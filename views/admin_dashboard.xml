@@ -1,0 +1,906 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="admin_dashboard" name="Admin Dashboard">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <!-- Bootstrap 5 CSS -->
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+                    rel="stylesheet" />
+                <link
+                    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+                    rel="stylesheet" />
+                <!-- Font Awesome for icons -->
+                <link
+                    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+                    rel="stylesheet" />
+                <!-- Custom CSS -->
+                <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard.css" />
+            </t>
+
+            <div class="container-fluid admin-dashboard py-4">
+                <!-- Page Header (From your first XML) -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Admin Dashboard</h2>
+                    <div>
+                        <span class="me-3">Welcome, <strong>
+                                <t t-esc="user.name" />
+                            </strong></span>
+                        <a href="/customer_support/logout" class="btn btn-sm btn-outline-danger">
+                            <i class="fa fa-sign-out"></i> Logout </a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Sidebar (From your first XML) -->
+                    <div class="col-md-2 bg-light p-3 rounded">
+                        <h5 class="mb-3"><i class="fa fa-bars me-2"></i>Admin Menu</h5>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a class="nav-link active bg-primary text-white rounded mb-2"
+                                    href="/customer_support/admin_dashboard">
+                                    <i class="fa fa-dashboard me-2"></i> Dashboard </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark rounded mb-2"
+                                    href="/customer_support/admin_dashboard/users">
+                                    <i class="fa fa-users me-2"></i> User Management </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark rounded mb-2" href="#user-management"
+                                    data-bs-toggle="tab" data-bs-target="#user-management">
+                                    <i class="fa fa-cog me-2"></i> System Settings </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark rounded mb-2" href="#reporting"
+                                    data-bs-toggle="tab" data-bs-target="#reporting">
+                                    <i class="fa fa-chart-bar me-2"></i> Reports </a>
+                            </li>
+                            <li class="nav-item mt-4">
+                                <a class="nav-link text-danger rounded"
+                                    href="/customer_support/logout">
+                                    <i class="fa fa-sign-out me-2"></i> Logout </a>
+                            </li>
+                        </ul>
+
+                        <!-- Quick Actions (From your first XML) -->
+                        <div class="mt-4">
+                            <h6><i class="fa fa-bolt me-2"></i>Quick Actions</h6>
+                            <div class="d-grid gap-2">
+                                <a href="/customer_support/admin_dashboard/users"
+                                    class="btn btn-primary btn-sm">
+                                    <i class="fa fa-users me-1"></i> Manage Users </a>
+                                <a href="/customer_support/admin_dashboard/create_user"
+                                    class="btn btn-success btn-sm">
+                                    <i class="fa fa-user-plus me-1"></i> Create User </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content Area -->
+                    <div class="col-md-10">
+                        <!-- Statistics Cards (From your first XML) -->
+                        <div class="row mb-4">
+                            <div class="col-md-3">
+                                <div class="card text-white bg-primary">
+                                    <div class="card-body">
+                                        <h5 class="card-title">New Tickets</h5>
+                                        <h2>
+                                            <t t-esc="ticket_counts.get('new', 0)" />
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-white bg-warning">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Assigned</h5>
+                                        <h2>
+                                            <t t-esc="ticket_counts.get('assigned', 0)" />
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-white bg-success">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Resolved</h5>
+                                        <h2>
+                                            <t t-esc="ticket_counts.get('resolved', 0)" />
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card text-white bg-secondary">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total Tickets</h5>
+                                        <h2>
+                                            <t t-esc="ticket_counts.get('total', 0)" />
+                                        </h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Navigation Tabs -->
+                        <ul class="nav nav-tabs mb-4" id="dashboardTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="overview-tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#overview" type="button" role="tab">
+                                    <i class="bi bi-house-door me-1"></i> Overview </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="ticket-assignment-tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#ticket-assignment" type="button" role="tab">
+                                    <i class="bi bi-ticket-detailed me-1"></i> Ticket Assignment </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="user-management-tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#user-management" type="button" role="tab">
+                                    <i class="bi bi-people me-1"></i> User Management </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="system-configuration-tab"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#system-configuration" type="button" role="tab">
+                                    <i class="bi bi-sliders me-1"></i> System Configuration </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="reporting-tab" data-bs-toggle="tab"
+                                    data-bs-target="#reporting" type="button" role="tab">
+                                    <i class="bi bi-graph-up me-1"></i> Reporting </button>
+                            </li>
+                        </ul>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content" id="dashboardTabsContent">
+
+                            <!-- Overview Tab -->
+                            <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                                <h5 class="section-title mb-4">Dashboard Overview</h5>
+
+                                <!-- Ticket Analytics Section -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">Ticket Analytics</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <!-- First Row of Metrics -->
+                                        <div class="row mb-4">
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">3</div>
+                                                    <div class="metric-label">Open Tickets</div>
+                                                    <div class="metric-subtext">Tickets</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">3</div>
+                                                    <div class="metric-label">Tickets</div>
+                                                    <div class="metric-subtext">Total</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">1</div>
+                                                    <div class="metric-label">High Priority</div>
+                                                    <div class="metric-subtext">Tickets</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">1</div>
+                                                    <div class="metric-label">Urgent</div>
+                                                    <div class="metric-subtext">Tickets</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Second Row of Metrics -->
+                                        <div class="row mb-4">
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">0.80</div>
+                                                    <div class="metric-label">Avg Open Hours</div>
+                                                    <div class="metric-subtext">Hours</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">2.30</div>
+                                                    <div class="metric-label">Total Hours</div>
+                                                    <div class="metric-subtext">Hours</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">0.80</div>
+                                                    <div class="metric-label">Avg High Priority
+                                                        Hours</div>
+                                                    <div class="metric-subtext">Hours</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">0.80</div>
+                                                    <div class="metric-label">Avg Urgent Hours</div>
+                                                    <div class="metric-subtext">Hours</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Third Row of Metrics -->
+                                        <div class="row">
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">0</div>
+                                                    <div class="metric-label">Failed Tickets</div>
+                                                    <div class="metric-subtext">Tickets</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">0.00%</div>
+                                                    <div class="metric-label">Failed Rate</div>
+                                                    <div class="metric-subtext">Percentage</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">0</div>
+                                                    <div class="metric-label">High Priority Failed</div>
+                                                    <div class="metric-subtext">Tickets</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3 col-sm-6">
+                                                <div class="metric-card">
+                                                    <div class="metric-value">0</div>
+                                                    <div class="metric-label">Urgent Failed</div>
+                                                    <div class="metric-subtext">Tickets</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- My Performance Section -->
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">My Performance</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <!-- Today's Performance -->
+                                            <div class="col-md-4">
+                                                <div class="performance-card">
+                                                    <div class="performance-card-header">
+                                                        <div class="performance-card-title">Today</div>
+                                                    </div>
+                                                    <div class="performance-card-body">
+                                                        <div class="performance-metric-large">0</div>
+                                                        <div class="performance-metric-label">Closed
+                                                            Tickets</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Last 7 Days Performance -->
+                                            <div class="col-md-4">
+                                                <div class="performance-card">
+                                                    <div class="performance-card-header">
+                                                        <div class="performance-card-title">Avg Last
+                                                            7 days</div>
+                                                    </div>
+                                                    <div class="performance-card-body">
+                                                        <div class="performance-metric-large">100.00</div>
+                                                        <div class="performance-metric-label">SLA
+                                                            Success Rate</div>
+
+                                                        <div class="mt-4">
+                                                            <div class="performance-target">
+                                                                <div class="target-label">Daily
+                                                                    Target</div>
+                                                                <div class="target-value">80.00%</div>
+                                                            </div>
+                                                            <div class="performance-target mt-2">
+                                                                <div class="target-label">
+                                                                    Achievement</div>
+                                                                <div class="target-value">Sample</div>
+                                                            </div>
+                                                            <div class="performance-target mt-2">
+                                                                <div class="target-label">Sample</div>
+                                                                <div class="target-value">85.00%</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Performance Chart Area -->
+                                            <div class="col-md-4">
+                                                <div class="performance-card">
+                                                    <div class="performance-card-header">
+                                                        <div class="performance-card-title">Performance
+                                                            Trend</div>
+                                                    </div>
+                                                    <div class="performance-card-body">
+                                                        <!-- Placeholder for chart -->
+                                                        <div class="chart-placeholder">
+                                                            <div class="chart-placeholder-text">Performance
+                                                                chart will be displayed here</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Ticket Assignment Tab -->
+                            <div class="tab-pane fade" id="ticket-assignment" role="tabpanel">
+                                <h5 class="section-title mb-4">Ticket Assignment</h5>
+
+                                <!-- Quick Stats -->
+                                <div class="row mb-4">
+                                    <div class="col-md-3 col-sm-6">
+                                        <div class="quick-stat-card">
+                                            <div class="quick-stat-label">New Tickets</div>
+                                            <div class="quick-stat-value">
+                                                <t t-esc="ticket_counts.get('new', 0)" />
+                                            </div>
+                                            <div class="quick-stat-trend positive">+2 today</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6">
+                                        <div class="quick-stat-card">
+                                            <div class="quick-stat-label">Assigned Tickets</div>
+                                            <div class="quick-stat-value">
+                                                <t t-esc="ticket_counts.get('assigned', 0)" />
+                                            </div>
+                                            <div class="quick-stat-trend positive">+3 today</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6">
+                                        <div class="quick-stat-card">
+                                            <div class="quick-stat-label">Resolved Tickets</div>
+                                            <div class="quick-stat-value">
+                                                <t t-esc="ticket_counts.get('resolved', 0)" />
+                                            </div>
+                                            <div class="quick-stat-trend positive">+5 today</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6">
+                                        <div class="quick-stat-card">
+                                            <div class="quick-stat-label">Total Tickets</div>
+                                            <div class="quick-stat-value">
+                                                <t t-esc="ticket_counts.get('total', 0)" />
+                                            </div>
+                                            <div class="quick-stat-trend">All time</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Ticket Assignment Table -->
+                                <div class="ticket-table-container">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover ticket-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Ticket</th>
+                                                    <th>Customer</th>
+                                                    <th>Priority</th>
+                                                    <th>Status</th>
+                                                    <th>Created On</th>
+                                                    <th>Assigned To</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="tickets" t-as="ticket">
+                                                    <tr>
+                                                        <td>
+                                                            <t t-esc="ticket.id" />
+                                                        </td>
+                                                        <td>
+                                                            <a
+                                                                t-att-href="'/customer_support/ticket/%s' % ticket.id"
+                                                                class="ticket-link">
+                                                                <t t-esc="ticket.subject" />
+                                                            </a>
+                                                        </td>
+                                                        <td>
+                                                            <t t-esc="ticket.customer_id.name" />
+                                                        </td>
+                                                        <td>
+                                                            <span
+                                                                t-att-class="'priority-badge priority-' + ticket.priority">
+                                                                <t
+                                                                    t-esc="ticket.priority.capitalize()" />
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <span class="status-badge"
+                                                                t-att-class="'status-' + ticket.state">
+                                                                <t
+                                                                    t-esc="ticket.state.replace('_', ' ').capitalize()" />
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <t
+                                                                t-esc="ticket.create_date.strftime('%Y-%m-%d %H:%M') if ticket.create_date else ''" />
+                                                        </td>
+                                                        <td>
+                                                            <t t-if="ticket.assigned_to">
+                                                                <t t-esc="ticket.assigned_to.name" />
+                                                            </t>
+                                                            <t t-if="not ticket.assigned_to">-</t>
+                                                        </td>
+                                                        <td>
+                                                            <t
+                                                                t-if="ticket.state == 'new' or ticket.state == 'assigned'">
+                                                                <form
+                                                                    t-att-action="'/customer_support/ticket/%s/assign' % ticket.id"
+                                                                    method="post"
+                                                                    class="assign-form">
+                                                                    <input type="hidden"
+                                                                        name="csrf_token"
+                                                                        t-att-value="request.csrf_token()" />
+                                                                    <div class="input-group">
+                                                                        <select
+                                                                            class="form-select form-select-sm"
+                                                                            name="assigned_to"
+                                                                            required="required">
+                                                                            <option value="">Select
+                                                                                User</option>
+                                                                            <t
+                                                                                t-foreach="request.env['res.users'].search([('active', '=', True), ('id','!=',1)])"
+                                                                                t-as="u">
+                                                                                <option
+                                                                                    t-att-value="u.id">
+                                                                                    <t
+                                                                                        t-esc="u.name" />
+                                                                                </option>
+                                                                            </t>
+                                                                        </select>
+                                                                        <button type="submit"
+                                                                            class="btn btn-primary btn-sm">
+                                                                            <i
+                                                                                class="bi bi-person-check"></i>
+                                                                            Assign </button>
+                                                                    </div>
+                                                                </form>
+                                                            </t>
+                                                            <t
+                                                                t-if="ticket.state in ['resolved','closed']">
+                                                                <span class="text-success">No Action</span>
+                                                            </t>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- User Management Tab -->
+                            <div class="tab-pane fade" id="user-management" role="tabpanel">
+                                <h5 class="section-title mb-4">User Management</h5>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="card">
+                                            <div
+                                                class="card-header bg-light d-flex justify-content-between align-items-center">
+                                                <h5 class="mb-0">System Users</h5>
+                                                <a
+                                                    href="/customer_support/admin_dashboard/create_user"
+                                                    class="btn btn-primary btn-sm">
+                                                    <i class="bi bi-person-plus"></i> Add New User </a>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>User ID</th>
+                                                                <th>Name</th>
+                                                                <th>Email</th>
+                                                                <th>Role</th>
+                                                                <th>Status</th>
+                                                                <th>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <!-- Sample data - you can replace with
+                                                            dynamic data -->
+                                                            <tr>
+                                                                <td>001</td>
+                                                                <td>John Doe</td>
+                                                                <td>john@example.com</td>
+                                                                <td>
+                                                                    <span class="badge bg-primary">
+                                                                        Admin</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="badge bg-success">
+                                                                        Active</span>
+                                                                </td>
+                                                                <td>
+                                                                    <button
+                                                                        class="btn btn-sm btn-outline-primary me-1">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                    </button>
+                                                                    <button
+                                                                        class="btn btn-sm btn-outline-danger">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>002</td>
+                                                                <td>Jane Smith</td>
+                                                                <td>jane@example.com</td>
+                                                                <td>
+                                                                    <span class="badge bg-info">Support
+                                                                        Agent</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="badge bg-success">
+                                                                        Active</span>
+                                                                </td>
+                                                                <td>
+                                                                    <button
+                                                                        class="btn btn-sm btn-outline-primary me-1">
+                                                                        <i class="bi bi-pencil"></i>
+                                                                    </button>
+                                                                    <button
+                                                                        class="btn btn-sm btn-outline-danger">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card">
+                                            <div class="card-header bg-light">
+                                                <h5 class="mb-0">Quick Actions</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="d-grid gap-2">
+                                                    <a
+                                                        href="/customer_support/admin_dashboard/reset_password"
+                                                        class="btn btn-outline-primary text-start">
+                                                        <i class="bi bi-key me-2"></i> Reset
+                                                        Password </a>
+                                                    <a
+                                                        href="/customer_support/admin_dashboard/permissions"
+                                                        class="btn btn-outline-primary text-start">
+                                                        <i class="bi bi-shield-lock me-2"></i>
+                                                        Manage Permissions </a>
+                                                    <a
+                                                        href="/customer_support/admin_dashboard/activity_log"
+                                                        class="btn btn-outline-primary text-start">
+                                                        <i class="bi bi-activity me-2"></i> User
+                                                        Activity Log </a>
+                                                    <a
+                                                        href="/customer_support/admin_dashboard/export_users"
+                                                        class="btn btn-outline-primary text-start">
+                                                        <i class="bi bi-download me-2"></i> Export
+                                                        Users List </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- System Configuration Tab -->
+                            <div class="tab-pane fade" id="system-configuration" role="tabpanel">
+                                <h5 class="section-title mb-4">System Configuration</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="card h-100">
+                                            <div class="card-header bg-light">
+                                                <h5 class="mb-0">General Settings</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">System Name</label>
+                                                    <input type="text" class="form-control"
+                                                        value="Customer Support System" />
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Time Zone</label>
+                                                    <select class="form-select">
+                                                        <option>UTC-05:00 (Eastern Time)</option>
+                                                        <option>UTC-08:00 (Pacific Time)</option>
+                                                    </select>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Default Language</label>
+                                                    <select class="form-select">
+                                                        <option>English</option>
+                                                        <option>Spanish</option>
+                                                    </select>
+                                                </div>
+                                                <button class="btn btn-primary w-100">Save Changes</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card h-100">
+                                            <div class="card-header bg-light">
+                                                <h5 class="mb-0">Ticket Settings</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <label class="form-label">SLA Response Time
+                                                        (hours)</label>
+                                                    <input type="number" class="form-control"
+                                                        value="24" />
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Auto-assignment</label>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input"
+                                                            type="checkbox" id="autoAssign"
+                                                            checked="" />
+                                                        <label class="form-check-label"
+                                                            for="autoAssign">
+                                                            Enable auto-assignment
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Default Priority</label>
+                                                    <select class="form-select">
+                                                        <option>Medium</option>
+                                                        <option>Low</option>
+                                                        <option>High</option>
+                                                        <option>Urgent</option>
+                                                    </select>
+                                                </div>
+                                                <button class="btn btn-primary w-100">Save Changes</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="card h-100">
+                                            <div class="card-header bg-light">
+                                                <h5 class="mb-0">Notification Settings</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input"
+                                                            type="checkbox" id="emailNotifications"
+                                                            checked="" />
+                                                        <label class="form-check-label"
+                                                            for="emailNotifications">
+                                                            Email Notifications
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input"
+                                                            type="checkbox" id="smsNotifications" />
+                                                        <label class="form-check-label"
+                                                            for="smsNotifications">
+                                                            SMS Notifications
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input"
+                                                            type="checkbox" id="pushNotifications"
+                                                            checked="" />
+                                                        <label class="form-check-label"
+                                                            for="pushNotifications">
+                                                            Push Notifications
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Notification Frequency</label>
+                                                    <select class="form-select">
+                                                        <option>Immediately</option>
+                                                        <option>Hourly</option>
+                                                        <option>Daily</option>
+                                                    </select>
+                                                </div>
+                                                <button class="btn btn-primary w-100">Save Changes</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Reporting Tab -->
+                            <div class="tab-pane fade" id="reporting" role="tabpanel">
+                                <h5 class="section-title mb-4">Reporting</h5>
+                                <div class="row mb-4">
+                                    <div class="col-md-3 col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body text-center">
+                                                <i
+                                                    class="bi bi-file-earmark-text display-4 text-primary mb-3"></i>
+                                                <h5>Daily Reports</h5>
+                                                <p class="text-muted">Generate daily performance
+                                                    reports</p>
+                                                <button class="btn btn-outline-primary">Generate</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body text-center">
+                                                <i
+                                                    class="bi bi-calendar-week display-4 text-info mb-3"></i>
+                                                <h5>Weekly Reports</h5>
+                                                <p class="text-muted">Weekly summary and analytics</p>
+                                                <button class="btn btn-outline-info">Generate</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body text-center">
+                                                <i
+                                                    class="bi bi-calendar-month display-4 text-success mb-3"></i>
+                                                <h5>Monthly Reports</h5>
+                                                <p class="text-muted">Monthly performance reports</p>
+                                                <button class="btn btn-outline-success">Generate</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 col-sm-6">
+                                        <div class="card">
+                                            <div class="card-body text-center">
+                                                <i
+                                                    class="bi bi-graph-up-arrow display-4 text-warning mb-3"></i>
+                                                <h5>Custom Reports</h5>
+                                                <p class="text-muted">Create custom reports</p>
+                                                <button class="btn btn-outline-warning">Create</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">Recent Reports</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Report Name</th>
+                                                        <th>Type</th>
+                                                        <th>Generated On</th>
+                                                        <th>Period</th>
+                                                        <th>Size</th>
+                                                        <th>Actions</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Daily Performance Report</td>
+                                                        <td>
+                                                            <span class="badge bg-primary">Daily</span>
+                                                        </td>
+                                                        <td>2026-01-21 10:30</td>
+                                                        <td>2026-01-21</td>
+                                                        <td>2.4 MB</td>
+                                                        <td>
+                                                            <button
+                                                                class="btn btn-sm btn-outline-primary me-1">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button
+                                                                class="btn btn-sm btn-outline-success me-1">
+                                                                <i class="bi bi-download"></i>
+                                                            </button>
+                                                            <button
+                                                                class="btn btn-sm btn-outline-danger">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Weekly Summary Report</td>
+                                                        <td>
+                                                            <span class="badge bg-info">Weekly</span>
+                                                        </td>
+                                                        <td>2026-01-20 15:45</td>
+                                                        <td>2026-01-14 to 2026-01-20</td>
+                                                        <td>5.1 MB</td>
+                                                        <td>
+                                                            <button
+                                                                class="btn btn-sm btn-outline-primary me-1">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button
+                                                                class="btn btn-sm btn-outline-success me-1">
+                                                                <i class="bi bi-download"></i>
+                                                            </button>
+                                                            <button
+                                                                class="btn btn-sm btn-outline-danger">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bootstrap JS -->
+            <script
+                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+            <!-- Custom JavaScript for Dashboard -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                // Initialize Bootstrap tabs
+                var triggerTabList = [].slice.call(document.querySelectorAll('#dashboardTabs
+                button'));
+                triggerTabList.forEach(function (triggerEl) {
+                var tabTrigger = new bootstrap.Tab(triggerEl);
+                triggerEl.addEventListener('click', function (event) {
+                event.preventDefault();
+                tabTrigger.show();
+                });
+                });
+
+                // Store active tab in session storage
+                var activeTab = localStorage.getItem('activeDashboardTab');
+                if (activeTab) {
+                var tab = document.querySelector(activeTab);
+                if (tab) {
+                new bootstrap.Tab(tab).show();
+                }
+                }
+
+                // Save active tab on change
+                document.getElementById('dashboardTabs').addEventListener('shown.bs.tab', function
+                (e) {
+                localStorage.setItem('activeDashboardTab', e.target.getAttribute('data-bs-target'));
+                });
+
+                // Handle sidebar links that should trigger tabs
+                var sidebarLinks = document.querySelectorAll('.nav-link[data-bs-toggle="tab"]');
+                sidebarLinks.forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                e.preventDefault();
+                var target = this.getAttribute('data-bs-target');
+                var tab = document.querySelector('[data-bs-target="' + target + '"]');
+                if (tab) {
+                new bootstrap.Tab(tab).show();
+                }
+                });
+                });
+                });
+            </script>
+        </t>
+    </template>
+</odoo>

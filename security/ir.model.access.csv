@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_customer_support_user,customer.support.user,model_customer_support,base.group_user,1,1,1,0
+access_customer_support_manager,customer.support.manager,model_customer_support,base.group_system,1,1,1,1
+access_customer_support_portal,customer.support.portal,model_customer_support,base.group_portal,1,0,1,0
+access_customer_support_project_user,customer.support.project.user,model_customer_support_project,base.group_user,1,1,1,0
+access_customer_support_project_manager,customer.support.project.manager,model_customer_support_project,base.group_system,1,1,1,1
+access_customer_support_project_portal,customer.support.project.portal,model_customer_support_project,base.group_portal,1,0,0,0

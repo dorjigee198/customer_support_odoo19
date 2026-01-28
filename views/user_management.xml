@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- User Management List -->
+    <template id="admin_users_management" name="Admin User Management">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <!-- Bootstrap 5 CSS -->
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+                    rel="stylesheet" />
+                <link
+                    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+                    rel="stylesheet" />
+                <!-- Custom CSS -->
+                <link rel="stylesheet" href="/customer_support/static/src/css/user_management.css" />
+            </t>
+
+            <div class="container-fluid user-management-dashboard py-4">
+                <!-- Page Header -->
+                <div class="dashboard-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-2">User Management</h1>
+                            <p class="mb-0 opacity-75">Manage all system users and their roles</p>
+                        </div>
+                        <div>
+                            <span class="me-3">Welcome, <strong>
+                                    <t t-esc="user.name" />
+                                </strong></span>
+                            <a href="/customer_support/logout" class="btn btn-outline-light">
+                                <i class="bi bi-box-arrow-right"></i> Logout </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Sidebar -->
+                    <div class="col-md-3 col-lg-2">
+                        <div class="sidebar-card">
+                            <h5 class="sidebar-title">Admin Menu</h5>
+                            <ul class="nav flex-column sidebar-nav">
+                                <li class="nav-item">
+                                    <a class="nav-link sidebar-link"
+                                        href="/customer_support/admin_dashboard">
+                                        <i class="bi bi-house-door me-2"></i> Dashboard </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sidebar-link active"
+                                        href="/customer_support/admin_dashboard/users">
+                                        <i class="bi bi-people me-2"></i> User Management </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sidebar-link" href="/customer_support/logout">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Logout </a>
+                                </li>
+                            </ul>
+
+                            <!-- Quick Stats -->
+                            <div class="sidebar-stats mt-4">
+                                <h6 class="sidebar-stats-title">Quick Stats</h6>
+                                <div class="stat-item">
+                                    <span class="stat-label">Support Agents</span>
+                                    <span class="stat-value">
+                                        <t t-esc="len(focal_persons) if focal_persons else 0" />
+                                    </span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">Customers</span>
+                                    <span class="stat-value">
+                                        <t t-esc="len(customers) if customers else 0" />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="col-md-9 col-lg-10">
+                        <!-- Action Header -->
+                        <div class="action-header mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h2 class="page-title">User Management</h2>
+                                <a href="/customer_support/admin_dashboard/create_user"
+                                    class="btn btn-primary btn-add-user">
+                                    <i class="bi bi-person-plus me-2"></i> Add Support Agent </a>
+                            </div>
+                        </div>
+
+                        <!-- Success/Error Messages -->
+                        <div class="messages-container">
+                            <t t-if="success">
+                                <div class="alert alert-success alert-dismissible fade show"
+                                    role="alert">
+                                    <i class="bi bi-check-circle me-2"></i>
+                                    <t t-esc="success" />
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
+                            <t t-if="error">
+                                <div class="alert alert-danger alert-dismissible fade show"
+                                    role="alert">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <t t-esc="error" />
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
+                        </div>
+
+                        <!-- Support Agents Section -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3 class="section-title">
+                                    <i class="bi bi-headset me-2"></i> Support Agents </h3>
+                                <span class="section-badge">
+                                    <t t-esc="len(focal_persons) if focal_persons else 0" /> agents </span>
+                            </div>
+                            <div class="section-body">
+                                <t t-if="focal_persons">
+                                    <div class="users-grid">
+                                        <t t-foreach="focal_persons" t-as="fp">
+                                            <div class="user-card">
+                                                <div class="user-card-header">
+                                                    <div class="user-avatar">
+                                                        <i class="bi bi-person-circle"></i>
+                                                    </div>
+                                                    <div class="user-actions">
+                                                        <a
+                                                            t-attf-href="/customer_support/admin_dashboard/user/#{fp.id}/edit"
+                                                            class="btn-action" title="Edit">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div class="user-card-body">
+                                                    <h5 class="user-name">
+                                                        <t t-esc="fp.name" />
+                                                    </h5>
+                                                    <div class="user-email">
+                                                        <i class="bi bi-envelope me-1"></i>
+                                                        <t t-esc="fp.email or 'No email'" />
+                                                    </div>
+                                                    <div class="user-phone">
+                                                        <i class="bi bi-telephone me-1"></i>
+                                                        <t t-esc="fp.phone or 'No phone'" />
+                                                    </div>
+                                                </div>
+                                                <div class="user-card-footer">
+                                                    <span class="user-role">Support Agent</span>
+                                                    <!-- FIXED: Changed JavaScript ternary to Python
+                                                    if/else -->
+                                                    <span
+                                                        t-att-class="'user-status active' if fp.active else 'user-status inactive'">
+                                                        <t t-if="fp.active">Active</t>
+                                                        <t t-else="">Inactive</t>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="empty-state">
+                                        <i class="bi bi-people empty-icon"></i>
+                                        <h5>No Support Agents Found</h5>
+                                        <p class="text-muted">Add your first support agent to get
+                                            started</p>
+                                        <a href="/customer_support/admin_dashboard/create_user"
+                                            class="btn btn-primary">
+                                            <i class="bi bi-person-plus me-2"></i> Add Agent </a>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Customers Section -->
+                        <div class="section-card">
+                            <div class="section-header">
+                                <h3 class="section-title">
+                                    <i class="bi bi-person me-2"></i> Customers </h3>
+                                <span class="section-badge">
+                                    <t t-esc="len(customers) if customers else 0" /> customers </span>
+                            </div>
+                            <div class="section-body">
+                                <t t-if="customers">
+                                    <div class="users-grid compact">
+                                        <t t-foreach="customers" t-as="cust">
+                                            <div class="user-card customer">
+                                                <div class="user-avatar customer">
+                                                    <i class="bi bi-person-circle"></i>
+                                                </div>
+                                                <div class="user-card-body">
+                                                    <h6 class="user-name">
+                                                        <t t-esc="cust.name" />
+                                                    </h6>
+                                                    <div class="user-email">
+                                                        <i class="bi bi-envelope me-1"></i>
+                                                        <t t-esc="cust.email or 'No email'" />
+                                                    </div>
+                                                    <!-- FIXED: Changed JavaScript ternary to Python
+                                                    if/else -->
+                                                    <div class="user-status-indicator"
+                                                        t-att-class="'active' if cust.active else 'inactive'">
+                                                        <t t-if="cust.active">Active</t>
+                                                        <t t-else="">Inactive</t>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="empty-state">
+                                        <i class="bi bi-person empty-icon"></i>
+                                        <h5>No Customers Found</h5>
+                                        <p class="text-muted">Customers will appear here when they
+                                            register</p>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bootstrap JS -->
+            <script
+                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        </t>
+    </template>
+
+
+    <!-- Create User Form -->
+    <template id="admin_create_user_form" name="Create User Form">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <!-- Bootstrap 5 CSS -->
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+                    rel="stylesheet" />
+                <link
+                    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+                    rel="stylesheet" />
+                <!-- Custom CSS -->
+                <link rel="stylesheet" href="/customer_support/static/src/css/user_management.css" />
+            </t>
+
+            <div class="container-fluid user-management-dashboard py-4">
+                <!-- Page Header -->
+                <div class="dashboard-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-2">Create New User</h1>
+                            <p class="mb-0 opacity-75">Add a new support agent to your team</p>
+                        </div>
+                        <div>
+                            <span class="me-3">Welcome, <strong>
+                                    <t t-esc="user.name" />
+                                </strong></span>
+                            <a href="/customer_support/logout" class="btn btn-outline-light">
+                                <i class="bi bi-box-arrow-right"></i> Logout </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Sidebar -->
+                    <div class="col-md-3 col-lg-2">
+                        <div class="sidebar-card">
+                            <h5 class="sidebar-title">Admin Menu</h5>
+                            <ul class="nav flex-column sidebar-nav">
+                                <li class="nav-item">
+                                    <a class="nav-link sidebar-link"
+                                        href="/customer_support/admin_dashboard">
+                                        <i class="bi bi-house-door me-2"></i> Dashboard </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sidebar-link"
+                                        href="/customer_support/admin_dashboard/users">
+                                        <i class="bi bi-people me-2"></i> User Management </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sidebar-link" href="/customer_support/logout">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Logout </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="col-md-9 col-lg-10">
+                        <div class="form-container">
+                            <div class="form-header">
+                                <h2 class="page-title">Create New User</h2>
+                                <a href="/customer_support/admin_dashboard/users"
+                                    class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-2"></i> Back to Users </a>
+                            </div>
+
+                            <!-- Error Message -->
+                            <t t-if="error">
+                                <div class="alert alert-danger alert-dismissible fade show"
+                                    role="alert">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <t t-esc="error" />
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
+
+                            <!-- Form -->
+                            <div class="form-card">
+                                <form method="post"
+                                    action="/customer_support/admin_dashboard/submit_user">
+                                    <input type="hidden" name="csrf_token"
+                                        t-att-value="request.csrf_token()" />
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-4">
+                                                <label class="form-label">User Type</label>
+                                                <div class="form-select-wrapper">
+                                                    <select name="user_type" class="form-select"
+                                                        required="required">
+                                                        <option value="customer">Customer</option>
+                                                        <option value="focal_person">Support Agent</option>
+                                                    </select>
+                                                    <i class="bi bi-chevron-down form-select-icon"></i>
+                                                </div>
+                                                <div class="form-help-text">Choose between Customer
+                                                    or Support Agent</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-4">
+                                                <label class="form-label">Full Name</label>
+                                                <input type="text" name="name" class="form-control"
+                                                    required="required"
+                                                    placeholder="Enter full name" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-4">
+                                                <label class="form-label">Email Address</label>
+                                                <input type="email" name="email"
+                                                    class="form-control" required="required"
+                                                    placeholder="Enter email address" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-4">
+                                                <label class="form-label">Phone Number</label>
+                                                <input type="tel" name="phone" class="form-control"
+                                                    placeholder="Enter phone number" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-4">
+                                                <label class="form-label">Password</label>
+                                                <input type="password" name="password"
+                                                    class="form-control"
+                                                    required="required"
+                                                    placeholder="Create a password" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="bi bi-person-plus me-2"></i> Create User </button>
+                                        <a href="/customer_support/admin_dashboard/users"
+                                            class="btn btn-outline-secondary btn-lg ms-2">Cancel</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bootstrap JS -->
+            <script
+                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        </t>
+    </template>
+
+
+    <!-- Edit User Form -->
+    <template id="admin_edit_user_form" name="Edit User Form">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <!-- Bootstrap 5 CSS -->
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+                    rel="stylesheet" />
+                <link
+                    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+                    rel="stylesheet" />
+                <!-- Custom CSS -->
+                <link rel="stylesheet" href="/customer_support/static/src/css/user_management.css" />
+            </t>
+
+            <div class="container-fluid user-management-dashboard py-4">
+                <!-- Page Header -->
+                <div class="dashboard-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="h3 mb-2">Edit User</h1>
+                            <p class="mb-0 opacity-75">Update user information and permissions</p>
+                        </div>
+                        <div>
+                            <span class="me-3">Welcome, <strong>
+                                    <t t-esc="user.name" />
+                                </strong></span>
+                            <a href="/customer_support/logout" class="btn btn-outline-light">
+                                <i class="bi bi-box-arrow-right"></i> Logout </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Sidebar -->
+                    <div class="col-md-3 col-lg-2">
+                        <div class="sidebar-card">
+                            <h5 class="sidebar-title">Admin Menu</h5>
+                            <ul class="nav flex-column sidebar-nav">
+                                <li class="nav-item">
+                                    <a class="nav-link sidebar-link"
+                                        href="/customer_support/admin_dashboard">
+                                        <i class="bi bi-house-door me-2"></i> Dashboard </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sidebar-link"
+                                        href="/customer_support/admin_dashboard/users">
+                                        <i class="bi bi-people me-2"></i> User Management </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link sidebar-link" href="/customer_support/logout">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Logout </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="col-md-9 col-lg-10">
+                        <div class="form-container">
+                            <div class="form-header">
+                                <h2 class="page-title">Edit User: <span class="text-primary">
+                                        <t t-esc="edit_user.name" />
+                                    </span></h2>
+                                <a href="/customer_support/admin_dashboard/users"
+                                    class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-left me-2"></i> Back to Users </a>
+                            </div>
+
+                            <!-- Error Message -->
+                            <t t-if="error">
+                                <div class="alert alert-danger alert-dismissible fade show"
+                                    role="alert">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <t t-esc="error" />
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
+
+                            <!-- Form -->
+                            <div class="form-card">
+                                <form method="post"
+                                    t-attf-action="/customer_support/admin_dashboard/user/#{edit_user.id}/update">
+                                    <input type="hidden" name="csrf_token"
+                                        t-att-value="request.csrf_token()" />
+
+                                    <div class="user-info-header mb-4">
+                                        <div class="user-avatar-lg">
+                                            <i class="bi bi-person-circle"></i>
+                                        </div>
+                                        <div>
+                                            <h5>
+                                                <t t-esc="edit_user.name" />
+                                            </h5>
+                                            <div class="text-muted">
+                                                <i class="bi bi-envelope me-1"></i>
+                                                <t t-esc="edit_user.email or 'No email'" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-4">
+                                                <label class="form-label">Full Name</label>
+                                                <input type="text" name="name" class="form-control"
+                                                    t-att-value="edit_user.name" required="required" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-4">
+                                                <label class="form-label">Email Address</label>
+                                                <input type="email" name="email"
+                                                    class="form-control"
+                                                    t-att-value="edit_user.email"
+                                                    required="required" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-4">
+                                                <label class="form-label">Phone Number</label>
+                                                <input type="tel" name="phone" class="form-control"
+                                                    t-att-value="edit_user.phone or ''"
+                                                    placeholder="Enter phone number" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-4">
+                                                <label class="form-label">New Password</label>
+                                                <input type="password" name="password"
+                                                    class="form-control"
+                                                    placeholder="Leave blank to keep current password" />
+                                                <div class="form-help-text">Leave blank if you don't
+                                                    want to change the password</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="bi bi-check-circle me-2"></i> Update User </button>
+                                        <a href="/customer_support/admin_dashboard/users"
+                                            class="btn btn-outline-secondary btn-lg ms-2">Cancel</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bootstrap JS -->
+            <script
+                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        </t>
+    </template>
+
+</odoo>
