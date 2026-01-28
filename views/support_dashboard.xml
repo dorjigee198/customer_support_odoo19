@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Assets Bundle -->
+    <!-- Main Dashboard Template -->
+    <template id="focal_person" name="Support Dashboard">
+        <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+            rel="stylesheet" />
+
+        <div class="support-dashboard-wrapper">
+            <!-- Enhanced Secondary Navigation with Profile -->
+            <nav class="secondary-navbar">
+                <div class="navbar-left">
+                    <a href="#" class="secondary-nav-link active" data-view="overview">Overview</a>
+                    <a href="#" class="secondary-nav-link" data-view="tickets">Tickets</a>
+                    <a href="#" class="secondary-nav-link" data-view="faq">Manage FAQ</a>
+                </div>
+                <div class="navbar-right">
+                    <!-- Notification Button -->
+                    <button class="icon-btn notification-btn">
+                        <i class="fa fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+
+                    <!-- Stats/Chart Button -->
+                    <button class="icon-btn chart-btn">
+                        <i class="fa fa-chart-bar"></i>
+                    </button>
+
+                    <!-- User Profile -->
+                    <div class="user-profile">
+                        <div class="user-avatar-small">
+                            <t t-if="user.image_128">
+                                <img
+                                    t-att-src="'data:image/png;base64,%s' % user.image_128.decode('utf-8')"
+                                    alt="User" />
+                            </t>
+                            <t t-else="">
+                                <img src="/web/static/src/img/placeholder.png" alt="User" />
+                            </t>
+                        </div>
+                        <div class="user-info">
+                            <span class="user-name">
+                                <t t-esc="user.name" />
+                            </span>
+                            <span class="user-role">
+                                <t t-esc="'Support Agent'" />
+                            </span>
+                        </div>
+                        <div class="user-dropdown">
+                            <i class="fa fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Overview Page -->
+            <div class="page-content" id="overview-page">
+                <div class="dashboard-grid">
+                    <!-- Ticket Analytics Card -->
+                    <div class="analytics-card">
+                        <div class="card-header">Ticket Analytics</div>
+                        <div class="card-body">
+                            <!-- Row 1: Ticket Counts -->
+                            <div class="metrics-grid">
+                                <div class="metric-box">
+                                    <div class="metric-label">Open Tickets</div>
+                                    <div class="metric-value">
+                                        <t
+                                            t-esc="len(tickets.filtered(lambda t: t.state not in ['resolved', 'closed'])) if tickets else 0" />
+                                    </div>
+                                    <div class="metric-sublabel">Tickets</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Total Tickets</div>
+                                    <div class="metric-value">
+                                        <t t-esc="len(tickets) if tickets else 0" />
+                                    </div>
+                                    <div class="metric-sublabel">Tickets</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">High Priority</div>
+                                    <div class="metric-value">
+                                        <t
+                                            t-esc="len(tickets.filtered(lambda t: t.priority == 'high')) if tickets else 0" />
+                                    </div>
+                                    <div class="metric-sublabel">Tickets</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Urgent</div>
+                                    <div class="metric-value">
+                                        <t
+                                            t-esc="len(tickets.filtered(lambda t: t.priority == 'urgent')) if tickets else 0" />
+                                    </div>
+                                    <div class="metric-sublabel">Tickets</div>
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Hours Metrics -->
+                            <div class="metrics-grid mt-3">
+                                <div class="metric-box">
+                                    <div class="metric-label">Avg Open Hours</div>
+                                    <div class="metric-value">
+                                        <t
+                                            t-esc="sum(tickets.mapped('days_open')) * 24 / len(tickets) if tickets and len(tickets) > 0 else 0.0" />
+                                    </div>
+                                    <div class="metric-sublabel">Hours</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Total Hours</div>
+                                    <div class="metric-value">
+                                        <t
+                                            t-esc="sum(tickets.mapped('days_open')) * 24 if tickets else 0.0" />
+                                    </div>
+                                    <div class="metric-sublabel">Hours</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Avg High Priority Hours</div>
+                                    <div class="metric-value">
+                                        <t
+                                            t-esc="sum(tickets.filtered(lambda t: t.priority == 'high').mapped('days_open')) * 24 / len(tickets.filtered(lambda t: t.priority == 'high')) if tickets and len(tickets.filtered(lambda t: t.priority == 'high')) > 0 else 0.0" />
+                                    </div>
+                                    <div class="metric-sublabel">Hours</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Avg Urgent Hours</div>
+                                    <div class="metric-value">
+                                        <t
+                                            t-esc="sum(tickets.filtered(lambda t: t.priority == 'urgent').mapped('days_open')) * 24 / len(tickets.filtered(lambda t: t.priority == 'urgent')) if tickets and len(tickets.filtered(lambda t: t.priority == 'urgent')) > 0 else 0.0" />
+                                    </div>
+                                    <div class="metric-sublabel">Hours</div>
+                                </div>
+                            </div>
+
+                            <!-- Row 3: Failed Tickets -->
+                            <div class="metrics-grid mt-3">
+                                <div class="metric-box">
+                                    <div class="metric-label">Overdue Tickets</div>
+                                    <div class="metric-value">
+                                        <t
+                                            t-esc="len(tickets.filtered(lambda t: t.is_overdue)) if tickets else 0" />
+                                    </div>
+                                    <div class="metric-sublabel">Tickets</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Overdue Rate</div>
+                                    <div class="metric-value">
+                                        <t
+                                            t-esc="(len(tickets.filtered(lambda t: t.is_overdue)) / len(tickets) * 100) if tickets and len(tickets) > 0 else 0.0" />
+                                        % </div>
+                                    <div class="metric-sublabel">Percentage</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">High Priority Overdue</div>
+                                    <div class="metric-value">
+                                        <t
+                                            t-esc="len(tickets.filtered(lambda t: t.priority == 'high' and t.is_overdue)) if tickets else 0" />
+                                    </div>
+                                    <div class="metric-sublabel">Tickets</div>
+                                </div>
+                                <div class="metric-box">
+                                    <div class="metric-label">Urgent Overdue</div>
+                                    <div class="metric-value">
+                                        <t
+                                            t-esc="len(tickets.filtered(lambda t: t.priority == 'urgent' and t.is_overdue)) if tickets else 0" />
+                                    </div>
+                                    <div class="metric-sublabel">Tickets</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- My Performance Card -->
+                    <div class="performance-card">
+                        <div class="card-header">My Performance</div>
+                        <div class="card-body">
+                            <div class="performance-metric">
+                                <div class="metric-label">Today</div>
+                                <div class="metric-value">
+                                    <t
+                                        t-esc="len(tickets.filtered(lambda t: t.state == 'closed' and t.closed_date and t.closed_date.date() == current_date)) if tickets else 0" />
+                                </div>
+                                <div class="metric-sublabel">Closed Tickets</div>
+                            </div>
+                            <div class="performance-metric mt-3">
+                                <div class="metric-label">Avg Last 7 days</div>
+                                <div class="metric-value highlight">
+                                    <t t-esc="85.0" />
+                                </div>
+                                <div class="metric-sublabel">Percentage</div>
+                            </div>
+                            <div class="performance-metric mt-3">
+                                <div class="metric-label">Daily Target</div>
+                                <div class="metric-value highlight">
+                                    <t t-esc="80.0" /> % </div>
+                                <div class="metric-sublabel">Percentage</div>
+                            </div>
+                            <div class="performance-metric mt-3">
+                                <div class="metric-label">Accuracy</div>
+                                <div class="metric-value highlight">
+                                    <t t-esc="95.0" />% </div>
+                                <div class="metric-sublabel">Percentage</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tickets Page -->
+            <div class="page-content" id="tickets-page" style="display: none;">
+                <div class="tickets-header">
+                    <div class="search-bar">
+                        <i class="fa fa-search"></i>
+                        <input type="text" placeholder="Search tickets..." class="search-input" />
+                    </div>
+                </div>
+
+                <t t-if="tickets">
+                    <div class="tickets-table-container">
+                        <table class="tickets-table">
+                            <thead>
+                                <tr>
+                                    <th>TICKET</th>
+                                    <th>CUSTOMER</th>
+                                    <th>STATUS</th>
+                                    <th>PRIORITY</th>
+                                    <th>CREATED</th>
+                                    <th>PROJECT</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="tickets" t-as="ticket">
+                                    <tr class="ticket-row">
+                                        <td>
+                                            <t t-esc="ticket.name" />
+                                        </td>
+                                        <td>
+                                            <t
+                                                t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'" />
+                                        </td>
+                                        <td>
+                                            <t t-esc="ticket.state.replace('_', ' ').title()" />
+                                        </td>
+                                        <td>
+                                            <t t-esc="ticket.priority" />
+                                        </td>
+                                        <td>
+                                            <t
+                                                t-esc="ticket.create_date.strftime('%b %d, %I:%M %p') if ticket.create_date else 'N/A'" />
+                                        </td>
+                                        <td>
+                                            <t t-esc="'Support'" />
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+                <t t-if="not tickets">
+                    <div class="no-tickets-message">
+                        <p style="color: #777; font-size: 16px; text-align: center; padding: 40px;">
+                            No tickets assigned to you yet.
+                        </p>
+                    </div>
+                </t>
+            </div>
+
+            <!-- FAQ Page Placeholder -->
+            <div class="page-content" id="faq-page" style="display: none;">
+                <div class="faq-container">
+                    <h2>Manage FAQ</h2>
+                    <p>FAQ Management interface coming soon...</p>
+                </div>
+            </div>
+
+            <!-- Hidden Logout Link -->
+            <a href="/web/session/logout" style="display: none;" id="logout-link">Logout</a>
+        </div>
+
+        <script>
+            // Secondary nav switching
+            document.addEventListener('DOMContentLoaded', function() {
+            const secondaryLinks = document.querySelectorAll('.secondary-nav-link');
+            const pages = document.querySelectorAll('.page-content');
+
+            secondaryLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const viewId = this.getAttribute('data-view');
+
+            secondaryLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+
+            pages.forEach(page => page.style.display = 'none');
+            const targetPage = document.getElementById(viewId + '-page');
+            if (targetPage) {
+            targetPage.style.display = 'block';
+            }
+            });
+            });
+            });
+        </script>
+    </template>
+</odoo>

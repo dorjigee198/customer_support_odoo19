@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="ticket_detail" name="Ticket Details">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+            </t>
+            
+            <div class="container mt-5">
+                <div class="row">
+                    <div class="col-md-8">
+                        <!-- Ticket Details Card -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h4 class="mb-0">Ticket #<t t-esc="ticket.name"/></h4>
+                            </div>
+                            <div class="card-body">
+                                <!-- Success/Error Messages -->
+                                <div class="alert alert-success" t-if="success">
+                                    <t t-esc="success"/>
+                                </div>
+                                <div class="alert alert-danger" t-if="error">
+                                    <t t-esc="error"/>
+                                </div>
+                                
+                                <h5><t t-esc="ticket.subject"/></h5>
+                                <p class="text-muted">
+                                    Created: <t t-esc="ticket.create_date"/> | 
+                                    Status: <span class="badge bg-info"><t t-esc="ticket.state"/></span>
+                                </p>
+                                
+                                <hr/>
+                                
+                                <h6>Description:</h6>
+                                <p><t t-esc="ticket.description"/></p>
+                                
+                                <hr/>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Customer:</strong> <t t-esc="ticket.customer_id.name"/>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Priority:</strong> <span class="badge bg-warning"><t t-esc="ticket.priority"/></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <strong>Assigned To:</strong> 
+                                        <t t-if="ticket.assigned_to">
+                                            <t t-esc="ticket.assigned_to.name"/>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="text-muted">Not assigned</span>
+                                        </t>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Days Open:</strong> <t t-esc="ticket.days_open"/> days
+                                    </div>
+                                </div>
+                                
+                                <t t-if="ticket.resolution_notes">
+                                    <hr/>
+                                    <h6>Resolution Notes:</h6>
+                                    <p><t t-esc="ticket.resolution_notes"/></p>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <!-- Admin Assignment Card -->
+                        <t t-if="is_admin">
+                            <div class="card shadow mb-4">
+                                <div class="card-header bg-warning">
+                                    <h5 class="mb-0">Admin Actions</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form t-attf-action="/customer_support/ticket/{{ticket.id}}/assign" method="post">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Assign To:</label>
+                                            <select class="form-select" name="assigned_to" required="required">
+                                                <option value="">-- Select Focal Person --</option>
+                                                <t t-foreach="focal_persons" t-as="person">
+                                                    <option t-att-value="person.id" t-att-selected="'selected' if ticket.assigned_to.id == person.id else None">
+                                                        <t t-esc="person.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-warning w-100">Assign Ticket</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </t>
+                        
+                        <!-- Status Update Card -->
+                        <t t-if="is_admin or is_assigned">
+                            <div class="card shadow">
+                                <div class="card-header bg-success text-white">
+                                    <h5 class="mb-0">Update Status</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form t-attf-action="/customer_support/ticket/{{ticket.id}}/update_status" method="post">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Status:</label>
+                                            <select class="form-select" name="status" required="required">
+                                                <option value="new" t-att-selected="'selected' if ticket.state == 'new' else None">New</option>
+                                                <option value="assigned" t-att-selected="'selected' if ticket.state == 'assigned' else None">Assigned</option>
+                                                <option value="in_progress" t-att-selected="'selected' if ticket.state == 'in_progress' else None">In Progress</option>
+                                                <option value="pending" t-att-selected="'selected' if ticket.state == 'pending' else None">Pending Customer</option>
+                                                <option value="resolved" t-att-selected="'selected' if ticket.state == 'resolved' else None">Resolved</option>
+                                                <option value="closed" t-att-selected="'selected' if ticket.state == 'closed' else None">Closed</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Resolution Notes:</label>
+                                            <textarea class="form-control" name="resolution_notes" rows="3" placeholder="Add notes about the resolution"></textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-success w-100">Update Status</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </t>
+                        
+                        <!-- Back Button -->
+                        <div class="mt-3">
+                            <a href="/customer_support/dashboard" class="btn btn-secondary w-100">Back to Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        </t>
+    </template>
+</odoo>
