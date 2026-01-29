@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="chatbot_page" name="Dragon Coders AI Chatbot">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <title>Dragon Coders AI Chatbot</title>
+                <link rel="stylesheet" type="text/css"
+                    href="/customer_support/static/src/css/chatbot.css" />
+            </t>
+
+            <div class="chat-container">
+                <div class="chat-header">
+                    <img src="/customer_support/static/src/img/dragon-logo.png" alt="Dragon Coders"
+                        class="logo" />
+                    <h2>Dragon Chat</h2>
+                    <button class="clear-btn" id="clear-chat-btn">Clear Chat</button>
+                </div>
+
+                <div id="chat-box" class="chat-box"></div>
+
+                <div class="quick-replies">
+                    <button class="quick-reply" data-msg="Services">Services</button>
+                    <button class="quick-reply" data-msg="Pricing">Pricing</button>
+                    <button class="quick-reply" data-msg="Request Demo">Request Demo</button>
+                    <button class="quick-reply" data-msg="Contact Support">Contact Support</button>
+                </div>
+
+                <div class="input-area">
+                    <input id="user-input" type="text" placeholder="Type your message..." />
+                    <button id="send-msg-btn">Send</button>
+                </div>
+            </div>
+
+            <script type="text/javascript" src="/customer_support/static/src/js/chatbot.js"></script>
+        </t>
+    </template>
+</odoo>

@@ -11,6 +11,9 @@
     "author": "Dragon Coders",
     "website": "https://www.yourwebsite.com",
     "depends": ["base", "mail", "web", "portal"],
+    "external_dependencies": {
+        "python": ["openai"],
+    },
     "data": [
         "security/ir.model.access.csv",
         "data/sequence.xml",
@@ -22,6 +25,7 @@
         "views/support_dashboard.xml",
         "views/create_ticket.xml",
         "views/edit_profile.xml",
+        "views/chatbot_page.xml",
         "views/admin_dashboard.xml",
         "views/user_management.xml",
         "views/templates/ticket_detail.xml",
@@ -36,6 +40,7 @@
             "customer_support/static/src/js/portal_login.js",
             "customer_support/static/src/css/portal_dashboard.css",
             "customer_support/static/src/css/support_dashboard.css",
+            "customer_support/static/src/js/chatbot.js",
         ],
     },
     "installable": True,
