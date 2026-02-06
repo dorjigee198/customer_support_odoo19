@@ -4,6 +4,7 @@ from odoo import http, fields
 from odoo.http import request
 import werkzeug
 import logging
+import json
 
 _logger = logging.getLogger(__name__)
 
@@ -129,6 +130,7 @@ class CustomerSupportPortal(http.Controller):
 
             ticket_counts = {
                 "new": len(tickets.filtered(lambda t: t.state == "new")),
+                "open": len(tickets.filtered(lambda t: t.state == "open")),
                 "in_progress": len(
                     tickets.filtered(lambda t: t.state == "in_progress")
                 ),
@@ -334,7 +336,7 @@ class CustomerSupportPortal(http.Controller):
 
         ticket_counts = {
             "new": len(tickets.filtered(lambda t: t.state == "new")),
-            "assigned": len(tickets.filtered(lambda t: t.state == "assigned")),
+            "open": len(tickets.filtered(lambda t: t.state == "open")),
             "resolved": len(tickets.filtered(lambda t: t.state == "resolved")),
             "closed": len(tickets.filtered(lambda t: t.state == "closed")),
             "total": len(tickets),
@@ -383,6 +385,35 @@ class CustomerSupportPortal(http.Controller):
                     [("active", "=", True), ("id", "!=", 1)]
                 )
 
+            # ============ RETRIEVE MESSAGES FOR DISPLAY ============
+            activities = []
+            
+            # METHOD 1: Try using message_ids from ticket
+            try:
+                if hasattr(ticket, 'message_ids') and ticket.message_ids:
+                    # Filter only comment and notification types
+                    activities = list(ticket.message_ids.filtered(
+                        lambda m: m.message_type in ['comment', 'notification']
+                    ).sorted(key=lambda r: r.date, reverse=True))
+                    _logger.info(f"✓ Found {len(activities)} messages using message_ids for ticket {ticket_id}")
+            except Exception as e:
+                _logger.error(f"✗ message_ids failed: {str(e)}")
+            
+            # METHOD 2: Search mail.message table if METHOD 1 failed
+            if not activities:
+                try:
+                    messages = request.env['mail.message'].sudo().search([
+                        ('model', '=', 'customer.support'),
+                        ('res_id', '=', ticket_id),
+                        ('message_type', 'in', ['comment', 'notification'])
+                    ], order='date desc')
+                    activities = list(messages)
+                    _logger.info(f"✓ Found {len(activities)} messages using mail.message search for ticket {ticket_id}")
+                except Exception as e:
+                    _logger.error(f"✗ mail.message search failed: {str(e)}")
+
+            _logger.info(f"Ticket {ticket_id}: Passing {len(activities)} activities to template (type: {type(activities)})")
+
             return request.render(
                 "customer_support.ticket_detail",
                 {
@@ -392,6 +423,8 @@ class CustomerSupportPortal(http.Controller):
                     "is_assigned": is_assigned,
                     "is_customer": is_customer,
                     "focal_persons": focal_persons,
+                    "activities": activities,
+                    "activities_count": len(activities),
                     "success": kw.get("success", ""),
                     "error": kw.get("error", ""),
                     "page_name": "ticket_detail",
@@ -402,6 +435,174 @@ class CustomerSupportPortal(http.Controller):
             _logger.error(f"View ticket error: {str(e)}")
             return werkzeug.utils.redirect(
                 "/customer_support/dashboard?error=Error loading ticket"
+            )
+
+    @http.route(
+        "/customer_support/ticket/<int:ticket_id>/post_message",
+        type="http",
+        auth="user",
+        methods=["POST"],
+        website=True,
+        csrf=True,
+    )
+    def post_ticket_message(self, ticket_id, **post):
+        """Handle posting messages to ticket communication"""
+        try:
+            ticket = request.env["customer.support"].sudo().browse(ticket_id)
+            
+            if not ticket.exists():
+                return werkzeug.utils.redirect(
+                    f"/customer_support/ticket/{ticket_id}?error=Ticket not found"
+                )
+
+            message = post.get('message', '').strip()
+            
+            if not message:
+                return werkzeug.utils.redirect(
+                    f"/customer_support/ticket/{ticket_id}?error=Message cannot be empty"
+                )
+            
+            # Don't wrap in <p> tags - send as plain text and let Odoo handle formatting
+            _logger.info(f"Attempting to post message to ticket {ticket_id}: {message}")
+            
+            # Try to post the message
+            try:
+                msg = ticket.message_post(
+                    body=message,
+                    message_type='comment',
+                    subtype_xmlid='mail.mt_comment',
+                )
+                _logger.info(f"✓ Message posted successfully - Message ID: {msg.id if msg else 'N/A'}")
+                success_msg = 'Message posted successfully'
+            except Exception as e1:
+                _logger.error(f"✗ message_post with subtype failed: {str(e1)}")
+                try:
+                    msg = ticket.message_post(
+                        body=message,
+                        message_type='comment',
+                    )
+                    _logger.info(f"✓ Message posted without subtype - Message ID: {msg.id if msg else 'N/A'}")
+                    success_msg = 'Message posted successfully'
+                except Exception as e2:
+                    _logger.error(f"✗ message_post without subtype failed: {str(e2)}")
+                    try:
+                        msg = request.env['mail.message'].sudo().create({
+                            'model': 'customer.support',
+                            'res_id': ticket_id,
+                            'body': message,
+                            'message_type': 'comment',
+                            'author_id': request.env.user.partner_id.id,
+                        })
+                        _logger.info(f"✓ Message created directly - Message ID: {msg.id}")
+                        success_msg = 'Message posted successfully'
+                    except Exception as e3:
+                        _logger.error(f"✗ All methods failed: {str(e3)}")
+                        success_msg = f'Error posting message: {str(e3)}'
+            
+            return werkzeug.utils.redirect(
+                f"/customer_support/ticket/{ticket_id}?success={success_msg}"
+            )
+
+        except Exception as e:
+            _logger.error(f"CRITICAL ERROR in post_message: {str(e)}")
+            return werkzeug.utils.redirect(
+                f"/customer_support/ticket/{ticket_id}?error={str(e)}"
+            )
+
+    @http.route(
+        "/customer_support/ticket/message/<int:message_id>/delete",
+        type="http",
+        auth="user",
+        methods=["POST"],
+        csrf=False,
+    )
+    def delete_message(self, message_id, **kwargs):
+        """Delete a message - AJAX endpoint"""
+        try:
+            message = request.env['mail.message'].sudo().browse(message_id)
+            
+            if not message.exists():
+                return request.make_response(
+                    json.dumps({'success': False, 'error': 'Message not found'}),
+                    headers=[('Content-Type', 'application/json')]
+                )
+            
+            # Check if user is the author or admin
+            user = request.env.user
+            is_admin = user.has_group("base.group_system")
+            is_author = message.author_id.id == user.partner_id.id
+            
+            if not (is_admin or is_author):
+                return request.make_response(
+                    json.dumps({'success': False, 'error': 'You do not have permission to delete this message'}),
+                    headers=[('Content-Type', 'application/json')]
+                )
+            
+            ticket_id = message.res_id
+            message.unlink()
+            
+            return request.make_response(
+                json.dumps({'success': True, 'message': 'Message deleted successfully', 'ticket_id': ticket_id}),
+                headers=[('Content-Type', 'application/json')]
+            )
+            
+        except Exception as e:
+            _logger.error(f"Delete message error: {str(e)}")
+            return request.make_response(
+                json.dumps({'success': False, 'error': str(e)}),
+                headers=[('Content-Type', 'application/json')]
+            )
+
+    @http.route(
+        "/customer_support/ticket/message/<int:message_id>/edit",
+        type="http",
+        auth="user",
+        methods=["POST"],
+        csrf=False,
+    )
+    def edit_message(self, message_id, new_body=None, **kwargs):
+        """Edit a message - AJAX endpoint"""
+        try:
+            message = request.env['mail.message'].sudo().browse(message_id)
+            
+            if not message.exists():
+                return request.make_response(
+                    json.dumps({'success': False, 'error': 'Message not found'}),
+                    headers=[('Content-Type', 'application/json')]
+                )
+            
+            # Check if user is the author
+            user = request.env.user
+            is_author = message.author_id.id == user.partner_id.id
+            
+            if not is_author:
+                return request.make_response(
+                    json.dumps({'success': False, 'error': 'You can only edit your own messages'}),
+                    headers=[('Content-Type', 'application/json')]
+                )
+            
+            if not new_body or not new_body.strip():
+                return request.make_response(
+                    json.dumps({'success': False, 'error': 'Message cannot be empty'}),
+                    headers=[('Content-Type', 'application/json')]
+                )
+            
+            message.write({'body': new_body.strip()})
+            
+            return request.make_response(
+                json.dumps({
+                    'success': True,
+                    'message': 'Message updated successfully',
+                    'new_body': new_body.strip()
+                }),
+                headers=[('Content-Type', 'application/json')]
+            )
+            
+        except Exception as e:
+            _logger.error(f"Edit message error: {str(e)}")
+            return request.make_response(
+                json.dumps({'success': False, 'error': str(e)}),
+                headers=[('Content-Type', 'application/json')]
             )
 
     @http.route(
@@ -440,7 +641,7 @@ class CustomerSupportPortal(http.Controller):
             ticket.write(
                 {
                     "assigned_to": assigned_user_id,
-                    "state": "assigned",
+                    "state": "new",
                     "assigned_by": user.id,
                     "assigned_date": fields.Datetime.now(),
                 }
@@ -987,6 +1188,7 @@ class CustomerSupportPortal(http.Controller):
                 )
 
         return request.redirect("/customer_support/profile?success=1")
+        
     @http.route("/customer_support/logout_manual", type="http", auth="user", website=True)
     def logout_manual(self):
         # This manually clears the session so they are actually logged out

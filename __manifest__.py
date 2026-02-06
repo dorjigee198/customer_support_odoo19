@@ -40,6 +40,7 @@
             "customer_support/static/src/js/portal_login.js",
             "customer_support/static/src/css/portal_dashboard.css",
             "customer_support/static/src/css/support_dashboard.css",
+            "customer_support/static/src/css/ticket_details.css",
             "customer_support/static/src/js/chatbot.js",
         ],
     },

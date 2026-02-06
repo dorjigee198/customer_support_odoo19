@@ -1,8 +1,8 @@
-# controllers/support_dashboard.py
 from odoo import http
 from odoo.http import request
 import werkzeug
 from datetime import datetime, timedelta
+import json
 
 
 class SupportDashboard(http.Controller):
@@ -12,7 +12,7 @@ class SupportDashboard(http.Controller):
     )
     def support_dashboard(self, **kw):
         """
-        Main dashboard route - YOUR ORIGINAL FUNCTIONALITY PRESERVED
+        Main dashboard route for focal persons (support staff)
         """
         # Ensure only focal persons can access
         if not request.env.user.has_group("base.group_user"):
@@ -25,10 +25,10 @@ class SupportDashboard(http.Controller):
             [("assigned_to", "=", request.env.user.id)]
         )
 
-        # Get analytics data (NEW - for Overview page)
+        # Get analytics data (for Overview page)
         analytics = self._get_analytics_data(request.env.user, tickets)
 
-        # Get performance metrics (NEW - for My Performance card)
+        # Get performance metrics (for My Performance card)
         performance = self._get_performance_metrics(request.env.user, tickets)
 
         # Render the dashboard template
@@ -37,12 +37,156 @@ class SupportDashboard(http.Controller):
             {
                 "tickets": tickets,
                 "user": request.env.user,
-                "analytics": analytics,  # NEW
-                "performance": performance,  # NEW
+                "analytics": analytics,
+                "performance": performance,
             },
         )
 
-    # ============ NEW HELPER METHODS FOR ANALYTICS ============
+    # ============ ROUTE FOR UPDATING TICKET PHASE (AJAX) ============
+
+    @http.route(
+        "/customer_support/ticket/update_phase", 
+        type="json", 
+        auth="user"
+    )
+    def update_ticket_phase(self, ticket_id, new_phase, **kwargs):
+        """
+        AJAX endpoint to update ticket phase/state
+        """
+        try:
+            ticket = request.env["customer.support"].sudo().browse(int(ticket_id))
+            
+            if not ticket.exists():
+                return {
+                    'success': False, 
+                    'error': 'Ticket not found'
+                }
+
+            valid_phases = ['new', 'open', 'in_progress', 'resolved', 'closed']
+            if new_phase not in valid_phases:
+                return {
+                    'success': False, 
+                    'error': 'Invalid phase'
+                }
+
+            old_phase = ticket.state
+            ticket.write({'state': new_phase})
+
+            try:
+                ticket.message_post(
+                    body=f"Phase changed from <b>{old_phase.replace('_', ' ').title()}</b> to <b>{new_phase.replace('_', ' ').title()}</b>",
+                    message_type='notification',
+                    subtype_xmlid='mail.mt_note',
+                )
+            except:
+                pass
+
+            return {
+                'success': True,
+                'new_phase': new_phase,
+                'new_phase_display': new_phase.replace('_', ' ').title(),
+                'ticket_id': ticket_id,
+                'message': 'Phase updated successfully'
+            }
+
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    # ============ ROUTE FOR ADDING TICKET NOTES (AJAX) ============
+
+    @http.route(
+        "/customer_support/ticket/add_note", 
+        type="json", 
+        auth="user"
+    )
+    def add_ticket_note(self, ticket_id, note, **kwargs):
+        """
+        AJAX endpoint to add internal notes to a ticket
+        """
+        try:
+            ticket = request.env["customer.support"].sudo().browse(int(ticket_id))
+            
+            if not ticket.exists():
+                return {'success': False, 'error': 'Ticket not found'}
+
+            try:
+                ticket.message_post(
+                    body=note,
+                    message_type='comment',
+                    subtype_xmlid='mail.mt_note',
+                    author_id=request.env.user.partner_id.id,
+                )
+            except:
+                pass
+
+            return {
+                'success': True,
+                'message': 'Note added successfully',
+                'author': request.env.user.name,
+                'date': datetime.now().strftime('%b %d, %I:%M %p')
+            }
+
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    # ============ AJAX ENDPOINT FOR SEARCH ============
+
+    @http.route("/customer_support/tickets/search", type="json", auth="user")
+    def search_tickets(self, search_term="", **kwargs):
+        """AJAX endpoint for searching tickets"""
+        user = request.env.user
+        domain = [("assigned_to", "=", user.id)]
+
+        if search_term:
+            domain += [
+                "|",
+                ("name", "ilike", search_term),
+                ("subject", "ilike", search_term),
+            ]
+
+        tickets = request.env["customer.support"].search(
+            domain, order="create_date desc"
+        )
+
+        tickets_data = []
+        for ticket in tickets:
+            try:
+                customer_name = ticket.partner_id.name if ticket.partner_id else "Unknown"
+            except:
+                customer_name = "Unknown"
+
+            try:
+                status = ticket.state
+            except:
+                status = "new"
+
+            try:
+                created = ticket.create_date.strftime("%b %d, %I:%M %p") if ticket.create_date else ""
+            except:
+                created = ""
+
+            try:
+                project = ticket.team_id.name if ticket.team_id else ""
+            except:
+                project = ""
+
+            tickets_data.append({
+                "id": ticket.id,
+                "name": ticket.name,
+                "subject": ticket.subject if hasattr(ticket, "subject") else ticket.name,
+                "state": status,
+                "priority": ticket.priority if hasattr(ticket, "priority") else "low",
+                "customer": customer_name,
+                "created": created,
+                "project": project,
+            })
+
+        return {"tickets": tickets_data, "count": len(tickets_data)}
+
+    # ============ HELPER METHODS FOR ANALYTICS ============
 
     def _get_analytics_data(self, user, tickets):
         """
@@ -64,38 +208,24 @@ class SupportDashboard(http.Controller):
                 "urgent_failed": 0,
             }
 
-        # Calculate open tickets (adjust field name if different in your model)
-        # Assuming your model has a 'state' or 'stage_id' field
         try:
-            open_tickets = len(tickets.filtered(lambda t: t.stage_id.is_close == False))
+            open_tickets = len(tickets.filtered(lambda t: t.state not in ['closed', 'resolved']))
         except:
-            # Fallback if stage_id doesn't exist
-            open_tickets = len(
-                tickets.filtered(lambda t: t.state not in ["closed", "done"])
-            )
+            open_tickets = len(tickets.filtered(lambda t: t.state not in ["closed", "done"]))
 
-        # Count high priority and urgent tickets
-        # Adjust priority values based on your model ('2' = High, '3' = Urgent)
-        high_priority = len(tickets.filtered(lambda t: t.priority == "2"))
-        urgent = len(tickets.filtered(lambda t: t.priority == "3"))
+        high_priority = len(tickets.filtered(lambda t: t.priority == "high"))
+        urgent = len(tickets.filtered(lambda t: t.priority == "urgent"))
 
-        # Calculate hours metrics
         avg_open_hours = self._calculate_avg_open_hours(tickets)
         total_hours = self._calculate_total_hours(tickets)
-        avg_high_priority_hours = self._calculate_avg_priority_hours(tickets, "2")
-        avg_urgent_hours = self._calculate_avg_priority_hours(tickets, "3")
+        avg_high_priority_hours = self._calculate_avg_priority_hours(tickets, "high")
+        avg_urgent_hours = self._calculate_avg_priority_hours(tickets, "urgent")
 
-        # Calculate failed tickets (adjust based on your model's failed state)
         try:
-            failed_tickets = len(
-                tickets.filtered(lambda t: t.stage_id.name in ["Failed", "Cancelled"])
-            )
+            failed_tickets = len(tickets.filtered(lambda t: t.state in ["failed", "cancelled"]))
         except:
-            failed_tickets = len(
-                tickets.filtered(lambda t: t.state in ["failed", "cancelled"])
-            )
+            failed_tickets = 0
 
-        # Calculate failed rate
         failed_rate = (failed_tickets / len(tickets)) * 100 if len(tickets) > 0 else 0.0
 
         analytics = {
@@ -110,22 +240,10 @@ class SupportDashboard(http.Controller):
             "failed_tickets": failed_tickets,
             "failed_rate": round(failed_rate, 2),
             "high_priority_failed": len(
-                tickets.filtered(
-                    lambda t: t.priority == "2"
-                    and (
-                        hasattr(t.stage_id, "name")
-                        and t.stage_id.name in ["Failed", "Cancelled"]
-                    )
-                )
+                tickets.filtered(lambda t: t.priority == "high" and t.state in ["failed", "cancelled"])
             ),
             "urgent_failed": len(
-                tickets.filtered(
-                    lambda t: t.priority == "3"
-                    and (
-                        hasattr(t.stage_id, "name")
-                        and t.stage_id.name in ["Failed", "Cancelled"]
-                    )
-                )
+                tickets.filtered(lambda t: t.priority == "urgent" and t.state in ["failed", "cancelled"])
             ),
         }
 
@@ -146,8 +264,6 @@ class SupportDashboard(http.Controller):
         today = datetime.now().date()
         week_ago = today - timedelta(days=7)
 
-        # Today's closed tickets
-        # Adjust the field name based on your model (close_date, date_closed, etc.)
         try:
             today_closed = len(
                 tickets.filtered(
@@ -159,7 +275,6 @@ class SupportDashboard(http.Controller):
         except:
             today_closed = 0
 
-        # Last 7 days closed tickets
         try:
             last_7_days_closed = len(
                 tickets.filtered(
@@ -171,12 +286,10 @@ class SupportDashboard(http.Controller):
         except:
             last_7_days_closed = 0
 
-        # Calculate average percentage
         avg_last_7_days = (
             (last_7_days_closed / 7) * 100 if last_7_days_closed > 0 else 0
         )
 
-        # You can make these configurable in settings
         daily_target = 80.00
         accuracy = 85.00
 
@@ -190,14 +303,12 @@ class SupportDashboard(http.Controller):
         return performance
 
     def _calculate_avg_open_hours(self, tickets):
-        """
-        Calculate average hours tickets have been open
-        """
+        """Calculate average hours tickets have been open"""
         if not tickets:
             return 0.0
 
         try:
-            open_tickets = tickets.filtered(lambda t: t.stage_id.is_close == False)
+            open_tickets = tickets.filtered(lambda t: t.state not in ['closed', 'resolved'])
         except:
             open_tickets = tickets.filtered(lambda t: t.state not in ["closed", "done"])
 
@@ -213,12 +324,9 @@ class SupportDashboard(http.Controller):
         return total_hours / len(open_tickets) if open_tickets else 0.0
 
     def _calculate_total_hours(self, tickets):
-        """
-        Calculate total hours spent on all tickets
-        """
+        """Calculate total hours spent on all tickets"""
         if not tickets:
-            a
-        return 0.0
+            return 0.0
 
         total_hours = 0
         for ticket in tickets:
@@ -234,9 +342,7 @@ class SupportDashboard(http.Controller):
         return total_hours
 
     def _calculate_avg_priority_hours(self, tickets, priority):
-        """
-        Calculate average hours for specific priority tickets
-        """
+        """Calculate average hours for specific priority tickets"""
         if not tickets:
             return 0.0
 
@@ -257,73 +363,3 @@ class SupportDashboard(http.Controller):
                 total_hours += delta.total_seconds() / 3600
 
         return total_hours / len(priority_tickets)
-
-    # ============ NEW AJAX ENDPOINT FOR SEARCH ============
-
-    @http.route("/customer_support/tickets/search", type="json", auth="user")
-    def search_tickets(self, search_term="", **kwargs):
-        """
-        AJAX endpoint for searching tickets (for search bar functionality)
-        """
-        user = request.env.user
-
-        # Base domain - same as your original
-        domain = [("assigned_to", "=", user.id)]
-
-        # Add search filter if provided
-        if search_term:
-            domain += [
-                "|",
-                ("name", "ilike", search_term),
-                ("subject", "ilike", search_term),
-            ]
-
-        tickets = request.env["customer.support"].search(
-            domain, order="create_date desc"
-        )
-
-        # Return ticket data as JSON
-        tickets_data = []
-        for ticket in tickets:
-            try:
-                customer_name = (
-                    ticket.partner_id.name if ticket.partner_id else "Unknown"
-                )
-            except:
-                customer_name = "Unknown"
-
-            try:
-                status = ticket.stage_id.name if ticket.stage_id else ticket.state
-            except:
-                status = "New"
-
-            try:
-                created = (
-                    ticket.create_date.strftime("%b %d, %I:%M %p")
-                    if ticket.create_date
-                    else ""
-                )
-            except:
-                created = ""
-
-            try:
-                project = ticket.team_id.name if ticket.team_id else ""
-            except:
-                project = ""
-
-            tickets_data.append(
-                {
-                    "id": ticket.id,
-                    "name": ticket.name,
-                    "subject": (
-                        ticket.subject if hasattr(ticket, "subject") else ticket.name
-                    ),
-                    "state": status,
-                    "priority": ticket.priority if hasattr(ticket, "priority") else "1",
-                    "customer": customer_name,
-                    "created": created,
-                    "project": project,
-                }
-            )
-
-        return {"tickets": tickets_data, "count": len(tickets_data)}

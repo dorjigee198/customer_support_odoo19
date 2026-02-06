@@ -4,7 +4,7 @@ from ..services.chatbot_backend import ChatBotBackend
 
 # Initialize backend with your API key
 bot = ChatBotBackend(
-    api_key="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"
+    api_key="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"
 )
 
 
@@ -16,8 +16,8 @@ class CustomerSupportChatbot(http.Controller):
         """Render the chatbot page"""
         return request.render("customer_support.chatbot_page")
 
-    # 2️⃣ Route for sending messages (AJAX) - CHANGED type="json" to type="jsonrpc"
-    @http.route("/customer_support/chatbot/message", type="json", auth="user")
+    # 2️⃣ Route for sending messages (AJAX)
+    @http.route("/customer_support/chatbot/message", type="jsonrpc", auth="user")
     def chatbot_message(self, message, **kw):
         """Handle chatbot messages"""
         user_id = request.env.user.id
@@ -28,7 +28,7 @@ class CustomerSupportChatbot(http.Controller):
             return {"error": str(e)}
 
     # 3️⃣ Optional: Route to clear chat history
-    @http.route("/customer_support/chatbot/clear", type="json", auth="user")
+    @http.route("/customer_support/chatbot/clear", type="jsonrpc", auth="user")
     def chatbot_clear(self, **kw):
         """Clear chat history for current user"""
         user_id = request.env.user.id

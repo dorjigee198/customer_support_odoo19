@@ -1,305 +1,725 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- Assets Bundle -->
     <!-- Main Dashboard Template -->
     <template id="focal_person" name="Support Dashboard">
-        <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css" />
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-            rel="stylesheet" />
+        <t t-call="web.layout">
+            <t t-set="head">
+                <!-- Bootstrap 5 CSS -->
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+                    rel="stylesheet" />
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+                    rel="stylesheet" />
 
-        <div class="support-dashboard-wrapper">
-            <!-- Enhanced Secondary Navigation with Profile -->
-            <nav class="secondary-navbar">
-                <div class="navbar-left">
-                    <a href="#" class="secondary-nav-link active" data-view="overview">Overview</a>
-                    <a href="#" class="secondary-nav-link" data-view="tickets">Tickets</a>
-                    <a href="#" class="secondary-nav-link" data-view="faq">Manage FAQ</a>
+                <!-- Custom Dashboard CSS -->
+                <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css" />
+            </t>
+
+            <div class="dashboard-wrapper">
+                <!-- Top Navigation Header -->
+                <header class="dashboard-header">
+                <div class="header-content">
+
+                    <!-- Left Navigation -->
+                    <div class="header-nav">
+                        <a href="#" class="nav-link active" data-view="overview">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Overview</span>
+                        </a>
+                        <a href="#" class="nav-link" data-view="tickets">
+                            <i class="bi bi-ticket-detailed"></i>
+                            <span>Tickets</span>
+                        </a>
+                        <a href="#" class="nav-link" data-view="faq">
+                            <i class="bi bi-question-circle"></i>
+                            <span>FAQ</span>
+                        </a>
+                    </div>
+
+                    <!-- Right Side -->
+                    <div class="header-right">
+
+                        <!-- Icons -->
+                        <i class="bi bi-grid-3x3-gap-fill text-white me-3"
+                        style="font-size: 1.2rem; cursor: pointer;"></i>
+
+                        <i class="bi bi-bell-fill text-white me-3"
+                        style="font-size: 1.2rem; cursor: pointer;"></i>
+
+                        <!-- User Profile -->
+                        <div class="user-profile dropdown">
+                            <a class="d-flex align-items-center text-white dropdown-toggle"
+                            href="#"
+                            id="userProfileDropdown"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            style="text-decoration: none;">
+
+                                <span class="user-name me-3">
+                                    <t t-esc="user.name" />
+                                </span>
+
+                                <img t-att-src="'/web/image/res.users/%s/avatar_128' % user.id"
+                                    alt="User Avatar"
+                                    class="user-avatar"
+                                    onerror="this.src='/web/static/img/avatar_gray.svg'" />
+                            </a>
+
+                            <ul class="dropdown-menu dropdown-menu-end"
+                                aria-labelledby="userProfileDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="bi bi-person me-2"></i> Edit Profile
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="/web/session/logout">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
                 </div>
-                <div class="navbar-right">
-                    <!-- Notification Button -->
-                    <button class="icon-btn notification-btn">
-                        <i class="fa fa-bell"></i>
-                        <span class="notification-badge">3</span>
-                    </button>
+            </header>
 
-                    <!-- Stats/Chart Button -->
-                    <button class="icon-btn chart-btn">
-                        <i class="fa fa-chart-bar"></i>
-                    </button>
 
-                    <!-- User Profile -->
-                    <div class="user-profile">
-                        <div class="user-avatar-small">
-                            <t t-if="user.image_128">
-                                <img
-                                    t-att-src="'data:image/png;base64,%s' % user.image_128.decode('utf-8')"
-                                    alt="User" />
-                            </t>
-                            <t t-else="">
-                                <img src="/web/static/src/img/placeholder.png" alt="User" />
-                            </t>
+                <!-- Success/Error Messages -->
+                <t t-if="request.params.get('success') or request.params.get('error') or request.params.get('created')">
+                    <div class="container-fluid" style="max-width: 1600px; padding: 1rem 2rem 0;">
+                        <t t-if="request.params.get('success')">
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <strong>Success!</strong> Operation completed successfully.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        </t>
+                        <t t-if="request.params.get('error')">
+                            <div class="alert alert-error alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <strong>Error!</strong> An error occurred. Please try again.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        </t>
+                        <t t-if="request.params.get('created')">
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <strong>Success!</strong> Ticket has been created successfully.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- Overview Page -->
+                <div class="page-content dashboard-content" id="overview-page">
+                    <div class="dashboard-grid">
+                        <!-- Left Section - Ticket Analytics -->
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h2 class="card-title">
+                                    <i class="bi bi-bar-chart-fill"></i>Ticket Analytics
+                                </h2>
+                                <div class="card-actions">
+                                    <span class="last-updated">
+                                        <i class="bi bi-clock"></i>Updated just now
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Row 1 - Main Stats -->
+                            <div class="analytics-grid">
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-folder-plus"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">Open Tickets</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('open_tickets', 0)" />
+                                        </div>
+                                        <div class="stat-subtitle">Active Tickets</div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-stack"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">Total Tickets</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('total_tickets', 0)" />
+                                        </div>
+                                        <div class="stat-subtitle">All Tickets</div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">High Priority</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('high_priority', 0)" />
+                                        </div>
+                                        <div class="stat-subtitle">High Priority</div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-lightning-charge-fill"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">Urgent</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('urgent', 0)" />
+                                        </div>
+                                        <div class="stat-subtitle">Urgent Priority</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Row 2 - Time Metrics -->
+                            <div class="analytics-grid">
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-clock-history"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">Avg Open Hours</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('avg_open_hours', 0)" />
+                                        </div>
+                                        <div class="stat-subtitle">Hours</div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-clock-fill"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">Total Hours</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('total_hours', 0)" />
+                                        </div>
+                                        <div class="stat-subtitle">Hours Open</div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-exclamation-octagon"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">Avg High Priority Hours</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('avg_high_hours', 0)" />
+                                        </div>
+                                        <div class="stat-subtitle">Hours</div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-lightning-charge-fill"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">Avg Urgent Hours</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('avg_urgent_hours', 0)" />
+                                        </div>
+                                        <div class="stat-subtitle">Hours</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Row 3 - Resolved Stats -->
+                            <div class="analytics-grid">
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-check-circle"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">Resolved Tickets</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('resolved_tickets', 0)" />
+                                        </div>
+                                        <div class="stat-subtitle">Fixed Tickets</div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-percent"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">Solve Rate</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('solve_rate', 0)" />%
+                                        </div>
+                                        <div class="stat-subtitle">Success Rate</div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-check-square"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">High Priority Resolved</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('high_resolved', 0)" />
+                                        </div>
+                                        <div class="stat-subtitle">High Fixed</div>
+                                    </div>
+                                </div>
+
+                                <div class="stat-box">
+                                    <div class="stat-icon">
+                                        <i class="bi bi-check-all"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label">Urgent Resolved</div>
+                                        <div class="stat-value">
+                                            <t t-esc="analytics.get('urgent_resolved', 0)" />
+                                        </div>
+                                        <div class="stat-subtitle">Urgent Fixed</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="user-info">
-                            <span class="user-name">
-                                <t t-esc="user.name" />
-                            </span>
-                            <span class="user-role">
-                                <t t-esc="'Support Agent'" />
-                            </span>
+
+                        <!-- Right Section - My Performance -->
+                        <div class="performance-card">
+                            <div class="card-header">
+                                <h2 class="card-title">
+                                    <i class="bi bi-graph-up-arrow"></i>My Performance
+                                </h2>
+                                <div class="card-actions">
+                                    <span class="performance-score">
+                                        <span class="score-badge">
+                                            <t t-esc="performance.get('sample_performance', 85)" />%
+                                        </span>
+                                        Overall Score
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Performance Stats -->
+                            <div class="performance-grid">
+                                <div class="performance-stat">
+                                    <div class="performance-icon">
+                                        <i class="bi bi-calendar-check"></i>
+                                    </div>
+                                    <div class="performance-content">
+                                        <div class="performance-label">Today Closed</div>
+                                        <div class="performance-value">
+                                            <t t-esc="performance.get('today_closed', 0)" />
+                                        </div>
+                                        <div class="performance-subtitle">Tickets Closed Today</div>
+                                    </div>
+                                </div>
+
+                                <div class="performance-stat">
+                                    <div class="performance-icon">
+                                        <i class="bi bi-calendar-week"></i>
+                                    </div>
+                                    <div class="performance-content">
+                                        <div class="performance-label">Avg Last 7 Days</div>
+                                        <div class="performance-value">
+                                            <t t-esc="performance.get('avg_resolve_rate', 0)" />%
+                                        </div>
+                                        <div class="performance-subtitle">Resolve Rate</div>
+                                    </div>
+                                </div>
+
+                                <div class="performance-stat">
+                                    <div class="performance-icon">
+                                        <i class="bi bi-bullseye"></i>
+                                    </div>
+                                    <div class="performance-content">
+                                        <div class="performance-label">Daily Target</div>
+                                        <div class="performance-value">
+                                            <t t-esc="performance.get('daily_target', 80)" />%
+                                        </div>
+                                        <div class="performance-subtitle">Target Achievement</div>
+                                    </div>
+                                </div>
+
+                                <div class="performance-stat">
+                                    <div class="performance-icon">
+                                        <i class="bi bi-trophy-fill"></i>
+                                    </div>
+                                    <div class="performance-content">
+                                        <div class="performance-label">Current Achievement</div>
+                                        <div class="performance-value">
+                                            <t t-esc="performance.get('achievement', 0)" />%
+                                        </div>
+                                        <div class="performance-subtitle">Target Progress</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="performance-progress">
+                                <div class="progress-label">
+                                    <span>Daily Goal Progress</span>
+                                    <span><t t-esc="performance.get('achievement', 0)" />%</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar"
+                                        role="progressbar"
+                                        t-att-style="'width: ' + str(performance.get('achievement', 0)) + '%;'"
+                                        t-att-class="'bg-success' if performance.get('achievement', 0) >= 80 else 'bg-warning'">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="user-dropdown">
-                            <i class="fa fa-chevron-down"></i>
+                    </div>
+
+                    <!-- Quick Actions Row -->
+                    <div class="quick-actions">
+                        <div class="actions-grid">
+                            <a href="#" class="action-card">
+                                <div class="action-icon">
+                                    <i class="bi bi-plus-circle-fill"></i>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Create New Ticket</h4>
+                                    <p>Submit a new support request</p>
+                                </div>
+                            </a>
+
+                            <a href="#" class="action-card" data-view="tickets">
+                                <div class="action-icon">
+                                    <i class="bi bi-list-task"></i>
+                                </div>
+                                <div class="action-content">
+                                    <h4>View All Tickets</h4>
+                                    <p>See all your support tickets</p>
+                                </div>
+                            </a>
+
+                            <a href="#" class="action-card">
+                                <div class="action-icon">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Generate Report</h4>
+                                    <p>Download performance report</p>
+                                </div>
+                            </a>
+
+                            <a href="#" class="action-card" data-view="faq">
+                                <div class="action-icon">
+                                    <i class="bi bi-question-circle-fill"></i>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Help Center</h4>
+                                    <p>Browse FAQ and guides</p>
+                                </div>
+                            </a>
                         </div>
                     </div>
                 </div>
-            </nav>
 
-            <!-- Overview Page -->
-            <div class="page-content" id="overview-page">
-                <div class="dashboard-grid">
-                    <!-- Ticket Analytics Card -->
-                    <div class="analytics-card">
-                        <div class="card-header">Ticket Analytics</div>
-                        <div class="card-body">
-                            <!-- Row 1: Ticket Counts -->
-                            <div class="metrics-grid">
-                                <div class="metric-box">
-                                    <div class="metric-label">Open Tickets</div>
-                                    <div class="metric-value">
-                                        <t
-                                            t-esc="len(tickets.filtered(lambda t: t.state not in ['resolved', 'closed'])) if tickets else 0" />
-                                    </div>
-                                    <div class="metric-sublabel">Tickets</div>
-                                </div>
-                                <div class="metric-box">
-                                    <div class="metric-label">Total Tickets</div>
-                                    <div class="metric-value">
-                                        <t t-esc="len(tickets) if tickets else 0" />
-                                    </div>
-                                    <div class="metric-sublabel">Tickets</div>
-                                </div>
-                                <div class="metric-box">
-                                    <div class="metric-label">High Priority</div>
-                                    <div class="metric-value">
-                                        <t
-                                            t-esc="len(tickets.filtered(lambda t: t.priority == 'high')) if tickets else 0" />
-                                    </div>
-                                    <div class="metric-sublabel">Tickets</div>
-                                </div>
-                                <div class="metric-box">
-                                    <div class="metric-label">Urgent</div>
-                                    <div class="metric-value">
-                                        <t
-                                            t-esc="len(tickets.filtered(lambda t: t.priority == 'urgent')) if tickets else 0" />
-                                    </div>
-                                    <div class="metric-sublabel">Tickets</div>
-                                </div>
-                            </div>
-
-                            <!-- Row 2: Hours Metrics -->
-                            <div class="metrics-grid mt-3">
-                                <div class="metric-box">
-                                    <div class="metric-label">Avg Open Hours</div>
-                                    <div class="metric-value">
-                                        <t
-                                            t-esc="sum(tickets.mapped('days_open')) * 24 / len(tickets) if tickets and len(tickets) > 0 else 0.0" />
-                                    </div>
-                                    <div class="metric-sublabel">Hours</div>
-                                </div>
-                                <div class="metric-box">
-                                    <div class="metric-label">Total Hours</div>
-                                    <div class="metric-value">
-                                        <t
-                                            t-esc="sum(tickets.mapped('days_open')) * 24 if tickets else 0.0" />
-                                    </div>
-                                    <div class="metric-sublabel">Hours</div>
-                                </div>
-                                <div class="metric-box">
-                                    <div class="metric-label">Avg High Priority Hours</div>
-                                    <div class="metric-value">
-                                        <t
-                                            t-esc="sum(tickets.filtered(lambda t: t.priority == 'high').mapped('days_open')) * 24 / len(tickets.filtered(lambda t: t.priority == 'high')) if tickets and len(tickets.filtered(lambda t: t.priority == 'high')) > 0 else 0.0" />
-                                    </div>
-                                    <div class="metric-sublabel">Hours</div>
-                                </div>
-                                <div class="metric-box">
-                                    <div class="metric-label">Avg Urgent Hours</div>
-                                    <div class="metric-value">
-                                        <t
-                                            t-esc="sum(tickets.filtered(lambda t: t.priority == 'urgent').mapped('days_open')) * 24 / len(tickets.filtered(lambda t: t.priority == 'urgent')) if tickets and len(tickets.filtered(lambda t: t.priority == 'urgent')) > 0 else 0.0" />
-                                    </div>
-                                    <div class="metric-sublabel">Hours</div>
-                                </div>
-                            </div>
-
-                            <!-- Row 3: Failed Tickets -->
-                            <div class="metrics-grid mt-3">
-                                <div class="metric-box">
-                                    <div class="metric-label">Overdue Tickets</div>
-                                    <div class="metric-value">
-                                        <t
-                                            t-esc="len(tickets.filtered(lambda t: t.is_overdue)) if tickets else 0" />
-                                    </div>
-                                    <div class="metric-sublabel">Tickets</div>
-                                </div>
-                                <div class="metric-box">
-                                    <div class="metric-label">Overdue Rate</div>
-                                    <div class="metric-value">
-                                        <t
-                                            t-esc="(len(tickets.filtered(lambda t: t.is_overdue)) / len(tickets) * 100) if tickets and len(tickets) > 0 else 0.0" />
-                                        % </div>
-                                    <div class="metric-sublabel">Percentage</div>
-                                </div>
-                                <div class="metric-box">
-                                    <div class="metric-label">High Priority Overdue</div>
-                                    <div class="metric-value">
-                                        <t
-                                            t-esc="len(tickets.filtered(lambda t: t.priority == 'high' and t.is_overdue)) if tickets else 0" />
-                                    </div>
-                                    <div class="metric-sublabel">Tickets</div>
-                                </div>
-                                <div class="metric-box">
-                                    <div class="metric-label">Urgent Overdue</div>
-                                    <div class="metric-value">
-                                        <t
-                                            t-esc="len(tickets.filtered(lambda t: t.priority == 'urgent' and t.is_overdue)) if tickets else 0" />
-                                    </div>
-                                    <div class="metric-sublabel">Tickets</div>
-                                </div>
-                            </div>
+                <!-- Tickets Page -->
+                <div class="page-content dashboard-content" id="tickets-page" style="display: none;">
+                    <div class="tickets-header">
+                        <div class="search-container">
+                            <i class="bi bi-search"></i>
+                            <input type="text" class="search-input" placeholder="Search tickets..."></input>
+                        </div>
+                        <div class="view-toggle">
+                            <button class="view-btn active">
+                                <i class="bi bi-list"></i>
+                            </button>
+                            <button class="view-btn">
+                                <i class="bi bi-grid-3x3-gap"></i>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- My Performance Card -->
-                    <div class="performance-card">
-                        <div class="card-header">My Performance</div>
-                        <div class="card-body">
-                            <div class="performance-metric">
-                                <div class="metric-label">Today</div>
-                                <div class="metric-value">
-                                    <t
-                                        t-esc="len(tickets.filtered(lambda t: t.state == 'closed' and t.closed_date and t.closed_date.date() == current_date)) if tickets else 0" />
-                                </div>
-                                <div class="metric-sublabel">Closed Tickets</div>
-                            </div>
-                            <div class="performance-metric mt-3">
-                                <div class="metric-label">Avg Last 7 days</div>
-                                <div class="metric-value highlight">
-                                    <t t-esc="85.0" />
-                                </div>
-                                <div class="metric-sublabel">Percentage</div>
-                            </div>
-                            <div class="performance-metric mt-3">
-                                <div class="metric-label">Daily Target</div>
-                                <div class="metric-value highlight">
-                                    <t t-esc="80.0" /> % </div>
-                                <div class="metric-sublabel">Percentage</div>
-                            </div>
-                            <div class="performance-metric mt-3">
-                                <div class="metric-label">Accuracy</div>
-                                <div class="metric-value highlight">
-                                    <t t-esc="95.0" />% </div>
-                                <div class="metric-sublabel">Percentage</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Tickets Page -->
-            <div class="page-content" id="tickets-page" style="display: none;">
-                <div class="tickets-header">
-                    <div class="search-bar">
-                        <i class="fa fa-search"></i>
-                        <input type="text" placeholder="Search tickets..." class="search-input" />
-                    </div>
-                </div>
-
-                <t t-if="tickets">
-                    <div class="tickets-table-container">
-                        <table class="tickets-table">
-                            <thead>
-                                <tr>
-                                    <th>TICKET</th>
-                                    <th>CUSTOMER</th>
-                                    <th>STATUS</th>
-                                    <th>PRIORITY</th>
-                                    <th>CREATED</th>
-                                    <th>PROJECT</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <t t-foreach="tickets" t-as="ticket">
-                                    <tr class="ticket-row">
-                                        <td>
-                                            <t t-esc="ticket.name" />
-                                        </td>
-                                        <td>
-                                            <t
-                                                t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'" />
-                                        </td>
-                                        <td>
-                                            <t t-esc="ticket.state.replace('_', ' ').title()" />
-                                        </td>
-                                        <td>
-                                            <t t-esc="ticket.priority" />
-                                        </td>
-                                        <td>
-                                            <t
-                                                t-esc="ticket.create_date.strftime('%b %d, %I:%M %p') if ticket.create_date else 'N/A'" />
-                                        </td>
-                                        <td>
-                                            <t t-esc="'Support'" />
-                                        </td>
+                    <div class="ticket-table-wrapper">
+                        <t t-if="tickets">
+                            <table class="ticket-table">
+                                <thead>
+                                    <tr>
+                                        <th>TICKET</th>
+                                        <th>CUSTOMER</th>
+                                        <th>STATUS</th>
+                                        <th>PRIORITY</th>
+                                        <th>SLA STATUS</th>
+                                        <th>CREATED</th>
+                                        <th>PROJECT</th>
                                     </tr>
-                                </t>
-                            </tbody>
-                        </table>
-                    </div>
-                </t>
-                <t t-if="not tickets">
-                    <div class="no-tickets-message">
-                        <p style="color: #777; font-size: 16px; text-align: center; padding: 40px;">
-                            No tickets assigned to you yet.
-                        </p>
-                    </div>
-                </t>
-            </div>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="tickets" t-as="ticket">
+                                        <tr class="ticket-row" t-att-data-ticket-id="ticket.id" style="cursor: pointer;">
+                                            <!-- Ticket Column -->
+                                            <td class="ticket-info-col">
+                                                <div class="ticket-id-badge">
+                                                    <t t-esc="ticket.name" />
+                                                </div>
+                                                <div class="ticket-description">
+                                                    <t t-esc="ticket.description or 'No description'" />
+                                                </div>
+                                            </td>
 
-            <!-- FAQ Page Placeholder -->
-            <div class="page-content" id="faq-page" style="display: none;">
-                <div class="faq-container">
-                    <h2>Manage FAQ</h2>
-                    <p>FAQ Management interface coming soon...</p>
+                                            <!-- Customer Column -->
+                                            <td class="customer-col">
+                                                <div class="customer-info">
+                                                    <img t-att-src="'/web/image/res.partner/%s/avatar_128' % ticket.customer_id.id if ticket.customer_id else '/web/static/img/avatar_gray.svg'"
+                                                        alt="Customer Avatar"
+                                                        class="customer-avatar"
+                                                        onerror="this.src='/web/static/img/avatar_gray.svg'" />
+                                                    <span class="customer-name">
+                                                        <t t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'" />
+                                                    </span>
+                                                </div>
+                                            </td>
+
+                                            <!-- Status Column -->
+                                            <td class="status-col">
+                                                <t t-set="state_class" t-value="''" />
+                                                <t t-set="state_display" t-value="ticket.state.replace('_', ' ').title()" />
+                                                
+                                                <t t-if="ticket.state == 'new'">
+                                                    <t t-set="state_class" t-value="'status-new'" />
+                                                </t>
+                                                <t t-elif="ticket.state == 'in_progress'">
+                                                    <t t-set="state_class" t-value="'status-in-progress'" />
+                                                    <t t-set="state_display" t-value="'In Progress'" />
+                                                </t>
+                                                <t t-elif="ticket.state == 'open'">
+                                                    <t t-set="state_class" t-value="'status-open'" />
+                                                </t>
+                                                <t t-elif="ticket.state == 'resolved'">
+                                                    <t t-set="state_class" t-value="'status-resolved'" />
+                                                </t>
+                                                <t t-elif="ticket.state == 'closed'">
+                                                    <t t-set="state_class" t-value="'status-closed'" />
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-set="state_class" t-value="'status-new'" />
+                                                </t>
+                                                
+                                                <span t-att-class="'table-status-badge ' + state_class">
+                                                    <t t-esc="state_display" />
+                                                </span>
+                                            </td>
+
+                                            <!-- Priority Column -->
+                                            <td class="priority-col">
+                                                <t t-set="priority_class" t-value="''" />
+                                                <t t-set="priority_display" t-value="ticket.priority.title()" />
+                                                
+                                                <t t-if="ticket.priority == 'low'">
+                                                    <t t-set="priority_class" t-value="'priority-low'" />
+                                                </t>
+                                                <t t-elif="ticket.priority == 'medium'">
+                                                    <t t-set="priority_class" t-value="'priority-medium'" />
+                                                </t>
+                                                <t t-elif="ticket.priority == 'high'">
+                                                    <t t-set="priority_class" t-value="'priority-high'" />
+                                                </t>
+                                                <t t-elif="ticket.priority == 'urgent'">
+                                                    <t t-set="priority_class" t-value="'priority-urgent'" />
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-set="priority_class" t-value="'priority-low'" />
+                                                </t>
+                                                
+                                                <span t-att-class="'table-priority-badge ' + priority_class">
+                                                    <t t-esc="priority_display" />
+                                                </span>
+                                            </td>
+
+                                            <!-- SLA Status Column -->
+                                            <td class="sla-col">
+                                                <t t-set="sla_class" t-value="''" />
+                                                <t t-set="sla_display" t-value="'On Track'" />
+                                                <t t-set="sla_icon" t-value="''" />
+                                                
+                                                <t t-if="ticket.priority == 'urgent'">
+                                                    <t t-set="sla_class" t-value="'sla-risk'" />
+                                                    <t t-set="sla_display" t-value="'SLA Risk'" />
+                                                    <t t-set="sla_icon" t-value="'bi-exclamation-triangle-fill'" />
+                                                </t>
+                                                <t t-elif="ticket.priority == 'high' and ticket.state in ['new', 'in_progress']">
+                                                    <t t-set="sla_class" t-value="'sla-at-risk'" />
+                                                    <t t-set="sla_display" t-value="'At Risk'" />
+                                                    <t t-set="sla_icon" t-value="'bi-exclamation-triangle-fill'" />
+                                                </t>
+                                                <t t-else="">
+                                                    <t t-set="sla_class" t-value="'sla-on-track'" />
+                                                    <t t-set="sla_display" t-value="'On Track'" />
+                                                </t>
+                                                
+                                                <span t-att-class="'table-sla-badge ' + sla_class">
+                                                    <i t-if="sla_icon" t-att-class="'bi ' + sla_icon"></i>
+                                                    <t t-esc="sla_display" />
+                                                </span>
+                                            </td>
+
+                                            <!-- Created Column -->
+                                            <td class="created-col">
+                                                <t t-if="ticket.create_date">
+                                                    <t t-esc="ticket.create_date.strftime('%b %d, %I:%M %p')" />
+                                                </t>
+                                                <t t-else="">N/A</t>
+                                            </td>
+
+                                            <!-- Project Column -->
+                                            <td class="project-col">
+                                                <i class="bi bi-folder2"></i>
+                                                <span>
+                                                    Support
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </t>
+                        <t t-if="not tickets">
+                            <div class="tickets-empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <h3>No tickets assigned to you yet.</h3>
+                                <p>When you have tickets assigned, they will appear here.</p>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Reporting Page -->
+                <div class="page-content dashboard-content" id="reporting-page" style="display: none;">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="bi bi-graph-up"></i>Reporting &amp; Analytics
+                            </h2>
+                        </div>
+                        <p class="text-muted">Detailed reporting interface coming soon...</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Page -->
+                <div class="page-content dashboard-content" id="faq-page" style="display: none;">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                <i class="bi bi-question-circle"></i>Manage FAQ
+                            </h2>
+                        </div>
+                        <p class="text-muted">FAQ Management interface coming soon...</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Hidden Logout Link -->
-            <a href="/web/session/logout" style="display: none;" id="logout-link">Logout</a>
-        </div>
+            <!-- Bootstrap JS -->
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-        <script>
-            // Secondary nav switching
-            document.addEventListener('DOMContentLoaded', function() {
-            const secondaryLinks = document.querySelectorAll('.secondary-nav-link');
-            const pages = document.querySelectorAll('.page-content');
+            <!-- Dashboard JavaScript -->
+<script>
+<![CDATA[
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-hide alerts
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
 
-            secondaryLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
+    // Navigation
+    const navLinks = document.querySelectorAll('.nav-link');
+    const pages = document.querySelectorAll('.page-content');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
             e.preventDefault();
             const viewId = this.getAttribute('data-view');
 
-            secondaryLinks.forEach(l => l.classList.remove('active'));
+            navLinks.forEach(l => l.classList.remove('active'));
             this.classList.add('active');
 
             pages.forEach(page => page.style.display = 'none');
             const targetPage = document.getElementById(viewId + '-page');
             if (targetPage) {
-            targetPage.style.display = 'block';
+                targetPage.style.display = 'block';
             }
+        });
+    });
+
+    // Quick action cards
+    document.querySelectorAll('.action-card[data-view]').forEach(card => {
+        card.addEventListener('click', function(e) {
+            e.preventDefault();
+            const viewId = this.getAttribute('data-view');
+            const navLink = document.querySelector(`.nav-link[data-view="${viewId}"]`);
+            if (navLink) navLink.click();
+        });
+    });
+
+    // Ticket search functionality
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const tickets = document.querySelectorAll('.ticket-row');
+            
+            tickets.forEach(ticket => {
+                const text = ticket.textContent.toLowerCase();
+                ticket.style.display = text.includes(searchTerm) ? '' : 'none';
             });
-            });
-            });
-        </script>
+        });
+    }
+
+    // Click on ticket rows to view details (optional)
+    document.querySelectorAll('.ticket-row').forEach(function(row) {
+       row.addEventListener('click', function() {
+           const ticketId = this.getAttribute('data-ticket-id');
+           if (ticketId) {
+               window.location.href = '/customer_support/ticket/' + ticketId;
+           }
+       });
+   });
+
+    // Number animation
+    function animateNumbers() {
+        document.querySelectorAll('.stat-value, .performance-value').forEach(element => {
+            const text = element.textContent.trim();
+            const hasPercent = text.includes('%');
+            const numericValue = parseFloat(text.replace('%', ''));
+
+            if (!isNaN(numericValue) && numericValue > 0) {
+                let current = 0;
+                const increment = numericValue / 40;
+                const interval = setInterval(() => {
+                    current += increment;
+                    if (current >= numericValue) {
+                        element.textContent = hasPercent ? numericValue + '%' : numericValue;
+                        clearInterval(interval);
+                    } else {
+                        element.textContent = hasPercent ? Math.floor(current) + '%' : Math.floor(current);
+                    }
+                }, 25);
+            }
+        });
+    }
+
+    setTimeout(animateNumbers, 300);
+});
+]]>
+</script>
+        </t>
     </template>
 </odoo>

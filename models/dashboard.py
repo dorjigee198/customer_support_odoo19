@@ -30,15 +30,15 @@ class CustomerSupportDashboard(models.AbstractModel):
 
             # Filter by status
             open_tickets = tickets.filtered(
-                lambda t: t.state in ["new", "in_progress", "pending"]
+                lambda t: t.state in ["new", "open", "in_progress"]
             )
             high_priority = tickets.filtered(
                 lambda t: t.priority == "high"
-                and t.state in ["new", "in_progress", "pending"]
+                and t.state in ["new", "open", "in_progress"]
             )
             urgent_tickets = tickets.filtered(
                 lambda t: t.priority == "urgent"
-                and t.state in ["new", "in_progress", "pending"]
+                and t.state in ["new", "open", "in_progress"]
             )
 
             # Resolved/Closed tickets
