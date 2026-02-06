@@ -67,7 +67,7 @@
                             <ul class="dropdown-menu dropdown-menu-end"
                                 aria-labelledby="userProfileDropdown">
                                 <li>
-                                    <a class="dropdown-item" href="#">
+                                    <a class="dropdown-item" href="/customer_support/profile">
                                         <i class="bi bi-person me-2"></i> Edit Profile
                                     </a>
                                 </li>
@@ -440,7 +440,7 @@
                                 <i class="bi bi-list"></i>
                             </button>
                             <button class="view-btn">
-                                <i class="bi bi-grid-3x3-gap"></i>
+                                <i class="bi bi-kanban"></i>
                             </button>
                         </div>
                     </div>
