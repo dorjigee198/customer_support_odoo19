@@ -28,6 +28,7 @@
         "views/chatbot_page.xml",
         "views/admin_dashboard.xml",
         "views/user_management.xml",
+        "views/system_configuration.xml",
         "views/templates/ticket_detail.xml",
     ],
     "assets": {
@@ -41,6 +42,10 @@
             "customer_support/static/src/css/portal_dashboard.css",
             "customer_support/static/src/css/support_dashboard.css",
             "customer_support/static/src/js/chatbot.js",
+            "customer_support/static/src/css/chatbot.css",
+            "customer_support/static/src/css/ticket_details.css",
+            "customer_support/static/src/css/project_configuration.css",
+            "customer_support/static/src/js/project_configuration.js",
         ],
     },
     "installable": True,

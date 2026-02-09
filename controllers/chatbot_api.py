@@ -4,7 +4,7 @@ from ..services.chatbot_backend import ChatBotBackend
 
 # Initialize backend with your API key
 bot = ChatBotBackend(
-    api_key="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"
+    api_key="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"
 )
 
 

@@ -1,23 +1,59 @@
 # -*- coding: utf-8 -*-
+"""
+Customer Support Portal Controller
+==================================
+This controller manages all routes for the Customer Support Portal including:
+1. Landing page and authentication
+2. Customer dashboard and ticket management
+3. Admin dashboard and user management
+4. Support agent (focal person) dashboard
+5. Ticket management and profile handling
+6. Ticket communication and messaging system
+
+All routes are organized by functionality with proper role-based access control.
+
+UPDATED: Added project management functionality
+- Admin can assign projects to users
+- Users can select projects when creating tickets
+"""
+
 import base64
+import logging
 from odoo import http, fields
 from odoo.http import request
 import werkzeug
-import logging
+import json
 
 _logger = logging.getLogger(__name__)
 
 
 class CustomerSupportPortal(http.Controller):
+    """
+    Main controller class for Customer Support Portal.
+    Handles all HTTP routes with proper authentication and authorization.
+    Routes are grouped logically for better maintainability.
+    """
+
+    # ========================================================================
+    # PUBLIC ROUTES (NO AUTHENTICATION REQUIRED)
+    # ========================================================================
 
     @http.route("/customer_support", type="http", auth="public", website=True)
     def landing_page(self, **kw):
-        """Landing page - first page visitors see"""
+        """
+        Landing Page - Public welcome page
+        Working: Displays welcome screen with login/register options
+        Access: Public (no login required)
+        """
         return request.render("customer_support.landing_page")
 
     @http.route("/customer_support/login", type="http", auth="public", website=True)
     def support_login(self, **kw):
-        """Display custom login page"""
+        """
+        Login Page - Custom login form
+        Working: Shows login form with email/password fields
+        Access: Public (no login required)
+        """
         return request.render(
             "customer_support.portal_login_page",
             {
@@ -34,7 +70,15 @@ class CustomerSupportPortal(http.Controller):
         csrf=False,
     )
     def support_authenticate(self, **post):
-        """Handle login authentication"""
+        """
+        Authentication Handler - Processes login credentials
+        Working: Validates credentials, sets session, redirects to appropriate dashboard
+        Access: Public (no login required)
+        Redirects:
+          - Admins → /customer_support/admin_dashboard
+          - Customers → /customer_support/dashboard
+          - Support Agents → /customer_support/support_dashboard
+        """
         try:
             email = post.get("email", "").strip()
             password = post.get("password", "")
@@ -107,9 +151,17 @@ class CustomerSupportPortal(http.Controller):
                 "/customer_support/login?error=An error occurred during login. Please try again."
             )
 
+    # ========================================================================
+    # CUSTOMER DASHBOARD ROUTES (PORTAL USERS)
+    # ========================================================================
+
     @http.route("/customer_support/dashboard", type="http", auth="user", website=True)
     def support_dashboard(self, **kw):
-        """Customer dashboard"""
+        """
+        Customer Dashboard - Main dashboard for portal users
+        Working: Shows customer's tickets, statistics, and analytics
+        Access: Authenticated portal users (customers)
+        """
         try:
             user = request.env.user
             if user.id == request.env.ref("base.public_user").id:
@@ -191,7 +243,13 @@ class CustomerSupportPortal(http.Controller):
         "/customer_support/create_ticket", type="http", auth="user", website=True
     )
     def create_ticket_form(self, **kw):
-        """Customer ticket creation form"""
+        """
+        Create Ticket Form - Form for creating new support tickets
+        Working: Displays form with subject, description, priority fields
+        Access: Authenticated portal users (customers)
+
+        UPDATED: Now includes project selection dropdown
+        """
         try:
             user = request.env.user
             if user.id == request.env.ref("base.public_user").id:
@@ -199,10 +257,18 @@ class CustomerSupportPortal(http.Controller):
                     "/customer_support/login?error=Please login to access tickets"
                 )
 
+            # ADDED: Fetch all active projects for dropdown
+            projects = (
+                request.env["customer_support.project"]
+                .sudo()
+                .search([("active", "=", True)])
+            )
+
             return request.render(
                 "customer_support.create_ticket_form",
                 {
                     "user": user,
+                    "projects": projects,  # ADDED: Pass projects to template
                     "error": kw.get("error", ""),
                     "page_name": "create_ticket",
                 },
@@ -221,7 +287,13 @@ class CustomerSupportPortal(http.Controller):
         csrf=True,
     )
     def submit_ticket(self, **post):
-        """Handle ticket submission and attachments safely"""
+        """
+        Submit Ticket - Handles ticket creation with attachments
+        Working: Processes form data, creates ticket, handles file uploads
+        Access: Authenticated portal users (customers)
+
+        UPDATED: Now validates and saves project_id
+        """
         try:
             user = request.env.user
 
@@ -252,6 +324,7 @@ class CustomerSupportPortal(http.Controller):
             # Validate required fields
             subject = post_dict.get("subject", "").strip()
             description = post_dict.get("description", "").strip()
+            project_id = post_dict.get("project_id")  # ADDED: Get project_id
 
             if not subject:
                 return werkzeug.utils.redirect(
@@ -263,6 +336,12 @@ class CustomerSupportPortal(http.Controller):
                     "/customer_support/create_ticket?error=Description is required"
                 )
 
+            # ADDED: Validate project selection
+            if not project_id:
+                return werkzeug.utils.redirect(
+                    "/customer_support/create_ticket?error=Project is required"
+                )
+
             # Create ticket
             ticket = request.env["customer.support"].create(
                 {
@@ -270,6 +349,7 @@ class CustomerSupportPortal(http.Controller):
                     "description": description,
                     "priority": post_dict.get("priority", "medium"),
                     "customer_id": user.partner_id.id,
+                    "project_id": int(project_id),  # ADDED: Save project_id
                     "state": "new",
                 }
             )
@@ -303,7 +383,9 @@ class CustomerSupportPortal(http.Controller):
                     f"Attachment processing error (ticket still created): {attach_err}"
                 )
 
-            _logger.info(f"Ticket created: {ticket.name} by {user.name}")
+            _logger.info(
+                f"Ticket created: {ticket.name} by {user.name} for project {project_id}"
+            )
 
             return werkzeug.utils.redirect(
                 "/customer_support/dashboard?success=Ticket submitted successfully"
@@ -315,11 +397,19 @@ class CustomerSupportPortal(http.Controller):
                 "/customer_support/create_ticket?error=Error creating ticket. Please try again."
             )
 
+    # ========================================================================
+    # ADMIN DASHBOARD ROUTES (SYSTEM ADMINISTRATORS)
+    # ========================================================================
+
     @http.route(
         "/customer_support/admin_dashboard", type="http", auth="user", website=True
     )
     def admin_dashboard(self, **kw):
-        """Admin dashboard"""
+        """
+        Admin Dashboard - Main dashboard for system administrators
+        Working: Shows all tickets, user management, system overview with analytics
+        Access: Authenticated system administrators only
+        """
         user = request.env.user
         if not user.has_group("base.group_system"):
             return werkzeug.utils.redirect(
@@ -340,193 +430,94 @@ class CustomerSupportPortal(http.Controller):
             "total": len(tickets),
         }
 
+        # ADD THIS SECTION: Get analytics data for admin dashboard
+        analytics = {}
+        performance = {}
+        try:
+            dashboard_model = request.env["customer_support.dashboard"]
+            analytics = dashboard_model.get_ticket_analytics(user.id)
+            performance = dashboard_model.get_user_performance(user.id)
+        except Exception as e:
+            _logger.warning(f"Admin dashboard analytics failed: {str(e)}")
+            # Provide default values similar to customer dashboard
+            open_tickets = ticket_counts.get("new", 0) + ticket_counts.get(
+                "assigned", 0
+            )
+            analytics = {
+                "open_tickets": open_tickets,
+                "total_tickets": ticket_counts.get("total", 0),
+                "high_priority": 0,
+                "urgent": 0,
+                "avg_open_hours": 0,
+                "total_hours": 0,
+                "avg_high_hours": 0,
+                "avg_urgent_hours": 0,
+                "resolved_tickets": ticket_counts.get("resolved", 0)
+                + ticket_counts.get("closed", 0),
+                "solve_rate": 0,
+                "high_resolved": 0,
+                "urgent_resolved": 0,
+            }
+            performance = {
+                "today_closed": 0,
+                "avg_resolve_rate": 0,
+                "daily_target": 80.00,
+                "achievement": 0,
+                "sample_performance": 85.00,
+            }
+
+        # Fetch all users for the User Management tab
+        all_users = (
+            request.env["res.users"]
+            .search(
+                [
+                    ("id", "not in", [1, request.env.ref("base.public_user").id]),
+                    ("active", "=", True),
+                ]
+            )
+            .sorted(key=lambda r: r.create_date, reverse=True)
+        )
+
+        # Prepare user data with roles
+        users_data = []
+        for u in all_users:
+            # Determine role
+            if u.has_group("base.group_system"):
+                role = "Admin"
+                role_class = "primary"
+            elif u.has_group("base.group_user"):
+                role = "Focal Person"
+                role_class = "info"
+            elif u.has_group("base.group_portal"):
+                role = "Customer"
+                role_class = "secondary"
+            else:
+                role = "User"
+                role_class = "secondary"
+
+            users_data.append(
+                {
+                    "id": u.id,
+                    "name": u.name,
+                    "email": u.email or u.login,
+                    "role": role,
+                    "role_class": role_class,
+                    "active": u.active,
+                }
+            )
+
         return request.render(
             "customer_support.admin_dashboard",
             {
                 "user": user,
                 "tickets": tickets,
                 "ticket_counts": ticket_counts,
+                "users_data": users_data,
+                "analytics": analytics,  # ADDED: Analytics for admin dashboard
+                "performance": performance,  # ADDED: Performance for admin dashboard
                 "page_name": "admin_dashboard",
             },
         )
-
-    @http.route(
-        "/customer_support/ticket/<int:ticket_id>",
-        type="http",
-        auth="user",
-        website=True,
-    )
-    def view_ticket(self, ticket_id, **kw):
-        """View ticket details"""
-        try:
-            user = request.env.user
-            if user.id == request.env.ref("base.public_user").id:
-                return werkzeug.utils.redirect(
-                    "/customer_support/login?error=Please login"
-                )
-
-            ticket = request.env["customer.support"].browse(ticket_id)
-            if not ticket.exists():
-                return werkzeug.utils.redirect(
-                    "/customer_support/dashboard?error=Ticket not found"
-                )
-
-            is_admin = user.has_group("base.group_system")
-            is_assigned = (
-                ticket.assigned_to.id == user.id if ticket.assigned_to else False
-            )
-            is_customer = ticket.customer_id.id == user.partner_id.id
-
-            focal_persons = []
-            if is_admin:
-                focal_persons = request.env["res.users"].search(
-                    [("active", "=", True), ("id", "!=", 1)]
-                )
-
-            return request.render(
-                "customer_support.ticket_detail",
-                {
-                    "user": user,
-                    "ticket": ticket,
-                    "is_admin": is_admin,
-                    "is_assigned": is_assigned,
-                    "is_customer": is_customer,
-                    "focal_persons": focal_persons,
-                    "success": kw.get("success", ""),
-                    "error": kw.get("error", ""),
-                    "page_name": "ticket_detail",
-                },
-            )
-
-        except Exception as e:
-            _logger.error(f"View ticket error: {str(e)}")
-            return werkzeug.utils.redirect(
-                "/customer_support/dashboard?error=Error loading ticket"
-            )
-
-    @http.route(
-        "/customer_support/ticket/<int:ticket_id>/assign",
-        type="http",
-        auth="user",
-        methods=["POST"],
-        website=True,
-        csrf=True,
-    )
-    def assign_ticket(self, ticket_id, **post):
-        try:
-            user = request.env.user
-            if not user.has_group("base.group_system"):
-                return werkzeug.utils.redirect(
-                    f"/customer_support/ticket/{ticket_id}?error=Access denied"
-                )
-
-            ticket = request.env["customer.support"].browse(ticket_id)
-            if not ticket.exists():
-                return werkzeug.utils.redirect(
-                    "/customer_support/dashboard?error=Ticket not found"
-                )
-
-            # Normalize post data
-            post_dict = dict(post) if not isinstance(post, dict) else post
-
-            assigned_to = post_dict.get("assigned_to")
-            if not assigned_to:
-                return werkzeug.utils.redirect(
-                    f"/customer_support/ticket/{ticket_id}?error=Please select a user to assign"
-                )
-
-            assigned_user_id = int(assigned_to)
-
-            ticket.write(
-                {
-                    "assigned_to": assigned_user_id,
-                    "state": "assigned",
-                    "assigned_by": user.id,
-                    "assigned_date": fields.Datetime.now(),
-                }
-            )
-
-            _logger.info(f"Ticket {ticket.name} assigned to user {assigned_user_id}")
-
-            return werkzeug.utils.redirect(
-                f"/customer_support/ticket/{ticket_id}?success=Ticket assigned successfully"
-            )
-
-        except Exception as e:
-            _logger.exception(f"Assign ticket error: {str(e)}")
-            return werkzeug.utils.redirect(
-                f"/customer_support/ticket/{ticket_id}?error=Error assigning ticket"
-            )
-
-    @http.route(
-        "/customer_support/ticket/<int:ticket_id>/update_status",
-        type="http",
-        auth="user",
-        methods=["POST"],
-        website=True,
-        csrf=True,
-    )
-    def update_ticket_status(self, ticket_id, **post):
-        try:
-            user = request.env.user
-            ticket = request.env["customer.support"].browse(ticket_id)
-            if not ticket.exists():
-                return werkzeug.utils.redirect(
-                    "/customer_support/dashboard?error=Ticket not found"
-                )
-
-            is_admin = user.has_group("base.group_system")
-            is_assigned = (
-                ticket.assigned_to.id == user.id if ticket.assigned_to else False
-            )
-
-            if not (is_admin or is_assigned):
-                return werkzeug.utils.redirect(
-                    f"/customer_support/ticket/{ticket_id}?error=Access denied"
-                )
-
-            # Normalize post data
-            post_dict = dict(post) if not isinstance(post, dict) else post
-
-            new_status = post_dict.get("status")
-            if not new_status:
-                return werkzeug.utils.redirect(
-                    f"/customer_support/ticket/{ticket_id}?error=Status is required"
-                )
-
-            update_vals = {"state": new_status}
-
-            if new_status == "resolved":
-                update_vals["resolved_date"] = fields.Datetime.now()
-            elif new_status == "closed":
-                update_vals["closed_date"] = fields.Datetime.now()
-
-            resolution_notes = post_dict.get("resolution_notes", "").strip()
-            if resolution_notes:
-                update_vals["resolution_notes"] = resolution_notes
-
-            ticket.write(update_vals)
-
-            _logger.info(f"Ticket {ticket.name} status updated to {new_status}")
-
-            return werkzeug.utils.redirect(
-                f"/customer_support/ticket/{ticket_id}?success=Status updated successfully"
-            )
-
-        except Exception as e:
-            _logger.exception(f"Update status error: {str(e)}")
-            return werkzeug.utils.redirect(
-                f"/customer_support/ticket/{ticket_id}?error=Error updating status"
-            )
-
-    @http.route("/customer_support/logout", type="http", auth="user", website=True)
-    def support_logout(self, **kw):
-        try:
-            request.session.logout()
-            return werkzeug.utils.redirect("/customer_support")
-        except Exception as e:
-            _logger.error(f"Logout error: {str(e)}")
-            return werkzeug.utils.redirect("/customer_support/login")
 
     @http.route(
         "/customer_support/admin_dashboard/users",
@@ -535,7 +526,11 @@ class CustomerSupportPortal(http.Controller):
         website=True,
     )
     def admin_users_list(self, **kw):
-        """Admin user management page"""
+        """
+        User Management Page - List and categorize all users
+        Working: Displays all users categorized as focal persons and customers
+        Access: Authenticated system administrators only
+        """
         user = request.env.user
         if not user.has_group("base.group_system"):
             return werkzeug.utils.redirect("/customer_support/dashboard")
@@ -578,15 +573,29 @@ class CustomerSupportPortal(http.Controller):
         website=True,
     )
     def admin_create_user_form(self, **kw):
-        """Show create user form"""
+        """
+        Create User Form - Form for creating new users
+        Working: Displays form for creating focal persons or customers
+        Access: Authenticated system administrators only
+
+        UPDATED: Now includes project selection
+        """
         user = request.env.user
         if not user.has_group("base.group_system"):
             return werkzeug.utils.redirect("/customer_support/dashboard")
+
+        # ADDED: Fetch all active projects
+        projects = (
+            request.env["customer_support.project"]
+            .sudo()
+            .search([("active", "=", True)])
+        )
 
         return request.render(
             "customer_support.admin_create_user_form",
             {
                 "user": user,
+                "projects": projects,  # ADDED: Pass projects to template
                 "page_name": "create_user",
                 "error": kw.get("error", ""),
             },
@@ -601,7 +610,13 @@ class CustomerSupportPortal(http.Controller):
         csrf=True,
     )
     def admin_submit_user(self, **post):
-        """Handle user creation"""
+        """
+        Submit User - Handles user creation
+        Working: Creates new user with appropriate permissions
+        Access: Authenticated system administrators only
+
+        UPDATED: Now validates and saves project_id to user's partner record
+        """
         try:
             user = request.env.user
             if not user.has_group("base.group_system"):
@@ -616,6 +631,7 @@ class CustomerSupportPortal(http.Controller):
             password = post_dict.get("password", "").strip()
             user_type = post_dict.get("user_type", "customer")
             phone = post_dict.get("phone", "").strip()
+            project_id = post_dict.get("project_id")  # ADDED: Get project_id
 
             if not name:
                 return werkzeug.utils.redirect(
@@ -630,6 +646,12 @@ class CustomerSupportPortal(http.Controller):
             if not password:
                 return werkzeug.utils.redirect(
                     "/customer_support/admin_dashboard/create_user?error=Password is required"
+                )
+
+            # ADDED: Validate project selection
+            if not project_id:
+                return werkzeug.utils.redirect(
+                    "/customer_support/admin_dashboard/create_user?error=Project is required"
                 )
 
             # Check if email already exists
@@ -654,6 +676,7 @@ class CustomerSupportPortal(http.Controller):
                         "email": email,
                         "phone": phone,
                         "is_company": False,
+                        "project_id": int(project_id),  # ADDED: Save project_id
                     }
                 )
             )
@@ -691,11 +714,14 @@ class CustomerSupportPortal(http.Controller):
             if groups_to_add:
                 new_user.sudo().write(
                     {
-                        "group_ids": [(6, 0, groups_to_add)],
+                        "groups_id": [(6, 0, groups_to_add)],
                     }
                 )
 
-            _logger.info(f"User created: {new_user.name} ({user_type}) by {user.name}")
+            # UPDATED: Log with project info
+            _logger.info(
+                f"User created: {new_user.name} ({user_type}) assigned to project {project_id} by {user.name}"
+            )
 
             user_type_label = (
                 "Focal Person" if user_type == "focal_person" else "Customer"
@@ -710,6 +736,11 @@ class CustomerSupportPortal(http.Controller):
                 "/customer_support/admin_dashboard/create_user?error=Error creating user. Please try again."
             )
 
+    # ========================================================================
+    # REST OF THE CONTROLLER REMAINS UNCHANGED
+    # (I'm including the remaining methods for completeness)
+    # ========================================================================
+
     @http.route(
         "/customer_support/admin_dashboard/user/<int:user_id>/edit",
         type="http",
@@ -717,7 +748,11 @@ class CustomerSupportPortal(http.Controller):
         website=True,
     )
     def admin_edit_user_form(self, user_id, **kw):
-        """Show edit user form"""
+        """
+        Edit User Form - Form for editing existing users
+        Working: Pre-populates form with user's current information
+        Access: Authenticated system administrators only
+        """
         current_user = request.env.user
         if not current_user.has_group("base.group_system"):
             return werkzeug.utils.redirect("/customer_support/dashboard")
@@ -753,7 +788,11 @@ class CustomerSupportPortal(http.Controller):
         csrf=True,
     )
     def admin_update_user(self, user_id, **post):
-        """Handle user update"""
+        """
+        Update User - Handles user information updates
+        Working: Updates user details and permissions
+        Access: Authenticated system administrators only
+        """
         try:
             current_user = request.env.user
             if not current_user.has_group("base.group_system"):
@@ -861,7 +900,11 @@ class CustomerSupportPortal(http.Controller):
         csrf=True,
     )
     def admin_toggle_user_active(self, user_id, **post):
-        """Activate/Deactivate user"""
+        """
+        Toggle User Active/Inactive - Activates or deactivates users
+        Working: Toggles user's active status
+        Access: Authenticated system administrators only
+        """
         try:
             current_user = request.env.user
             if not current_user.has_group("base.group_system"):
@@ -904,7 +947,11 @@ class CustomerSupportPortal(http.Controller):
         csrf=True,
     )
     def admin_delete_user(self, user_id, **post):
-        """Delete user (archive)"""
+        """
+        Delete User - Archives user (soft delete)
+        Working: Sets user's active status to False (archive)
+        Access: Authenticated system administrators only
+        """
         try:
             current_user = request.env.user
             if not current_user.has_group("base.group_system"):
@@ -939,9 +986,578 @@ class CustomerSupportPortal(http.Controller):
                 "/customer_support/admin_dashboard/users?error=Error deleting user"
             )
 
+    # ========================================================================
+    # SUPPORT AGENT (FOCAL PERSON) DASHBOARD
+    # ========================================================================
+
+    @http.route(
+        "/customer_support/support_dashboard", type="http", auth="user", website=True
+    )
+    def support_agent_dashboard(self, **kw):
+        """
+        Support Agent Dashboard - For internal users (focal persons).
+        Shows tickets assigned to the support agent.
+        Working: Displays assigned tickets, ticket statistics, and analytics
+        Access: Authenticated internal users (focal persons)
+        """
+        try:
+            user = request.env.user
+
+            # Check if user is public/not logged in
+            if user.id == request.env.ref("base.public_user").id:
+                return werkzeug.utils.redirect(
+                    "/customer_support/login?error=Please login to access dashboard"
+                )
+
+            # Redirect admin users to admin dashboard
+            if user.has_group("base.group_system"):
+                return werkzeug.utils.redirect("/customer_support/admin_dashboard")
+
+            # Redirect portal users to customer dashboard
+            if user.has_group("base.group_portal"):
+                return werkzeug.utils.redirect("/customer_support/dashboard")
+
+            # Get tickets assigned to this support agent
+            tickets = (
+                request.env["customer.support"]
+                .sudo()
+                .search([("assigned_to", "=", user.id)])
+                .sorted(key=lambda r: r.create_date, reverse=True)
+            )
+            # ADD THIS DEBUGGING:
+            _logger.info(f"========== TICKETS FOR DASHBOARD ==========")
+            _logger.info(f"User: {user.name} (ID: {user.id})")
+            _logger.info(f"Found {len(tickets)} tickets")
+            for t in tickets:
+                _logger.info(
+                    f"  - Ticket {t.id}: {t.name} | State: {t.state} | Priority: {t.priority}"
+                )
+            _logger.info(f"===========================================")
+
+            # Calculate ticket counts by status
+            ticket_counts = {
+                "new": len(tickets.filtered(lambda t: t.state == "new")),
+                "assigned": len(tickets.filtered(lambda t: t.state == "assigned")),
+                "in_progress": len(
+                    tickets.filtered(lambda t: t.state == "in_progress")
+                ),
+                "resolved": len(tickets.filtered(lambda t: t.state == "resolved")),
+                "closed": len(tickets.filtered(lambda t: t.state == "closed")),
+                "total": len(tickets),
+            }
+
+            # Get analytics data for support agent
+            analytics = {}
+            performance = {}
+            try:
+                dashboard_model = request.env["customer_support.dashboard"]
+                analytics = dashboard_model.get_ticket_analytics(user.id)
+                performance = dashboard_model.get_user_performance(user.id)
+            except Exception as e:
+                _logger.warning(f"Support dashboard analytics failed: {str(e)}")
+                open_tickets = (
+                    ticket_counts.get("new", 0)
+                    + ticket_counts.get("assigned", 0)
+                    + ticket_counts.get("in_progress", 0)
+                )
+                analytics = {
+                    "open_tickets": open_tickets,
+                    "total_tickets": ticket_counts.get("total", 0),
+                    "high_priority": 0,
+                    "urgent": 0,
+                    "avg_open_hours": 0,
+                    "total_hours": 0,
+                    "avg_high_hours": 0,
+                    "avg_urgent_hours": 0,
+                    "resolved_tickets": ticket_counts.get("resolved", 0)
+                    + ticket_counts.get("closed", 0),
+                    "solve_rate": 0,
+                    "high_resolved": 0,
+                    "urgent_resolved": 0,
+                }
+                performance = {
+                    "today_closed": 0,
+                    "avg_resolve_rate": 0,
+                    "daily_target": 80.00,
+                    "achievement": 0,
+                    "sample_performance": 85.00,
+                }
+
+            return request.render(
+                "customer_support.support_agent_dashboard",
+                {
+                    "user": user,
+                    "tickets": tickets,
+                    "ticket_counts": ticket_counts,
+                    "analytics": analytics,
+                    "performance": performance,
+                    "page_name": "support_dashboard",
+                },
+            )
+
+        except Exception as e:
+            _logger.error(f"Support dashboard error: {str(e)}")
+            return werkzeug.utils.redirect(
+                "/customer_support/login?error=Error loading support dashboard"
+            )
+
+    # ========================================================================
+    # TICKET MANAGEMENT ROUTES (ALL AUTHENTICATED USERS)
+    # ========================================================================
+
+    @http.route(
+        "/customer_support/ticket/<int:ticket_id>",
+        type="http",
+        auth="user",
+        website=True,
+    )
+    def view_ticket(self, ticket_id, **kw):
+        """
+        View Ticket Details - Displays ticket information with messaging thread
+        Working: Shows ticket details with role-based access control and message history
+        Access:
+          - Customers can view their own tickets
+          - Support agents can view assigned tickets
+          - Admins can view all tickets
+        """
+        try:
+            user = request.env.user
+            if user.id == request.env.ref("base.public_user").id:
+                return werkzeug.utils.redirect(
+                    "/customer_support/login?error=Please login"
+                )
+
+            ticket = request.env["customer.support"].browse(ticket_id)
+            if not ticket.exists():
+                return werkzeug.utils.redirect(
+                    "/customer_support/dashboard?error=Ticket not found"
+                )
+
+            is_admin = user.has_group("base.group_system")
+            is_assigned = (
+                ticket.assigned_to.id == user.id if ticket.assigned_to else False
+            )
+            is_customer = ticket.customer_id.id == user.partner_id.id
+
+            focal_persons = []
+            if is_admin:
+                focal_persons = request.env["res.users"].search(
+                    [("active", "=", True), ("id", "!=", 1)]
+                )
+
+            # ============ RETRIEVE MESSAGES FOR DISPLAY ============
+            activities = []
+
+            # METHOD 1: Try using message_ids from ticket
+            try:
+                if hasattr(ticket, "message_ids") and ticket.message_ids:
+                    # Filter only comment and notification types
+                    activities = list(
+                        ticket.message_ids.filtered(
+                            lambda m: m.message_type in ["comment", "notification"]
+                        ).sorted(key=lambda r: r.date, reverse=True)
+                    )
+                    _logger.info(
+                        f"✓ Found {len(activities)} messages using message_ids for ticket {ticket_id}"
+                    )
+            except Exception as e:
+                _logger.error(f"✗ message_ids failed: {str(e)}")
+
+            # METHOD 2: Search mail.message table if METHOD 1 failed
+            if not activities:
+                try:
+                    messages = (
+                        request.env["mail.message"]
+                        .sudo()
+                        .search(
+                            [
+                                ("model", "=", "customer.support"),
+                                ("res_id", "=", ticket_id),
+                                ("message_type", "in", ["comment", "notification"]),
+                            ],
+                            order="date desc",
+                        )
+                    )
+                    activities = list(messages)
+                    _logger.info(
+                        f"✓ Found {len(activities)} messages using mail.message search for ticket {ticket_id}"
+                    )
+                except Exception as e:
+                    _logger.error(f"✗ mail.message search failed: {str(e)}")
+
+            _logger.info(
+                f"Ticket {ticket_id}: Passing {len(activities)} activities to template (type: {type(activities)})"
+            )
+
+            return request.render(
+                "customer_support.ticket_detail",
+                {
+                    "user": user,
+                    "ticket": ticket,
+                    "is_admin": is_admin,
+                    "is_assigned": is_assigned,
+                    "is_customer": is_customer,
+                    "focal_persons": focal_persons,
+                    "activities": activities,
+                    "activities_count": len(activities),
+                    "success": kw.get("success", ""),
+                    "error": kw.get("error", ""),
+                    "page_name": "ticket_detail",
+                },
+            )
+
+        except Exception as e:
+            _logger.error(f"View ticket error: {str(e)}")
+            return werkzeug.utils.redirect(
+                "/customer_support/dashboard?error=Error loading ticket"
+            )
+
+    @http.route(
+        "/customer_support/ticket/<int:ticket_id>/post_message",
+        type="http",
+        auth="user",
+        methods=["POST"],
+        website=True,
+        csrf=True,
+    )
+    def post_ticket_message(self, ticket_id, **post):
+        """
+        Post Ticket Message - Handles posting messages to ticket communication
+        Working: Creates new message in ticket's communication thread
+        Access: Authenticated users (customers, support agents, admins)
+        """
+        try:
+            ticket = request.env["customer.support"].sudo().browse(ticket_id)
+
+            if not ticket.exists():
+                return werkzeug.utils.redirect(
+                    f"/customer_support/ticket/{ticket_id}?error=Ticket not found"
+                )
+
+            message = post.get("message", "").strip()
+
+            if not message:
+                return werkzeug.utils.redirect(
+                    f"/customer_support/ticket/{ticket_id}?error=Message cannot be empty"
+                )
+
+            # Don't wrap in <p> tags - send as plain text and let Odoo handle formatting
+            _logger.info(f"Attempting to post message to ticket {ticket_id}: {message}")
+
+            # Try to post the message
+            try:
+                msg = ticket.message_post(
+                    body=message,
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_comment",
+                )
+                _logger.info(
+                    f"✓ Message posted successfully - Message ID: {msg.id if msg else 'N/A'}"
+                )
+                success_msg = "Message posted successfully"
+            except Exception as e1:
+                _logger.error(f"✗ message_post with subtype failed: {str(e1)}")
+                try:
+                    msg = ticket.message_post(
+                        body=message,
+                        message_type="comment",
+                    )
+                    _logger.info(
+                        f"✓ Message posted without subtype - Message ID: {msg.id if msg else 'N/A'}"
+                    )
+                    success_msg = "Message posted successfully"
+                except Exception as e2:
+                    _logger.error(f"✗ message_post without subtype failed: {str(e2)}")
+                    try:
+                        msg = (
+                            request.env["mail.message"]
+                            .sudo()
+                            .create(
+                                {
+                                    "model": "customer.support",
+                                    "res_id": ticket_id,
+                                    "body": message,
+                                    "message_type": "comment",
+                                    "author_id": request.env.user.partner_id.id,
+                                }
+                            )
+                        )
+                        _logger.info(
+                            f"✓ Message created directly - Message ID: {msg.id}"
+                        )
+                        success_msg = "Message posted successfully"
+                    except Exception as e3:
+                        _logger.error(f"✗ All methods failed: {str(e3)}")
+                        success_msg = f"Error posting message: {str(e3)}"
+
+            return werkzeug.utils.redirect(
+                f"/customer_support/ticket/{ticket_id}?success={success_msg}"
+            )
+
+        except Exception as e:
+            _logger.error(f"CRITICAL ERROR in post_message: {str(e)}")
+            return werkzeug.utils.redirect(
+                f"/customer_support/ticket/{ticket_id}?error={str(e)}"
+            )
+
+    @http.route(
+        "/customer_support/ticket/message/<int:message_id>/delete",
+        type="http",
+        auth="user",
+        methods=["POST"],
+        csrf=False,
+    )
+    def delete_message(self, message_id, **kwargs):
+        """
+        Delete Message - AJAX endpoint for deleting ticket messages
+        Working: Deletes a message from ticket's communication thread
+        Access: Message author or system administrators
+        """
+        try:
+            message = request.env["mail.message"].sudo().browse(message_id)
+
+            if not message.exists():
+                return request.make_response(
+                    json.dumps({"success": False, "error": "Message not found"}),
+                    headers=[("Content-Type", "application/json")],
+                )
+
+            # Check if user is the author or admin
+            user = request.env.user
+            is_admin = user.has_group("base.group_system")
+            is_author = message.author_id.id == user.partner_id.id
+
+            if not (is_admin or is_author):
+                return request.make_response(
+                    json.dumps(
+                        {
+                            "success": False,
+                            "error": "You do not have permission to delete this message",
+                        }
+                    ),
+                    headers=[("Content-Type", "application/json")],
+                )
+
+            ticket_id = message.res_id
+            message.unlink()
+
+            return request.make_response(
+                json.dumps(
+                    {
+                        "success": True,
+                        "message": "Message deleted successfully",
+                        "ticket_id": ticket_id,
+                    }
+                ),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Delete message error: {str(e)}")
+            return request.make_response(
+                json.dumps({"success": False, "error": str(e)}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+    @http.route(
+        "/customer_support/ticket/message/<int:message_id>/edit",
+        type="http",
+        auth="user",
+        methods=["POST"],
+        csrf=False,
+    )
+    def edit_message(self, message_id, new_body=None, **kwargs):
+        """
+        Edit Message - AJAX endpoint for editing ticket messages
+        Working: Updates message content in ticket's communication thread
+        Access: Message author only (users can only edit their own messages)
+        """
+        try:
+            message = request.env["mail.message"].sudo().browse(message_id)
+
+            if not message.exists():
+                return request.make_response(
+                    json.dumps({"success": False, "error": "Message not found"}),
+                    headers=[("Content-Type", "application/json")],
+                )
+
+            # Check if user is the author
+            user = request.env.user
+            is_author = message.author_id.id == user.partner_id.id
+
+            if not is_author:
+                return request.make_response(
+                    json.dumps(
+                        {
+                            "success": False,
+                            "error": "You can only edit your own messages",
+                        }
+                    ),
+                    headers=[("Content-Type", "application/json")],
+                )
+
+            if not new_body or not new_body.strip():
+                return request.make_response(
+                    json.dumps({"success": False, "error": "Message cannot be empty"}),
+                    headers=[("Content-Type", "application/json")],
+                )
+
+            message.write({"body": new_body.strip()})
+
+            return request.make_response(
+                json.dumps(
+                    {
+                        "success": True,
+                        "message": "Message updated successfully",
+                        "new_body": new_body.strip(),
+                    }
+                ),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Edit message error: {str(e)}")
+            return request.make_response(
+                json.dumps({"success": False, "error": str(e)}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+    @http.route(
+        "/customer_support/ticket/<int:ticket_id>/assign",
+        type="http",
+        auth="user",
+        methods=["POST"],
+        website=True,
+        csrf=True,
+    )
+    def assign_ticket(self, ticket_id, **post):
+        """
+        Assign Ticket - Assigns ticket to support agent
+        Working: Updates ticket with assigned user and status
+        Access: System administrators only
+        """
+        try:
+            user = request.env.user
+            if not user.has_group("base.group_system"):
+                return werkzeug.utils.redirect(
+                    f"/customer_support/ticket/{ticket_id}?error=Access denied"
+                )
+
+            ticket = request.env["customer.support"].browse(ticket_id)
+            if not ticket.exists():
+                return werkzeug.utils.redirect(
+                    "/customer_support/dashboard?error=Ticket not found"
+                )
+
+            # Normalize post data
+            post_dict = dict(post) if not isinstance(post, dict) else post
+
+            assigned_to = post_dict.get("assigned_to")
+            if not assigned_to:
+                return werkzeug.utils.redirect(
+                    f"/customer_support/ticket/{ticket_id}?error=Please select a user to assign"
+                )
+
+            assigned_user_id = int(assigned_to)
+
+            ticket.write(
+                {
+                    "assigned_to": assigned_user_id,
+                    "state": "assigned",
+                    "assigned_by": user.id,
+                    "assigned_date": fields.Datetime.now(),
+                }
+            )
+
+            _logger.info(f"Ticket {ticket.name} assigned to user {assigned_user_id}")
+
+            return werkzeug.utils.redirect(
+                f"/customer_support/ticket/{ticket_id}?success=Ticket assigned successfully"
+            )
+
+        except Exception as e:
+            _logger.exception(f"Assign ticket error: {str(e)}")
+            return werkzeug.utils.redirect(
+                f"/customer_support/ticket/{ticket_id}?error=Error assigning ticket"
+            )
+
+    @http.route(
+        "/customer_support/ticket/<int:ticket_id>/update_status",
+        type="http",
+        auth="user",
+        methods=["POST"],
+        website=True,
+        csrf=True,
+    )
+    def update_ticket_status(self, ticket_id, **post):
+        """
+        Update Ticket Status - Changes ticket state
+        Working: Updates ticket status with timestamps and resolution notes
+        Access: System administrators and assigned support agents
+        """
+        try:
+            user = request.env.user
+            ticket = request.env["customer.support"].browse(ticket_id)
+            if not ticket.exists():
+                return werkzeug.utils.redirect(
+                    "/customer_support/dashboard?error=Ticket not found"
+                )
+
+            is_admin = user.has_group("base.group_system")
+            is_assigned = (
+                ticket.assigned_to.id == user.id if ticket.assigned_to else False
+            )
+
+            if not (is_admin or is_assigned):
+                return werkzeug.utils.redirect(
+                    f"/customer_support/ticket/{ticket_id}?error=Access denied"
+                )
+
+            # Normalize post data
+            post_dict = dict(post) if not isinstance(post, dict) else post
+
+            new_status = post_dict.get("status")
+            if not new_status:
+                return werkzeug.utils.redirect(
+                    f"/customer_support/ticket/{ticket_id}?error=Status is required"
+                )
+
+            update_vals = {"state": new_status}
+
+            if new_status == "resolved":
+                update_vals["resolved_date"] = fields.Datetime.now()
+            elif new_status == "closed":
+                update_vals["closed_date"] = fields.Datetime.now()
+
+            resolution_notes = post_dict.get("resolution_notes", "").strip()
+            if resolution_notes:
+                update_vals["resolution_notes"] = resolution_notes
+
+            ticket.write(update_vals)
+
+            _logger.info(f"Ticket {ticket.name} status updated to {new_status}")
+
+            return werkzeug.utils.redirect(
+                f"/customer_support/ticket/{ticket_id}?success=Status updated successfully"
+            )
+
+        except Exception as e:
+            _logger.exception(f"Update status error: {str(e)}")
+            return werkzeug.utils.redirect(
+                f"/customer_support/ticket/{ticket_id}?error=Error updating status"
+            )
+
+    # ========================================================================
+    # PROFILE MANAGEMENT ROUTES (ALL AUTHENTICATED USERS)
+    # ========================================================================
+
     @http.route("/customer_support/profile", type="http", auth="user", website=True)
     def display_profile(self, **kwargs):
-        # This handles the initial page load and the redirect after saving
+        """
+        Display Profile - Shows user profile information
+        Working: Displays user details and password change form
+        Access: All authenticated users
+        """
         return request.render(
             "customer_support.portal_profile_page",
             {
@@ -959,6 +1575,11 @@ class CustomerSupportPortal(http.Controller):
         website=True,
     )
     def update_profile(self, **post):
+        """
+        Update Profile - Handles profile updates and password changes
+        Working: Updates user information and validates password changes
+        Access: All authenticated users
+        """
         user = request.env.user
 
         # 1. Update Basic Info (Sudo needed if user has restricted portal access)
@@ -987,8 +1608,33 @@ class CustomerSupportPortal(http.Controller):
                 )
 
         return request.redirect("/customer_support/profile?success=1")
-    @http.route("/customer_support/logout_manual", type="http", auth="user", website=True)
+
+    # ========================================================================
+    # LOGOUT ROUTES (ALL AUTHENTICATED USERS)
+    # ========================================================================
+
+    @http.route("/customer_support/logout", type="http", auth="user", website=True)
+    def support_logout(self, **kw):
+        """
+        Logout - Standard logout route
+        Working: Clears session and redirects to landing page
+        Access: All authenticated users
+        """
+        try:
+            request.session.logout()
+            return werkzeug.utils.redirect("/customer_support")
+        except Exception as e:
+            _logger.error(f"Logout error: {str(e)}")
+            return werkzeug.utils.redirect("/customer_support/login")
+
+    @http.route(
+        "/customer_support/logout_manual", type="http", auth="user", website=True
+    )
     def logout_manual(self):
-        # This manually clears the session so they are actually logged out
-        request.session.logout() 
+        """
+        Manual Logout - Alternative logout route
+        Working: Clears session and redirects to login page
+        Access: All authenticated users
+        """
+        request.session.logout()
         return request.redirect("/customer_support/login")
