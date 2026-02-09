@@ -1,276 +1,92 @@
-# controllers/support_dashboard.py
 from odoo import http
 from odoo.http import request
 import werkzeug
 from datetime import datetime, timedelta
+import json
 
 
 class SupportDashboard(http.Controller):
+    # ============ ROUTE FOR UPDATING TICKET PHASE (AJAX) ============
 
-    @http.route(
-        "/customer_support/support_dashboard", type="http", auth="user", website=True
-    )
-    def support_dashboard(self, **kw):
+    @http.route("/customer_support/ticket/update_phase", type="json", auth="user")
+    def update_ticket_phase(self, ticket_id, new_phase, **kwargs):
         """
-        Main dashboard route - YOUR ORIGINAL FUNCTIONALITY PRESERVED
+        AJAX endpoint to update ticket phase/state
         """
-        # Ensure only focal persons can access
-        if not request.env.user.has_group("base.group_user"):
-            return werkzeug.utils.redirect(
-                "/customer_support/login?error=Access Denied"
-            )
+        try:
+            ticket = request.env["customer.support"].sudo().browse(int(ticket_id))
 
-        # Get tickets assigned to this user
-        tickets = request.env["customer.support"].search(
-            [("assigned_to", "=", request.env.user.id)]
-        )
+            if not ticket.exists():
+                return {"success": False, "error": "Ticket not found"}
 
-        # Get analytics data (NEW - for Overview page)
-        analytics = self._get_analytics_data(request.env.user, tickets)
+            valid_phases = ["new", "open", "in_progress", "resolved", "closed"]
+            if new_phase not in valid_phases:
+                return {"success": False, "error": "Invalid phase"}
 
-        # Get performance metrics (NEW - for My Performance card)
-        performance = self._get_performance_metrics(request.env.user, tickets)
+            old_phase = ticket.state
+            ticket.write({"state": new_phase})
 
-        # Render the dashboard template
-        return request.render(
-            "customer_support.focal_person",
-            {
-                "tickets": tickets,
-                "user": request.env.user,
-                "analytics": analytics,  # NEW
-                "performance": performance,  # NEW
-            },
-        )
+            try:
+                ticket.message_post(
+                    body=f"Phase changed from <b>{old_phase.replace('_', ' ').title()}</b> to <b>{new_phase.replace('_', ' ').title()}</b>",
+                    message_type="notification",
+                    subtype_xmlid="mail.mt_note",
+                )
+            except:
+                pass
 
-    # ============ NEW HELPER METHODS FOR ANALYTICS ============
-
-    def _get_analytics_data(self, user, tickets):
-        """
-        Calculate analytics metrics for the Overview page
-        """
-        if not tickets:
             return {
-                "open_tickets": 0,
-                "total_tickets": 0,
-                "high_priority": 0,
-                "urgent": 0,
-                "avg_open_hours": 0.0,
-                "total_hours": 0.0,
-                "avg_high_priority_hours": 0.0,
-                "avg_urgent_hours": 0.0,
-                "failed_tickets": 0,
-                "failed_rate": 0.0,
-                "high_priority_failed": 0,
-                "urgent_failed": 0,
+                "success": True,
+                "new_phase": new_phase,
+                "new_phase_display": new_phase.replace("_", " ").title(),
+                "ticket_id": ticket_id,
+                "message": "Phase updated successfully",
             }
 
-        # Calculate open tickets (adjust field name if different in your model)
-        # Assuming your model has a 'state' or 'stage_id' field
-        try:
-            open_tickets = len(tickets.filtered(lambda t: t.stage_id.is_close == False))
-        except:
-            # Fallback if stage_id doesn't exist
-            open_tickets = len(
-                tickets.filtered(lambda t: t.state not in ["closed", "done"])
-            )
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
-        # Count high priority and urgent tickets
-        # Adjust priority values based on your model ('2' = High, '3' = Urgent)
-        high_priority = len(tickets.filtered(lambda t: t.priority == "2"))
-        urgent = len(tickets.filtered(lambda t: t.priority == "3"))
+    # ============ ROUTE FOR ADDING TICKET NOTES (AJAX) ============
 
-        # Calculate hours metrics
-        avg_open_hours = self._calculate_avg_open_hours(tickets)
-        total_hours = self._calculate_total_hours(tickets)
-        avg_high_priority_hours = self._calculate_avg_priority_hours(tickets, "2")
-        avg_urgent_hours = self._calculate_avg_priority_hours(tickets, "3")
-
-        # Calculate failed tickets (adjust based on your model's failed state)
-        try:
-            failed_tickets = len(
-                tickets.filtered(lambda t: t.stage_id.name in ["Failed", "Cancelled"])
-            )
-        except:
-            failed_tickets = len(
-                tickets.filtered(lambda t: t.state in ["failed", "cancelled"])
-            )
-
-        # Calculate failed rate
-        failed_rate = (failed_tickets / len(tickets)) * 100 if len(tickets) > 0 else 0.0
-
-        analytics = {
-            "open_tickets": open_tickets,
-            "total_tickets": len(tickets),
-            "high_priority": high_priority,
-            "urgent": urgent,
-            "avg_open_hours": round(avg_open_hours, 2),
-            "total_hours": round(total_hours, 2),
-            "avg_high_priority_hours": round(avg_high_priority_hours, 2),
-            "avg_urgent_hours": round(avg_urgent_hours, 2),
-            "failed_tickets": failed_tickets,
-            "failed_rate": round(failed_rate, 2),
-            "high_priority_failed": len(
-                tickets.filtered(
-                    lambda t: t.priority == "2"
-                    and (
-                        hasattr(t.stage_id, "name")
-                        and t.stage_id.name in ["Failed", "Cancelled"]
-                    )
-                )
-            ),
-            "urgent_failed": len(
-                tickets.filtered(
-                    lambda t: t.priority == "3"
-                    and (
-                        hasattr(t.stage_id, "name")
-                        and t.stage_id.name in ["Failed", "Cancelled"]
-                    )
-                )
-            ),
-        }
-
-        return analytics
-
-    def _get_performance_metrics(self, user, tickets):
+    @http.route("/customer_support/ticket/add_note", type="json", auth="user")
+    def add_ticket_note(self, ticket_id, note, **kwargs):
         """
-        Calculate performance metrics for My Performance card
+        AJAX endpoint to add internal notes to a ticket
         """
-        if not tickets:
+        try:
+            ticket = request.env["customer.support"].sudo().browse(int(ticket_id))
+
+            if not ticket.exists():
+                return {"success": False, "error": "Ticket not found"}
+
+            try:
+                ticket.message_post(
+                    body=note,
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_note",
+                    author_id=request.env.user.partner_id.id,
+                )
+            except:
+                pass
+
             return {
-                "today_closed": 0,
-                "avg_last_7_days": 0.0,
-                "daily_target": 80.00,
-                "accuracy": 85.00,
+                "success": True,
+                "message": "Note added successfully",
+                "author": request.env.user.name,
+                "date": datetime.now().strftime("%b %d, %I:%M %p"),
             }
 
-        today = datetime.now().date()
-        week_ago = today - timedelta(days=7)
+        except Exception as e:
+            return {"success": False, "error": str(e)}
 
-        # Today's closed tickets
-        # Adjust the field name based on your model (close_date, date_closed, etc.)
-        try:
-            today_closed = len(
-                tickets.filtered(
-                    lambda t: hasattr(t, "close_date")
-                    and t.close_date
-                    and t.close_date.date() == today
-                )
-            )
-        except:
-            today_closed = 0
-
-        # Last 7 days closed tickets
-        try:
-            last_7_days_closed = len(
-                tickets.filtered(
-                    lambda t: hasattr(t, "close_date")
-                    and t.close_date
-                    and t.close_date.date() >= week_ago
-                )
-            )
-        except:
-            last_7_days_closed = 0
-
-        # Calculate average percentage
-        avg_last_7_days = (
-            (last_7_days_closed / 7) * 100 if last_7_days_closed > 0 else 0
-        )
-
-        # You can make these configurable in settings
-        daily_target = 80.00
-        accuracy = 85.00
-
-        performance = {
-            "today_closed": today_closed,
-            "avg_last_7_days": round(avg_last_7_days, 2),
-            "daily_target": daily_target,
-            "accuracy": accuracy,
-        }
-
-        return performance
-
-    def _calculate_avg_open_hours(self, tickets):
-        """
-        Calculate average hours tickets have been open
-        """
-        if not tickets:
-            return 0.0
-
-        try:
-            open_tickets = tickets.filtered(lambda t: t.stage_id.is_close == False)
-        except:
-            open_tickets = tickets.filtered(lambda t: t.state not in ["closed", "done"])
-
-        if not open_tickets:
-            return 0.0
-
-        total_hours = 0
-        for ticket in open_tickets:
-            if ticket.create_date:
-                delta = datetime.now() - ticket.create_date
-                total_hours += delta.total_seconds() / 3600
-
-        return total_hours / len(open_tickets) if open_tickets else 0.0
-
-    def _calculate_total_hours(self, tickets):
-        """
-        Calculate total hours spent on all tickets
-        """
-        if not tickets:
-            a
-        return 0.0
-
-        total_hours = 0
-        for ticket in tickets:
-            if ticket.create_date:
-                try:
-                    end_date = ticket.close_date or datetime.now()
-                except:
-                    end_date = datetime.now()
-
-                delta = end_date - ticket.create_date
-                total_hours += delta.total_seconds() / 3600
-
-        return total_hours
-
-    def _calculate_avg_priority_hours(self, tickets, priority):
-        """
-        Calculate average hours for specific priority tickets
-        """
-        if not tickets:
-            return 0.0
-
-        priority_tickets = tickets.filtered(lambda t: t.priority == priority)
-
-        if not priority_tickets:
-            return 0.0
-
-        total_hours = 0
-        for ticket in priority_tickets:
-            if ticket.create_date:
-                try:
-                    end_date = ticket.close_date or datetime.now()
-                except:
-                    end_date = datetime.now()
-
-                delta = end_date - ticket.create_date
-                total_hours += delta.total_seconds() / 3600
-
-        return total_hours / len(priority_tickets)
-
-    # ============ NEW AJAX ENDPOINT FOR SEARCH ============
+    # ============ AJAX ENDPOINT FOR SEARCH ============
 
     @http.route("/customer_support/tickets/search", type="json", auth="user")
     def search_tickets(self, search_term="", **kwargs):
-        """
-        AJAX endpoint for searching tickets (for search bar functionality)
-        """
+        """AJAX endpoint for searching tickets"""
         user = request.env.user
-
-        # Base domain - same as your original
         domain = [("assigned_to", "=", user.id)]
 
-        # Add search filter if provided
         if search_term:
             domain += [
                 "|",
@@ -282,7 +98,6 @@ class SupportDashboard(http.Controller):
             domain, order="create_date desc"
         )
 
-        # Return ticket data as JSON
         tickets_data = []
         for ticket in tickets:
             try:
@@ -293,9 +108,9 @@ class SupportDashboard(http.Controller):
                 customer_name = "Unknown"
 
             try:
-                status = ticket.stage_id.name if ticket.stage_id else ticket.state
+                status = ticket.state
             except:
-                status = "New"
+                status = "new"
 
             try:
                 created = (
@@ -319,7 +134,9 @@ class SupportDashboard(http.Controller):
                         ticket.subject if hasattr(ticket, "subject") else ticket.name
                     ),
                     "state": status,
-                    "priority": ticket.priority if hasattr(ticket, "priority") else "1",
+                    "priority": (
+                        ticket.priority if hasattr(ticket, "priority") else "low"
+                    ),
                     "customer": customer_name,
                     "created": created,
                     "project": project,
@@ -327,3 +144,195 @@ class SupportDashboard(http.Controller):
             )
 
         return {"tickets": tickets_data, "count": len(tickets_data)}
+
+    # ============ HELPER METHODS FOR ANALYTICS ============
+
+    def _get_analytics_data(self, user, tickets):
+        """
+        Calculate analytics metrics for the Overview page
+        """
+        if not tickets:
+            return {
+                "open_tickets": 0,
+                "total_tickets": 0,
+                "high_priority": 0,
+                "urgent": 0,
+                "avg_open_hours": 0.0,
+                "total_hours": 0.0,
+                "avg_high_priority_hours": 0.0,
+                "avg_urgent_hours": 0.0,
+                "failed_tickets": 0,
+                "failed_rate": 0.0,
+                "high_priority_failed": 0,
+                "urgent_failed": 0,
+            }
+
+        try:
+            open_tickets = len(
+                tickets.filtered(lambda t: t.state not in ["closed", "resolved"])
+            )
+        except:
+            open_tickets = len(
+                tickets.filtered(lambda t: t.state not in ["closed", "done"])
+            )
+
+        high_priority = len(tickets.filtered(lambda t: t.priority == "high"))
+        urgent = len(tickets.filtered(lambda t: t.priority == "urgent"))
+
+        avg_open_hours = self._calculate_avg_open_hours(tickets)
+        total_hours = self._calculate_total_hours(tickets)
+        avg_high_priority_hours = self._calculate_avg_priority_hours(tickets, "high")
+        avg_urgent_hours = self._calculate_avg_priority_hours(tickets, "urgent")
+
+        try:
+            failed_tickets = len(
+                tickets.filtered(lambda t: t.state in ["failed", "cancelled"])
+            )
+        except:
+            failed_tickets = 0
+
+        failed_rate = (failed_tickets / len(tickets)) * 100 if len(tickets) > 0 else 0.0
+
+        analytics = {
+            "open_tickets": open_tickets,
+            "total_tickets": len(tickets),
+            "high_priority": high_priority,
+            "urgent": urgent,
+            "avg_open_hours": round(avg_open_hours, 2),
+            "total_hours": round(total_hours, 2),
+            "avg_high_priority_hours": round(avg_high_priority_hours, 2),
+            "avg_urgent_hours": round(avg_urgent_hours, 2),
+            "failed_tickets": failed_tickets,
+            "failed_rate": round(failed_rate, 2),
+            "high_priority_failed": len(
+                tickets.filtered(
+                    lambda t: t.priority == "high"
+                    and t.state in ["failed", "cancelled"]
+                )
+            ),
+            "urgent_failed": len(
+                tickets.filtered(
+                    lambda t: t.priority == "urgent"
+                    and t.state in ["failed", "cancelled"]
+                )
+            ),
+        }
+
+        return analytics
+
+    def _get_performance_metrics(self, user, tickets):
+        """
+        Calculate performance metrics for My Performance card
+        """
+        if not tickets:
+            return {
+                "today_closed": 0,
+                "avg_last_7_days": 0.0,
+                "daily_target": 80.00,
+                "accuracy": 85.00,
+            }
+
+        today = datetime.now().date()
+        week_ago = today - timedelta(days=7)
+
+        try:
+            today_closed = len(
+                tickets.filtered(
+                    lambda t: hasattr(t, "close_date")
+                    and t.close_date
+                    and t.close_date.date() == today
+                )
+            )
+        except:
+            today_closed = 0
+
+        try:
+            last_7_days_closed = len(
+                tickets.filtered(
+                    lambda t: hasattr(t, "close_date")
+                    and t.close_date
+                    and t.close_date.date() >= week_ago
+                )
+            )
+        except:
+            last_7_days_closed = 0
+
+        avg_last_7_days = (
+            (last_7_days_closed / 7) * 100 if last_7_days_closed > 0 else 0
+        )
+
+        daily_target = 80.00
+        accuracy = 85.00
+
+        performance = {
+            "today_closed": today_closed,
+            "avg_last_7_days": round(avg_last_7_days, 2),
+            "daily_target": daily_target,
+            "accuracy": accuracy,
+        }
+
+        return performance
+
+    def _calculate_avg_open_hours(self, tickets):
+        """Calculate average hours tickets have been open"""
+        if not tickets:
+            return 0.0
+
+        try:
+            open_tickets = tickets.filtered(
+                lambda t: t.state not in ["closed", "resolved"]
+            )
+        except:
+            open_tickets = tickets.filtered(lambda t: t.state not in ["closed", "done"])
+
+        if not open_tickets:
+            return 0.0
+
+        total_hours = 0
+        for ticket in open_tickets:
+            if ticket.create_date:
+                delta = datetime.now() - ticket.create_date
+                total_hours += delta.total_seconds() / 3600
+
+        return total_hours / len(open_tickets) if open_tickets else 0.0
+
+    def _calculate_total_hours(self, tickets):
+        """Calculate total hours spent on all tickets"""
+        if not tickets:
+            return 0.0
+
+        total_hours = 0
+        for ticket in tickets:
+            if ticket.create_date:
+                try:
+                    end_date = ticket.close_date or datetime.now()
+                except:
+                    end_date = datetime.now()
+
+                delta = end_date - ticket.create_date
+                total_hours += delta.total_seconds() / 3600
+
+        return total_hours
+
+    def _calculate_avg_priority_hours(self, tickets, priority):
+        """Calculate average hours for specific priority tickets"""
+        if not tickets:
+            return 0.0
+
+        priority_tickets = tickets.filtered(lambda t: t.priority == priority)
+
+        if not priority_tickets:
+            return 0.0
+
+        total_hours = 0
+        for ticket in priority_tickets:
+            if ticket.create_date:
+                try:
+                    end_date = ticket.close_date or datetime.now()
+                except:
+                    end_date = datetime.now()
+
+                delta = end_date - ticket.create_date
+                total_hours += delta.total_seconds() / 3600
+
+        return total_hours / len(priority_tickets)

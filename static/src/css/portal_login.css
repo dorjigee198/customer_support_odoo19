@@ -645,3 +645,87 @@
                             margin-bottom: 1.5rem;
                         }
                     }
+
+                    /* Character Image Styling - Better sizing and positioning */
+                    .character-image {
+                        position: relative;
+                        max-width: 400px;
+                        max-height: 650px;
+                        /* Your preferred size */
+                        width: auto;
+                        height: auto;
+                        display: block;
+                        margin: 0 auto;
+                        z-index: 2;
+                        object-fit: contain;
+                        animation: float 3s ease-in-out infinite;
+                    }
+
+                    /* Shadow beneath the image */
+                    /* Shadow beneath the image */
+                    .character-shadow {
+                        position: absolute;
+                        top: auto;
+                        bottom: 30px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 250px;
+                        height: 35px;
+                        background: #5a6266;
+                        opacity: 0.5;
+                        border-radius: 50%;
+                        filter: blur(10px);
+                        z-index: 1;
+                    }
+
+                    /* Floating animation for image */
+                    @keyframes float {
+
+                        0%,
+                        100% {
+                            transform: translateY(0);
+                        }
+
+                        50% {
+                            transform: translateY(-8px);
+                        }
+                    }
+
+                    /* Container positioning - centered vertically */
+                    .character-illustration-container {
+                        position: relative;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        height: 100%;
+                        padding: 60px 40px;
+                    }
+
+                    /* Responsive adjustments */
+                    @media (max-width: 1400px) {
+                        .character-image {
+                            max-width: 300px;
+                            max-height: 500px;
+                            /* Proportionally smaller for small screens */
+                        }
+
+                        .character-shadow {
+                            width: 180px;
+                            bottom: 20px;
+                        }
+                    }
+
+                    @media (min-width: 1600px) {
+                        .character-image {
+                            max-width: 450px;
+                            /* UPDATED - was 350px */
+                            max-height: 700px;
+                            /* UPDATED - was 500px */
+                        }
+
+                        .character-shadow {
+                            width: 270px;
+                            /* UPDATED - was 220px */
+                            bottom: 100px;
+                        }
+                    }

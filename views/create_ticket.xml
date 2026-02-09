@@ -32,6 +32,20 @@
                                             placeholder="Brief description of your issue" />
                                         <div class="form-text">Keep it short and descriptive</div>
                                     </div>
+                                    <div class="mb-4">
+                                        <label for="project" class="form-label">Project <span
+                                                class="required-asterisk">*</span></label>
+                                        <select class="form-select" id="project" name="project_id"
+                                            required="required">
+                                            <option value="">-- Select a Project --</option>
+                                            <t t-foreach="projects" t-as="project">
+                                                <option t-att-value="project.id"
+                                                    t-esc="project.name"></option>
+                                            </t>
+                                        </select>
+                                        <div class="form-text">Select the project related to this
+                                            ticket</div>
+                                    </div>
 
                                     <div class="mb-4">
                                         <label for="description" class="form-label">Description <span

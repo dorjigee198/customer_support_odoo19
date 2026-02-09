@@ -4,142 +4,656 @@
         <t t-call="web.layout">
             <t t-set="head">
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet"/>
+                <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css"/>
+                <link rel="stylesheet" href="/customer_support/static/src/css/ticket_details.css"/>
+                
+                <style>
+                    /* Hide message action buttons by default */
+                    .message-actions {
+                        opacity: 0;
+                        visibility: hidden;
+                        transition: opacity 0.2s ease, visibility 0.2s ease;
+                    }
+                    
+                    /* Show message action buttons on message hover */
+                    .message-item:hover .message-actions {
+                        opacity: 1;
+                        visibility: visible;
+                    }
+                    
+                    /* Style for action buttons */
+                    .message-action-btn {
+                        background: none;
+                        border: none;
+                        padding: 6px 10px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 14px;
+                        transition: all 0.2s ease;
+                        margin-left: 4px;
+                    }
+                    
+                    /* Edit button - blue hover */
+                    .edit-message-btn {
+                        color: #6c757d;
+                    }
+                    
+                    .edit-message-btn:hover {
+                        background-color: #0d6efd;
+                        color: white;
+                    }
+                    
+                    /* Delete button - red hover */
+                    .delete-message-btn {
+                        color: #6c757d;
+                    }
+                    
+                    .delete-message-btn:hover {
+                        background-color: #dc3545;
+                        color: white;
+                    }
+                    
+                    /* Message header layout - flexbox to position time on right */
+                    .message-header {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        gap: 10px;
+                    }
+                    
+                    /* Message time styling */
+                    .message-time {
+                        margin-left: auto;
+                        white-space: nowrap;
+                    }
+                    
+                    /* Keep action buttons on the right with time */
+                    .message-actions {
+                        display: flex;
+                        align-items: center;
+                        margin-left: 8px;
+                    }
+                </style>
             </t>
             
-            <div class="container mt-5">
-                <div class="row">
-                    <div class="col-md-8">
-                        <!-- Ticket Details Card -->
-                        <div class="card shadow mb-4">
-                            <div class="card-header bg-primary text-white">
-                                <h4 class="mb-0">Ticket #<t t-esc="ticket.name"/></h4>
+            <div class="dashboard-wrapper">
+                <!-- Top Navigation Header -->
+                <header class="dashboard-header">
+                <div class="header-content">
+
+                    <!-- Left Navigation -->
+                    <div class="header-nav">
+                        <a href="#" class="nav-link active" data-view="overview">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>Overview</span>
+                        </a>
+                        <a href="#" class="nav-link" data-view="tickets">
+                            <i class="bi bi-ticket-detailed"></i>
+                            <span>Tickets</span>
+                        </a>
+                        <a href="#" class="nav-link" data-view="faq">
+                            <i class="bi bi-question-circle"></i>
+                            <span>FAQ</span>
+                        </a>
+                    </div>
+
+                    <!-- Right Side -->
+                    <div class="header-right">
+
+                        <!-- Icons -->
+                        <i class="bi bi-grid-3x3-gap-fill text-white me-3"
+                        style="font-size: 1.2rem; cursor: pointer;"></i>
+
+                        <i class="bi bi-bell-fill text-white me-3"
+                        style="font-size: 1.2rem; cursor: pointer;"></i>
+
+                        <!-- User Profile -->
+                        <div class="user-profile dropdown">
+                            <a class="d-flex align-items-center text-white dropdown-toggle"
+                            href="#"
+                            id="userProfileDropdown"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            style="text-decoration: none;">
+
+                                <span class="user-name me-3">
+                                    <t t-esc="user.name" />
+                                </span>
+
+                                <img t-att-src="'/web/image/res.users/%s/avatar_128' % user.id"
+                                    alt="User Avatar"
+                                    class="user-avatar"
+                                    onerror="this.src='/web/static/img/avatar_gray.svg'" />
+                            </a>
+
+                            <ul class="dropdown-menu dropdown-menu-end"
+                                aria-labelledby="userProfileDropdown">
+                                <li>
+                                    <a class="dropdown-item" href="#">
+                                        <i class="bi bi-person me-2"></i> Edit Profile
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <a class="dropdown-item text-danger" href="/web/session/logout">
+                                        <i class="bi bi-box-arrow-right me-2"></i> Logout
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                </div>
+            </header>
+
+                <!-- Ticket Detail Content -->
+                <div class="page-content ticket-detail-content">
+                    <div class="ticket-detail-container">
+                        <!-- Left Column - Ticket Information -->
+                        <div class="ticket-main-column">
+                            <!-- Back Button -->
+                            <div class="mb-3">
+                                <a href="/customer_support/support_dashboard" class="btn btn-outline-primary">
+                                    <i class="bi bi-arrow-left me-2"></i>
+                                    Back to Dashboard
+                                </a>
                             </div>
-                            <div class="card-body">
-                                <!-- Success/Error Messages -->
-                                <div class="alert alert-success" t-if="success">
-                                    <t t-esc="success"/>
+                            
+                            <!-- Information Banner -->
+                            <div class="info-banner">
+                                <i class="bi bi-lock-fill"></i>
+                                <div class="info-text">
+                                    <strong>Ticket Information Locked</strong>
+                                    <p>This ticket's details are read-only and cannot be edited once created. You can only add comments in the Communication section below.</p>
                                 </div>
-                                <div class="alert alert-danger" t-if="error">
-                                    <t t-esc="error"/>
+                            </div>
+
+                            <!-- Success/Error Messages -->
+                            <div class="alert alert-success alert-dismissible fade show notification-alert" t-if="success">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <strong>Success!</strong> <t t-esc="success"/>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            <div class="alert alert-danger alert-dismissible fade show notification-alert" t-if="error">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <strong>Error!</strong> <t t-esc="error"/>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+
+                            <!-- Ticket Header Card -->
+                            <div class="ticket-header-card">
+                                <div class="ticket-id-badges">
+                                    <span class="ticket-id-badge">
+                                        <t t-esc="ticket.name"/>
+                                    </span>
+                                    
+                                    <t t-set="priority_class" t-value="''" />
+                                    <t t-if="ticket.priority == 'low'">
+                                        <t t-set="priority_class" t-value="'priority-low'" />
+                                    </t>
+                                    <t t-elif="ticket.priority == 'medium'">
+                                        <t t-set="priority_class" t-value="'priority-medium'" />
+                                    </t>
+                                    <t t-elif="ticket.priority == 'high'">
+                                        <t t-set="priority_class" t-value="'priority-high'" />
+                                    </t>
+                                    <t t-elif="ticket.priority == 'urgent'">
+                                        <t t-set="priority_class" t-value="'priority-urgent'" />
+                                    </t>
+                                    <span t-att-class="'priority-badge ' + priority_class">
+                                        <t t-esc="ticket.priority.title() if ticket.priority else 'Low'" />
+                                    </span>
+                                    
+                                    <t t-set="state_class" t-value="''" />
+                                    <t t-if="ticket.state == 'new'">
+                                        <t t-set="state_class" t-value="'state-new'" />
+                                    </t>
+                                    <t t-elif="ticket.state == 'open'">
+                                        <t t-set="state_class" t-value="'state-open'" />
+                                    </t>
+                                    <t t-elif="ticket.state == 'in_progress'">
+                                        <t t-set="state_class" t-value="'state-progress'" />
+                                    </t>
+                                    <t t-elif="ticket.state == 'resolved'">
+                                        <t t-set="state_class" t-value="'state-resolved'" />
+                                    </t>
+                                    <t t-elif="ticket.state == 'closed'">
+                                        <t t-set="state_class" t-value="'state-closed'" />
+                                    </t>
+                                    <span t-att-class="'state-badge ' + state_class">
+                                        <t t-esc="ticket.state.replace('_', ' ').title()" />
+                                    </span>
                                 </div>
-                                
-                                <h5><t t-esc="ticket.subject"/></h5>
-                                <p class="text-muted">
-                                    Created: <t t-esc="ticket.create_date"/> | 
-                                    Status: <span class="badge bg-info"><t t-esc="ticket.state"/></span>
-                                </p>
-                                
-                                <hr/>
-                                
-                                <h6>Description:</h6>
-                                <p><t t-esc="ticket.description"/></p>
-                                
-                                <hr/>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <strong>Customer:</strong> <t t-esc="ticket.customer_id.name"/>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>Priority:</strong> <span class="badge bg-warning"><t t-esc="ticket.priority"/></span>
-                                    </div>
+
+                                <h1 class="ticket-title">
+                                    <t t-esc="ticket.subject"/>
+                                </h1>
+
+                                <div class="ticket-meta-info">
+                                    <span class="meta-item">
+                                        <i class="bi bi-person"></i>
+                                        Created by <t t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'" />
+                                    </span>
+                                    <span class="meta-divider">•</span>
+                                    <span class="meta-item">
+                                        <i class="bi bi-calendar"></i>
+                                        <t t-esc="ticket.create_date.strftime('%B %d, %Y at %I:%M %p') if ticket.create_date else 'N/A'"/>
+                                    </span>
                                 </div>
-                                
-                                <div class="row mt-2">
-                                    <div class="col-md-6">
-                                        <strong>Assigned To:</strong> 
-                                        <t t-if="ticket.assigned_to">
-                                            <t t-esc="ticket.assigned_to.name"/>
+
+                                <div class="ticket-description">
+                                    <t t-if="ticket.description">
+                                        <t t-esc="ticket.description" />
+                                    </t>
+                                    <t t-else="">
+                                        <p class="text-muted">No description provided.</p>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <!-- Communication Section -->
+                            <div class="communication-section">
+                                <div class="section-header">
+                                    <i class="bi bi-chat-left-text-fill"></i>
+                                    <h3>Communication</h3>
+                                </div>
+
+                                <!-- Messages List -->
+                                <div class="communication-messages" id="communicationMessages">
+                                    <t t-if="activities and len(activities) > 0">
+                                        <t t-foreach="activities" t-as="activity">
+                                            <t t-set="is_author" t-value="activity.author_id.id == request.env.user.partner_id.id if activity.author_id else False" />
+                                            <t t-set="is_admin" t-value="request.env.user.has_group('base.group_system')" />
+                                            
+                                            <!-- Message Item with Edit/Delete on Hover -->
+                                            <div class="message-item" t-att-data-message-id="activity.id">
+                                                <t t-set="author_id" t-value="activity.author_id.id if activity.author_id else request.env.user.partner_id.id" />
+                                                <img t-att-src="'/web/image/res.partner/%s/avatar_128' % author_id"
+                                                    alt="Avatar"
+                                                    class="message-avatar"
+                                                    onerror="this.src='/web/static/img/avatar_gray.svg'" />
+                                                <div class="message-content">
+                                                    <div class="message-header">
+                                                        <strong>
+                                                            <t t-esc="activity.author_id.name if activity.author_id else 'System'" />
+                                                        </strong>
+                                                        <span class="message-time">
+                                                            <t t-if="activity.date">
+                                                                <t t-esc="activity.date.strftime('%B %d, %Y at %I:%M %p')" />
+                                                            </t>
+                                                            <t t-else="">Recently</t>
+                                                        </span>
+                                                        
+                                                        <!-- Action Buttons (show on hover) -->
+                                                        <div class="message-actions">
+                                                            <t t-if="is_author">
+                                                                <button class="message-action-btn edit-message-btn" 
+                                                                        t-att-data-message-id="activity.id"
+                                                                        title="Edit message">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </button>
+                                                            </t>
+                                                            <t t-if="is_author or is_admin">
+                                                                <button class="message-action-btn delete-message-btn" 
+                                                                        t-att-data-message-id="activity.id"
+                                                                        title="Delete message">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            </t>
+                                                        </div>
+                                                    </div>
+                                                    <div class="message-body" t-att-data-message-id="activity.id">
+                                                        <t t-if="activity.body">
+                                                            <t t-raw="activity.body" />
+                                                        </t>
+                                                        <t t-else="">
+                                                            <em class="text-muted">[Empty message]</em>
+                                                        </t>
+                                                    </div>
+                                                    <!-- Edit Form (hidden by default) -->
+                                                    <div class="message-edit-form" t-att-data-message-id="activity.id" style="display: none;">
+                                                        <textarea class="form-control edit-message-textarea" rows="3" t-att-data-original-body="activity.body"><t t-esc="activity.body" /></textarea>
+                                                        <div class="edit-form-actions mt-2">
+                                                            <button class="btn btn-sm btn-primary save-edit-btn" t-att-data-message-id="activity.id">
+                                                                <i class="bi bi-check"></i> Save
+                                                            </button>
+                                                            <button class="btn btn-sm btn-secondary cancel-edit-btn" t-att-data-message-id="activity.id">
+                                                                <i class="bi bi-x"></i> Cancel
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </t>
-                                        <t t-else="">
-                                            <span class="text-muted">Not assigned</span>
-                                        </t>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <strong>Days Open:</strong> <t t-esc="ticket.days_open"/> days
+                                    </t>
+                                    <t t-else="">
+                                        <div class="empty-state">
+                                            <i class="bi bi-chat-left-text"></i>
+                                            <p>No messages yet.</p>
+                                        </div>
+                                    </t>
+                                </div>
+
+                                <!-- Message Input -->
+                                <div class="message-input-section">
+                                    <form t-attf-action="/customer_support/ticket/{{ticket.id}}/post_message" method="post" id="communicationForm">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        
+                                        <textarea 
+                                            class="form-control message-textarea" 
+                                            name="message"
+                                            id="messageTextarea" 
+                                            rows="3" 
+                                            placeholder="Type your message..."
+                                            required="required"></textarea>
+                                        <button type="submit" class="btn btn-send">
+                                            <i class="bi bi-send-fill"></i>
+                                            Send
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column - Properties and Info -->
+                        <div class="ticket-sidebar-column">
+                            <!-- Properties Card -->
+                            <div class="properties-card">
+                                <div class="card-header-custom">
+                                    <i class="bi bi-gear-fill"></i>
+                                    <h3>Properties</h3>
+                                </div>
+
+                                <div class="property-item">
+                                    <label class="property-label">Status</label>
+                                    <!-- STATUS UPDATE FORM - SEPARATE FROM MESSAGE FORM -->
+                                    <form t-attf-action="/customer_support/ticket/{{ticket.id}}/update_status" method="post" class="status-form">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <select class="form-select status-select" name="status" onchange="this.form.submit()">
+                                            <option value="new" t-att-selected="'selected' if ticket.state == 'new' else None">New</option>
+                                            <option value="open" t-att-selected="'selected' if ticket.state == 'open' else None">Open</option>
+                                            <option value="in_progress" t-att-selected="'selected' if ticket.state == 'in_progress' else None">In Progress</option>
+                                            <option value="resolved" t-att-selected="'selected' if ticket.state == 'resolved' else None">Resolved</option>
+                                            <option value="closed" t-att-selected="'selected' if ticket.state == 'closed' else None">Closed</option>
+                                        </select>
+                                    </form>
+                                </div>
+
+                                <div class="property-item">
+                                    <label class="property-label">Priority</label>
+                                    <button t-att-class="'priority-button ' + priority_class" disabled="disabled">
+                                        <t t-esc="ticket.priority.title() if ticket.priority else 'Low'" />
+                                    </button>
+                                </div>
+
+                                <div class="property-item">
+                                    <label class="property-label">Assignee</label>
+                                    <div class="assignee-info">
+                                        <img t-att-src="'/web/image/res.users/%s/avatar_128' % (ticket.assigned_to.id if ticket.assigned_to else request.env.user.id)"
+                                            alt="Assignee Avatar"
+                                            class="assignee-avatar"
+                                            onerror="this.src='/web/static/img/avatar_gray.svg'" />
+                                        <div class="assignee-details">
+                                            <strong>
+                                                <t t-if="ticket.assigned_to">
+                                                    <t t-esc="ticket.assigned_to.name" />
+                                                </t>
+                                                <t t-else="">
+                                                    Not assigned
+                                                </t>
+                                            </strong>
+                                            <span class="assignee-email">
+                                                <t t-if="ticket.assigned_to and ticket.assigned_to.email">
+                                                    <t t-esc="ticket.assigned_to.email" />
+                                                </t>
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                                
-                                <t t-if="ticket.resolution_notes">
-                                    <hr/>
-                                    <h6>Resolution Notes:</h6>
-                                    <p><t t-esc="ticket.resolution_notes"/></p>
-                                </t>
+                            </div>
+
+                            <!-- Customer Information Card -->
+                            <div class="info-card">
+                                <div class="card-header-custom">
+                                    <h3>Customer Information</h3>
+                                </div>
+                                <div class="customer-info">
+                                    <img t-att-src="'/web/image/res.partner/%s/avatar_128' % (ticket.customer_id.id if ticket.customer_id else 1)"
+                                        alt="Customer Avatar"
+                                        class="customer-avatar"
+                                        onerror="this.src='/web/static/img/avatar_gray.svg'" />
+                                    <div class="customer-details">
+                                        <strong><t t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown Customer'" /></strong>
+                                        <span class="customer-email">
+                                            <t t-if="ticket.customer_id and ticket.customer_id.email">
+                                                <t t-esc="ticket.customer_id.email" />
+                                            </t>
+                                            <t t-else="">No email</t>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Projects Card -->
+                            <div class="info-card">
+                                <div class="card-header-custom">
+                                    <h3>Projects</h3>
+                                </div>
+                                <div class="projects-list">
+                                    <div class="project-item active">
+                                        <div class="project-info">
+                                            <strong>E-Commerce Platform</strong>
+                                            <span class="project-id">Project ID: PRJ-001</span>
+                                        </div>
+                                        <span class="project-status active-status">Active</span>
+                                    </div>
+                                    <div class="project-item">
+                                        <div class="project-info">
+                                            <strong>Mobile App Redesign</strong>
+                                            <span class="project-id">Project ID: PRJ-002</span>
+                                        </div>
+                                        <span class="project-status inactive-status">Inactive</span>
+                                    </div>
+                                    <div class="project-item">
+                                        <div class="project-info">
+                                            <strong>Analytics Dashboard</strong>
+                                            <span class="project-id">Project ID: PRJ-003</span>
+                                            </div>
+                                        <span class="project-status inactive-status">Inactive</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="col-md-4">
-                        <!-- Admin Assignment Card -->
-                        <t t-if="is_admin">
-                            <div class="card shadow mb-4">
-                                <div class="card-header bg-warning">
-                                    <h5 class="mb-0">Admin Actions</h5>
-                                </div>
-                                <div class="card-body">
-                                    <form t-attf-action="/customer_support/ticket/{{ticket.id}}/assign" method="post">
-                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-
-                                        <div class="mb-3">
-                                            <label class="form-label">Assign To:</label>
-                                            <select class="form-select" name="assigned_to" required="required">
-                                                <option value="">-- Select Focal Person --</option>
-                                                <t t-foreach="focal_persons" t-as="person">
-                                                    <option t-att-value="person.id" t-att-selected="'selected' if ticket.assigned_to.id == person.id else None">
-                                                        <t t-esc="person.name"/>
-                                                    </option>
-                                                </t>
-                                            </select>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-warning w-100">Assign Ticket</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </t>
-                        
-                        <!-- Status Update Card -->
-                        <t t-if="is_admin or is_assigned">
-                            <div class="card shadow">
-                                <div class="card-header bg-success text-white">
-                                    <h5 class="mb-0">Update Status</h5>
-                                </div>
-                                <div class="card-body">
-                                    <form t-attf-action="/customer_support/ticket/{{ticket.id}}/update_status" method="post">
-                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-
-                                        <div class="mb-3">
-                                            <label class="form-label">Status:</label>
-                                            <select class="form-select" name="status" required="required">
-                                                <option value="new" t-att-selected="'selected' if ticket.state == 'new' else None">New</option>
-                                                <option value="assigned" t-att-selected="'selected' if ticket.state == 'assigned' else None">Assigned</option>
-                                                <option value="in_progress" t-att-selected="'selected' if ticket.state == 'in_progress' else None">In Progress</option>
-                                                <option value="pending" t-att-selected="'selected' if ticket.state == 'pending' else None">Pending Customer</option>
-                                                <option value="resolved" t-att-selected="'selected' if ticket.state == 'resolved' else None">Resolved</option>
-                                                <option value="closed" t-att-selected="'selected' if ticket.state == 'closed' else None">Closed</option>
-                                            </select>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label class="form-label">Resolution Notes:</label>
-                                            <textarea class="form-control" name="resolution_notes" rows="3" placeholder="Add notes about the resolution"></textarea>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-success w-100">Update Status</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </t>
-                        
-                        <!-- Back Button -->
-                        <div class="mt-3">
-                            <a href="/customer_support/dashboard" class="btn btn-secondary w-100">Back to Dashboard</a>
+                </div>
+            </div>
+            
+            <!-- Delete Confirmation Modal -->
+            <div class="modal fade" id="deleteMessageModal" tabindex="-1" aria-labelledby="deleteMessageModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="deleteMessageModalLabel">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                                Confirm Delete
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete this message? This action cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                                <i class="bi bi-trash"></i> Delete Message
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
             
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            
+            <!-- Fixed JavaScript for Delete and Edit -->
+            <script type="text/javascript">
+        //<![CDATA[
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+
+            let messageIdToDelete = null;
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteMessageModal'));
+
+            // ============ DELETE MESSAGE FUNCTIONALITY ============
+            document.querySelectorAll('.delete-message-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    messageIdToDelete = this.getAttribute('data-message-id');
+                    deleteModal.show();
+                });
+            });
+
+            document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+                if (messageIdToDelete) {
+                    // Create form data for POST request
+                    const formData = new FormData();
+                    
+                    fetch('/customer_support/ticket/message/' + messageIdToDelete + '/delete', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove the message element from the DOM
+                            const messageElement = document.querySelector('.message-item[data-message-id="' + messageIdToDelete + '"]');
+                            if (messageElement) {
+                                messageElement.remove();
+                            }
+                            deleteModal.hide();
+                            
+                            // Show success message
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'alert alert-success alert-dismissible fade show notification-alert';
+                            alertDiv.innerHTML = '<i class="bi bi-check-circle-fill"></i> <strong>Success!</strong> Message deleted successfully <button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                            document.querySelector('.ticket-main-column').insertBefore(alertDiv, document.querySelector('.ticket-header-card'));
+                            
+                            setTimeout(() => {
+                                alertDiv.remove();
+                            }, 3000);
+                        } else {
+                            alert('Error: ' + (data.error || 'Failed to delete message'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the message');
+                    });
+                }
+            });
+
+            // ============ EDIT MESSAGE FUNCTIONALITY ============
+            document.querySelectorAll('.edit-message-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const messageId = this.getAttribute('data-message-id');
+                    const messageBody = document.querySelector('.message-body[data-message-id="' + messageId + '"]');
+                    const editForm = document.querySelector('.message-edit-form[data-message-id="' + messageId + '"]');
+                    
+                    // Get the textarea
+                    const textarea = editForm.querySelector('.edit-message-textarea');
+                    
+                    // Strip HTML tags from the message body to get plain text
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = messageBody.innerHTML;
+                    const plainText = tempDiv.textContent || tempDiv.innerText || '';
+                    
+                    // Set the plain text in the textarea
+                    textarea.value = plainText.trim();
+                    
+                    // Hide message body and show edit form
+                    messageBody.style.display = 'none';
+                    editForm.style.display = 'block';
+                    
+                    // Focus on textarea
+                    textarea.focus();
+                    // Move cursor to end
+                    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+                });
+            });
+
+            document.querySelectorAll('.cancel-edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const messageId = this.getAttribute('data-message-id');
+                    const messageBody = document.querySelector('.message-body[data-message-id="' + messageId + '"]');
+                    const editForm = document.querySelector('.message-edit-form[data-message-id="' + messageId + '"]');
+                    
+                    // Show message body and hide edit form
+                    messageBody.style.display = 'block';
+                    editForm.style.display = 'none';
+                });
+            });
+
+            document.querySelectorAll('.save-edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const messageId = this.getAttribute('data-message-id');
+                    const editForm = document.querySelector('.message-edit-form[data-message-id="' + messageId + '"]');
+                    const textarea = editForm.querySelector('.edit-message-textarea');
+                    const newBody = textarea.value.trim();
+
+                    if (!newBody) {
+                        alert('Message cannot be empty');
+                        return;
+                    }
+
+                    // Create form data for POST request
+                    const formData = new FormData();
+                    formData.append('new_body', newBody);
+
+                    fetch('/customer_support/ticket/message/' + messageId + '/edit', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update the message body with new content
+                            const messageBody = document.querySelector('.message-body[data-message-id="' + messageId + '"]');
+                            messageBody.innerHTML = newBody;
+                            
+                            // Show message body and hide edit form
+                            messageBody.style.display = 'block';
+                            editForm.style.display = 'none';
+                            
+                            // Show success message
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'alert alert-success alert-dismissible fade show notification-alert';
+                            alertDiv.innerHTML = '<i class="bi bi-check-circle-fill"></i> <strong>Success!</strong> Message updated successfully <button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                            document.querySelector('.ticket-main-column').insertBefore(alertDiv, document.querySelector('.ticket-header-card'));
+                            
+                            setTimeout(() => {
+                                alertDiv.remove();
+                            }, 3000);
+                        } else {
+                            alert('Error: ' + (data.error || 'Failed to update message'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while updating the message');
+                    });
+                });
+            });
+
+        });
+        //]]>
+        </script>
         </t>
     </template>
 </odoo>

@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="system_configuration_template" name="System Configuration">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <!-- Bootstrap CSS -->
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+                    rel="stylesheet" />
+                <!-- Bootstrap Icons -->
+                <link rel="stylesheet"
+                    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" />
+                <!-- Custom CSS -->
+                <link rel="stylesheet"
+                    href="/customer_support/static/src/css/project_configuration.css" />
+                <!-- Bootstrap JS (must come before custom JS) -->
+                <script
+                    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <!-- Custom JS -->
+                <script src="/customer_support/static/src/js/project_configuration.js"></script>
+            </t>
+
+            <div id="wrap" class="oe_structure">
+                <div class="container-fluid py-4">
+                    <!-- Header Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="page-header">
+                                <h1 class="h3 mb-2">
+                                    <i class="bi bi-gear-fill text-primary me-2"></i>System
+                                    Configuration </h1>
+                                <p class="text-muted">Configure and manage your system settings</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <t t-if="request.params.get('project_created')">
+                                <div
+                                    class="alert alert-success alert-dismissible fade show shadow-sm"
+                                    role="alert">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    <strong>Success!</strong>
+                                    Project configuration created successfully. <button
+                                        type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
+
+                            <t t-if="request.params.get('project_updated')">
+                                <div
+                                    class="alert alert-success alert-dismissible fade show shadow-sm"
+                                    role="alert">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    <strong>Success!</strong>
+                                    Project configuration updated successfully. <button
+                                        type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
+
+                            <t t-if="request.params.get('project_deleted')">
+                                <div
+                                    class="alert alert-success alert-dismissible fade show shadow-sm"
+                                    role="alert">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    <strong>Success!</strong>
+                                    Project configuration deleted successfully. <button
+                                        type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
+
+                            <t t-if="request.params.get('error')">
+                                <div
+                                    class="alert alert-danger alert-dismissible fade show shadow-sm"
+                                    role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <strong>Error!</strong>
+                                    <t t-esc="request.params.get('error_msg', 'An error occurred.')" />
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Project Configuration Form -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-white py-3 border-bottom">
+                                    <h5 class="card-title mb-0">
+                                        <i class="bi bi-folder-plus text-primary me-2"></i>New
+                                        Project Configuration </h5>
+                                    <p class="card-subtitle text-muted mt-1 mb-0">
+                                        Define project details for tracking and management
+                                    </p>
+                                </div>
+
+                                <div class="card-body p-4">
+                                    <form id="projectConfigForm" method="post"
+                                        action="/customer_support/admin_dashboard/projects/create"
+                                        class="needs-validation" novalidate="novalidate">
+                                        <input type="hidden" name="csrf_token"
+                                            t-att-value="request.csrf_token()" />
+
+                                        <!-- Basic Information - Side by Side -->
+                                        <div class="form-section mb-4">
+                                            <h6 class="section-title mb-3">
+                                                <i class="bi bi-info-circle text-primary me-2"></i>Basic
+                                                Information </h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-8">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control"
+                                                            id="project_name"
+                                                            name="project_name"
+                                                            placeholder="Project Name"
+                                                            required="required" />
+                                                        <label for="project_name" class="text-muted">
+                                                            <i class="bi bi-card-heading me-1"></i>Project
+                                                            Name </label>
+                                                        <div class="form-text">Enter a descriptive
+                                                            project title</div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="text"
+                                                            class="form-control text-uppercase"
+                                                            id="project_key" name="project_key"
+                                                            placeholder="PROJ-X"
+                                                            pattern="[A-Za-z0-9-]+"
+                                                            required="required" />
+                                                        <label for="project_key" class="text-muted">
+                                                            <i class="bi bi-key me-1"></i>Project
+                                                            Key </label>
+                                                        <div class="form-text">Unique identifier</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Type & Timeline - Side by Side -->
+                                        <div class="form-section mb-4">
+                                            <h6 class="section-title mb-3">
+                                                <i class="bi bi-calendar-range text-primary me-2"></i>Project
+                                                Details </h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <select class="form-select"
+                                                            id="project_type"
+                                                            name="project_type" required="required">
+                                                            <option value="">Select Type</option>
+                                                            <option value="web_app">Web Application</option>
+                                                            <option value="mobile">Mobile
+                                                                Application</option>
+                                                            <option value="machine_learning">Machine
+                                                                Learning</option>
+                                                            <option value="iot">IoT Platform</option>
+                                                            <option value="api">API/Backend Service</option>
+                                                            <option value="other">Other</option>
+                                                        </select>
+                                                        <label for="project_type" class="text-muted">
+                                                            <i class="bi bi-tag me-1"></i>Project
+                                                            Type </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="date" class="form-control"
+                                                            id="start_date"
+                                                            name="start_date" required="required" />
+                                                        <label for="start_date" class="text-muted">
+                                                            <i class="bi bi-calendar-plus me-1"></i>Start
+                                                            Date </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="date" class="form-control"
+                                                            id="end_date"
+                                                            name="end_date" />
+                                                        <label for="end_date" class="text-muted">
+                                                            <i class="bi bi-calendar-check me-1"></i>Target
+                                                            End Date </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Technology Stack - Compact Layout -->
+                                        <div class="form-section mb-4">
+                                            <h6 class="section-title mb-3">
+                                                <i class="bi bi-code-slash text-primary me-2"></i>Technology
+                                                Stack </h6>
+                                            <div class="row g-3">
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control"
+                                                            id="programming_languages"
+                                                            name="programming_languages"
+                                                            placeholder="Python, JavaScript, Java" />
+                                                        <label for="programming_languages"
+                                                            class="text-muted">
+                                                            <i class="bi bi-braces me-1"></i>
+                                                            Languages
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control"
+                                                            id="frameworks"
+                                                            name="frameworks"
+                                                            placeholder="React, Django, Spring" />
+                                                        <label for="frameworks" class="text-muted">
+                                                            <i class="bi bi-box me-1"></i>Frameworks </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="form-floating">
+                                                        <input type="text" class="form-control"
+                                                            id="databases"
+                                                            name="databases"
+                                                            placeholder="PostgreSQL, MongoDB" />
+                                                        <label for="databases" class="text-muted">
+                                                            <i class="bi bi-database me-1"></i>
+                                                            Databases
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Goals - Full Width -->
+                                        <div class="form-section mb-4">
+                                            <h6 class="section-title mb-3">
+                                                <i class="bi bi-bullseye text-primary me-2"></i>Project
+                                                Goals </h6>
+                                            <div class="form-floating">
+                                                <textarea class="form-control" id="project_goals"
+                                                    name="project_goals"
+                                                    placeholder="Project goals and objectives"
+                                                    style="height: 100px"></textarea>
+                                                <label for="project_goals" class="text-muted">
+                                                    <i class="bi bi-chat-left-text me-1"></i>Goals
+                                                    &amp; Objectives </label>
+                                                <div class="form-text">Describe the project's
+                                                    purpose and expected outcomes</div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Compliance - Compact Checkboxes -->
+                                        <div class="form-section mb-5">
+                                            <h6 class="section-title mb-3">
+                                                <i class="bi bi-shield-check text-primary me-2"></i>Compliance
+                                                Requirements </h6>
+                                            <div class="compliance-grid">
+                                                <div class="row row-cols-2 row-cols-md-3 g-3">
+                                                    <div class="col">
+                                                        <div class="form-check compliance-item">
+                                                            <input class="form-check-input"
+                                                                type="checkbox"
+                                                                value="gdpr" id="gdpr"
+                                                                name="compliance_gdpr" />
+                                                            <label class="form-check-label"
+                                                                for="gdpr">
+                                                                <span class="compliance-label">GDPR</span>
+                                                                <small class="d-block text-muted">Data
+                                                                    Protection</small>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="form-check compliance-item">
+                                                            <input class="form-check-input"
+                                                                type="checkbox"
+                                                                value="hipaa" id="hipaa"
+                                                                name="compliance_hipaa" />
+                                                            <label class="form-check-label"
+                                                                for="hipaa">
+                                                                <span class="compliance-label">HIPAA</span>
+                                                                <small class="d-block text-muted">
+                                                                    Healthcare</small>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="form-check compliance-item">
+                                                            <input class="form-check-input"
+                                                                type="checkbox"
+                                                                value="pci_dss" id="pci_dss"
+                                                                name="compliance_pci_dss" />
+                                                            <label class="form-check-label"
+                                                                for="pci_dss">
+                                                                <span class="compliance-label">PCI
+                                                                    DSS</span>
+                                                                <small class="d-block text-muted">Payment
+                                                                    Security</small>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="form-check compliance-item">
+                                                            <input class="form-check-input"
+                                                                type="checkbox"
+                                                                value="iso27001" id="iso27001"
+                                                                name="compliance_iso27001" />
+                                                            <label class="form-check-label"
+                                                                for="iso27001">
+                                                                <span class="compliance-label">ISO
+                                                                    27001</span>
+                                                                <small class="d-block text-muted">Security
+                                                                    Standard</small>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="form-actions pt-4 border-top">
+                                            <div class="d-flex justify-content-end gap-3">
+                                                <button type="reset"
+                                                    class="btn btn-outline-secondary px-4">
+                                                    <i class="bi bi-x-circle me-2"></i>Reset </button>
+                                                <button type="submit" class="btn btn-primary px-4">
+                                                    <i class="bi bi-check-circle me-2"></i>Save
+                                                    Configuration </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

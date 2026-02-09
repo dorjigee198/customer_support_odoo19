@@ -14,6 +14,17 @@ class CustomerSupport(models.Model):
     subject = fields.Char(string="Subject", required=True, tracking=True)
     description = fields.Text(string="Description", required=True)
 
+    # ============ ADD THIS FIELD HERE ============
+    # Project Information
+    project_id = fields.Many2one(
+        "customer_support.project",
+        string="Project",
+        required=False,
+        tracking=True,
+        help="The project this ticket belongs to",
+    )
+    # ============ END OF NEW FIELD ============
+
     # Customer Information
     customer_id = fields.Many2one(
         "res.partner",
