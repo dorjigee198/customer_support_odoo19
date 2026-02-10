@@ -460,6 +460,30 @@
                         <!-- Ticket Assignment Tab -->
                         <div class="tab-pane fade" id="ticket-assignment" role="tabpanel"
                             aria-labelledby="ticket-assignment-tab">
+
+                            <!-- SUCCESS/ERROR MESSAGES -->
+                            <t t-if="request.params.get('success')">
+                                <div class="alert alert-success alert-dismissible fade show"
+                                    role="alert">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    <strong>Success!</strong>
+                                    <t t-esc="request.params.get('success')" />
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                                </div>
+                            </t>
+
+                            <t t-if="request.params.get('error')">
+                                <div class="alert alert-danger alert-dismissible fade show"
+                                    role="alert">
+                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                    <strong>Error!</strong>
+                                    <t t-esc="request.params.get('error')" />
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
+                                        aria-label="Close"></button>
+                                </div>
+                            </t>
+
                             <!-- Quick Stats -->
                             <div class="row mb-4">
                                 <div class="col-md-3 col-sm-6 mb-3">
@@ -561,11 +585,11 @@
                                                                 <t t-esc="ticket.id" />
                                                             </td>
                                                             <td>
-                                                                <a
-                                                                    t-att-href="'/customer_support/ticket/%s' % ticket.id"
-                                                                    class="ticket-link">
-                                                                    <i class="bi bi-link-45deg me-1"></i>
-                                                                    <t t-esc="ticket.subject" />
+                                                            <a t-att-href="'/customer_support/ticket/%s'
+                                                                % ticket.id" class="ticket-link"> <i
+                                                                    class="bi bi-link-45deg me-1"></i>
+                                                                    <t
+                                                                    t-esc="ticket.subject" />
                                                                 </a>
                                                             </td>
                                                             <td>
@@ -728,12 +752,11 @@
                                                                     </t>
                                                                 </td>
                                                                 <td>
-                                                                    <a
-                                                                        t-att-href="'/customer_support/admin_dashboard/user/%s/edit' % user_item['id']"
-                                                                        class="btn btn-sm btn-outline-primary me-1"
-                                                                        title="Edit User">
-                                                                        <i
-                                                                            class="bi bi-pencil-square"></i>
+                                                                <a t-att-href="'/customer_support/admin_dashboard/user/%s/edit'
+                                                                    % user_item['id']" class="btn
+                                                                    btn-sm btn-outline-primary me-1"
+                                                                    title="Edit User"> <i
+                                                                        class="bi bi-pencil-square"></i>
                                                                     </a>
                                                                     <form
                                                                         t-att-action="'/customer_support/admin_dashboard/user/%s/toggle_active' % user_item['id']"
@@ -960,12 +983,11 @@
                                                 class="d-flex justify-content-between align-items-center mb-4">
                                                 <h6 class="mb-0">
                                                     <i class="bi bi-list-ul me-2"></i>Configured
-                                                    Projects </h6>
-                                                <a
-                                                    href="/customer_support/admin_dashboard/system_configuration?tab=project"
-                                                    class="btn btn-primary btn-sm">
-                                                    <i class="bi bi-plus-circle me-2"></i>Configure
-                                                    New Project </a>
+                                                Projects </h6>
+                                                <a href="/customer_support/admin_dashboard/system_configuration?tab=project"
+                                                class="btn btn-primary btn-sm"> <i
+                                                    class="bi bi-plus-circle me-2"></i>Configure New
+                                                Project </a>
                                             </div>
 
                                             <!-- Projects Table -->
@@ -1088,12 +1110,11 @@
                                                                 <!-- Actions -->
                                                                 <!-- Actions -->
                                                                 <td>
-                                                                    <a
-                                                                        t-att-href="'/customer_support/admin_dashboard/projects/%d/edit' % project.id"
-                                                                        class="btn btn-sm btn-outline-primary me-1"
-                                                                        title="Edit Project">
-                                                                        <i
-                                                                            class="bi bi-pencil-square"></i>
+                                                                <a t-att-href="'/customer_support/admin_dashboard/projects/%d/edit'
+                                                                    % project.id" class="btn btn-sm
+                                                                    btn-outline-primary me-1"
+                                                                    title="Edit Project"> <i
+                                                                        class="bi bi-pencil-square"></i>
                                                                     </a>
                                                                     <button
                                                                         class="btn btn-sm btn-outline-info me-1"
@@ -1279,60 +1300,91 @@
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
             <!-- Custom JavaScript for Dashboard -->
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                console.log('Dashboard initialized');
-
-                // Initialize Bootstrap tabs
-                var triggerTabList = [].slice.call(document.querySelectorAll('.header-left
-                button[data-bs-toggle="tab"]'));
-                triggerTabList.forEach(function (triggerEl) {
-                var tabTrigger = new bootstrap.Tab(triggerEl);
-
-                triggerEl.addEventListener('click', function (event) {
+            <script type="text/javascript">
+                //<![CDATA[
+(function() {
+    'use strict';
+    
+    function activateTabFromURL() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var tabParam = urlParams.get('tab');
+        
+        if (tabParam) {
+            var targetSelector = '#' + tabParam;
+            var tabButton = document.querySelector('.header-left button[data-bs-target="' + targetSelector + '"]');
+            
+            if (tabButton) {
+                document.querySelectorAll('.header-left button').forEach(function(btn) {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-selected', 'false');
+                });
+                document.querySelectorAll('.tab-pane').forEach(function(pane) {
+                    pane.classList.remove('show', 'active');
+                });
+                
+                tabButton.classList.add('active');
+                tabButton.setAttribute('aria-selected', 'true');
+                
+                var targetPane = document.querySelector(targetSelector);
+                if (targetPane) {
+                    targetPane.classList.add('show', 'active');
+                }
+            }
+        }
+    }
+    
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', activateTabFromURL);
+    } else {
+        activateTabFromURL();
+    }
+    
+    window.addEventListener('load', activateTabFromURL);
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        var triggerTabList = [].slice.call(document.querySelectorAll('.header-left button[data-bs-toggle="tab"]'));
+        
+        triggerTabList.forEach(function (triggerEl) {
+            triggerEl.addEventListener('click', function (event) {
                 event.preventDefault();
-                console.log('Tab clicked:', triggerEl.getAttribute('data-bs-target'));
+                var tabTrigger = new bootstrap.Tab(triggerEl);
                 tabTrigger.show();
-                });
-                });
-
-                // Store and restore active tab
-                var activeTab = localStorage.getItem('activeDashboardTab');
-                if (activeTab) {
-                console.log('Restoring tab:', activeTab);
-                var tab = document.querySelector('.header-left button[data-bs-target="' + activeTab
-                + '"]');
-                if (tab) {
-                var tabInstance = new bootstrap.Tab(tab);
-                tabInstance.show();
-                }
-                }
-
-                // Save active tab on change
-                triggerTabList.forEach(function(tab) {
-                tab.addEventListener('shown.bs.tab', function (e) {
+            });
+        });
+        
+        triggerTabList.forEach(function(tab) {
+            tab.addEventListener('shown.bs.tab', function (e) {
                 var target = e.target.getAttribute('data-bs-target');
-                console.log('Tab shown:', target);
                 localStorage.setItem('activeDashboardTab', target);
-                });
-                });
-
-                // Quick action card tab switching
-                document.querySelectorAll('.action-card[data-bs-toggle="tab"]').forEach(function(card)
-                {
-                card.addEventListener('click', function(e) {
+            });
+        });
+        
+        document.querySelectorAll('.action-card[data-bs-toggle="tab"]').forEach(function(card) {
+            card.addEventListener('click', function(e) {
                 e.preventDefault();
                 var target = this.getAttribute('href');
-                var tab = document.querySelector('.header-left button[data-bs-target="' + target +
-                '"]');
+                var tab = document.querySelector('.header-left button[data-bs-target="' + target + '"]');
                 if (tab) {
-                var tabInstance = new bootstrap.Tab(tab);
-                tabInstance.show();
+                    var tabInstance = new bootstrap.Tab(tab);
+                    tabInstance.show();
                 }
-                });
-                });
-                });
-            </script>
+            });
+        });
+        
+        activateTabFromURL();
+        
+        // Auto-dismiss success and error alerts after 5 seconds
+        var alerts = document.querySelectorAll('.alert-success, .alert-danger');
+        alerts.forEach(function(alert) {
+            setTimeout(function() {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }, 5000); // 5000ms = 5 seconds
+        });
+    });
+})();
+//]]>
+</script>
         </t>
     </template>
 </odoo>
