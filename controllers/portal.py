@@ -23,6 +23,7 @@ from odoo import http, fields
 from odoo.http import request
 import werkzeug
 import json
+from odoo import Command
 
 _logger = logging.getLogger(__name__)
 
@@ -714,7 +715,7 @@ class CustomerSupportPortal(http.Controller):
             if groups_to_add:
                 new_user.sudo().write(
                     {
-                        "groups_id": [(6, 0, groups_to_add)],
+                        "group_ids": [Command.set(groups_to_add)],
                     }
                 )
 
