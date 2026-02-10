@@ -15,15 +15,25 @@ All routes are organized by functionality with proper role-based access control.
 UPDATED: Added project management functionality
 - Admin can assign projects to users
 - Users can select projects when creating tickets
+
+UPDATED: Added email notification functionality
+- Welcome emails to new customers
+- Assignment notifications to support agents
+- Status change notifications to customers
+
+REFACTORED: Email functionality moved to services layer
+- EmailService handles all email operations
+- Cleaner separation of concerns
 """
 
 import base64
 import logging
+import json
 from odoo import http, fields
 from odoo.http import request
 import werkzeug
-import json
-from odoo import Command
+
+from ..services.email_service import EmailService
 
 _logger = logging.getLogger(__name__)
 
@@ -33,10 +43,12 @@ class CustomerSupportPortal(http.Controller):
     Main controller class for Customer Support Portal.
     Handles all HTTP routes with proper authentication and authorization.
     Routes are grouped logically for better maintainability.
+
+    Email notifications are handled by EmailService in the services layer.
     """
 
     # ========================================================================
-    # PUBLIC ROUTES (NO AUTHENTICATION REQUIRED)
+    # ========== PUBLIC ROUTES (NO AUTHENTICATION REQUIRED) ==========
     # ========================================================================
 
     @http.route("/customer_support", type="http", auth="public", website=True)
@@ -153,7 +165,7 @@ class CustomerSupportPortal(http.Controller):
             )
 
     # ========================================================================
-    # CUSTOMER DASHBOARD ROUTES (PORTAL USERS)
+    # ========== CUSTOMER DASHBOARD ROUTES (PORTAL USERS) ==========
     # ========================================================================
 
     @http.route("/customer_support/dashboard", type="http", auth="user", website=True)
@@ -399,7 +411,7 @@ class CustomerSupportPortal(http.Controller):
             )
 
     # ========================================================================
-    # ADMIN DASHBOARD ROUTES (SYSTEM ADMINISTRATORS)
+    # ========== ADMIN DASHBOARD ROUTES (SYSTEM ADMINISTRATORS) ==========
     # ========================================================================
 
     @http.route(
@@ -617,6 +629,7 @@ class CustomerSupportPortal(http.Controller):
         Access: Authenticated system administrators only
 
         UPDATED: Now validates and saves project_id to user's partner record
+        UPDATED: Sends welcome email to new customers
         """
         try:
             user = request.env.user
@@ -699,6 +712,7 @@ class CustomerSupportPortal(http.Controller):
             new_user = (
                 request.env["res.users"]
                 .sudo()
+                .with_context(no_reset_password=True)
                 .create(
                     {
                         "name": name,
@@ -715,7 +729,7 @@ class CustomerSupportPortal(http.Controller):
             if groups_to_add:
                 new_user.sudo().write(
                     {
-                        "group_ids": [Command.set(groups_to_add)],
+                        "group_ids": [(6, 0, groups_to_add)],
                     }
                 )
 
@@ -723,6 +737,18 @@ class CustomerSupportPortal(http.Controller):
             _logger.info(
                 f"User created: {new_user.name} ({user_type}) assigned to project {project_id} by {user.name}"
             )
+
+            # ========== UPDATED: Send welcome email to new customers ==========
+            if user_type == "customer":
+                try:
+                    # Send welcome email (email failures won't break user creation)
+                    EmailService.send_welcome_email(email, name, password)
+                except Exception as email_error:
+                    # Log error but don't fail the entire operation
+                    _logger.error(
+                        f"Welcome email failed for {email}: {str(email_error)}"
+                    )
+            # ========== END OF UPDATED CODE ==========
 
             user_type_label = (
                 "Focal Person" if user_type == "focal_person" else "Customer"
@@ -736,11 +762,6 @@ class CustomerSupportPortal(http.Controller):
             return werkzeug.utils.redirect(
                 "/customer_support/admin_dashboard/create_user?error=Error creating user. Please try again."
             )
-
-    # ========================================================================
-    # REST OF THE CONTROLLER REMAINS UNCHANGED
-    # (I'm including the remaining methods for completeness)
-    # ========================================================================
 
     @http.route(
         "/customer_support/admin_dashboard/user/<int:user_id>/edit",
@@ -873,7 +894,7 @@ class CustomerSupportPortal(http.Controller):
                 groups_to_add = [request.env.ref("base.group_portal").id]
                 groups_to_remove = [request.env.ref("base.group_user").id]
 
-            update_vals["groups_id"] = [
+            update_vals["group_ids"] = [
                 (4, groups_to_add[0]),  # Add group
                 (3, groups_to_remove[0]),  # Remove group
             ]
@@ -988,7 +1009,7 @@ class CustomerSupportPortal(http.Controller):
             )
 
     # ========================================================================
-    # SUPPORT AGENT (FOCAL PERSON) DASHBOARD
+    # ========== SUPPORT AGENT (FOCAL PERSON) DASHBOARD ==========
     # ========================================================================
 
     @http.route(
@@ -1103,7 +1124,7 @@ class CustomerSupportPortal(http.Controller):
             )
 
     # ========================================================================
-    # TICKET MANAGEMENT ROUTES (ALL AUTHENTICATED USERS)
+    # ========== TICKET MANAGEMENT ROUTES (ALL AUTHENTICATED USERS) ==========
     # ========================================================================
 
     @http.route(
@@ -1436,6 +1457,8 @@ class CustomerSupportPortal(http.Controller):
         Assign Ticket - Assigns ticket to support agent
         Working: Updates ticket with assigned user and status
         Access: System administrators only
+
+        UPDATED: Sends assignment notification email to support agent
         """
         try:
             user = request.env.user
@@ -1472,8 +1495,22 @@ class CustomerSupportPortal(http.Controller):
 
             _logger.info(f"Ticket {ticket.name} assigned to user {assigned_user_id}")
 
+            # ========== UPDATED: Send assignment email to support agent ==========
+            try:
+                # Get the assigned user record
+                assigned_user = request.env["res.users"].browse(assigned_user_id)
+
+                # Send assignment email (email failures won't break ticket assignment)
+                EmailService.send_assignment_email(ticket, assigned_user)
+            except Exception as email_error:
+                # Log error but don't fail the entire operation
+                _logger.error(
+                    f"Assignment email failed for ticket {ticket.name}: {str(email_error)}"
+                )
+            # ========== END OF UPDATED CODE ==========
+
             return werkzeug.utils.redirect(
-                f"/customer_support/ticket/{ticket_id}?success=Ticket assigned successfully"
+                f"/customer_support/admin_dashboard?tab=ticket-assignment&success=Ticket {ticket.name} assigned successfully to {assigned_user.name}"
             )
 
         except Exception as e:
@@ -1495,6 +1532,8 @@ class CustomerSupportPortal(http.Controller):
         Update Ticket Status - Changes ticket state
         Working: Updates ticket status with timestamps and resolution notes
         Access: System administrators and assigned support agents
+
+        UPDATED: Sends status change notification email to customer
         """
         try:
             user = request.env.user
@@ -1523,6 +1562,10 @@ class CustomerSupportPortal(http.Controller):
                     f"/customer_support/ticket/{ticket_id}?error=Status is required"
                 )
 
+            # ========== UPDATED: Store old status before update ==========
+            old_status = ticket.state
+            # ========== END OF UPDATED CODE ==========
+
             update_vals = {"state": new_status}
 
             if new_status == "resolved":
@@ -1538,6 +1581,19 @@ class CustomerSupportPortal(http.Controller):
 
             _logger.info(f"Ticket {ticket.name} status updated to {new_status}")
 
+            # ========== UPDATED: Send status change email to customer ==========
+            try:
+                # Send status change email (email failures won't break status update)
+                # Only sends for: assigned, in_progress, resolved, closed
+                # Skips: new, pending
+                EmailService.send_status_change_email(ticket, old_status, new_status)
+            except Exception as email_error:
+                # Log error but don't fail the entire operation
+                _logger.error(
+                    f"Status change email failed for ticket {ticket.name}: {str(email_error)}"
+                )
+            # ========== END OF UPDATED CODE ==========
+
             return werkzeug.utils.redirect(
                 f"/customer_support/ticket/{ticket_id}?success=Status updated successfully"
             )
@@ -1549,7 +1605,7 @@ class CustomerSupportPortal(http.Controller):
             )
 
     # ========================================================================
-    # PROFILE MANAGEMENT ROUTES (ALL AUTHENTICATED USERS)
+    # ========== PROFILE MANAGEMENT ROUTES (ALL AUTHENTICATED USERS) ==========
     # ========================================================================
 
     @http.route("/customer_support/profile", type="http", auth="user", website=True)
@@ -1611,7 +1667,7 @@ class CustomerSupportPortal(http.Controller):
         return request.redirect("/customer_support/profile?success=1")
 
     # ========================================================================
-    # LOGOUT ROUTES (ALL AUTHENTICATED USERS)
+    # ========== LOGOUT ROUTES (ALL AUTHENTICATED USERS) ==========
     # ========================================================================
 
     @http.route("/customer_support/logout", type="http", auth="user", website=True)
