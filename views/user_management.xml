@@ -35,7 +35,7 @@
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link sidebar-link"
-                                        href="/customer_support/admin_dashboard/">
+                                        href="/customer_support/admin_dashboard#user-management">
                                         <i class="bi bi-box-arrow-right me-2"></i> Back </a>
                                 </li>
                             </ul>

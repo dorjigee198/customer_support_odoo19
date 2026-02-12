@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="landing_chat" name="Dragon Coders AI Chatbot">
+        <t t-call="web.layout">
+
+            <!-- HEAD -->
+            <t t-set="head">
+                <title>Dragon Coders AI Chatbot</title>
+
+                <!-- Bootstrap 5 CSS -->
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+                    rel="stylesheet" />
+                <link
+                    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+                    rel="stylesheet" />
+
+                <!-- Custom CSS -->
+                <link rel="stylesheet"
+                    href="/customer_support/static/src/css/landing_chat.css" />
+            </t>
+
+            <!-- MAIN CONTENT -->
+            <div class="page-wrapper">
+
+                <!-- WELCOME HEADER -->
+                <div class="welcome-header">
+                    <h1>Welcome to Dragon Chat</h1>
+                    <p>Your AI Assistant powered by Dragon Coders</p>
+                </div>
+
+                <!-- CHAT CONTAINER -->
+                <div class="chat-container">
+
+                    <!-- SCROLLABLE CHAT BOX -->
+                    <div id="chat-box" class="chat-box">
+                        <!-- Messages will appear here -->
+                    </div>
+
+                    <!-- QUICK REPLIES -->
+                    <div class="quick-replies">
+                        <button class="quick-reply-btn" data-msg="Services">Services</button>
+                        <button class="quick-reply-btn" data-msg="Pricing">Pricing</button>
+                        <button class="quick-reply-btn" data-msg="Request Demo">Request Demo</button>
+                        <button class="quick-reply-btn" data-msg="Contact Support">Contact Support</button>
+                    </div>
+
+                    <!-- INPUT AREA -->
+                    <div class="input-area">
+                        <input id="user-input" type="text" placeholder="Type your message..." />
+                        <button id="send-msg-btn">Send</button>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Bootstrap JS -->
+            <script
+                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+            <!-- Chatbot JavaScript -->
+            <script type="text/javascript"
+                src="/customer_support/static/src/js/chatbot.js"></script>
+
+        </t>
+    </template>
+</odoo>
