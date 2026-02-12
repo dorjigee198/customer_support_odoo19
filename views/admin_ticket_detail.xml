@@ -1,0 +1,180 @@
+<odoo>
+    <template id="admin_ticket_detail" name="Admin Ticket Detail View">
+        <t t-call="web.layout">
+            <t t-set="head">
+                <t t-call-assets="web.assets_common" t-js="false" />
+                <t t-call-assets="web.assets_frontend" t-js="false" />
+                <t t-call-assets="web.assets_common" t-css="false" />
+                <t t-call-assets="web.assets_frontend" t-css="false" />
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net" />
+                <link rel="stylesheet"
+                    href="/customer_support/static/src/css/admin_ticket_detail_styles.css" />
+                <style>
+                    .detail-card { border-radius: 10px; border: none; box-shadow: 0 0.125rem 0.25rem
+                    rgba(0, 0, 0, 0.075); }
+                    .info-label { color: #6c757d; font-weight: 600; font-size: 0.85rem;
+                    text-uppercase; }
+                    .info-value { color: #212529; font-weight: 500; }
+                </style>
+            </t>
+
+            <body class="bg-light p-4">
+                <div class="container">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="mb-1">Ticket #<t t-esc="ticket.id" /></h2>
+                            <p class="text-muted mb-0">Reviewing details for: <strong
+                                    t-esc="ticket.subject" /></p>
+                        </div>
+                        <a href="#" id="backToDashboard"
+                            class="btn btn-outline-dark shadow-sm">
+                            <i class="bi bi-arrow-left me-2"></i>Back to List </a>
+                    </div>
+
+                    <div class="row">
+                        <!-- Main Column -->
+                        <div class="col-md-8">
+                            <!-- Description Section -->
+                            <div class="card detail-card mb-4">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3 text-primary">Ticket Description</h5>
+                                    <div class="p-3 bg-white border rounded"
+                                        style="white-space: pre-wrap; min-height: 150px;">
+                                        <t t-esc="ticket.description" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Attachments Section (Optional) -->
+                            <div class="card detail-card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3"><i class="bi bi-paperclip me-1"></i>Attached
+                                        Files</h5>
+                                    <t t-if="attachments">
+                                        <div class="row g-3">
+                                            <t t-foreach="attachments" t-as="attach">
+                                                <div class="col-sm-6">
+                                                    <div
+                                                        class="p-2 border rounded d-flex align-items-center justify-content-between bg-white">
+                                                        <div class="text-truncate me-2">
+                                                            <i
+                                                                class="bi bi-file-earmark-text text-primary me-2"></i>
+                                                            <span class="small" t-esc="attach.name" />
+                                                        </div>
+                                                        <a
+                                                            t-attf-href="/web/content/#{attach.id}?download=true&amp;access_token=#{attach.access_token}"
+                                                            class="btn btn-primary shadow-sm"
+                                                            style="position: relative; z-index: 1000; pointer-events: auto !important; cursor: pointer;"
+                                                            target="_blank">
+                                                            <i class="bi bi-download me-1"></i>
+                                                            Download</a>
+
+
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </t>
+                                    <t t-else="">
+                                        <div
+                                            class="text-center py-3 text-muted border border-dashed rounded">
+                                            <small>No attachments found for this ticket.</small>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sidebar: Showing All Your Table Fields -->
+                        <div class="col-md-4">
+                            <div class="card detail-card">
+                                <div class="card-body">
+                                    <h5 class="card-title border-bottom pb-2 mb-3">Ticket
+                                        Information</h5>
+
+                                    <div class="mb-3">
+                                        <div class="info-label">SL.NO</div>
+                                        <div class="info-value">#<t t-esc="ticket.id" /></div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="info-label">CLIENT</div>
+                                        <div class="info-value">
+                                            <t t-esc="ticket.customer_id.name" />
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="info-label">PRIORITY</div>
+                                        <div>
+                                            <span
+                                                t-att-class="'priority-badge priority-' + ticket.priority">
+                                                <t t-esc="ticket.priority.capitalize()" />
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="info-label">STATUS</div>
+                                        <div>
+                                            <span class="status-badge"
+                                                t-att-class="'status-' + ticket.state">
+                                                <t
+                                                    t-esc="ticket.state.replace('_', ' ').capitalize()" />
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <div class="info-label">CREATED ON</div>
+                                        <div class="info-value">
+                                            <t t-esc="ticket.create_date.strftime('%Y-%m-%d %H:%M')" />
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-0">
+                                        <div class="info-label">ASSIGNED TO</div>
+                                        <div class="info-value">
+                                            <t t-if="ticket.assigned_to">
+                                                <i class="bi bi-person-check text-success me-1"></i>
+                                                <t t-esc="ticket.assigned_to.name" />
+                                            </t>
+                                            <t t-else="">
+                                                <span class="text-muted"><i
+                                                        class="bi bi-dash-circle me-1"></i>
+                                                    Unassigned</span>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JavaScript for Back Button Navigation -->
+                <script type="text/javascript">
+                    <![CDATA[
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var backButton = document.getElementById('backToDashboard');
+                        
+                        if (backButton) {
+                            backButton.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                
+                                // Navigate to admin dashboard with ticket assignment tab active
+                                window.location.href = '/customer_support/admin_dashboard#ticket-assignment';
+                                
+                                // Alternative: If you're using Bootstrap tabs with data attributes
+                                // window.location.href = '/customer_support/admin_dashboard?tab=ticket-assignment';
+                            });
+                        }
+                    });
+                    ]]>
+                </script>
+            </body>
+        </t>
+    </template>
+
+</odoo>

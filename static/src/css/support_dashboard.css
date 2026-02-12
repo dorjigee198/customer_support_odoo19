@@ -992,3 +992,89 @@
         font-size: 0.85rem;
     }
 }
+
+/* Dropdown Menu Container */
+.dropdown-menu {
+    background-color: #f0f9ff !important;
+    border: 1px solid #e0f2fe !important;
+    border-radius: 8px !important;
+    min-width: 220px;
+    box-shadow: 0 10px 25px rgba(12, 74, 110, 0.1) !important;
+    padding: 0.5rem 0 !important;
+}
+
+/* Dropdown Items */
+.dropdown-item {
+    color: #0c4a6e !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+    border-radius: 4px !important;
+    margin: 0.125rem 0.5rem !important;
+}
+
+/* Dropdown Items Hover */
+.dropdown-item:hover {
+    background-color: #e0f2fe !important;
+    color: #0c4a6e !important;
+    transform: translateX(2px);
+}
+
+/* Icons within dropdown */
+.dropdown-item .bi {
+    color: #0c4a6e !important;
+    font-size: 1.1rem;
+    width: 20px;
+}
+
+/* Dropdown Divider */
+.dropdown-divider {
+    border-color: #e0f2fe !important;
+    margin: 0.5rem 1rem !important;
+    opacity: 0.8;
+}
+
+/* Logout Item Specific */
+.dropdown-item.text-danger {
+    color: #0c4a6e !important;
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: rgba(12, 74, 110, 0.1) !important;
+    color: #0c4a6e !important;
+}
+
+/* Active/Focused State */
+.dropdown-item:focus {
+    background-color: #e0f2fe !important;
+    color: #0c4a6e !important;
+    outline: none !important;
+    box-shadow: 0 0 0 2px rgba(12, 74, 110, 0.1) !important;
+}
+
+/* Animation for dropdown appearance */
+@keyframes dropdownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-menu.show {
+    animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

@@ -356,15 +356,19 @@ class CustomerSupportPortal(http.Controller):
                 )
 
             # Create ticket
-            ticket = request.env["customer.support"].create(
-                {
-                    "subject": subject,
-                    "description": description,
-                    "priority": post_dict.get("priority", "medium"),
-                    "customer_id": user.partner_id.id,
-                    "project_id": int(project_id),  # ADDED: Save project_id
-                    "state": "new",
-                }
+            ticket = (
+                request.env["customer.support"]
+                .sudo()
+                .create(
+                    {
+                        "subject": subject,
+                        "description": description,
+                        "priority": post_dict.get("priority", "medium"),
+                        "customer_id": user.partner_id.id,
+                        "project_id": int(project_id),  # ADDED: Save project_id
+                        "state": "new",
+                    }
+                )
             )
 
             # Handle attachments
@@ -377,7 +381,7 @@ class CustomerSupportPortal(http.Controller):
                         if uploaded_file and uploaded_file.filename:
                             file_data = uploaded_file.read()
                             if file_data:
-                                request.env["ir.attachment"].create(
+                                request.env["ir.attachment"].sudo().create(
                                     {
                                         "name": uploaded_file.filename,
                                         "type": "binary",
