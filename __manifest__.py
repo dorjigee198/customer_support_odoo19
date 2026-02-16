@@ -32,6 +32,7 @@
         "views/user_management.xml",
         "views/system_configuration.xml",
         "views/templates/ticket_detail.xml",
+        "views/templates/customer_ticket_detail.xml",
     ],
     "assets": {
         "web.assets_backend": [
@@ -46,6 +47,7 @@
             "customer_support/static/src/js/chatbot.js",
             "customer_support/static/src/css/chatbot.css",
             "customer_support/static/src/css/ticket_details.css",
+            "customer_support/static/src/css/customer_ticket_details.css",
             "customer_support/static/src/css/project_configuration.css",
             "customer_support/static/src/js/project_configuration.js",
         ],

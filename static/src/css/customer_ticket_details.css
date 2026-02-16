@@ -1,80 +1,9 @@
-/* Ticket Detail View Styles - Updated with Menu Bar */
+/* Customer Ticket Detail View Styles - Read-Only Version */
 
 .dashboard-wrapper {
     min-height: 100vh;
     background: #E8F1F8;
 }
-
-/* ========== SEARCH BAR SECTION ========== 
-
-.search-bar-section {
-    background: white;
-    padding: 1rem 2rem;
-    border-bottom: 1px solid #E0E0E0;
-}
-
-.search-container {
-    max-width: 1600px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-
-.btn-back {
-    background: white;
-    border: 1px solid #E0E0E0;
-    border-radius: 8px;
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-}
-
-.btn-back:hover {
-    background: #F5F5F5;
-    border-color: #1E5A7D;
-}
-
-.btn-back i {
-    font-size: 1.2rem;
-    color: #1E5A7D;
-}
-
-.search-input-wrapper {
-    flex: 1;
-    max-width: 700px;
-    position: relative;
-}
-
-.search-input-wrapper i {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9E9E9E;
-    font-size: 1rem;
-}
-
-.search-input {
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 3rem;
-    border: 1px solid #E0E0E0;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    background: #F8F9FA;
-}
-
-.search-input:focus {
-    background: white;
-    border-color: #1E5A7D;
-    box-shadow: 0 0 0 0.2rem rgba(30, 90, 125, 0.15);
-    outline: none;
-} */
 
 /* ========== CONTENT AREA ========== */
 
@@ -91,7 +20,7 @@
     gap: 1.5rem;
 }
 
-/* ========== INFORMATION BANNER ========== */
+/* ========== INFORMATION BANNER (Customer-specific styling) ========== */
 
 .info-banner {
     background: #E3F2FD;
@@ -403,7 +332,7 @@
     font-size: 0.9rem;
 }
 
-/* ========== SIDEBAR - PROPERTIES CARD ========== */
+/* ========== SIDEBAR - PROPERTIES CARD (READ-ONLY) ========== */
 
 .ticket-sidebar-column {
     display: flex;
@@ -457,27 +386,7 @@
     margin-bottom: 0.5rem;
 }
 
-.status-form {
-    margin: 0;
-}
-
-.status-select {
-    width: 100%;
-    background: #0EA5E9;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0.5rem 1rem;
-    font-weight: 500;
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-
-.status-select:focus {
-    box-shadow: 0 0 0 0.2rem rgba(14, 165, 233, 0.25);
-    outline: none;
-}
-
+/* Read-only status display for customers */
 .status-display {
     padding: 0.5rem 1rem;
     border-radius: 6px;
@@ -543,45 +452,126 @@
     border-color: #EF9A9A;
 }
 
-.assignee-info,
-.customer-info {
+.assignee-info {
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
-.assignee-avatar,
-.customer-avatar {
+.assignee-avatar {
     width: 48px;
     height: 48px;
     border-radius: 50%;
     border: 2px solid #E0E0E0;
 }
 
-.assignee-details,
-.customer-details {
+.assignee-details {
     flex: 1;
 }
 
-.assignee-details strong,
-.customer-details strong {
+.assignee-details strong {
     display: block;
     color: #1E3A5F;
     font-size: 0.95rem;
     margin-bottom: 0.25rem;
 }
 
-.assignee-email,
-.customer-email {
+.assignee-email {
     display: block;
     color: #1565C0;
     font-size: 0.85rem;
 }
 
-/* ========== CUSTOMER INFORMATION CARD ========== */
+/* Resolution notes styling */
+.resolution-notes {
+    background: #F8F9FA;
+    border: 1px solid #E0E0E0;
+    border-radius: 6px;
+    padding: 0.75rem;
+    color: #37474F;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
 
-.info-card .customer-info {
-    padding: 1.25rem;
+/* ========== TIMELINE CARD ========== */
+
+.timeline-list {
+    padding: 1rem 1.25rem;
+}
+
+.timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 40px;
+    bottom: -24px;
+    width: 2px;
+    background: #E0E0E0;
+}
+
+.timeline-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.timeline-icon.created {
+    background: #E3F2FD;
+    color: #1976D2;
+}
+
+.timeline-icon.assigned {
+    background: #FFF3E0;
+    color: #F57C00;
+}
+
+.timeline-icon.resolved {
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+.timeline-icon.closed {
+    background: #F5F5F5;
+    color: #616161;
+}
+
+.timeline-icon i {
+    font-size: 1rem;
+}
+
+.timeline-content {
+    flex: 1;
+    padding-top: 0.25rem;
+}
+
+.timeline-content strong {
+    display: block;
+    color: #1E3A5F;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+}
+
+.timeline-date {
+    display: block;
+    color: #78909C;
+    font-size: 0.8rem;
 }
 
 /* ========== PROJECT INFO ========== */
@@ -617,7 +607,6 @@
         transform: translateX(100%);
         opacity: 0;
     }
-
     to {
         transform: translateX(0);
         opacity: 1;
@@ -678,14 +667,6 @@
         display: none;
     }
 
-    .search-bar-section {
-        padding: 1rem;
-    }
-
-    .search-input-wrapper {
-        max-width: 100%;
-    }
-
     .ticket-detail-content {
         padding: 1rem;
     }
@@ -718,12 +699,51 @@
     .message-avatar {
         align-self: flex-start;
     }
+
+    .timeline-item:not(:last-child)::after {
+        left: 14px;
+    }
+
+    .timeline-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .timeline-icon i {
+        font-size: 0.85rem;
+    }
+}
+.read-only-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #E3F2FD;
+    border: 1px solid #90CAF9;
+    border-radius: 8px;
 }
 
-/* ========== LOADING STATE ========== */
+.read-only-info i {
+    color: #1976D2;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
 
-.status-select:disabled,
-.btn-send:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+.read-only-info .info-content {
+    flex: 1;
+}
+
+.read-only-info .info-content strong {
+    display: block;
+    color: #0D47A1;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.read-only-info .info-content p {
+    color: #1565C0;
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
 }

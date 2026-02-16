@@ -1173,21 +1173,45 @@ class CustomerSupportPortal(http.Controller):
 
             # ============ RETRIEVE MESSAGES FOR DISPLAY ============
             activities = []
-
-            # METHOD 1: Try using message_ids from ticket
+            
+            # Empty patterns to filter out
+            empty_patterns = [
+                '<p><br></p>', '<br>', '<p></p>', '<p><br/></p>',
+                '<div><br></div>', '<p> </p>', '',
+            ]
+            
+            # Try using message_ids from ticket with filtering
             try:
                 if hasattr(ticket, "message_ids") and ticket.message_ids:
-                    # Filter only comment and notification types
+                    all_messages = ticket.message_ids.sorted(key=lambda r: r.date, reverse=True)
+                    
+                    # Filter out empty messages
+                    filtered_messages = all_messages.filtered(
+                        lambda m: (
+                            m.body and
+                            m.body.strip() and
+                            m.body.strip() not in empty_patterns and
+                            m.message_type in ['comment', 'notification']
+                        )
+                    )
+                    
+                    activities = list(filtered_messages)
+                    _logger.info(
+                        f"✓ Ticket {ticket_id}: {len(all_messages)} total, "
+                        f"{len(activities)} displayed after filtering"
+                    )
+            except Exception as e:
+                _logger.error(f"✗ message filtering failed: {str(e)}")
+                # Fallback to your original method
+                try:
                     activities = list(
                         ticket.message_ids.filtered(
                             lambda m: m.message_type in ["comment", "notification"]
                         ).sorted(key=lambda r: r.date, reverse=True)
                     )
-                    _logger.info(
-                        f"✓ Found {len(activities)} messages using message_ids for ticket {ticket_id}"
-                    )
-            except Exception as e:
-                _logger.error(f"✗ message_ids failed: {str(e)}")
+                except Exception as e2:
+                    _logger.error(f"✗ fallback also failed: {str(e2)}")
+                    activities = []
 
             # METHOD 2: Search mail.message table if METHOD 1 failed
             if not activities:

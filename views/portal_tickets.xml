@@ -136,7 +136,6 @@
                             <option value="new">New</option>
                             <option value="assigned">Assigned</option>
                             <option value="in_progress">In Progress</option>
-                            <option value="pending">Pending</option>
                             <option value="resolved">Resolved</option>
                             <option value="closed">Closed</option>
                         </select>
@@ -247,57 +246,115 @@
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
             <!-- Tickets JavaScript -->
-            <script> document.addEventListener('DOMContentLoaded', function() { // Search
-                functionality const searchInput = document.getElementById('ticket-search'); const
-                statusFilter = document.getElementById('status-filter'); const priorityFilter =
-                document.getElementById('priority-filter'); const ticketsList =
-                document.getElementById('tickets-list'); const clearSearchBtn =
-                document.getElementById('clear-search'); function filterTickets() { const searchTerm
-                = searchInput.value.toLowerCase(); const statusValue = statusFilter.value; const
-                priorityValue = priorityFilter.value; if (ticketsList) { const ticketCards =
-                ticketsList.querySelectorAll('.ticket-card'); ticketCards.forEach(card => { const
-                title = card.querySelector('.ticket-title').textContent.toLowerCase(); const
-                description = card.querySelector('.ticket-description').textContent.toLowerCase();
-                const statusBadge = card.querySelector('.ticket-status-badge'); const priorityBadge
-                = card.querySelector('.priority-badge'); let statusClass = ''; if (statusBadge) {
-                statusClass = statusBadge.className; } let priorityClass = ''; if (priorityBadge) {
-                priorityClass = priorityBadge.className; } const matchesSearch = searchTerm === ''
-                || title.includes(searchTerm) || description.includes(searchTerm); const
-                matchesStatus = statusValue === '' || statusClass.includes('status-' + statusValue);
-                const matchesPriority = priorityValue === '' || priorityClass.includes('priority-' +
-                priorityValue); if (matchesSearch &amp; matchesStatus &amp; matchesPriority) {
-                card.style.display = 'block'; } else { card.style.display = 'none'; } }); // Show
-                empty message if no tickets match const visibleTickets =
-                Array.from(ticketCards).filter(card => card.style.display !== 'none' ); if
-                (visibleTickets.length === 0 &amp; ticketsList.querySelector('.no-results-message')
-                === null) { const noResults = document.createElement('div'); noResults.className =
-                'empty-state no-results-message'; noResults.innerHTML = ` <div
-                    class="empty-state-icon">
-                    <i class="bi bi-search"></i>
-                </div>
-                                    <h3 class="mb-3">No Tickets
-                Found</h3>
+            <script>
+                //<![CDATA[
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Search functionality
+                    const searchInput = document.getElementById('ticket-search');
+                    const statusFilter = document.getElementById('status-filter');
+                    const priorityFilter = document.getElementById('priority-filter');
+                    const ticketsList = document.getElementById('tickets-list');
+                    const clearSearchBtn = document.getElementById('clear-search');
+
+                    function filterTickets() {
+                        const searchTerm = searchInput.value.toLowerCase();
+                        const statusValue = statusFilter.value;
+                        const priorityValue = priorityFilter.value;
+
+                        if (ticketsList) {
+                            const ticketCards = ticketsList.querySelectorAll('.ticket-card');
+                            
+                            ticketCards.forEach(card => {
+                                const title = card.querySelector('.ticket-title').textContent.toLowerCase();
+                                const description = card.querySelector('.ticket-description').textContent.toLowerCase();
+                                const statusBadge = card.querySelector('.ticket-status-badge');
+                                const priorityBadge = card.querySelector('.priority-badge');
+
+                                let statusClass = '';
+                                if (statusBadge) {
+                                    statusClass = statusBadge.className;
+                                }
+
+                                let priorityClass = '';
+                                if (priorityBadge) {
+                                    priorityClass = priorityBadge.className;
+                                }
+
+                                const matchesSearch = searchTerm === '' || title.includes(searchTerm) || description.includes(searchTerm);
+                                const matchesStatus = statusValue === '' || statusClass.includes('status-' + statusValue);
+                                const matchesPriority = priorityValue === '' || priorityClass.includes('priority-' + priorityValue);
+
+                                if (matchesSearch && matchesStatus && matchesPriority) {
+                                    card.style.display = 'block';
+                                } else {
+                                    card.style.display = 'none';
+                                }
+                            });
+
+                            // Show empty message if no tickets match
+                            const visibleTickets = Array.from(ticketCards).filter(card => card.style.display !== 'none');
+                            
+                            if (visibleTickets.length === 0 && ticketsList.querySelector('.no-results-message') === null) {
+                                const noResults = document.createElement('div');
+                                noResults.className = 'empty-state no-results-message';
+                                noResults.innerHTML = `
+                                    <div class="empty-state-icon">
+                                        <i class="bi bi-search"></i>
+                                    </div>
+                                    <h3 class="mb-3">No Tickets Found</h3>
                                     <p class="text-muted mb-4">Try adjusting your search or filters</p>
-                                    <button
-                    class="btn btn-outline-primary" id="clear-filters">
-                    Clear All Filters
-                </button> `;
-                ticketsList.appendChild(noResults); // Add event listener to clear filters button
-                document.getElementById('clear-filters').addEventListener('click', function() {
-                searchInput.value = ''; statusFilter.value = ''; priorityFilter.value = '';
-                filterTickets(); }); } else { const noResultsMsg =
-                ticketsList.querySelector('.no-results-message'); if (noResultsMsg) {
-                noResultsMsg.remove(); } } } } // Event listeners
-                searchInput.addEventListener('input', filterTickets);
-                statusFilter.addEventListener('change', filterTickets);
-                priorityFilter.addEventListener('change', filterTickets);
-                clearSearchBtn.addEventListener('click', function() { searchInput.value = '';
-                statusFilter.value = ''; priorityFilter.value = ''; filterTickets(); }); // Make
-                ticket cards clickable document.querySelectorAll('.ticket-card').forEach(card => {
-                card.addEventListener('click', function(e) { // Don't trigger if clicking on a link
-                or button inside if (!e.target.closest('a') &amp; !e.target.closest('button')) {
-                const ticketId = this.getAttribute('data-ticket-id'); if (ticketId) {
-                window.location = '/customer_support/ticket/' + ticketId; } } }); }); }); </script>
+                                    <button class="btn btn-outline-primary" id="clear-filters">
+                                        Clear All Filters
+                                    </button>
+                                `;
+                                ticketsList.appendChild(noResults);
+
+                                // Add event listener to clear filters button
+                                document.getElementById('clear-filters').addEventListener('click', function() {
+                                    searchInput.value = '';
+                                    statusFilter.value = '';
+                                    priorityFilter.value = '';
+                                    filterTickets();
+                                });
+                            } else {
+                                const noResultsMsg = ticketsList.querySelector('.no-results-message');
+                                if (noResultsMsg) {
+                                    noResultsMsg.remove();
+                                }
+                            }
+                        }
+                    }
+
+                    // Event listeners
+                    searchInput.addEventListener('input', filterTickets);
+                    statusFilter.addEventListener('change', filterTickets);
+                    priorityFilter.addEventListener('change', filterTickets);
+                    
+                    clearSearchBtn.addEventListener('click', function() {
+                        searchInput.value = '';
+                        statusFilter.value = '';
+                        priorityFilter.value = '';
+                        filterTickets();
+                    });
+
+                    // Make ticket cards clickable
+                    // ========== UPDATED: Use customer route ==========
+                    document.querySelectorAll('.ticket-card').forEach(card => {
+                        card.addEventListener('click', function(e) {
+                            // Don't trigger if clicking on a link or button inside
+                            if (!e.target.closest('a') && !e.target.closest('button')) {
+                                const ticketId = this.getAttribute('data-ticket-id');
+                                if (ticketId) {
+                                    // CHANGED: Use customer-specific route
+                                    window.location = '/customer_support/customer/ticket/' + ticketId;
+                                }
+                            }
+                        });
+                    });
+                    // ========== END OF UPDATE ==========
+                });
+                //]]>
+            </script>
         </t>
     </template>
 </odoo>
