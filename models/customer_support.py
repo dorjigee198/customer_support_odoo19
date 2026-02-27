@@ -59,7 +59,7 @@ class CustomerSupport(models.Model):
     state = fields.Selection(
         [
             ("new", "New"),
-            ("open", "Open"),
+            ("assigned", "Assigned"),
             ("in_progress", "In Progress"),
             ("resolved", "Resolved"),
             ("closed", "Closed"),

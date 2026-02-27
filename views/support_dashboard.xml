@@ -497,8 +497,8 @@
                                                     <t t-set="state_class" t-value="'status-in-progress'" />
                                                     <t t-set="state_display" t-value="'In Progress'" />
                                                 </t>
-                                                <t t-elif="ticket.state == 'open'">
-                                                    <t t-set="state_class" t-value="'status-open'" />
+                                                <t t-elif="ticket.state == 'assigned'">
+                                                    <t t-set="state_class" t-value="'status-assigned'" />
                                                 </t>
                                                 <t t-elif="ticket.state == 'resolved'">
                                                     <t t-set="state_class" t-value="'status-resolved'" />

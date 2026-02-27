@@ -130,7 +130,7 @@ class CustomerSupportPortal(http.Controller):
 
             ticket_counts = {
                 "new": len(tickets.filtered(lambda t: t.state == "new")),
-                "open": len(tickets.filtered(lambda t: t.state == "open")),
+                "assigned": len(tickets.filtered(lambda t: t.state == "assigned")),
                 "in_progress": len(
                     tickets.filtered(lambda t: t.state == "in_progress")
                 ),
@@ -336,7 +336,7 @@ class CustomerSupportPortal(http.Controller):
 
         ticket_counts = {
             "new": len(tickets.filtered(lambda t: t.state == "new")),
-            "open": len(tickets.filtered(lambda t: t.state == "open")),
+            "assigned": len(tickets.filtered(lambda t: t.state == "assigned")),
             "resolved": len(tickets.filtered(lambda t: t.state == "resolved")),
             "closed": len(tickets.filtered(lambda t: t.state == "closed")),
             "total": len(tickets),
@@ -350,7 +350,7 @@ class CustomerSupportPortal(http.Controller):
                 "ticket_counts": ticket_counts,
                 "page_name": "admin_dashboard",
                 "analytics": {                  
-                    "open_tickets": ticket_counts.get("new", 0) + ticket_counts.get("open", 0),
+                    "open_tickets": ticket_counts.get("new", 0) + ticket_counts.get("assigned", 0),
                     "total_tickets": ticket_counts.get("total", 0),
                     "high_priority": 0,
                     "urgent": 0,

@@ -66,7 +66,7 @@ class SupportDashboard(http.Controller):
                     'error': 'Ticket not found'
                 }
 
-            valid_phases = ['new', 'open', 'in_progress', 'resolved', 'closed']
+            valid_phases = ['new', 'assigned', 'in_progress', 'resolved', 'closed']
             if new_phase not in valid_phases:
                 return {
                     'success': False, 
