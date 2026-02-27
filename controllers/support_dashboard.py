@@ -14,15 +14,19 @@ class SupportDashboard(http.Controller):
         """
         Main dashboard route for focal persons (support staff)
         """
+        user = request.env.user
         # Ensure only focal persons can access
-        if not request.env.user.has_group("base.group_user"):
+        if not user.has_group("base.group_user"):
             return werkzeug.utils.redirect(
                 "/customer_support/login?error=Access Denied"
             )
 
-        # Get tickets assigned to this user
+        # Redirect admins to their own dashboard
+        if user.has_group("base.group_system"):
+            return werkzeug.utils.redirect("/customer_support/admin_dashboard")
+
         tickets = request.env["customer.support"].search(
-            [("assigned_to", "=", request.env.user.id)]
+            [("assigned_to", "=", user.id)]
         )
 
         # Get analytics data (for Overview page)
@@ -150,7 +154,6 @@ class SupportDashboard(http.Controller):
         tickets = request.env["customer.support"].search(
             domain, order="create_date desc"
         )
-
         tickets_data = []
         for ticket in tickets:
             try:

@@ -1,180 +1,417 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="admin_ticket_detail" name="Admin Ticket Detail View">
         <t t-call="web.layout">
             <t t-set="head">
-                <t t-call-assets="web.assets_common" t-js="false" />
-                <t t-call-assets="web.assets_frontend" t-js="false" />
-                <t t-call-assets="web.assets_common" t-css="false" />
-                <t t-call-assets="web.assets_frontend" t-css="false" />
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net" />
-                <link rel="stylesheet"
-                    href="/customer_support/static/src/css/admin_ticket_detail_styles.css" />
-                <style>
-                    .detail-card { border-radius: 10px; border: none; box-shadow: 0 0.125rem 0.25rem
-                    rgba(0, 0, 0, 0.075); }
-                    .info-label { color: #6c757d; font-weight: 600; font-size: 0.85rem;
-                    text-uppercase; }
-                    .info-value { color: #212529; font-weight: 500; }
-                </style>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet"/>
+                <link rel="stylesheet" href="/customer_support/static/src/css/admin_ticket_detail_styles.css"/>
+                <link rel="stylesheet" href="/customer_support/static/src/css/customer_ticket_details.css"/>
             </t>
 
-            <body class="bg-light p-4">
-                <div class="container">
-                    <!-- Header -->
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <div>
-                            <h2 class="mb-1">Ticket #<t t-esc="ticket.id" /></h2>
-                            <p class="text-muted mb-0">Reviewing details for: <strong
-                                    t-esc="ticket.subject" /></p>
-                        </div>
-                        <a href="#" id="backToDashboard"
-                            class="btn btn-outline-dark shadow-sm">
-                            <i class="bi bi-arrow-left me-2"></i>Back to List </a>
-                    </div>
+            <div class="dashboard-wrapper">
+                <!-- Ticket Detail Content -->
+                <div class="page-content ticket-detail-content">
+                    <div class="ticket-detail-container">
 
-                    <div class="row">
-                        <!-- Main Column -->
-                        <div class="col-md-8">
-                            <!-- Description Section -->
-                            <div class="card detail-card mb-4">
-                                <div class="card-body">
-                                    <h5 class="card-title mb-3 text-primary">Ticket Description</h5>
-                                    <div class="p-3 bg-white border rounded"
-                                        style="white-space: pre-wrap; min-height: 150px;">
-                                        <t t-esc="ticket.description" />
-                                    </div>
+                        <!-- Left Column - Ticket Information -->
+                        <div class="ticket-main-column">
+
+                            <!-- Back Button -->
+                            <div class="mb-3">
+                                <a href="#" id="backToDashboard" class="btn btn-outline-primary">
+                                    <i class="bi bi-arrow-left me-2"></i>
+                                    Back to List
+                                </a>
+                            </div>
+
+                            <!-- Admin Info Banner -->
+                            <div class="info-banner admin-banner">
+                                <i class="bi bi-shield-check-fill"></i>
+                                <div class="info-text">
+                                    <strong>Admin View — Support Ticket</strong>
+                                    <p>You have full access to manage this ticket. You can assign agents, update status, priority, and communicate with the customer.</p>
                                 </div>
                             </div>
 
-                            <!-- Attachments Section (Optional) -->
-                            <div class="card detail-card">
-                                <div class="card-body">
-                                    <h5 class="card-title mb-3"><i class="bi bi-paperclip me-1"></i>Attached
-                                        Files</h5>
+                            <!-- Success/Error Messages -->
+                            <div class="alert alert-success alert-dismissible fade show notification-alert" t-if="success">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <strong>Success!</strong> <t t-esc="success"/>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            <div class="alert alert-danger alert-dismissible fade show notification-alert" t-if="error">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                <strong>Error!</strong> <t t-esc="error"/>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+
+                            <!-- Ticket Header Card -->
+                            <div class="ticket-header-card">
+                                <div class="ticket-id-badges">
+                                    <span class="ticket-id-badge">
+                                        #<t t-esc="ticket.id"/>
+                                    </span>
+
+                                    <!-- Priority Badge -->
+                                    <t t-set="priority_class" t-value="''"/>
+                                    <t t-if="ticket.priority == 'low'">
+                                        <t t-set="priority_class" t-value="'priority-low'"/>
+                                    </t>
+                                    <t t-elif="ticket.priority == 'medium'">
+                                        <t t-set="priority_class" t-value="'priority-medium'"/>
+                                    </t>
+                                    <t t-elif="ticket.priority == 'high'">
+                                        <t t-set="priority_class" t-value="'priority-high'"/>
+                                    </t>
+                                    <t t-elif="ticket.priority == 'urgent'">
+                                        <t t-set="priority_class" t-value="'priority-urgent'"/>
+                                    </t>
+                                    <span t-att-class="'priority-badge ' + priority_class">
+                                        <t t-esc="ticket.priority.title() if ticket.priority else 'Low'"/>
+                                    </span>
+
+                                    <!-- State Badge -->
+                                    <t t-set="state_class" t-value="''"/>
+                                    <t t-if="ticket.state == 'new'">
+                                        <t t-set="state_class" t-value="'state-new'"/>
+                                    </t>
+                                    <t t-elif="ticket.state == 'in_progress'">
+                                        <t t-set="state_class" t-value="'state-progress'"/>
+                                    </t>
+                                    <t t-elif="ticket.state == 'resolved'">
+                                        <t t-set="state_class" t-value="'state-resolved'"/>
+                                    </t>
+                                    <t t-elif="ticket.state == 'closed'">
+                                        <t t-set="state_class" t-value="'state-closed'"/>
+                                    </t>
+                                    <span t-att-class="'state-badge ' + state_class">
+                                        <t t-esc="ticket.state.replace('_', ' ').title()"/>
+                                    </span>
+                                </div>
+
+                                <h1 class="ticket-title">
+                                    <t t-esc="ticket.subject"/>
+                                </h1>
+
+                                <div class="ticket-meta-info">
+                                    <span class="meta-item">
+                                        <i class="bi bi-person"></i>
+                                        <t t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown Client'"/>
+                                    </span>
+                                    <span class="meta-divider">•</span>
+                                    <span class="meta-item">
+                                        <i class="bi bi-calendar"></i>
+                                        <t t-esc="ticket.create_date.strftime('%B %d, %Y at %I:%M %p') if ticket.create_date else 'N/A'"/>
+                                    </span>
+                                </div>
+
+                                <div class="ticket-description">
+                                    <t t-if="ticket.description">
+                                        <t t-esc="ticket.description"/>
+                                    </t>
+                                    <t t-else="">
+                                        <p class="text-muted">No description provided.</p>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <!-- Attachments Section -->
+                            <div class="communication-section">
+                                <div class="section-header">
+                                    <i class="bi bi-paperclip"></i>
+                                    <h3>Attached Files</h3>
+                                </div>
+                                <div class="communication-messages">
                                     <t t-if="attachments">
                                         <div class="row g-3">
                                             <t t-foreach="attachments" t-as="attach">
                                                 <div class="col-sm-6">
-                                                    <div
-                                                        class="p-2 border rounded d-flex align-items-center justify-content-between bg-white">
+                                                    <div class="p-2 border rounded d-flex align-items-center justify-content-between bg-white">
                                                         <div class="text-truncate me-2">
-                                                            <i
-                                                                class="bi bi-file-earmark-text text-primary me-2"></i>
-                                                            <span class="small" t-esc="attach.name" />
+                                                            <i class="bi bi-file-earmark-text text-primary me-2"></i>
+                                                            <span class="small" t-esc="attach.name"/>
                                                         </div>
-                                                        <a
-                                                            t-attf-href="/web/content/#{attach.id}?download=true&amp;access_token=#{attach.access_token}"
-                                                            class="btn btn-primary shadow-sm"
-                                                            style="position: relative; z-index: 1000; pointer-events: auto !important; cursor: pointer;"
-                                                            target="_blank">
-                                                            <i class="bi bi-download me-1"></i>
-                                                            Download</a>
-
-
+                                                        <a t-attf-href="/web/content/#{attach.id}?download=true&amp;access_token=#{attach.access_token}"
+                                                           class="btn btn-sm btn-primary shadow-sm"
+                                                           target="_blank">
+                                                            <i class="bi bi-download me-1"></i>Download
+                                                        </a>
                                                     </div>
                                                 </div>
                                             </t>
                                         </div>
                                     </t>
                                     <t t-else="">
-                                        <div
-                                            class="text-center py-3 text-muted border border-dashed rounded">
-                                            <small>No attachments found for this ticket.</small>
+                                        <div class="empty-state">
+                                            <i class="bi bi-paperclip"></i>
+                                            <p>No attachments found for this ticket.</p>
                                         </div>
                                     </t>
                                 </div>
                             </div>
+
+                            <!-- Communication Section -->
+                            <div class="communication-section mt-4">
+                                <div class="section-header">
+                                    <i class="bi bi-chat-left-text-fill"></i>
+                                    <h3>Communication</h3>
+                                </div>
+
+                                <!-- Messages List -->
+                                <div class="communication-messages" id="communicationMessages">
+                                    <t t-if="activities and len(activities) > 0">
+                                        <t t-foreach="activities" t-as="activity">
+                                            <div class="message-item" t-att-data-message-id="activity.id">
+                                                <t t-set="author_id" t-value="activity.author_id.id if activity.author_id else request.env.user.partner_id.id"/>
+                                                <img t-att-src="'/web/image/res.partner/%s/avatar_128' % author_id"
+                                                     alt="Avatar"
+                                                     class="message-avatar"
+                                                     onerror="this.src='/web/static/img/avatar_gray.svg'"/>
+                                                <div class="message-content">
+                                                    <div class="message-header">
+                                                        <strong>
+                                                            <t t-esc="activity.author_id.name if activity.author_id else 'System'"/>
+                                                        </strong>
+                                                        <span class="message-time">
+                                                            <t t-if="activity.date">
+                                                                <t t-esc="activity.date.strftime('%B %d, %Y at %I:%M %p')"/>
+                                                            </t>
+                                                            <t t-else="">Recently</t>
+                                                        </span>
+                                                    </div>
+                                                    <div class="message-body">
+                                                        <t t-if="activity.body">
+                                                            <t t-raw="activity.body"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            <em class="text-muted">[Empty message]</em>
+                                                        </t>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="empty-state">
+                                            <i class="bi bi-chat-left-text"></i>
+                                            <p>No messages yet.</p>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+
                         </div>
 
-                        <!-- Sidebar: Showing All Your Table Fields -->
-                        <div class="col-md-4">
-                            <div class="card detail-card">
-                                <div class="card-body">
-                                    <h5 class="card-title border-bottom pb-2 mb-3">Ticket
-                                        Information</h5>
+                        <!-- Right Sidebar -->
+                        <div class="ticket-sidebar-column">
 
-                                    <div class="mb-3">
-                                        <div class="info-label">SL.NO</div>
-                                        <div class="info-value">#<t t-esc="ticket.id" /></div>
+                            <!-- Ticket Information Card -->
+                            <div class="properties-card">
+                                <div class="card-header-custom">
+                                    <i class="bi bi-info-circle-fill"></i>
+                                    <h3>Ticket Information</h3>
+                                </div>
+
+                                <div class="property-item">
+                                    <label class="property-label">Status</label>
+                                    <t t-set="state_class" t-value="''"/>
+                                    <t t-if="ticket.state == 'new'">
+                                        <t t-set="state_class" t-value="'state-new'"/>
+                                    </t>
+                                    <t t-elif="ticket.state == 'in_progress'">
+                                        <t t-set="state_class" t-value="'state-progress'"/>
+                                    </t>
+                                    <t t-elif="ticket.state == 'resolved'">
+                                        <t t-set="state_class" t-value="'state-resolved'"/>
+                                    </t>
+                                    <t t-elif="ticket.state == 'closed'">
+                                        <t t-set="state_class" t-value="'state-closed'"/>
+                                    </t>
+                                    <div t-att-class="'status-display ' + state_class">
+                                        <t t-esc="ticket.state.replace('_', ' ').title()"/>
                                     </div>
+                                </div>
 
-                                    <div class="mb-3">
-                                        <div class="info-label">CLIENT</div>
-                                        <div class="info-value">
-                                            <t t-esc="ticket.customer_id.name" />
-                                        </div>
+                                <div class="property-item">
+                                    <label class="property-label">Priority</label>
+                                    <div t-att-class="'priority-button ' + priority_class">
+                                        <t t-esc="ticket.priority.title() if ticket.priority else 'Low'"/>
                                     </div>
+                                </div>
 
-                                    <div class="mb-3">
-                                        <div class="info-label">PRIORITY</div>
-                                        <div>
-                                            <span
-                                                t-att-class="'priority-badge priority-' + ticket.priority">
-                                                <t t-esc="ticket.priority.capitalize()" />
+                                <div class="property-item">
+                                    <label class="property-label">Client</label>
+                                    <div class="assignee-info">
+                                        <t t-set="customer_id" t-value="ticket.customer_id.id if ticket.customer_id else 0"/>
+                                        <img t-att-src="'/web/image/res.partner/%s/avatar_128' % customer_id"
+                                             alt="Client Avatar"
+                                             class="assignee-avatar"
+                                             onerror="this.src='/web/static/img/avatar_gray.svg'"/>
+                                        <div class="assignee-details">
+                                            <strong>
+                                                <t t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'"/>
+                                            </strong>
+                                            <span class="assignee-email">
+                                                <t t-if="ticket.customer_id and ticket.customer_id.email">
+                                                    <t t-esc="ticket.customer_id.email"/>
+                                                </t>
                                             </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <div class="info-label">STATUS</div>
-                                        <div>
-                                            <span class="status-badge"
-                                                t-att-class="'status-' + ticket.state">
-                                                <t
-                                                    t-esc="ticket.state.replace('_', ' ').capitalize()" />
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <div class="info-label">CREATED ON</div>
-                                        <div class="info-value">
-                                            <t t-esc="ticket.create_date.strftime('%Y-%m-%d %H:%M')" />
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-0">
-                                        <div class="info-label">ASSIGNED TO</div>
-                                        <div class="info-value">
-                                            <t t-if="ticket.assigned_to">
-                                                <i class="bi bi-person-check text-success me-1"></i>
-                                                <t t-esc="ticket.assigned_to.name" />
-                                            </t>
-                                            <t t-else="">
-                                                <span class="text-muted"><i
-                                                        class="bi bi-dash-circle me-1"></i>
-                                                    Unassigned</span>
-                                            </t>
                                         </div>
                                     </div>
                                 </div>
+
+                                <div class="property-item">
+                                    <label class="property-label">Assigned Support Agent</label>
+                                    <div class="assignee-info">
+                                        <img t-att-src="'/web/image/res.users/%s/avatar_128' % (ticket.assigned_to.id if ticket.assigned_to else 0)"
+                                             alt="Agent Avatar"
+                                             class="assignee-avatar"
+                                             onerror="this.src='/web/static/img/avatar_gray.svg'"/>
+                                        <div class="assignee-details">
+                                            <strong>
+                                                <t t-if="ticket.assigned_to">
+                                                    <t t-esc="ticket.assigned_to.name"/>
+                                                </t>
+                                                <t t-else="">
+                                                    Awaiting Assignment
+                                                </t>
+                                            </strong>
+                                            <span class="assignee-email">
+                                                <t t-if="ticket.assigned_to and ticket.assigned_to.email">
+                                                    <t t-esc="ticket.assigned_to.email"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <em class="text-muted">Not yet assigned</em>
+                                                </t>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Resolution Notes if resolved/closed -->
+                                <t t-if="ticket.state in ['resolved', 'closed'] and ticket.resolution_notes">
+                                    <div class="property-item">
+                                        <label class="property-label">Resolution Notes</label>
+                                        <div class="resolution-notes">
+                                            <t t-esc="ticket.resolution_notes"/>
+                                        </div>
+                                    </div>
+                                </t>
                             </div>
+
+                            <!-- Timeline Card -->
+                            <div class="info-card">
+                                <div class="card-header-custom">
+                                    <i class="bi bi-clock-history"></i>
+                                    <h3>Timeline</h3>
+                                </div>
+                                <div class="timeline-list">
+                                    <div class="timeline-item">
+                                        <div class="timeline-icon created">
+                                            <i class="bi bi-plus-circle-fill"></i>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <strong>Ticket Created</strong>
+                                            <span class="timeline-date">
+                                                <t t-esc="ticket.create_date.strftime('%B %d, %Y at %I:%M %p') if ticket.create_date else 'N/A'"/>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <t t-if="ticket.assigned_date">
+                                        <div class="timeline-item">
+                                            <div class="timeline-icon assigned">
+                                                <i class="bi bi-person-check-fill"></i>
+                                            </div>
+                                            <div class="timeline-content">
+                                                <strong>Assigned to <t t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Agent'"/></strong>
+                                                <span class="timeline-date">
+                                                    <t t-esc="ticket.assigned_date.strftime('%B %d, %Y at %I:%M %p')"/>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+
+                                    <t t-if="ticket.resolved_date">
+                                        <div class="timeline-item">
+                                            <div class="timeline-icon resolved">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                            </div>
+                                            <div class="timeline-content">
+                                                <strong>Ticket Resolved</strong>
+                                                <span class="timeline-date">
+                                                    <t t-esc="ticket.resolved_date.strftime('%B %d, %Y at %I:%M %p')"/>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+
+                                    <t t-if="ticket.closed_date">
+                                        <div class="timeline-item">
+                                            <div class="timeline-icon closed">
+                                                <i class="bi bi-x-circle-fill"></i>
+                                            </div>
+                                            <div class="timeline-content">
+                                                <strong>Ticket Closed</strong>
+                                                <span class="timeline-date">
+                                                    <t t-esc="ticket.closed_date.strftime('%B %d, %Y at %I:%M %p')"/>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <!-- Project Info (if exists) -->
+                            <t t-if="ticket.project_id">
+                                <div class="info-card">
+                                    <div class="card-header-custom">
+                                        <i class="bi bi-folder-fill"></i>
+                                        <h3>Project</h3>
+                                    </div>
+                                    <div class="project-info-detail">
+                                        <div class="project-name">
+                                            <t t-esc="ticket.project_id.name"/>
+                                        </div>
+                                        <t t-if="ticket.project_id.code">
+                                            <div class="project-code mt-1" style="font-size:0.8rem; color:#78909C;">
+                                                Code: <t t-esc="ticket.project_id.code"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- JavaScript for Back Button Navigation -->
-                <script type="text/javascript">
-                    <![CDATA[
-                    document.addEventListener('DOMContentLoaded', function() {
-                        var backButton = document.getElementById('backToDashboard');
-                        
-                        if (backButton) {
-                            backButton.addEventListener('click', function(e) {
-                                e.preventDefault();
-                                
-                                // Navigate to admin dashboard with ticket assignment tab active
-                                window.location.href = '/customer_support/admin_dashboard#ticket-assignment';
-                                
-                                // Alternative: If you're using Bootstrap tabs with data attributes
-                                // window.location.href = '/customer_support/admin_dashboard?tab=ticket-assignment';
-                            });
-                        }
-                    });
-                    ]]>
-                </script>
-            </body>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+            <script type="text/javascript">
+                //<![CDATA[
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Back button navigation
+                    var backButton = document.getElementById('backToDashboard');
+                    if (backButton) {
+                        backButton.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            window.location.href = '/customer_support/admin_dashboard#ticket-assignment';
+                        });
+                    }
+
+                    // Auto-hide alerts after 5 seconds
+                    setTimeout(function() {
+                        const alerts = document.querySelectorAll('.alert');
+                        alerts.forEach(function(alert) {
+                            const bsAlert = new bootstrap.Alert(alert);
+                            bsAlert.close();
+                        });
+                    }, 5000);
+                });
+                //]]>
+            </script>
         </t>
     </template>
-
 </odoo>

@@ -349,6 +349,27 @@ class CustomerSupportPortal(http.Controller):
                 "tickets": tickets,
                 "ticket_counts": ticket_counts,
                 "page_name": "admin_dashboard",
+                "analytics": {                  
+                    "open_tickets": ticket_counts.get("new", 0) + ticket_counts.get("open", 0),
+                    "total_tickets": ticket_counts.get("total", 0),
+                    "high_priority": 0,
+                    "urgent": 0,
+                    "avg_open_hours": 0,
+                    "total_hours": 0,
+                    "avg_high_hours": 0,
+                    "avg_urgent_hours": 0,
+                    "resolved_tickets": ticket_counts.get("resolved", 0) + ticket_counts.get("closed", 0),
+                    "solve_rate": 0,
+                    "high_resolved": 0,
+                    "urgent_resolved": 0,
+                },
+                "performance": {                
+                    "sample_performance": 85,
+                    "today_closed": 0,
+                    "avg_resolve_rate": 0,
+                    "daily_target": 80,
+                    "achievement": 0,
+                },
             },
         )
 
@@ -769,6 +790,7 @@ class CustomerSupportPortal(http.Controller):
                 "page_name": "user_management",
                 "success": kw.get("success", ""),
                 "error": kw.get("error", ""),
+                
             },
         )
 
