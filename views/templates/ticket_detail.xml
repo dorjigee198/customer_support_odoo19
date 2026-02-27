@@ -209,9 +209,6 @@
                                     <t t-if="ticket.state == 'new'">
                                         <t t-set="state_class" t-value="'state-new'" />
                                     </t>
-                                    <t t-elif="ticket.state == 'open'">
-                                        <t t-set="state_class" t-value="'state-open'" />
-                                    </t>
                                     <t t-elif="ticket.state == 'in_progress'">
                                         <t t-set="state_class" t-value="'state-progress'" />
                                     </t>
@@ -372,7 +369,6 @@
                                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                                         <select class="form-select status-select" name="status" onchange="this.form.submit()">
                                             <option value="new" t-att-selected="'selected' if ticket.state == 'new' else None">New</option>
-                                            <option value="open" t-att-selected="'selected' if ticket.state == 'open' else None">Open</option>
                                             <option value="in_progress" t-att-selected="'selected' if ticket.state == 'in_progress' else None">In Progress</option>
                                             <option value="resolved" t-att-selected="'selected' if ticket.state == 'resolved' else None">Resolved</option>
                                             <option value="closed" t-att-selected="'selected' if ticket.state == 'closed' else None">Closed</option>
