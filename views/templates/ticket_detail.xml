@@ -79,6 +79,7 @@
             
             <div class="dashboard-wrapper">
                 <!-- Top Navigation Header -->
+<<<<<<< Updated upstream
                 <header class="dashboard-header">
                 <div class="header-content">
 
@@ -146,6 +147,8 @@
                     </div>
                 </div>
             </header>
+=======
+>>>>>>> Stashed changes
 
                 <!-- Ticket Detail Content -->
                 <div class="page-content ticket-detail-content">
