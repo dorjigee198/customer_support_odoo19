@@ -13,6 +13,22 @@ class CustomerSupportProject(models.Model):
     active = fields.Boolean(string="Active", default=True)
 
 
+# ============ ADD THIS CLASS HERE ============
+class ResPartner(models.Model):
+    """Extend res.partner to add project association"""
+
+    _inherit = "res.partner"
+
+    project_id = fields.Many2one(
+        "customer_support.project",
+        string="Project",
+        help="The project this user/partner is associated with",
+    )
+
+
+# ============ END OF NEW CLASS ============
+
+
 class CustomerSupportDashboard(models.AbstractModel):
     _name = "customer_support.dashboard"
     _description = "Customer Support Dashboard Analytics"

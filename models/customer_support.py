@@ -14,6 +14,17 @@ class CustomerSupport(models.Model):
     subject = fields.Char(string="Subject", required=True, tracking=True)
     description = fields.Text(string="Description", required=True)
 
+    # ============ ADD THIS FIELD HERE ============
+    # Project Information
+    project_id = fields.Many2one(
+        "customer_support.project",
+        string="Project",
+        required=False,
+        tracking=True,
+        help="The project this ticket belongs to",
+    )
+    # ============ END OF NEW FIELD ============
+
     # Customer Information
     customer_id = fields.Many2one(
         "res.partner",
@@ -91,7 +102,23 @@ class CustomerSupport(models.Model):
                     or "New"
                 )
 
-        return super(CustomerSupport, self).create(vals_list)
+        tickets = super(CustomerSupport, self).create(vals_list)
+        
+        return tickets
+    
+    def _track_subtype(self, init_values):
+        """
+        Override to make tracking messages visible.
+        This is a NEW method - doesn't change any existing behavior.
+        """
+        self.ensure_one()
+        
+        # Make state changes visible as comments
+        if 'state' in init_values:
+            return self.env.ref('mail.mt_comment')
+        
+        # Default behavior for other fields
+        return super(CustomerSupport, self)._track_subtype(init_values)
 
     @api.depends("create_date", "closed_date")
     def _compute_days_open(self):

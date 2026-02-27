@@ -14,105 +14,37 @@
             <div class="login-container container-fluid p-0">
                 <div class="row g-0">
                     <!-- Left Section - Illustration -->
-                    <div class="left-section col-lg-6 d-flex align-items-stretch d-none d-lg-flex">
-                        <div class="illustration-container w-100">
-                            <!-- Background Pattern -->
-                            <div class="background-pattern"></div>
-                            
-                            <!-- Floating Elements -->
-                            <div class="floating-elements-container">
-                                <div class="floating-element">
-                                    <i class="bi bi-envelope-fill"></i>
-                                </div>
-                                <div class="floating-element">
-                                    <i class="bi bi-check-circle-fill"></i>
-                                </div>
-                                <div class="floating-element">
-                                    <i class="bi bi-chat-dots-fill"></i>
-                                </div>
-                            </div>
-                            
-                            <!-- Girl Character Illustration -->
-                            <div class="character-illustration-container">
-                                <svg class="girl-character" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
-                                    <!-- Shadow -->
-                                    <ellipse cx="200" cy="580" rx="130" ry="22" fill="#0C4A6E" opacity="0.1" style="filter: blur(10px);"/>
-                                    
-                                    <!-- Legs -->
-                                    <rect x="158" y="420" width="38" height="165" rx="19" fill="#0A3A5A"/>
-                                    <rect x="204" y="420" width="38" height="165" rx="19" fill="#08304D"/>
-                                    
-                                    <!-- Shoes -->
-                                    <ellipse cx="177" cy="578" rx="28" ry="13" fill="#0C4A6E"/>
-                                    <ellipse cx="223" cy="578" rx="28" ry="13" fill="#0A3A5A"/>
-                                    
-                                    <!-- Dress -->
-                                    <path d="M 145 315 Q 145 425 158 425 L 242 425 Q 255 425 255 315 Z" fill="#1E88C7"/>
-                                    <path d="M 150 315 Q 150 425 160 425 L 240 425 Q 250 425 250 315 Z" fill="#0C4A6E" opacity="0.3"/>
-                                    
-                                    <!-- Body -->
-                                    <rect x="155" y="195" width="90" height="125" rx="12" fill="#4A90E2"/>
-                                    <rect x="160" y="200" width="80" height="115" rx="10" fill="#5D9EEC" opacity="0.3"/>
-                                    
-                                    <!-- Arms -->
-                                    <ellipse cx="138" cy="260" rx="22" ry="55" fill="#4A90E2"/>
-                                    <ellipse cx="262" cy="260" rx="22" ry="55" fill="#4A90E2"/>
-                                    
-                                    <!-- Hands -->
-                                    <circle cx="138" cy="315" r="20" fill="#F4D6CC"/>
-                                    <circle cx="262" cy="315" r="20" fill="#F4D6CC"/>
-                                    
-                                    <!-- Laptop -->
-                                    <rect x="165" y="275" width="110" height="75" rx="6" fill="#0C4A6E"/>
-                                    <rect x="170" y="280" width="100" height="60" fill="#1E3A5A"/>
-                                    <rect x="172" y="282" width="96" height="56" fill="#2D4A6A"/>
-                                    <rect x="172" y="282" width="96" height="56" fill="url(#screenGradient)" opacity="0.4"/>
-                                    
-                                    <defs>
-                                        <linearGradient id="screenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                            <stop offset="0%" style="stop-color:#1E88C7;stop-opacity:0.4" />
-                                            <stop offset="50%" style="stop-color:#0C4A6E;stop-opacity:0.3" />
-                                            <stop offset="100%" style="stop-color:#1E88C7;stop-opacity:0.4" />
-                                        </linearGradient>
-                                    </defs>
-                                    
-                                    <!-- Neck -->
-                                    <rect x="182" y="178" width="36" height="22" rx="18" fill="#F4D6CC"/>
-                                    <!-- Long Hair -->
-                                    <path d="M 148 135 Q 148 75 200 70 Q 252 75 252 135 L 252 200 Q 240 190 220 185 Q 200 180 180 185 Q 160 190 148 200 Z" fill="#0C4A6E"/>
-                                    <ellipse cx="175" cy="100" rx="15" ry="25" fill="#0C4A6E"/>
-                                    <ellipse cx="225" cy="100" rx="15" ry="25" fill="#0C4A6E"/>
-                                    
-                                    <!-- Head -->
-                                    <circle cx="200" cy="138" r="52" fill="#F4D6CC"/>
-                                    <circle cx="200" cy="140" r="50" fill="#E8C7B9"/>
-                                    
-                                    
-                                    
-                                    <!-- Face Details -->
-                                    <ellipse cx="182" cy="133" rx="3" ry="4" fill="#0C4A6E"/>
-                                    <ellipse cx="218" cy="133" rx="3" ry="4" fill="#0C4A6E"/>
-                                    <circle cx="183" cy="132" r="1.5" fill="white"/>
-                                    <circle cx="219" cy="132" r="1.5" fill="white"/>
-                                    
-                                    <!-- Eyebrows -->
-                                    <path d="M 175 125 Q 180 122 187 123" stroke="#0C4A6E" stroke-width="2" fill="none" stroke-linecap="round"/>
-                                    <path d="M 213 123 Q 220 122 225 125" stroke="#0C4A6E" stroke-width="2" fill="none" stroke-linecap="round"/>
-                                    
-                                    <!-- Smile -->
-                                    <path d="M 185 153 Q 200 165 215 153" stroke="#0C4A6E" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                                    
-                                    <!-- Blush -->
-                                    <ellipse cx="170" cy="145" rx="8" ry="5" fill="#FFB6C1" opacity="0.25"/>
-                                    <ellipse cx="230" cy="145" rx="8" ry="5" fill="#FFB6C1" opacity="0.25"/>
-                                    
-                                    <!-- Earrings -->
-                                    <circle cx="148" cy="150" r="3" fill="#FFD700"/>
-                                    <circle cx="252" cy="150" r="3" fill="#FFD700"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Left Section - Illustration -->
+<div class="left-section col-lg-6 d-flex align-items-stretch d-none d-lg-flex">
+    <div class="illustration-container w-100">
+        <!-- Background Pattern -->
+        <div class="background-pattern"></div>
+        
+        <!-- Floating Elements -->
+        <div class="floating-elements-container">
+            <div class="floating-element">
+                <i class="bi bi-envelope-fill"></i>
+            </div>
+            <div class="floating-element">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="floating-element">
+                <i class="bi bi-chat-dots-fill"></i>
+            </div>
+        </div>
+        
+        <!-- Character Image with Shadow -->
+        <div class="character-illustration-container">
+            <!-- Shadow -->
+            <div class="character-shadow"></div>
+            
+            <!-- Your Image -->
+            <img src="/customer_support/static/src/img/girl.png" 
+                 alt="Character" 
+                 class="character-image"/>
+        </div>
+    </div>
+</div>
                     
                     <!-- Right Section - Login Form -->
                     <div class="right-section col-lg-6 d-flex align-items-stretch">
