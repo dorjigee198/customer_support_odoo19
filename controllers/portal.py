@@ -18,12 +18,15 @@ UPDATED: Added project management functionality
 
 UPDATED: Added email notification functionality
 - Welcome emails to new customers
+- Welcome emails to new support agents (FOCAL PERSONS)
 - Assignment notifications to support agents
+- Assignment notifications to customers (NEW)
 - Status change notifications to customers
 
 REFACTORED: Email functionality moved to services layer
 - EmailService handles all email operations
 - Cleaner separation of concerns
+- Dynamic email sender (no hardcoded addresses)
 """
 
 import base64
@@ -633,7 +636,7 @@ class CustomerSupportPortal(http.Controller):
         Access: Authenticated system administrators only
 
         UPDATED: Now validates and saves project_id to user's partner record
-        UPDATED: Sends welcome email to new customers
+        UPDATED: Sends welcome email to new customers AND new focal persons
         """
         try:
             user = request.env.user
@@ -742,16 +745,19 @@ class CustomerSupportPortal(http.Controller):
                 f"User created: {new_user.name} ({user_type}) assigned to project {project_id} by {user.name}"
             )
 
-            # ========== UPDATED: Send welcome email to new customers ==========
-            if user_type == "customer":
-                try:
-                    # Send welcome email (email failures won't break user creation)
+            # ========== UPDATED: Send welcome emails based on user type ==========
+            try:
+                if user_type == "customer":
+                    # Send welcome email to customer
                     EmailService.send_welcome_email(email, name, password)
-                except Exception as email_error:
-                    # Log error but don't fail the entire operation
-                    _logger.error(
-                        f"Welcome email failed for {email}: {str(email_error)}"
-                    )
+                elif user_type == "focal_person":
+                    # Send welcome email to support agent/focal person
+                    EmailService.send_welcome_email_focal_person(email, name, password)
+            except Exception as email_error:
+                # Log error but don't fail the entire operation
+                _logger.error(
+                    f"Welcome email failed for {email}: {str(email_error)}"
+                )
             # ========== END OF UPDATED CODE ==========
 
             user_type_label = (
@@ -1463,6 +1469,7 @@ class CustomerSupportPortal(http.Controller):
         Access: System administrators only
 
         UPDATED: Sends assignment notification email to support agent
+        UPDATED: Sends assignment notification email to customer (NEW)
         """
         try:
             user = request.env.user
@@ -1499,13 +1506,16 @@ class CustomerSupportPortal(http.Controller):
 
             _logger.info(f"Ticket {ticket.name} assigned to user {assigned_user_id}")
 
-            # ========== UPDATED: Send assignment email to support agent ==========
+            # ========== UPDATED: Send assignment emails ==========
             try:
                 # Get the assigned user record
                 assigned_user = request.env["res.users"].browse(assigned_user_id)
 
-                # Send assignment email (email failures won't break ticket assignment)
+                # 1. Send assignment email to support agent
                 EmailService.send_assignment_email(ticket, assigned_user)
+                
+                # 2. Send assignment notification to customer (NEW)
+                EmailService.send_assignment_notification_to_customer(ticket, assigned_user)
             except Exception as email_error:
                 # Log error but don't fail the entire operation
                 _logger.error(
