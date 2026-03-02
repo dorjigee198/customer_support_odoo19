@@ -309,15 +309,16 @@ class CustomerSupportAdminUsers(http.Controller):
                     "/customer_support/admin_dashboard/create_user?error=Project is required"
                 )
 
-            # Prevent duplicate accounts
+            # Prevent duplicate accounts — check active AND archived users
             existing_user = (
                 request.env["res.users"]
                 .sudo()
+                .with_context(active_test=False)
                 .search(["|", ("login", "=", email), ("email", "=", email)], limit=1)
             )
             if existing_user:
                 return werkzeug.utils.redirect(
-                    "/customer_support/admin_dashboard/create_user?error=Email already exists"
+                    "/customer_support/admin_dashboard/create_user?error=A user with this email already exists"
                 )
 
             # ------------------------------------------------------------------
