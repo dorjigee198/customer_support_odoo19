@@ -1,251 +1,156 @@
+
+# -*- coding: utf-8 -*-
+"""
+Email Service
+=============
+Coordinator for all customer support email notifications.
+Template rendering is delegated to the email_templates package.
+"""
 import logging
-from odoo import _
 from odoo.http import request
+from .email_templates import (
+    render_welcome_customer,
+    render_welcome_agent,
+    render_assignment_agent,
+    render_assignment_customer,
+    render_status_change,
+)
 
 _logger = logging.getLogger(__name__)
 
 
 class EmailService:
-    """Service class for handling all customer support emails"""
+    """Handles sending all customer support emails."""
+
+    # ── Helpers ──────────────────────────────────────────────────────────────
 
     @staticmethod
     def _get_default_email_from():
-        """
-        Get the default 'from' email address from Odoo configuration.
-
-        Returns:
-            str: Configured email address or fallback
-        """
         try:
-            # Try to get from mail server configuration
             mail_server = request.env["ir.mail_server"].sudo().search([], limit=1)
             if mail_server and mail_server.smtp_user:
                 return mail_server.smtp_user
-
-            # Fallback to system parameter
             default_from = (
                 request.env["ir.config_parameter"].sudo().get_param("mail.default.from")
             )
             if default_from:
                 return default_from
-
-            # Final fallback
             return request.env.user.email or "noreply@example.com"
         except Exception as e:
-            _logger.warning(f"Could not get default email: {str(e)}, using fallback")
+            _logger.warning(f"Could not get default email: {e}, using fallback")
             return "noreply@example.com"
 
     @staticmethod
+    def _get_base_url():
+        return request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+
+    @staticmethod
+    def _send(subject, body_html, email_to):
+        """Low-level send helper. Returns True on success."""
+        mail = (
+            request.env["mail.mail"]
+            .sudo()
+            .create(
+                {
+                    "subject": subject,
+                    "body_html": body_html,
+                    "email_to": email_to,
+                    "email_from": EmailService._get_default_email_from(),
+                    "auto_delete": False,
+                }
+            )
+        )
+        mail.send()
+
+    # ── Public send methods ───────────────────────────────────────────────────
+
+    @staticmethod
     def send_welcome_email(user_email, user_name, password):
-        """
-        Send welcome email to newly created customer account.
-
-        Args:
-            user_email (str): Customer's email address
-            user_name (str): Customer's name
-            password (str): Plain text password for initial login
-
-        Returns:
-            bool: True if email sent successfully, False otherwise
-        """
+        """Send welcome email to a newly created customer."""
         try:
-            base_url = (
-                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
-            )
-            portal_login_link = f"{base_url}/customer_support/login"
-
-            email_body = EmailService._get_welcome_email_template(
-                user_name, user_email, password, portal_login_link
-            )
-
-            mail_values = {
-                "subject": "Welcome to Customer Support Portal",
-                "body_html": email_body,
-                "email_to": user_email,
-                "email_from": EmailService._get_default_email_from(),
-                "auto_delete": False,
-            }
-
-            mail = request.env["mail.mail"].sudo().create(mail_values)
-            mail.send()
-
-            _logger.info(f"✓ Welcome email sent successfully to {user_email}")
+            login_url = f"{EmailService._get_base_url()}/customer_support/login"
+            body = render_welcome_customer(user_name, user_email, password, login_url)
+            EmailService._send("Welcome to Customer Support Portal", body, user_email)
+            _logger.info(f"✓ Welcome email sent to {user_email}")
             return True
-
         except Exception as e:
-            _logger.error(f"✗ Failed to send welcome email to {user_email}: {str(e)}")
+            _logger.error(f"✗ Welcome email failed for {user_email}: {e}")
             return False
 
     @staticmethod
     def send_welcome_email_focal_person(user_email, user_name, password):
-        """
-        Send welcome email to newly created support agent/focal person account.
-
-        Args:
-            user_email (str): Support agent's email address
-            user_name (str): Support agent's name
-            password (str): Plain text password for initial login
-
-        Returns:
-            bool: True if email sent successfully, False otherwise
-        """
+        """Send welcome email to a newly created support agent."""
         try:
-            base_url = (
-                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            login_url = f"{EmailService._get_base_url()}/customer_support/login"
+            body = render_welcome_agent(user_name, user_email, password, login_url)
+            EmailService._send(
+                "Welcome to Customer Support Portal - Support Agent Account",
+                body,
+                user_email,
             )
-            portal_login_link = f"{base_url}/customer_support/login"
-
-            email_body = EmailService._get_welcome_email_focal_person_template(
-                user_name, user_email, password, portal_login_link
-            )
-
-            mail_values = {
-                "subject": "Welcome to Customer Support Portal - Support Agent Account",
-                "body_html": email_body,
-                "email_to": user_email,
-                "email_from": EmailService._get_default_email_from(),
-                "auto_delete": False,
-            }
-
-            mail = request.env["mail.mail"].sudo().create(mail_values)
-            mail.send()
-
-            _logger.info(
-                f"✓ Welcome email sent successfully to support agent {user_email}"
-            )
+            _logger.info(f"✓ Agent welcome email sent to {user_email}")
             return True
-
         except Exception as e:
-            _logger.error(
-                f"✗ Failed to send welcome email to support agent {user_email}: {str(e)}"
-            )
+            _logger.error(f"✗ Agent welcome email failed for {user_email}: {e}")
             return False
 
     @staticmethod
     def send_assignment_email(ticket, assigned_user):
-        """
-        Send assignment notification to support agent.
-
-        Args:
-            ticket: customer.support record
-            assigned_user: res.users record
-
-        Returns:
-            bool: True if email sent successfully, False otherwise
-        """
+        """Notify a support agent that a ticket was assigned to them."""
         try:
             agent_email = assigned_user.email or assigned_user.login
             if not agent_email:
-                _logger.warning(f"✗ No email found for user {assigned_user.name}")
+                _logger.warning(f"✗ No email for user {assigned_user.name}")
                 return False
 
-            base_url = (
-                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            ticket_url = (
+                f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}"
             )
-            ticket_url = f"{base_url}/customer_support/ticket/{ticket.id}"
-
-            email_body = EmailService._get_assignment_email_template(
-                ticket, assigned_user, ticket_url
+            body = render_assignment_agent(ticket, assigned_user, ticket_url)
+            EmailService._send(
+                f"New Ticket Assigned: {ticket.name} - {ticket.subject}",
+                body,
+                agent_email,
             )
-
-            mail_values = {
-                "subject": f"New Ticket Assigned: {ticket.name} - {ticket.subject}",
-                "body_html": email_body,
-                "email_to": agent_email,
-                "email_from": EmailService._get_default_email_from(),
-                "auto_delete": False,
-            }
-
-            mail = request.env["mail.mail"].sudo().create(mail_values)
-            mail.send()
-
-            _logger.info(
-                f"✓ Assignment email sent to {agent_email} for ticket {ticket.name}"
-            )
+            _logger.info(f"✓ Assignment email sent to {agent_email} for {ticket.name}")
             return True
-
         except Exception as e:
-            _logger.error(
-                f"✗ Failed to send assignment email for ticket {ticket.name}: {str(e)}"
-            )
+            _logger.error(f"✗ Assignment email failed for {ticket.name}: {e}")
             return False
 
     @staticmethod
     def send_assignment_notification_to_customer(ticket, assigned_user):
-        """
-        Send assignment notification to customer when their ticket is assigned.
-
-        Args:
-            ticket: customer.support record
-            assigned_user: res.users record (the assigned support agent)
-
-        Returns:
-            bool: True if email sent successfully, False otherwise
-        """
+        """Notify the customer that their ticket has been assigned."""
         try:
             customer_email = ticket.customer_id.email
             if not customer_email:
-                _logger.warning(
-                    f"✗ No email found for customer {ticket.customer_id.name}"
-                )
+                _logger.warning(f"✗ No email for customer {ticket.customer_id.name}")
                 return False
 
-            base_url = (
-                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            ticket_url = (
+                f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}"
             )
-            ticket_url = f"{base_url}/customer_support/ticket/{ticket.id}"
-
-            email_body = EmailService._get_assignment_notification_customer_template(
-                ticket, assigned_user, ticket_url
+            body = render_assignment_customer(ticket, assigned_user, ticket_url)
+            EmailService._send(
+                f"Your Ticket Has Been Assigned: {ticket.name}",
+                body,
+                customer_email,
             )
-
-            mail_values = {
-                "subject": f"Your Ticket Has Been Assigned: {ticket.name}",
-                "body_html": email_body,
-                "email_to": customer_email,
-                "email_from": EmailService._get_default_email_from(),
-                "auto_delete": False,
-            }
-
-            mail = request.env["mail.mail"].sudo().create(mail_values)
-            mail.send()
-
-            _logger.info(
-                f"✓ Assignment notification sent to customer {customer_email} for ticket {ticket.name}"
-            )
+            _logger.info(f"✓ Customer assignment notification sent to {customer_email}")
             return True
-
         except Exception as e:
             _logger.error(
-                f"✗ Failed to send assignment notification to customer for ticket {ticket.name}: {str(e)}"
+                f"✗ Customer assignment notification failed for {ticket.name}: {e}"
             )
             return False
 
     @staticmethod
     def send_status_change_email(ticket, old_status, new_status):
-        """
-        Send status change notification to customer.
-
-        Args:
-            ticket: customer.support record
-            old_status (str): Previous status
-            new_status (str): New status
-
-        Returns:
-            bool: True if email sent successfully, False otherwise
-        """
+        """Notify the customer of a ticket status change."""
         try:
-            # Skip certain statuses
             if new_status in ["new", "pending"]:
-                _logger.info(
-                    f"⊘ Skipping status email for {ticket.name}: status is '{new_status}'"
-                )
                 return True
-
             if new_status not in ["assigned", "in_progress", "resolved", "closed"]:
-                _logger.info(
-                    f"⊘ Skipping status email for {ticket.name}: '{new_status}' not in list"
-                )
                 return True
 
             customer_email = ticket.customer_id.email
@@ -253,33 +158,21 @@ class EmailService:
                 _logger.warning(f"✗ No email for customer {ticket.customer_id.name}")
                 return False
 
-            base_url = (
-                request.env["ir.config_parameter"].sudo().get_param("web.base.url")
+            ticket_url = (
+                f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}"
             )
-            ticket_url = f"{base_url}/customer_support/ticket/{ticket.id}"
-
-            email_body = EmailService._get_status_change_email_template(
-                ticket, old_status, new_status, ticket_url
+            body = render_status_change(ticket, old_status, new_status, ticket_url)
+            EmailService._send(
+                f"Ticket Status Updated: {ticket.name} - {new_status.replace('_', ' ').title()}",
+                body,
+                customer_email,
             )
-
-            mail_values = {
-                "subject": f'Ticket Status Updated: {ticket.name} - {new_status.replace("_", " ").title()}',
-                "body_html": email_body,
-                "email_to": customer_email,
-                "email_from": EmailService._get_default_email_from(),
-                "auto_delete": False,
-            }
-
-            mail = request.env["mail.mail"].sudo().create(mail_values)
-            mail.send()
-
             _logger.info(
-                f"✓ Status email sent to {customer_email} for {ticket.name} ({old_status} → {new_status})"
+                f"✓ Status email sent to {customer_email} ({old_status} → {new_status})"
             )
             return True
-
         except Exception as e:
-            _logger.error(f"✗ Failed to send status email for {ticket.name}: {str(e)}")
+            _logger.error(f"✗ Status email failed for {ticket.name}: {e}")
             return False
 
     # Private template methods
