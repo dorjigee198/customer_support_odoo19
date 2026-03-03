@@ -143,11 +143,27 @@ class CustomerTickets(http.Controller):
                 except:
                     activities = []
 
-            _logger.info(
-                f"Customer {user.name} viewing ticket {ticket_id}: {len(activities)} messages"
+            # After retrieving activities, add this:
+            attachments = (
+                request.env["ir.attachment"]
+                .sudo()
+                .search([
+                    ("res_model", "=", "customer.support"),
+                    ("res_id", "=", ticket.id)
+                ])
             )
 
-            # Render customer-specific template
+            # Generate access tokens so download links don't 404
+            for attach in attachments:
+                if not attach.access_token:
+                    attach.sudo().generate_access_token()
+
+            _logger.info(
+                f"Customer {user.name} viewing ticket {ticket_id}: "
+                f"{len(activities)} messages, {len(attachments)} attachments"
+            )
+
+            # Then pass it to the template:
             return request.render(
                 "customer_support.customer_ticket_detail",
                 {
@@ -155,6 +171,7 @@ class CustomerTickets(http.Controller):
                     "ticket": ticket,
                     "activities": activities,
                     "activities_count": len(activities),
+                    "attachments": attachments,   # ← ADD THIS
                     "success": kw.get("success", ""),
                     "error": kw.get("error", ""),
                     "page_name": "ticket_detail",

@@ -131,8 +131,24 @@ class CustomerSupportTicketActions(http.Controller):
                 except Exception as e:
                     _logger.error(f"✗ mail.message search failed: {str(e)}")
 
+            # After the activities block, add this:
+
+            # ============ RETRIEVE ATTACHMENTS ============
+            attachments = (
+                request.env["ir.attachment"]
+                .sudo()
+                .search([
+                    ("res_model", "=", "customer.support"),
+                    ("res_id", "=", ticket.id)
+                ])
+            )
+            for attach in attachments:
+                if not attach.access_token:
+                    attach.sudo().generate_access_token()
+
             _logger.info(
-                f"Ticket {ticket_id}: passing {len(activities)} activities to template"
+                f"Ticket {ticket_id}: passing {len(activities)} activities, "
+                f"{len(attachments)} attachments to template"
             )
 
             return request.render(
@@ -146,6 +162,7 @@ class CustomerSupportTicketActions(http.Controller):
                     "focal_persons": focal_persons,
                     "activities": activities,
                     "activities_count": len(activities),
+                    "attachments": attachments,  # ← ADD THIS
                     "success": kw.get("success", ""),
                     "error": kw.get("error", ""),
                     "page_name": "ticket_detail",

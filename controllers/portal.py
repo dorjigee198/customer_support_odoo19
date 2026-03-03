@@ -433,7 +433,25 @@ class CustomerSupportPortal(http.Controller):
                 except Exception as e:
                     _logger.error(f"✗ mail.message search failed: {str(e)}")
 
-            _logger.info(f"Ticket {ticket_id}: Passing {len(activities)} activities to template (type: {type(activities)})")
+                # Attachment Section
+                _logger.info(f"VIEW_TICKET CALLED - ticket_id: {ticket_id}, user: {request.env.user.name}")
+                _logger.info(f"Attachments found: {len(request.env['ir.attachment'].sudo().search([('res_model', '=', 'customer.support'), ('res_id', '=', ticket_id)]))}")
+                attachments = (
+                request.env["ir.attachment"]
+                .sudo()
+                .search([
+                    ("res_model", "=", "customer.support"),
+                    ("res_id", "=", ticket.id)
+                ])
+            )
+            for attach in attachments:
+                if not attach.access_token:
+                    attach.sudo().generate_access_token()
+
+            _logger.info(
+                f"Ticket {ticket_id}: {len(activities)} messages, "
+                f"{len(attachments)} attachments"
+            )
 
             return request.render(
                 "customer_support.ticket_detail",
@@ -446,11 +464,13 @@ class CustomerSupportPortal(http.Controller):
                     "focal_persons": focal_persons,
                     "activities": activities,
                     "activities_count": len(activities),
+                    "attachments": attachments,   # ← ADD THIS
                     "success": kw.get("success", ""),
                     "error": kw.get("error", ""),
                     "page_name": "ticket_detail",
                 },
             )
+
 
         except Exception as e:
             _logger.error(f"View ticket error: {str(e)}")
