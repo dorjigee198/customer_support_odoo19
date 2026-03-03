@@ -579,102 +579,71 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <t t-foreach="tickets" t-as="ticket">
-                                                        <tr class="position-relative"> <!-- This
-                                                            makes the whole row the "link area" -->
-                                                            <td>
-                                                                <!-- The Stretched Link covers the
-                                                                entire row -->
-                                                                <a
-                                                                    t-att-href="'/customer_support/admin_view/ticket/%s' % ticket.id"
-                                                                    class="stretched-link text-decoration-none text-reset">
-                                                                    <t t-esc="ticket.id" />
-                                                                </a>
-                                                            </td>
-                                                            <td>
-                                                                <i class="bi bi-link-45deg me-1"></i>
-                                                                <t t-esc="ticket.subject" />
-                                                            </td>
-                                                            <td>
-                                                                <t t-esc="ticket.customer_id.name" />
-                                                            </td>
-                                                            <td>
-                                                                <span
-                                                                    t-att-class="'priority-badge priority-' + ticket.priority">
-                                                                    <t
-                                                                        t-esc="ticket.priority.capitalize()" />
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                <span class="status-badge"
-                                                                    t-att-class="'status-' + ticket.state">
-                                                                    <t
-                                                                        t-esc="ticket.state.replace('_', ' ').capitalize()" />
-                                                                </span>
-                                                            </td>
-                                                            <td>
-                                                                <t
-                                                                    t-esc="ticket.create_date.strftime('%Y-%m-%d %H:%M') if ticket.create_date else ''" />
-                                                            </td>
-                                                            <td>
-                                                                <t t-if="ticket.assigned_to">
-                                                                    <i
-                                                                        class="bi bi-person-circle me-1"></i>
-                                                                    <t
-                                                                        t-esc="ticket.assigned_to.name" />
-                                                                </t>
-                                                            </td>
-
-                                                            <!-- IMPORTANT: The Action Column needs
-                                                            high z-index to stay clickable -->
-                                                            <td
-                                                                style="position: relative; z-index: 10;">
-                                                                <t
-                                                                    t-if="ticket.state in ['new', 'assigned']">
-                                                                    <form
-                                                                        t-att-action="'/customer_support/ticket/%s/assign' % ticket.id"
-                                                                        method="post"
-                                                                        class="assign-form">
-                                                                        <input type="hidden"
-                                                                            name="csrf_token"
-                                                                            t-att-value="request.csrf_token()" />
-                                                                        <div
-                                                                            class="input-group input-group-sm">
-                                                                            <select
-                                                                                class="form-select form-select-sm"
-                                                                                name="assigned_to"
-                                                                                required="required">
-                                                                                <option value="">Select
-                                                                                    User</option>
-                                                                                <t
-                                                                                    t-foreach="request.env['res.users'].sudo().search([('active', '=', True), ('id','!=',1)])"
-                                                                                    t-as="u">
-                                                                                    <option
-                                                                                        t-att-value="u.id">
-                                                                                        <t
-                                                                                            t-esc="u.name" />
-                                                                                    </option>
-                                                                                </t>
-                                                                            </select>
-                                                                            <button type="submit"
-                                                                                class="btn btn-primary btn-sm">
-                                                                                <i
-                                                                                    class="bi bi-person-check"></i>
-                                                                                Assign </button>
-                                                                        </div>
-                                                                    </form>
-                                                                </t>
-                                                                <t
-                                                                    t-if="ticket.state in ['resolved','closed']">
-                                                                    <span class="text-success"><i
-                                                                            class="bi bi-check-circle me-1"></i>No
-                                                                        Action</span>
-                                                                </t>
-                                                            </td>
-                                                        </tr>
-
-                                                    </t>
-                                                </tbody>
+    <t t-foreach="tickets" t-as="ticket">
+        <tr class="ticket-row" 
+            t-attf-data-href="/customer_support/admin_view/ticket/#{ticket.id}"
+            style="cursor: pointer;">
+            <td>
+                <t t-esc="ticket.id" />
+            </td>
+            <td>
+                <i class="bi bi-link-45deg me-1"></i>
+                <t t-esc="ticket.subject" />
+            </td>
+            <td>
+                <t t-esc="ticket.customer_id.name" />
+            </td>
+            <td>
+                <span t-att-class="'priority-badge priority-' + ticket.priority">
+                    <t t-esc="ticket.priority.capitalize()" />
+                </span>
+            </td>
+            <td>
+                <span class="status-badge" t-att-class="'status-' + ticket.state">
+                    <t t-esc="ticket.state.replace('_', ' ').capitalize()" />
+                </span>
+            </td>
+            <td>
+                <t t-esc="ticket.create_date.strftime('%Y-%m-%d %H:%M') if ticket.create_date else ''" />
+            </td>
+            <td>
+                <t t-if="ticket.assigned_to">
+                    <i class="bi bi-person-circle me-1"></i>
+                    <t t-esc="ticket.assigned_to.name" />
+                </t>
+            </td>
+            <td class="action-cell" onclick="event.stopPropagation();">
+                <t t-if="ticket.state in ['new', 'assigned']">
+                    <form t-attf-action="/customer_support/ticket/#{ticket.id}/assign"
+                          method="post" class="assign-form">
+                        <input type="hidden" name="csrf_token"
+                               t-att-value="request.csrf_token()" />
+                        <div class="input-group input-group-sm">
+                            <select class="form-select form-select-sm"
+                                    name="assigned_to" required="required">
+                                <option value="">Select User</option>
+                                <t t-foreach="request.env['res.users'].sudo().search([('active', '=', True), ('id','!=',1)])"
+                                   t-as="u">
+                                    <option t-att-value="u.id">
+                                        <t t-esc="u.name" />
+                                    </option>
+                                </t>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-person-check"></i> Assign
+                            </button>
+                        </div>
+                    </form>
+                </t>
+                <t t-if="ticket.state in ['resolved','closed']">
+                    <span class="text-success">
+                        <i class="bi bi-check-circle me-1"></i>No Action
+                    </span>
+                </t>
+            </td>
+        </tr>
+    </t>
+</tbody>
                                             </table>
                                         </div>
                                     </div>
@@ -1401,6 +1370,17 @@
             }, 5000); // 5000ms = 5 seconds
         });
     });
+    // Make ticket rows clickable — skip clicks on the action cell
+document.querySelectorAll('tr.ticket-row').forEach(function(row) {
+    row.addEventListener('click', function(e) {
+        // Don't navigate if clicking inside the action cell
+        if (e.target.closest('.action-cell')) return;
+        var href = row.getAttribute('data-href');
+        if (href) {
+            window.location.href = href;
+        }
+    });
+});
 })();
 //]]>
 </script>
