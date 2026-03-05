@@ -1,10 +1,11 @@
 from openai import OpenAI
+import json
 
 SYSTEM_PROMPT = """
-You are the official AI assistant for Dragon Coders, a software company.
-Answer questions professionally about products, services, software development solutions, pricing, and documentation.
-Guide users to official resources and provide helpful suggestions.
+You are Dragon Coders AI assistant. Answer questions about our software services briefly and professionally.
 """
+
+MAX_HISTORY = 6
 
 
 class ChatBotBackend:
@@ -16,7 +17,7 @@ class ChatBotBackend:
     ):
         self.client = OpenAI(api_key=api_key, base_url=base_url)
         self.model = model
-        self.histories = {}  # key = user_id, value = messages list
+        self.histories = {}
 
     def send_message(self, user_id, user_message):
         # Initialize history per user
@@ -26,13 +27,27 @@ class ChatBotBackend:
         # Append user message
         self.histories[user_id].append({"role": "user", "content": user_message})
 
-        # Call OpenAI / OpenRouter API
-        response = self.client.chat.completions.create(
-            model=self.model, messages=self.histories[user_id]
-        )
+        # Trim history - keep system prompt + last 6 messages only
+        if len(self.histories[user_id]) > MAX_HISTORY:
+            self.histories[user_id] = [self.histories[user_id][0]] + self.histories[
+                user_id
+            ][-MAX_HISTORY:]
 
-        # Get assistant reply
-        bot_reply = response.choices[0].message.content
+        # Call OpenRouter API
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model, messages=self.histories[user_id]
+            )
+
+            # Handle both object and string responses
+            if isinstance(response, str):
+                response = json.loads(response)
+                bot_reply = response["choices"][0]["message"]["content"]
+            else:
+                bot_reply = response.choices[0].message.content
+
+        except Exception as e:
+            return "Sorry, I am currently unavailable. Please try again later."
 
         # Append bot reply to history
         self.histories[user_id].append({"role": "assistant", "content": bot_reply})
