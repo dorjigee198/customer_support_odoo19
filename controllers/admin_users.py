@@ -10,6 +10,8 @@ Handles all routes for system administrators related to:
   - Toggle user active/inactive
   - Delete (archive) user
   - Reporting data API endpoints (JSON) for charts + printable reports
+  - Admin notifications bell (SLA breaches, unassigned, status changes)
+  - Agent workload overview
 
 Access: All routes require the user to be in base.group_system (admin).
 Non-admin users are redirected to the customer dashboard.
@@ -246,13 +248,11 @@ class CustomerSupportAdminUsers(http.Controller):
                     proj_tickets.filtered(lambda t: t.sla_status == "breached")
                 )
 
-                # Priority breakdown
                 p_urgent = len(proj_tickets.filtered(lambda t: t.priority == "urgent"))
                 p_high = len(proj_tickets.filtered(lambda t: t.priority == "high"))
                 p_medium = len(proj_tickets.filtered(lambda t: t.priority == "medium"))
                 p_low = len(proj_tickets.filtered(lambda t: t.priority == "low"))
 
-                # Avg resolution time (hours)
                 resolved_with_dates = proj_tickets.filtered(
                     lambda t: t.state in ["resolved", "closed"]
                     and t.resolved_date
@@ -266,7 +266,6 @@ class CustomerSupportAdminUsers(http.Controller):
                     )
                     avg_resolution = round(total_hours / len(resolved_with_dates), 1)
 
-                # Health score: Red < 50%, Amber 50-80%, Green > 80%
                 if total == 0:
                     health = "green"
                     health_score = 100
@@ -282,7 +281,6 @@ class CustomerSupportAdminUsers(http.Controller):
                         else "amber" if health_score >= 50 else "red"
                     )
 
-                # Trend: compare current period vs previous period
                 prev_since = since - timedelta(days=days)
                 prev_tickets = proj_tickets.filtered(
                     lambda t: t.create_date and prev_since <= t.create_date < since
@@ -315,7 +313,6 @@ class CustomerSupportAdminUsers(http.Controller):
                     }
                 )
 
-            # Sort by health score ascending (most problematic first)
             project_health.sort(key=lambda p: p["health_score"])
 
             # ── Focal person leaderboard ──────────────────────────────────────
@@ -352,7 +349,6 @@ class CustomerSupportAdminUsers(http.Controller):
                     fp_tickets.filtered(lambda t: t.state not in ["resolved", "closed"])
                 )
 
-                # SLA compliance rate
                 sla_tickets = fp_tickets.filtered(lambda t: t.sla_policy_id)
                 sla_ok = len(sla_tickets.filtered(lambda t: t.sla_status != "breached"))
                 sla_rate = (
@@ -361,7 +357,6 @@ class CustomerSupportAdminUsers(http.Controller):
                     else 100.0
                 )
 
-                # Avg resolution time
                 resolved_with_dates = fp_tickets.filtered(
                     lambda t: t.state in ["resolved", "closed"]
                     and t.resolved_date
@@ -398,7 +393,6 @@ class CustomerSupportAdminUsers(http.Controller):
                     }
                 )
 
-            # Sort by resolved descending
             focal_leaderboard.sort(key=lambda f: f["resolved"], reverse=True)
 
             # ── Top customers ─────────────────────────────────────────────────
@@ -538,7 +532,6 @@ class CustomerSupportAdminUsers(http.Controller):
             "green" if health_score >= 80 else "amber" if health_score >= 50 else "red"
         )
 
-        # Focal persons working on this project
         focal_map = {}
         for t in all_tickets:
             if t.assigned_to:
@@ -642,7 +635,6 @@ class CustomerSupportAdminUsers(http.Controller):
             p: len(all_tickets.filtered(lambda t: t.priority == p)) for p in priorities
         }
 
-        # Projects handled
         project_map = {}
         for t in all_tickets:
             if t.project_id:
@@ -720,7 +712,6 @@ class CustomerSupportAdminUsers(http.Controller):
         sla_ok = len(sla_all.filtered(lambda t: t.sla_status != "breached"))
         sla_compliance = round((sla_ok / len(sla_all)) * 100, 1) if sla_all else 100.0
 
-        # Projects summary
         projects = (
             request.env["customer_support.project"]
             .sudo()
@@ -751,7 +742,6 @@ class CustomerSupportAdminUsers(http.Controller):
             )
         project_rows.sort(key=lambda x: x["health_score"])
 
-        # Focal persons summary
         focal_persons = (
             request.env["res.users"]
             .sudo()
@@ -784,7 +774,7 @@ class CustomerSupportAdminUsers(http.Controller):
                 if sla_t
                 else 100.0
             )
-            rw = resolved_with_dates = ft.filtered(
+            rw = ft.filtered(
                 lambda t: t.state in ["resolved", "closed"]
                 and t.resolved_date
                 and t.create_date
@@ -838,6 +828,267 @@ class CustomerSupportAdminUsers(http.Controller):
                 "generated_at": fields.Datetime.now().strftime("%Y-%m-%d %H:%M"),
             },
         )
+
+    # =========================================================================
+    # ADMIN NOTIFICATIONS  — polled every 30s by the bell dropdown
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/admin/notifications",
+        type="http",
+        auth="user",
+        website=True,
+        csrf=False,
+    )
+    def admin_notifications(self, **kw):
+        """
+        Returns 3 notification categories for the admin bell:
+          1. sla_breaches   — tickets with breached SLA across ALL agents
+          2. unassigned     — tickets with no assigned_to and state = 'new'
+          3. status_changes — tickets whose write_date is within last 30 min
+        """
+        try:
+            now = fields.Datetime.now()
+            Ticket = request.env["customer.support"].sudo()
+
+            # ── 1. SLA Breaches across all agents ────────────────────────────
+            breached_tickets = Ticket.search(
+                [
+                    ("sla_deadline", "!=", False),
+                    ("sla_deadline", "<", now),
+                    ("state", "not in", ["resolved", "closed"]),
+                ],
+                limit=20,
+                order="sla_deadline asc",
+            )
+
+            sla_breaches = []
+            for t in breached_tickets:
+                over_seconds = (now - t.sla_deadline).total_seconds()
+                h = int(over_seconds // 3600)
+                m = int((over_seconds % 3600) // 60)
+                time_display = (
+                    f"{h}h {m}m past deadline" if h > 0 else f"{m}m past deadline"
+                )
+                sla_breaches.append(
+                    {
+                        "ticket_id": t.id,
+                        "ticket_name": t.name or "",
+                        "subject": t.subject or "(No subject)",
+                        "agent_name": (
+                            t.assigned_to.name if t.assigned_to else "Unassigned"
+                        ),
+                        "priority": (t.priority or "low").capitalize(),
+                        "time_display": time_display,
+                    }
+                )
+
+            # ── 2. Unassigned tickets ─────────────────────────────────────────
+            unassigned_tickets = Ticket.search(
+                [
+                    ("assigned_to", "=", False),
+                    ("state", "in", ["new"]),
+                ],
+                limit=15,
+                order="create_date asc",
+            )
+
+            unassigned = []
+            for t in unassigned_tickets:
+                if t.create_date:
+                    waiting_secs = (now - t.create_date).total_seconds()
+                    h = int(waiting_secs // 3600)
+                    m = int((waiting_secs % 3600) // 60)
+                    waiting = f"{h}h {m}m" if h > 0 else f"{m}m"
+                else:
+                    waiting = "Unknown"
+                unassigned.append(
+                    {
+                        "ticket_id": t.id,
+                        "ticket_name": t.name or "",
+                        "subject": t.subject or "(No subject)",
+                        "priority": (t.priority or "low").capitalize(),
+                        "waiting": waiting,
+                        "create_date": (
+                            t.create_date.strftime("%b %d, %H:%M")
+                            if t.create_date
+                            else "—"
+                        ),
+                    }
+                )
+
+            # ── 3. Status changes in last 30 minutes ──────────────────────────
+            cutoff = now - timedelta(minutes=30)
+            recently_changed = Ticket.search(
+                [
+                    ("write_date", ">=", cutoff),
+                    ("state", "not in", ["new"]),
+                ],
+                limit=15,
+                order="write_date desc",
+            )
+
+            status_changes = []
+            state_labels = {
+                "new": "New",
+                "assigned": "Assigned",
+                "in_progress": "In Progress",
+                "resolved": "Resolved",
+                "closed": "Closed",
+            }
+            for t in recently_changed:
+                status_changes.append(
+                    {
+                        "ticket_id": t.id,
+                        "ticket_name": t.name or "",
+                        "subject": t.subject or "(No subject)",
+                        "new_state": state_labels.get(t.state, t.state),
+                        "agent_name": (
+                            t.assigned_to.name if t.assigned_to else "Unassigned"
+                        ),
+                        "changed_at": (
+                            t.write_date.strftime("%b %d, %H:%M")
+                            if t.write_date
+                            else "—"
+                        ),
+                    }
+                )
+
+            return request.make_response(
+                json.dumps(
+                    {
+                        "sla_breaches": sla_breaches,
+                        "unassigned": unassigned,
+                        "status_changes": status_changes,
+                    }
+                ),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Admin notifications error: {str(e)}")
+            return request.make_response(
+                json.dumps(
+                    {
+                        "sla_breaches": [],
+                        "unassigned": [],
+                        "status_changes": [],
+                    }
+                ),
+                headers=[("Content-Type", "application/json")],
+            )
+
+    # =========================================================================
+    # AGENT WORKLOAD OVERVIEW  — polled every 60s by the workload panel
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/admin/workload",
+        type="http",
+        auth="user",
+        website=True,
+        csrf=False,
+    )
+    def admin_workload(self, **kw):
+        """
+        Returns workload stats per active internal user (focal person).
+        For each agent:
+          - assigned    : tickets in state 'assigned' or 'new'
+          - in_progress : tickets in state 'in_progress'
+          - resolved    : tickets in state 'resolved' or 'closed'
+          - total_open  : assigned + in_progress
+          - breached    : open tickets with sla_deadline < now
+          - resolve_rate: resolved / total * 100  (rounded)
+        """
+        try:
+            now = fields.Datetime.now()
+            Ticket = request.env["customer.support"].sudo()
+
+            # Active internal users only (exclude admin id=1 and portal users)
+            users = (
+                request.env["res.users"]
+                .sudo()
+                .search(
+                    [
+                        ("active", "=", True),
+                        ("id", "!=", 1),
+                        ("share", "=", False),
+                    ]
+                )
+            )
+
+            agents = []
+            total_open_system = 0
+            total_breached_system = 0
+            overloaded_count = 0
+
+            for user in users:
+                user_tickets = Ticket.search([("assigned_to", "=", user.id)])
+
+                assigned = len(
+                    user_tickets.filtered(lambda t: t.state in ["new", "assigned"])
+                )
+                in_progress = len(
+                    user_tickets.filtered(lambda t: t.state == "in_progress")
+                )
+                resolved = len(
+                    user_tickets.filtered(lambda t: t.state in ["resolved", "closed"])
+                )
+                total_open = assigned + in_progress
+                total_all = len(user_tickets)
+
+                breached = len(
+                    user_tickets.filtered(
+                        lambda t: t.sla_deadline
+                        and t.sla_deadline < now
+                        and t.state not in ["resolved", "closed"]
+                    )
+                )
+
+                resolve_rate = (
+                    round((resolved / total_all) * 100) if total_all > 0 else 0
+                )
+
+                total_open_system += total_open
+                total_breached_system += breached
+                if total_open > 8:
+                    overloaded_count += 1
+
+                agents.append(
+                    {
+                        "user_id": user.id,
+                        "name": user.name,
+                        "email": user.email or "",
+                        "assigned": assigned,
+                        "in_progress": in_progress,
+                        "resolved": resolved,
+                        "total_open": total_open,
+                        "breached": breached,
+                        "resolve_rate": resolve_rate,
+                    }
+                )
+
+            # Sort: most loaded first
+            agents.sort(key=lambda a: a["total_open"], reverse=True)
+
+            summary = {
+                "total_agents": len(agents),
+                "total_open": total_open_system,
+                "overloaded": overloaded_count,
+                "total_breached": total_breached_system,
+            }
+
+            return request.make_response(
+                json.dumps({"agents": agents, "summary": summary}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Admin workload error: {str(e)}")
+            return request.make_response(
+                json.dumps({"agents": [], "summary": {}}),
+                headers=[("Content-Type", "application/json")],
+            )
 
     # =========================================================================
     # USER MANAGEMENT LIST
@@ -1004,7 +1255,8 @@ class CustomerSupportAdminUsers(http.Controller):
                 new_user.sudo().write({"group_ids": [(6, 0, groups_to_add)]})
 
             _logger.info(
-                f"User created: {new_user.name} ({user_type}) assigned to project {project_id} by {user.name}"
+                f"User created: {new_user.name} ({user_type}) assigned to project "
+                f"{project_id} by {user.name}"
             )
 
             try:

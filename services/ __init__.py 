@@ -1,2 +1,2 @@
-from . import chatbot_backend
+from . import rag_chatbot
 from . email_service

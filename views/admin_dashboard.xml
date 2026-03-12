@@ -12,6 +12,127 @@
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
                     rel="stylesheet" />
                 <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard.css" />
+                <style>
+                    /* NOTIFICATION BELL */
+                    .admin-notif-wrap{position:relative;display:inline-flex;align-items:center;}
+                    .admin-notif-btn{background:none;border:none;cursor:pointer;padding:6px
+                    8px;border-radius:8px;color:rgba(255,255,255,0.75);font-size:1.2rem;transition:all
+                    0.2s;position:relative;display:flex;align-items:center;}
+                    .admin-notif-btn:hover{background:rgba(255,255,255,0.08);color:#fff;}
+                    .admin-notif-badge{position:absolute;top:2px;right:2px;background:#ef4444;color:#fff;border-radius:999px;font-size:0.58rem;font-weight:700;min-width:16px;height:16px;display:flex;align-items:center;justify-content:center;border:2px
+                    solid #1a3a5c;padding:0 3px;line-height:1;transition:transform 0.2s;}
+                    .admin-notif-badge.bump{transform:scale(1.4);}
+                    .admin-notif-badge.hidden{display:none!important;}
+                    .admin-notif-dropdown{position:absolute;top:calc(100% +
+                    12px);right:0;width:400px;background:#fff;border:1px solid
+                    rgba(0,0,0,0.1);border-radius:16px;box-shadow:0 24px 60px
+                    rgba(0,0,0,0.18);z-index:1050;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(-8px);transition:opacity
+                    0.18s ease,transform 0.18s ease;}
+                    .admin-notif-dropdown.open{opacity:1;pointer-events:all;transform:translateY(0);}
+                    .admin-notif-header{padding:.9rem 1.25rem;border-bottom:1px solid
+                    #f0f0f0;display:flex;justify-content:space-between;align-items:center;background:#f8fafc;}
+                    .admin-notif-header
+                    h6{font-size:.875rem;font-weight:700;margin:0;color:#1a3a5c;}
+                    .admin-notif-mark-read{font-size:.72rem;color:#3b82f6;cursor:pointer;background:none;border:none;padding:0;font-weight:600;}
+                    .admin-notif-section-label{padding:.5rem 1.25rem
+                    .25rem;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;background:#f8fafc;border-bottom:1px
+                    solid #f0f0f0;display:flex;align-items:center;justify-content:space-between;}
+                    .admin-notif-section-label
+                    .section-count{background:#e5e7eb;color:#374151;border-radius:999px;padding:1px
+                    7px;font-size:.65rem;font-weight:700;}
+                    .admin-notif-list{max-height:420px;overflow-y:auto;}
+                    .admin-notif-list::-webkit-scrollbar{width:4px;}
+                    .admin-notif-list::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:4px;}
+                    .admin-notif-item{display:flex;align-items:flex-start;gap:.75rem;padding:.75rem
+                    1.25rem;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background
+                    .12s;text-decoration:none;color:inherit;}
+                    .admin-notif-item:last-child{border-bottom:none;}
+                    .admin-notif-item:hover{background:#f0f7ff;}
+                    .admin-notif-item.unread{background:#fefce8;}
+                    .admin-notif-item.unread:hover{background:#fef9c3;}
+                    .admin-notif-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.95rem;}
+                    .admin-notif-icon.sla-breach{background:#fee2e2;color:#ef4444;}
+                    .admin-notif-icon.unassigned{background:#dbeafe;color:#3b82f6;}
+                    .admin-notif-icon.status-chg{background:#d1fae5;color:#10b981;}
+                    .admin-notif-body{flex:1;min-width:0;}
+                    .admin-notif-title{font-size:.8rem;font-weight:600;color:#1f2937;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+                    .admin-notif-sub{font-size:.72rem;color:#6b7280;}
+                    .admin-notif-time{font-size:.68rem;color:#9ca3af;margin-top:2px;}
+                    .admin-notif-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+                    .admin-notif-dot.sla-breach{background:#ef4444;}
+                    .admin-notif-dot.unassigned{background:#3b82f6;}
+                    .admin-notif-dot.status-chg{background:#10b981;}
+                    .admin-notif-empty{padding:2rem
+                    1.25rem;text-align:center;color:#9ca3af;font-size:.82rem;}
+                    .admin-notif-footer{padding:.6rem 1.25rem;border-top:1px solid
+                    #f0f0f0;background:#f8fafc;text-align:center;}
+                    .admin-notif-footer
+                    a{font-size:.78rem;color:#3b82f6;text-decoration:none;font-weight:600;}
+                    /* WORKLOAD PANEL */
+                    .workload-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1040;opacity:0;pointer-events:none;transition:opacity
+                    .25s;}
+                    .workload-overlay.open{opacity:1;pointer-events:all;}
+                    .workload-panel{position:fixed;top:0;right:0;bottom:0;width:460px;max-width:95vw;background:#f8fafc;box-shadow:-8px
+                    0 40px
+                    rgba(0,0,0,0.18);z-index:1041;transform:translateX(100%);transition:transform
+                    .28s
+                    cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden;}
+                    .workload-panel.open{transform:translateX(0);}
+                    .workload-panel-header{background:#1a3a5c;color:#fff;padding:1.1rem
+                    1.4rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+                    .workload-panel-header
+                    h5{margin:0;font-size:1rem;font-weight:700;display:flex;align-items:center;gap:.6rem;}
+                    .workload-close-btn{background:none;border:none;color:rgba(255,255,255,.75);font-size:1.3rem;cursor:pointer;padding:2px
+                    6px;border-radius:6px;transition:all .15s;line-height:1;}
+                    .workload-close-btn:hover{background:rgba(255,255,255,.12);color:#fff;}
+                    .workload-summary-bar{display:flex;gap:0;border-bottom:1px solid
+                    #e5e7eb;background:#fff;flex-shrink:0;}
+                    .workload-summary-item{flex:1;text-align:center;padding:.75rem
+                    .5rem;border-right:1px solid #e5e7eb;}
+                    .workload-summary-item:last-child{border-right:none;}
+                    .workload-summary-val{font-size:1.4rem;font-weight:800;font-family:'Rajdhani',sans-serif;color:#1a3a5c;line-height:1;}
+                    .workload-summary-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:.05em;color:#9ca3af;margin-top:2px;font-weight:600;}
+                    .workload-panel-body{flex:1;overflow-y:auto;padding:1rem;}
+                    .workload-panel-body::-webkit-scrollbar{width:4px;}
+                    .workload-panel-body::-webkit-scrollbar-thumb{background:#e5e7eb;border-radius:4px;}
+                    .workload-card{background:#fff;border-radius:12px;border:1px solid
+                    #e5e7eb;padding:1rem;margin-bottom:.75rem;transition:box-shadow .15s;}
+                    .workload-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);}
+                    .workload-card.status-ok{border-left:4px solid #22c55e;}
+                    .workload-card.status-amber{border-left:4px solid #f59e0b;}
+                    .workload-card.status-red{border-left:4px solid #ef4444;}
+                    .workload-agent-row{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;}
+                    .workload-agent-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px
+                    solid #e5e7eb;flex-shrink:0;}
+                    .workload-agent-name{font-size:.88rem;font-weight:700;color:#1f2937;}
+                    .workload-agent-sub{font-size:.72rem;color:#6b7280;}
+                    .workload-status-pill{margin-left:auto;font-size:.65rem;font-weight:700;padding:3px
+                    10px;border-radius:999px;text-transform:uppercase;letter-spacing:.04em;}
+                    .workload-status-pill.ok{background:#dcfce7;color:#16a34a;}
+                    .workload-status-pill.amber{background:#fef3c7;color:#d97706;}
+                    .workload-status-pill.red{background:#fee2e2;color:#dc2626;}
+                    .workload-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;}
+                    .workload-stat-box{background:#f8fafc;border-radius:8px;padding:.5rem;text-align:center;}
+                    .workload-stat-val{font-size:1.1rem;font-weight:800;color:#1a3a5c;line-height:1;}
+                    .workload-stat-lbl{font-size:.62rem;color:#9ca3af;text-transform:uppercase;margin-top:2px;font-weight:600;}
+                    .workload-bar-wrap{margin-top:.65rem;}
+                    .workload-bar-label{display:flex;justify-content:space-between;font-size:.68rem;color:#6b7280;margin-bottom:3px;}
+                    .workload-bar-bg{height:6px;background:#e5e7eb;border-radius:999px;overflow:hidden;}
+                    .workload-bar-fill{height:100%;border-radius:999px;transition:width .5s ease;}
+                    .workload-empty{text-align:center;padding:3rem
+                    1rem;color:#9ca3af;font-size:.85rem;}
+                    .workload-refresh-row{padding:.6rem 1rem;border-top:1px solid
+                    #e5e7eb;background:#fff;display:flex;align-items:center;justify-content:space-between;font-size:.72rem;color:#9ca3af;flex-shrink:0;}
+                    .workload-refresh-btn{background:none;border:none;font-size:.72rem;color:#3b82f6;cursor:pointer;padding:0;font-weight:600;}
+                    .admin-grid-btn{background:none;border:none;cursor:pointer;padding:6px
+                    8px;border-radius:8px;color:rgba(255,255,255,0.75);font-size:1.2rem;transition:all
+                    .2s;display:flex;align-items:center;}
+                    .admin-grid-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
+                    .admin-grid-btn.active{background:rgba(255,255,255,.15);color:#fff;}
+                    @keyframes
+                    bell-ring{0%,100%{transform:rotate(0);}20%{transform:rotate(15deg);}40%{transform:rotate(-12deg);}60%{transform:rotate(8deg);}80%{transform:rotate(-5deg);}}
+                    .bell-ring{animation:bell-ring .5s ease;}
+                </style>
             </t>
 
             <div class="dashboard-wrapper">
@@ -21,34 +142,58 @@
                             <button class="nav-link active" id="overview-tab" data-bs-toggle="tab"
                                 data-bs-target="#overview" type="button" role="tab"
                                 aria-controls="overview" aria-selected="true">
-                                <i class="bi bi-speedometer2 me-2"></i>Overview </button>
+                                <i class="bi bi-speedometer2 me-2"></i>Overview</button>
                             <button class="nav-link" id="ticket-assignment-tab" data-bs-toggle="tab"
                                 data-bs-target="#ticket-assignment" type="button" role="tab"
                                 aria-controls="ticket-assignment" aria-selected="false">
-                                <i class="bi bi-clipboard-check me-2"></i>Ticket Assignment </button>
+                                <i class="bi bi-clipboard-check me-2"></i>Ticket Assignment</button>
                             <button class="nav-link" id="user-management-tab" data-bs-toggle="tab"
                                 data-bs-target="#user-management" type="button" role="tab"
                                 aria-controls="user-management" aria-selected="false">
-                                <i class="bi bi-people me-2"></i>User Management </button>
+                                <i class="bi bi-people me-2"></i>User Management</button>
                             <button class="nav-link" id="system-configuration-tab"
                                 data-bs-toggle="tab" data-bs-target="#system-configuration"
                                 type="button" role="tab" aria-controls="system-configuration"
                                 aria-selected="false">
-                                <i class="bi bi-gear me-2"></i>System Configuration </button>
+                                <i class="bi bi-gear me-2"></i>System Configuration</button>
                             <button class="nav-link" id="reporting-tab" data-bs-toggle="tab"
                                 data-bs-target="#reporting" type="button" role="tab"
                                 aria-controls="reporting" aria-selected="false">
-                                <i class="bi bi-graph-up-arrow me-2"></i>Reporting </button>
+                                <i class="bi bi-graph-up-arrow me-2"></i>Reporting</button>
                         </div>
                         <div class="header-right">
+                            <button class="admin-grid-btn me-2" id="workloadBtn"
+                                title="Agent Workload Overview">
+                                <i class="bi bi-grid-3x3-gap-fill"></i>
+                            </button>
+                            <div class="admin-notif-wrap me-3">
+                                <button class="admin-notif-btn" id="adminNotifBell"
+                                    title="Notifications">
+                                    <i class="bi bi-bell-fill" id="adminBellIcon"></i>
+                                    <span class="admin-notif-badge hidden" id="adminNotifBadge">0</span>
+                                </button>
+                                <div class="admin-notif-dropdown" id="adminNotifDropdown">
+                                    <div class="admin-notif-header">
+                                        <h6><i class="bi bi-bell-fill me-2" style="color:#1a3a5c;"></i>
+                                            Notifications</h6>
+                                        <button class="admin-notif-mark-read" id="adminMarkAllRead">Mark
+                                            all read</button>
+                                    </div>
+                                    <div class="admin-notif-list" id="adminNotifList">
+                                        <div class="admin-notif-empty"><i class="bi bi-arrow-repeat"
+                                                style="font-size:1.6rem;display:block;margin-bottom:.5rem;"></i>
+                                            Loading...</div>
+                                    </div>
+                                    <div class="admin-notif-footer">
+                                        <a href="#" id="notifViewAllTickets">View all tickets
+                                            &#x2192;</a>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="user-profile dropdown">
-                                <i class="bi bi-grid-3x3-gap-fill text-white me-3"
-                                    style="font-size: 1.2rem; cursor: pointer;"></i>
-                                <i class="bi bi-bell-fill text-white me-3"
-                                    style="font-size: 1.2rem; cursor: pointer;"></i>
                                 <a class="d-flex align-items-center text-white dropdown-toggle"
                                     href="#" id="userProfileDropdown" data-bs-toggle="dropdown"
-                                    aria-expanded="false" style="text-decoration: none;">
+                                    aria-expanded="false" style="text-decoration:none;">
                                     <span class="user-name me-3">
                                         <t t-esc="user.name" />
                                     </span>
@@ -76,6 +221,43 @@
                     </div>
                 </header>
 
+                <!-- WORKLOAD OVERLAY + PANEL -->
+                <div class="workload-overlay" id="workloadOverlay"></div>
+                <div class="workload-panel" id="workloadPanel">
+                    <div class="workload-panel-header">
+                        <h5><i class="bi bi-people-fill"></i>Agent Workload Overview</h5>
+                        <button class="workload-close-btn" id="workloadClose">&#x2715;</button>
+                    </div>
+                    <div class="workload-summary-bar">
+                        <div class="workload-summary-item">
+                            <div class="workload-summary-val" id="ws-agents">—</div>
+                            <div class="workload-summary-lbl">Agents</div>
+                        </div>
+                        <div class="workload-summary-item">
+                            <div class="workload-summary-val" id="ws-total-open">—</div>
+                            <div class="workload-summary-lbl">Total Open</div>
+                        </div>
+                        <div class="workload-summary-item">
+                            <div class="workload-summary-val" id="ws-overloaded">—</div>
+                            <div class="workload-summary-lbl">Overloaded</div>
+                        </div>
+                        <div class="workload-summary-item">
+                            <div class="workload-summary-val" id="ws-breached">—</div>
+                            <div class="workload-summary-lbl">SLA Breached</div>
+                        </div>
+                    </div>
+                    <div class="workload-panel-body" id="workloadPanelBody">
+                        <div class="workload-empty"><i class="bi bi-arrow-repeat"
+                                style="font-size:2rem;display:block;margin-bottom:.5rem;"></i>Loading
+                            agent workloads...</div>
+                    </div>
+                    <div class="workload-refresh-row">
+                        <span id="workloadLastUpdated">Updating...</span>
+                        <button class="workload-refresh-btn" id="workloadRefreshBtn"><i
+                                class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+                    </div>
+                </div>
+
                 <div class="container-fluid admin-dashboard py-4">
                     <div class="tab-content" id="dashboardTabsContent">
 
@@ -84,8 +266,6 @@
                             aria-labelledby="overview-tab">
                             <div class="dashboard-content">
                                 <div class="dashboard-grid">
-
-                                    <!-- Ticket Analytics Card -->
                                     <div class="dashboard-card">
                                         <div class="card-header">
                                             <h2 class="card-title"><i
@@ -97,8 +277,6 @@
                                                     now</span>
                                             </div>
                                         </div>
-
-                                        <!-- Row 1: Main Stats -->
                                         <div class="analytics-grid">
                                             <div class="stat-box" data-key="open_tickets">
                                                 <div class="stat-icon">
@@ -107,7 +285,7 @@
                                                 <div class="stat-content">
                                                     <div class="stat-label">Open Tickets</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('open_tickets', 0)" />
+                                                        <t t-esc="analytics.get('open_tickets',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Active Tickets</div>
                                                 </div>
@@ -119,7 +297,7 @@
                                                 <div class="stat-content">
                                                     <div class="stat-label">Total Tickets</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('total_tickets', 0)" />
+                                                        <t t-esc="analytics.get('total_tickets',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">All Tickets</div>
                                                 </div>
@@ -131,7 +309,7 @@
                                                 <div class="stat-content">
                                                     <div class="stat-label">High Priority</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('high_priority', 0)" />
+                                                        <t t-esc="analytics.get('high_priority',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">High Priority</div>
                                                 </div>
@@ -143,14 +321,12 @@
                                                 <div class="stat-content">
                                                     <div class="stat-label">Urgent</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('urgent', 0)" />
+                                                        <t t-esc="analytics.get('urgent',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Urgent Priority</div>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <!-- Row 2: Time Metrics -->
                                         <div class="analytics-grid">
                                             <div class="stat-box" data-key="avg_open_hours">
                                                 <div class="stat-icon">
@@ -159,8 +335,7 @@
                                                 <div class="stat-content">
                                                     <div class="stat-label">Avg Open Hours</div>
                                                     <div class="stat-value">
-                                                        <t
-                                                            t-esc="analytics.get('avg_open_hours', 0)" />
+                                                        <t t-esc="analytics.get('avg_open_hours',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Hours</div>
                                                 </div>
@@ -172,7 +347,7 @@
                                                 <div class="stat-content">
                                                     <div class="stat-label">Total Hours</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('total_hours', 0)" />
+                                                        <t t-esc="analytics.get('total_hours',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Hours Open</div>
                                                 </div>
@@ -184,8 +359,7 @@
                                                 <div class="stat-content">
                                                     <div class="stat-label">Avg High Priority Hours</div>
                                                     <div class="stat-value">
-                                                        <t
-                                                            t-esc="analytics.get('avg_high_hours', 0)" />
+                                                        <t t-esc="analytics.get('avg_high_hours',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Hours</div>
                                                 </div>
@@ -198,14 +372,12 @@
                                                     <div class="stat-label">Avg Urgent Hours</div>
                                                     <div class="stat-value">
                                                         <t
-                                                            t-esc="analytics.get('avg_urgent_hours', 0)" />
+                                                            t-esc="analytics.get('avg_urgent_hours',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Hours</div>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <!-- Row 3: Resolved Stats -->
                                         <div class="analytics-grid">
                                             <div class="stat-box" data-key="resolved_tickets">
                                                 <div class="stat-icon">
@@ -215,7 +387,7 @@
                                                     <div class="stat-label">Resolved Tickets</div>
                                                     <div class="stat-value">
                                                         <t
-                                                            t-esc="analytics.get('resolved_tickets', 0)" />
+                                                            t-esc="analytics.get('resolved_tickets',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Fixed Tickets</div>
                                                 </div>
@@ -227,7 +399,7 @@
                                                 <div class="stat-content">
                                                     <div class="stat-label">Solve Rate</div>
                                                     <div class="stat-value"><t
-                                                            t-esc="analytics.get('solve_rate', 0)" />
+                                                            t-esc="analytics.get('solve_rate',0)" />
                                                         %</div>
                                                     <div class="stat-subtitle">Success Rate</div>
                                                 </div>
@@ -239,7 +411,7 @@
                                                 <div class="stat-content">
                                                     <div class="stat-label">High Priority Resolved</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('high_resolved', 0)" />
+                                                        <t t-esc="analytics.get('high_resolved',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">High Fixed</div>
                                                 </div>
@@ -252,15 +424,13 @@
                                                     <div class="stat-label">Urgent Resolved</div>
                                                     <div class="stat-value">
                                                         <t
-                                                            t-esc="analytics.get('urgent_resolved', 0)" />
+                                                            t-esc="analytics.get('urgent_resolved',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Urgent Fixed</div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- My Performance Card -->
                                     <div class="performance-card">
                                         <div class="card-header">
                                             <h2 class="card-title"><i
@@ -268,10 +438,10 @@
                                                 Performance</h2>
                                             <div class="card-actions">
                                                 <span class="performance-score"
-                                                    data-key="sample_performance">
-                                                    <span class="score-badge"><t
-                                                            t-esc="performance.get('sample_performance', 85)" />
-                                                    %</span> Overall Score </span>
+                                                    data-key="sample_performance"><span
+                                                        class="score-badge"><t
+                                                            t-esc="performance.get('sample_performance',85)" />
+                                                    %</span> Overall Score</span>
                                             </div>
                                         </div>
                                         <div class="performance-grid">
@@ -282,8 +452,7 @@
                                                 <div class="performance-content">
                                                     <div class="performance-label">Today Closed</div>
                                                     <div class="performance-value">
-                                                        <t
-                                                            t-esc="performance.get('today_closed', 0)" />
+                                                        <t t-esc="performance.get('today_closed',0)" />
                                                     </div>
                                                     <div class="performance-subtitle">Tickets Closed
                                                         Today</div>
@@ -297,7 +466,7 @@
                                                 <div class="performance-content">
                                                     <div class="performance-label">Avg Last 7 Days</div>
                                                     <div class="performance-value"><t
-                                                            t-esc="performance.get('avg_resolve_rate', 0)" />
+                                                            t-esc="performance.get('avg_resolve_rate',0)" />
                                                         %</div>
                                                     <div class="performance-subtitle">Resolve Rate</div>
                                                 </div>
@@ -309,7 +478,7 @@
                                                 <div class="performance-content">
                                                     <div class="performance-label">Daily Target</div>
                                                     <div class="performance-value"><t
-                                                            t-esc="performance.get('daily_target', 80)" />
+                                                            t-esc="performance.get('daily_target',80)" />
                                                         %</div>
                                                     <div class="performance-subtitle">Target
                                                         Achievement</div>
@@ -323,7 +492,7 @@
                                                     <div class="performance-label">Current
                                                         Achievement</div>
                                                     <div class="performance-value"><t
-                                                            t-esc="performance.get('achievement', 0)" />
+                                                            t-esc="performance.get('achievement',0)" />
                                                         %</div>
                                                     <div class="performance-subtitle">Target
                                                         Progress</div>
@@ -333,20 +502,17 @@
                                         <div class="performance-progress mt-4">
                                             <div class="progress-label">
                                                 <span>Daily Goal Progress</span>
-                                                <span><t t-esc="performance.get('achievement', 0)" />
+                                                <span><t t-esc="performance.get('achievement',0)" />
                                                     %</span>
                                             </div>
                                             <div class="progress">
                                                 <div class="progress-bar" role="progressbar"
-                                                    t-att-style="'width: ' + str(performance.get('achievement', 0)) + '%;'"
-                                                    t-att-class="'bg-success' if performance.get('achievement', 0) >= 80 else 'bg-warning'">
-                                                </div>
+                                                    t-att-style="'width: ' + str(performance.get('achievement',0)) + '%;'"
+                                                    t-att-class="'bg-success' if performance.get('achievement',0) >= 80 else 'bg-warning'"></div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Quick Actions -->
                                 <div class="quick-actions mt-4">
                                     <div class="actions-grid">
                                         <a href="/customer_support/admin_dashboard/users"
@@ -403,8 +569,7 @@
                                     <i class="bi bi-check-circle-fill me-2"></i>
                                     <strong>Success!</strong>
                                     <t t-esc="request.params.get('success')" />
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
                             </t>
                             <t t-if="request.params.get('error')">
@@ -413,12 +578,9 @@
                                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                                     <strong>Error!</strong>
                                     <t t-esc="request.params.get('error')" />
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
                             </t>
-
-                            <!-- Quick Stats -->
                             <div class="row mb-4">
                                 <div class="col-md-3 col-sm-6 mb-3">
                                     <div class="quick-stat-card" data-key="count_new">
@@ -427,7 +589,7 @@
                                         </div>
                                         <div class="quick-stat-label">New Tickets</div>
                                         <div class="quick-stat-value">
-                                            <t t-esc="ticket_counts.get('new', 0)" />
+                                            <t t-esc="ticket_counts.get('new',0)" />
                                         </div>
                                         <div class="quick-stat-trend positive"><i
                                                 class="bi bi-arrow-up-short"></i>+2 today</div>
@@ -440,7 +602,7 @@
                                         </div>
                                         <div class="quick-stat-label">Assigned Tickets</div>
                                         <div class="quick-stat-value">
-                                            <t t-esc="ticket_counts.get('assigned', 0)" />
+                                            <t t-esc="ticket_counts.get('assigned',0)" />
                                         </div>
                                         <div class="quick-stat-trend positive"><i
                                                 class="bi bi-arrow-up-short"></i>+3 today</div>
@@ -453,7 +615,7 @@
                                         </div>
                                         <div class="quick-stat-label">Resolved Tickets</div>
                                         <div class="quick-stat-value">
-                                            <t t-esc="ticket_counts.get('resolved', 0)" />
+                                            <t t-esc="ticket_counts.get('resolved',0)" />
                                         </div>
                                         <div class="quick-stat-trend positive"><i
                                                 class="bi bi-arrow-up-short"></i>+5 today</div>
@@ -466,15 +628,13 @@
                                         </div>
                                         <div class="quick-stat-label">Total Tickets</div>
                                         <div class="quick-stat-value">
-                                            <t t-esc="ticket_counts.get('total', 0)" />
+                                            <t t-esc="ticket_counts.get('total',0)" />
                                         </div>
                                         <div class="quick-stat-trend"><i class="bi bi-infinity"></i>All
                                             time</div>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Ticket Table -->
                             <div class="card">
                                 <div class="card-header">
                                     <h5 class="mb-0"><i class="bi bi-table me-2"></i>Ticket
@@ -486,28 +646,28 @@
                                             <table class="table table-hover ticket-table">
                                                 <thead>
                                                     <tr>
-                                                        <th style="width: 5%;">
+                                                        <th style="width:5%;">
                                                             <i>Sl.no</i>
                                                         </th>
-                                                        <th style="width: 18%;"><i
+                                                        <th style="width:18%;"><i
                                                                 class="bi bi-ticket-perforated me-1 align-middle"></i>
                                                             Ticket</th>
-                                                        <th style="width: 13%;"><i
+                                                        <th style="width:13%;"><i
                                                                 class="bi bi-person-circle me-1 align-middle"></i>
                                                             Client</th>
-                                                        <th style="width: 8%;"><i
+                                                        <th style="width:8%;"><i
                                                                 class="bi bi-exclamation-triangle me-1 align-middle"></i>
                                                             Priority</th>
-                                                        <th style="width: 8%;"><i
+                                                        <th style="width:8%;"><i
                                                                 class="bi bi-clock-history me-1 align-middle"></i>
                                                             Status</th>
-                                                        <th style="width: 13%;"><i
+                                                        <th style="width:13%;"><i
                                                                 class="bi bi-calendar-check me-1 align-middle"></i>
                                                             Created_On</th>
-                                                        <th style="width: 12%;"><i
+                                                        <th style="width:12%;"><i
                                                                 class="bi bi-person-check me-1 align-middle"></i>
                                                             Assigned_To</th>
-                                                        <th style="width: 23%;"><i
+                                                        <th style="width:23%;"><i
                                                                 class="bi bi-three-dots-vertical me-1 align-middle"></i>
                                                             Action</th>
                                                     </tr>
@@ -540,7 +700,7 @@
                                                                 <span class="status-badge"
                                                                     t-att-class="'status-' + ticket.state">
                                                                     <t
-                                                                        t-esc="ticket.state.replace('_', ' ').capitalize()" />
+                                                                        t-esc="ticket.state.replace('_',' ').capitalize()" />
                                                                 </span>
                                                             </td>
                                                             <td>
@@ -553,7 +713,6 @@
                                                                         class="bi bi-person-circle me-1"></i>
                                                                     <t
                                                                         t-esc="ticket.assigned_to.name" />
-                                                                    <!-- SLA badge if attached -->
                                                                     <t t-if="ticket.sla_policy_id">
                                                                         <br />
                                                                         <small
@@ -567,11 +726,9 @@
                                                                 </t>
                                                             </td>
                                                             <td
-                                                                style="position: relative; z-index: 10;">
+                                                                style="position:relative;z-index:10;">
                                                                 <t
-                                                                    t-if="ticket.state in ['new', 'assigned']">
-                                                                    <!-- ── UPDATED ASSIGN FORM with
-                                                                    SLA dropdown ── -->
+                                                                    t-if="ticket.state in ['new','assigned']">
                                                                     <form
                                                                         t-att-action="'/customer_support/ticket/%s/assign' % ticket.id"
                                                                         method="post"
@@ -579,7 +736,6 @@
                                                                         <input type="hidden"
                                                                             name="csrf_token"
                                                                             t-att-value="request.csrf_token()" />
-                                                                        <!-- Focal Person -->
                                                                         <select
                                                                             class="form-select form-select-sm mb-1"
                                                                             name="assigned_to"
@@ -587,7 +743,7 @@
                                                                             <option value="">Select
                                                                                 Focal Person</option>
                                                                             <t
-                                                                                t-foreach="request.env['res.users'].sudo().search([('active', '=', True), ('id','!=',1)])"
+                                                                                t-foreach="request.env['res.users'].sudo().search([('active','=',True),('id','!=',1)])"
                                                                                 t-as="u">
                                                                                 <option
                                                                                     t-att-value="u.id"
@@ -597,7 +753,6 @@
                                                                                 </option>
                                                                             </t>
                                                                         </select>
-                                                                        <!-- SLA Policy -->
                                                                         <select
                                                                             class="form-select form-select-sm mb-1"
                                                                             name="sla_policy_id">
@@ -608,20 +763,18 @@
                                                                                 t-as="sla">
                                                                                 <option
                                                                                     t-att-value="sla.id"
-                                                                                    t-att-selected="'selected' if ticket.sla_policy_id and ticket.sla_policy_id.id == sla.id else None">
-                                                                                    <t
+                                                                                    t-att-selected="'selected' if ticket.sla_policy_id and ticket.sla_policy_id.id == sla.id else None"><t
                                                                                         t-esc="sla.name" />
                                                                                     (<t
                                                                                         t-esc="sla.response_time" /><t
                                                                                         t-esc="' ' + sla.time_unit" />
-                                                                                    ) </option>
+                                                                                    )</option>
                                                                             </t>
                                                                         </select>
                                                                         <button type="submit"
-                                                                            class="btn btn-primary btn-sm w-100">
-                                                                            <i
+                                                                            class="btn btn-primary btn-sm w-100"><i
                                                                                 class="bi bi-person-check me-1"></i>
-                                                                            Assign </button>
+                                                                            Assign</button>
                                                                     </form>
                                                                 </t>
                                                                 <t
@@ -652,8 +805,8 @@
                                             <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>System
                                                 Users</h5>
                                             <a href="/customer_support/admin_dashboard/users"
-                                                class="btn btn-primary btn-sm">
-                                                <i class="bi bi-person-plus me-2"></i>Add New User </a>
+                                                class="btn btn-primary btn-sm"><i
+                                                    class="bi bi-person-plus me-2"></i>Add New User</a>
                                         </div>
                                         <div class="card-body">
                                             <div class="table-responsive">
@@ -712,35 +865,32 @@
                                                                 <td>
                                                                     <a
                                                                         t-att-href="'/customer_support/admin_dashboard/user/%s/edit' % user_item['id']"
-                                                                        class="btn btn-sm btn-outline-primary me-1"
-                                                                        title="Edit User">
+                                                                        class="btn btn-sm btn-outline-primary me-1">
                                                                         <i
                                                                             class="bi bi-pencil-square"></i>
                                                                     </a>
                                                                     <form
                                                                         t-att-action="'/customer_support/admin_dashboard/user/%s/toggle_active' % user_item['id']"
                                                                         method="post"
-                                                                        style="display: inline-block;">
+                                                                        style="display:inline-block;">
                                                                         <input type="hidden"
                                                                             name="csrf_token"
                                                                             t-att-value="request.csrf_token()" />
                                                                         <button type="submit"
-                                                                            class="btn btn-sm btn-outline-warning me-1"
-                                                                            title="Toggle Status">
+                                                                            class="btn btn-sm btn-outline-warning me-1">
                                                                             <i class="bi bi-power"></i>
                                                                         </button>
                                                                     </form>
                                                                     <form
                                                                         t-att-action="'/customer_support/admin_dashboard/user/%s/delete' % user_item['id']"
                                                                         method="post"
-                                                                        style="display: inline-block;"
-                                                                        onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                                                        style="display:inline-block;"
+                                                                        onsubmit="return confirm('Are you sure?');">
                                                                         <input type="hidden"
                                                                             name="csrf_token"
                                                                             t-att-value="request.csrf_token()" />
                                                                         <button type="submit"
-                                                                            class="btn btn-sm btn-outline-danger"
-                                                                            title="Delete User">
+                                                                            class="btn btn-sm btn-outline-danger">
                                                                             <i class="bi bi-trash3"></i>
                                                                         </button>
                                                                     </form>
@@ -759,8 +909,11 @@
                         <!-- ═══ SYSTEM CONFIGURATION TAB ═══ -->
                         <div class="tab-pane fade" id="system-configuration" role="tabpanel"
                             aria-labelledby="system-configuration-tab">
+
+                            <!-- ── 4 Config Cards ── -->
                             <div class="row g-4 mb-4">
-                                <div class="col-md-4">
+                                <!-- General Settings -->
+                                <div class="col-md-3">
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
                                             <div class="config-icon">
@@ -768,15 +921,14 @@
                                             </div>
                                         </div>
                                         <h3 class="config-title">General Settings</h3>
-                                        <p class="config-description">Configure system-wide settings
-                                            including system name, timezone, and language
-                                            preferences</p>
+                                        <p class="config-description">Configure system-wide settings</p>
                                         <button class="btn btn-config" data-bs-toggle="modal"
                                             data-bs-target="#generalSettingsModal"><i
                                                 class="bi bi-gear-fill me-2"></i>Configure</button>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <!-- Ticket Settings -->
+                                <div class="col-md-3">
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
                                             <div class="config-icon">
@@ -784,14 +936,15 @@
                                             </div>
                                         </div>
                                         <h3 class="config-title">Ticket Settings</h3>
-                                        <p class="config-description">Manage SLA policies, response
-                                            times, auto-assignment, and priority defaults</p>
+                                        <p class="config-description">Manage SLA policies and ticket
+                                            defaults</p>
                                         <button class="btn btn-config" data-bs-toggle="modal"
                                             data-bs-target="#ticketSettingsModal"><i
                                                 class="bi bi-gear-fill me-2"></i>Configure</button>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <!-- Project Configuration -->
+                                <div class="col-md-3">
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
                                             <div class="config-icon">
@@ -800,47 +953,57 @@
                                         </div>
                                         <h3 class="config-title">Project Configuration</h3>
                                         <p class="config-description">Define and manage software
-                                            projects including tech stack, timelines, and compliance
-                                            standards</p>
+                                            projects</p>
                                         <button class="btn btn-config" data-bs-toggle="modal"
                                             data-bs-target="#projectConfigModal"><i
                                                 class="bi bi-folder-plus me-2"></i>View Projects</button>
                                     </div>
                                 </div>
+                                <!-- ★ NEW: Knowledge Base ★ -->
+                                <div class="col-md-3">
+                                    <div class="config-option-card">
+                                        <div class="config-icon-wrapper">
+                                            <div class="config-icon">
+                                                <i class="bi bi-database-fill"></i>
+                                            </div>
+                                        </div>
+                                        <h3 class="config-title">Knowledge Base</h3>
+                                        <p class="config-description">Upload documents for the AI
+                                            chatbot to answer customer questions</p>
+                                        <button class="btn btn-config" data-bs-toggle="modal"
+                                            data-bs-target="#knowledgeBaseModal"><i
+                                                class="bi bi-cloud-upload me-2"></i>Manage Docs</button>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- General Settings Modal (unchanged) -->
+                            <!-- General Settings Modal -->
                             <div class="modal fade" id="generalSettingsModal" tabindex="-1"
-                                aria-labelledby="generalSettingsModalLabel" aria-hidden="true">
+                                aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="generalSettingsModalLabel"><i
-                                                    class="bi bi-sliders me-2"></i>General Settings</h5>
+                                            <h5 class="modal-title"><i class="bi bi-sliders me-2"></i>General
+                                                Settings</h5>
                                             <button type="button" class="btn-close"
-                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
                                             <form>
                                                 <div class="mb-3">
-                                                    <label class="form-label"><i
-                                                            class="bi bi-building me-1"></i>System
-                                                        Name</label>
+                                                    <label class="form-label">System Name</label>
                                                     <input type="text" class="form-control"
                                                         value="Customer Support System" />
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label class="form-label"><i
-                                                            class="bi bi-clock me-1"></i>Time Zone</label>
+                                                    <label class="form-label">Time Zone</label>
                                                     <select class="form-select">
                                                         <option>UTC-05:00 (Eastern Time)</option>
                                                         <option>UTC-08:00 (Pacific Time)</option>
                                                     </select>
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label class="form-label"><i
-                                                            class="bi bi-translate me-1"></i>Default
-                                                        Language</label>
+                                                    <label class="form-label">Default Language</label>
                                                     <select class="form-select">
                                                         <option>English</option>
                                                         <option>Spanish</option>
@@ -858,47 +1021,37 @@
                                 </div>
                             </div>
 
-                            <!-- ═══ TICKET SETTINGS MODAL (fully rebuilt with SLA manager) ═══ -->
+                            <!-- Ticket Settings Modal -->
                             <div class="modal fade" id="ticketSettingsModal" tabindex="-1"
-                                aria-labelledby="ticketSettingsModalLabel" aria-hidden="true">
+                                aria-hidden="true">
                                 <div class="modal-dialog modal-xl">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="ticketSettingsModalLabel">
-                                                <i class="bi bi-ticket-perforated me-2"></i>Ticket
-                                                Settings &amp; SLA Policies </h5>
+                                            <h5 class="modal-title"><i
+                                                    class="bi bi-ticket-perforated me-2"></i>Ticket
+                                                Settings &amp; SLA Policies</h5>
                                             <button type="button" class="btn-close"
-                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-
-                                            <!-- Alert area for save messages -->
                                             <div id="slaAlert" class="d-none mb-3"></div>
-
-                                            <!-- Nav tabs inside modal -->
-                                            <ul class="nav nav-tabs mb-4" id="ticketSettingsTabs">
+                                            <ul class="nav nav-tabs mb-4">
                                                 <li class="nav-item">
                                                     <button class="nav-link active"
                                                         data-bs-toggle="tab"
-                                                        data-bs-target="#slaTab" type="button">
-                                                        <i class="bi bi-clock-history me-1"></i>SLA
-                                                        Policies </button>
+                                                        data-bs-target="#slaTab" type="button"><i
+                                                            class="bi bi-clock-history me-1"></i>SLA
+                                                        Policies</button>
                                                 </li>
                                                 <li class="nav-item">
                                                     <button class="nav-link" data-bs-toggle="tab"
                                                         data-bs-target="#ticketDefaultsTab"
-                                                        type="button">
-                                                        <i class="bi bi-sliders me-1"></i>Ticket
-                                                        Defaults </button>
+                                                        type="button"><i class="bi bi-sliders me-1"></i>Ticket
+                                                        Defaults</button>
                                                 </li>
                                             </ul>
-
                                             <div class="tab-content">
-
-                                                <!-- ── SLA POLICIES TAB ── -->
                                                 <div class="tab-pane fade show active" id="slaTab">
-
-                                                    <!-- Add New Policy Form -->
                                                     <div class="card mb-4 border-primary">
                                                         <div
                                                             class="card-header bg-primary text-white">
@@ -967,10 +1120,9 @@
                                                                     <div
                                                                         class="col-md-2 d-flex align-items-end">
                                                                         <button type="submit"
-                                                                            class="btn btn-primary w-100">
-                                                                            <i
+                                                                            class="btn btn-primary w-100"><i
                                                                                 class="bi bi-plus-circle me-1"></i>Add
-                                                                            Policy </button>
+                                                                            Policy</button>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-12 mt-2">
@@ -984,14 +1136,11 @@
                                                             </form>
                                                         </div>
                                                     </div>
-
-                                                    <!-- Existing Policies Table -->
                                                     <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Existing
                                                         SLA Policies</h6>
                                                     <div class="table-responsive">
                                                         <table
-                                                            class="table table-hover table-bordered align-middle"
-                                                            id="slaPoliciesTable">
+                                                            class="table table-hover table-bordered align-middle">
                                                             <thead class="table-light">
                                                                 <tr>
                                                                     <th>Policy Name</th>
@@ -1004,22 +1153,17 @@
                                                             <tbody id="slaPoliciesBody">
                                                                 <tr>
                                                                     <td colspan="5"
-                                                                        class="text-center text-muted py-3">
-                                                                        <i
+                                                                        class="text-center text-muted py-3"><i
                                                                             class="bi bi-hourglass-split me-2"></i>Loading
-                                                                        policies... </td>
+                                                                        policies...</td>
                                                                 </tr>
                                                             </tbody>
                                                         </table>
                                                     </div>
                                                 </div>
-
-                                                <!-- ── TICKET DEFAULTS TAB ── -->
                                                 <div class="tab-pane fade" id="ticketDefaultsTab">
                                                     <div class="mb-3">
-                                                        <label class="form-label"><i
-                                                                class="bi bi-robot me-1"></i>
-                                                            Auto-assignment</label>
+                                                        <label class="form-label">Auto-assignment</label>
                                                         <div class="form-check">
                                                             <input class="form-check-input"
                                                                 type="checkbox" id="autoAssign"
@@ -1030,9 +1174,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label class="form-label"><i
-                                                                class="bi bi-flag me-1"></i>Default
-                                                            Priority</label>
+                                                        <label class="form-label">Default Priority</label>
                                                         <select class="form-select">
                                                             <option>Medium</option>
                                                             <option>Low</option>
@@ -1041,7 +1183,6 @@
                                                         </select>
                                                     </div>
                                                 </div>
-
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -1052,7 +1193,7 @@
                                 </div>
                             </div>
 
-                            <!-- Edit SLA Policy Modal (inline) -->
+                            <!-- Edit SLA Modal -->
                             <div class="modal fade" id="slaEditModal" tabindex="-1"
                                 aria-hidden="true">
                                 <div class="modal-dialog">
@@ -1107,24 +1248,24 @@
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Cancel</button>
                                             <button type="button" class="btn btn-primary"
-                                                onclick="slaSaveEdit()">
-                                                <i class="bi bi-save me-1"></i>Save Changes </button>
+                                                onclick="slaSaveEdit()"><i class="bi bi-save me-1"></i>Save
+                                                Changes</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Project Configuration Modal (unchanged) -->
+                            <!-- Project Config Modal -->
                             <div class="modal fade" id="projectConfigModal" tabindex="-1"
-                                aria-labelledby="projectConfigModalLabel" aria-hidden="true">
+                                aria-hidden="true">
                                 <div class="modal-dialog modal-xl">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="projectConfigModalLabel"><i
+                                            <h5 class="modal-title"><i
                                                     class="bi bi-folder-fill me-2"></i>Project
                                                 Configuration</h5>
                                             <button type="button" class="btn-close"
-                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
                                             <div
@@ -1141,19 +1282,13 @@
                                                 <table class="table table-hover">
                                                     <thead>
                                                         <tr>
-                                                            <th><i class="bi bi-hash me-1"></i>ID</th>
-                                                            <th><i class="bi bi-tag me-1"></i>Project
-                                                                Name</th>
-                                                            <th><i class="bi bi-key me-1"></i>
-                                                                Identifier</th>
-                                                            <th><i class="bi bi-folder2 me-1"></i>
-                                                                Type</th>
-                                                            <th><i class="bi bi-calendar-range me-1"></i>
-                                                                Timeline</th>
-                                                            <th><i class="bi bi-activity me-1"></i>
-                                                                Status</th>
-                                                            <th><i class="bi bi-gear me-1"></i>
-                                                                Actions</th>
+                                                            <th>ID</th>
+                                                            <th>Project Name</th>
+                                                            <th>Identifier</th>
+                                                            <th>Type</th>
+                                                            <th>Timeline</th>
+                                                            <th>Status</th>
+                                                            <th>Actions</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -1169,24 +1304,6 @@
                                                                     <t t-esc="project.id" />
                                                                 </td>
                                                                 <td>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'web_app'"
-                                                                        class="bi bi-laptop me-2 text-primary"></i>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'mobile'"
-                                                                        class="bi bi-phone me-2 text-success"></i>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'machine_learning'"
-                                                                        class="bi bi-brain me-2 text-warning"></i>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'iot'"
-                                                                        class="bi bi-cloud-lightning me-2 text-info"></i>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'api'"
-                                                                        class="bi bi-box-seam me-2 text-dark"></i>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'other'"
-                                                                        class="bi bi-gear me-2 text-muted"></i>
                                                                     <t t-esc="project.name" />
                                                                 </td>
                                                                 <td>
@@ -1200,8 +1317,6 @@
                                                                 </td>
                                                                 <td>
                                                                     <small class="text-muted">
-                                                                        <i
-                                                                            class="bi bi-calendar-event me-1"></i>
                                                                         <t
                                                                             t-esc="(config.start_date.strftime('%b %Y') if config and config.start_date else '-') + ' - ' + (config.end_date.strftime('%b %Y') if config and config.end_date else '-')" />
                                                                     </small>
@@ -1212,15 +1327,13 @@
                                                                     <t
                                                                         t-if="config and config.start_date and config.end_date and config.start_date &lt;= today and today &lt;= config.end_date">
                                                                         <span
-                                                                            class="badge bg-success"><i
-                                                                                class="bi bi-play-circle me-1"></i>
+                                                                            class="badge bg-success">
                                                                             Active</span>
                                                                     </t>
                                                                     <t
                                                                         t-if="config and config.start_date and config.start_date &gt; today">
                                                                         <span
-                                                                            class="badge bg-warning"><i
-                                                                                class="bi bi-clock-history me-1"></i>
+                                                                            class="badge bg-warning">
                                                                             Planning</span>
                                                                     </t>
                                                                     <t t-if="not config">
@@ -1232,23 +1345,16 @@
                                                                 <td>
                                                                     <a
                                                                         t-att-href="'/customer_support/admin_dashboard/projects/%d/edit' % project.id"
-                                                                        class="btn btn-sm btn-outline-primary me-1"
-                                                                        title="Edit Project">
+                                                                        class="btn btn-sm btn-outline-primary me-1">
                                                                         <i
                                                                             class="bi bi-pencil-square"></i>
                                                                     </a>
-                                                                    <button
-                                                                        class="btn btn-sm btn-outline-info me-1"
-                                                                        title="View Details">
-                                                                        <i class="bi bi-eye"></i>
-                                                                    </button>
                                                                     <form
                                                                         t-att-action="'/customer_support/admin_dashboard/projects/delete/%d' % project.id"
                                                                         method="post"
                                                                         style="display:inline">
                                                                         <button type="submit"
                                                                             class="btn btn-sm btn-outline-danger"
-                                                                            title="Archive Project"
                                                                             onclick="return confirm('Archive this project?');">
                                                                             <i class="bi bi-archive"></i>
                                                                         </button>
@@ -1267,20 +1373,192 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- ═══ REPORTING TAB (unchanged) ═══ -->
+                            <!-- ★ NEW: Knowledge Base Modal ★ -->
+                            <div class="modal fade" id="knowledgeBaseModal" tabindex="-1"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title"><i
+                                                    class="bi bi-database-fill me-2"></i>Knowledge
+                                                Base Management</h5>
+                                            <button type="button" class="btn-close"
+                                                data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+
+                                            <!-- Alert -->
+                                            <div id="kbAlert" class="d-none mb-3"></div>
+
+                                            <!-- Stats -->
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-6 col-md-3">
+                                                    <div class="card border-0 shadow-sm text-center"
+                                                        style="border-top:3px solid #1a3a5c!important;border-radius:10px;">
+                                                        <div class="card-body py-3">
+                                                            <div class="fw-bold" id="kbTotalDocs"
+                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                —</div>
+                                                            <div class="text-muted"
+                                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Total
+                                                                Docs</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3">
+                                                    <div class="card border-0 shadow-sm text-center"
+                                                        style="border-top:3px solid #22c55e!important;border-radius:10px;">
+                                                        <div class="card-body py-3">
+                                                            <div class="fw-bold" id="kbReadyDocs"
+                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                —</div>
+                                                            <div class="text-muted"
+                                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                                                                Ready</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3">
+                                                    <div class="card border-0 shadow-sm text-center"
+                                                        style="border-top:3px solid #f59e0b!important;border-radius:10px;">
+                                                        <div class="card-body py-3">
+                                                            <div class="fw-bold" id="kbPendingDocs"
+                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                —</div>
+                                                            <div class="text-muted"
+                                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                                                                Pending</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3">
+                                                    <div class="card border-0 shadow-sm text-center"
+                                                        style="border-top:3px solid #ef4444!important;border-radius:10px;">
+                                                        <div class="card-body py-3">
+                                                            <div class="fw-bold" id="kbErrorDocs"
+                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                —</div>
+                                                            <div class="text-muted"
+                                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                                                                Errors</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Upload Form -->
+                                            <div class="card mb-4 border-primary">
+                                                <div class="card-header bg-primary text-white">
+                                                    <h6 class="mb-0"><i
+                                                            class="bi bi-cloud-upload me-2"></i>Upload
+                                                        New Document</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-semibold">Document
+                                                                Name <span class="text-danger">*</span></label>
+                                                            <input type="text" class="form-control"
+                                                                id="kbDocName"
+                                                                placeholder="e.g. Dragon Coders Services Overview" />
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label fw-semibold">
+                                                                Category <span class="text-danger">*</span></label>
+                                                            <select class="form-select"
+                                                                id="kbCategory">
+                                                                <option value="company">Company Info</option>
+                                                                <option value="services">Services
+                                                                    &amp; Products</option>
+                                                                <option value="projects">Projects</option>
+                                                                <option value="pricing">Pricing</option>
+                                                                <option value="technical">Technical
+                                                                    Docs</option>
+                                                                <option value="faq">FAQ</option>
+                                                                <option value="other">Other</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <label class="form-label fw-semibold">Description
+                                                                (optional)</label>
+                                                            <input type="text" class="form-control"
+                                                                id="kbDescription"
+                                                                placeholder="Brief description..." />
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <label class="form-label fw-semibold">
+                                                                File <span class="text-danger">*</span> <small
+                                                                    class="text-muted fw-normal ms-1">PDF
+                                                                · DOCX · TXT · XLSX</small></label>
+                                                            <input type="file" class="form-control"
+                                                                id="kbFile"
+                                                                accept=".pdf,.docx,.txt,.xlsx" />
+                                                        </div>
+                                                        <div class="col-md-4 d-flex align-items-end">
+                                                            <button type="button"
+                                                                class="btn btn-primary w-100"
+                                                                id="kbUploadBtn"
+                                                                onclick="kbUpload()">
+                                                                <i class="bi bi-upload me-2"></i>Upload
+                                                                &amp; Process </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Documents Table -->
+                                            <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Uploaded
+                                                Documents</h6>
+                                            <div class="table-responsive">
+                                                <table
+                                                    class="table table-hover table-bordered align-middle">
+                                                    <thead class="table-dark">
+                                                        <tr>
+                                                            <th>Document Name</th>
+                                                            <th>Category</th>
+                                                            <th>Type</th>
+                                                            <th>Status</th>
+                                                            <th style="width:80px;">Chunks</th>
+                                                            <th>Uploaded</th>
+                                                            <th style="width:90px;">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="kbDocsBody">
+                                                        <tr>
+                                                            <td colspan="7"
+                                                                class="text-center text-muted py-4"><i
+                                                                    class="bi bi-hourglass-split me-2"></i>
+                                                                Loading...</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div><!--
+                                        /modal-body -->
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ★ END Knowledge Base Modal ★ -->
+
+                        </div><!--
+                        /system-configuration tab-pane -->
+
+                        <!-- ═══ REPORTING TAB ═══ -->
                         <div class="tab-pane fade" id="reporting" role="tabpanel"
                             aria-labelledby="reporting-tab">
-
-                            <!-- ── Filter Bar ── -->
                             <div
                                 class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                                 <div>
                                     <h4 class="mb-0"
-                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;letter-spacing:1px;">
-                                        <i class="bi bi-graph-up-arrow me-2"></i>Analytics &amp;
-                                        Reports </h4>
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;letter-spacing:1px;"><i
+                                            class="bi bi-graph-up-arrow me-2"></i>Analytics &amp;
+                                        Reports</h4>
                                     <small class="text-muted">Live data from the system</small>
                                 </div>
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -1296,8 +1574,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- ── Summary KPI Row ── -->
                             <div class="row g-3 mb-4" id="reportKpiRow">
                                 <div class="col-6 col-md-2">
                                     <div class="card text-center border-0 shadow-sm h-100"
@@ -1305,7 +1581,7 @@
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
                                                 style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
-                                                id="r-total-period">—</div>
+                                                id="r-total-period">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">New
                                                 Tickets</div>
@@ -1318,7 +1594,7 @@
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
                                                 style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
-                                                id="r-resolved">—</div>
+                                                id="r-resolved">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
                                                 Resolved</div>
@@ -1331,7 +1607,7 @@
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
                                                 style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
-                                                id="r-open">—</div>
+                                                id="r-open">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
                                                 Open</div>
@@ -1344,7 +1620,7 @@
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
                                                 style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
-                                                id="r-breached">—</div>
+                                                id="r-breached">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">SLA
                                                 Breached</div>
@@ -1357,7 +1633,7 @@
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
                                                 style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
-                                                id="r-sla-compliance">—</div>
+                                                id="r-sla-compliance">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">SLA
                                                 Compliance</div>
@@ -1370,7 +1646,7 @@
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
                                                 style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
-                                                id="r-resolve-rate">—</div>
+                                                id="r-resolve-rate">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Resolve
                                                 Rate</div>
@@ -1378,17 +1654,15 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- ── Charts Row ── -->
                             <div class="row g-4 mb-4">
                                 <div class="col-lg-8">
                                     <div class="card border-0 shadow-sm h-100"
                                         style="border-radius:12px;">
                                         <div class="card-header bg-white border-0 pt-3 pb-0">
                                             <h6 class="mb-0"
-                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
-                                                <i class="bi bi-bar-chart-line me-2"></i>Ticket
-                                                Volume Trend </h6>
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                    class="bi bi-bar-chart-line me-2"></i>Ticket
+                                                Volume Trend</h6>
                                         </div>
                                         <div class="card-body">
                                             <canvas id="volumeChart" height="120"></canvas>
@@ -1400,8 +1674,9 @@
                                         style="border-radius:12px;">
                                         <div class="card-header bg-white border-0 pt-3 pb-0">
                                             <h6 class="mb-0"
-                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
-                                                <i class="bi bi-pie-chart me-2"></i>Status Breakdown </h6>
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                    class="bi bi-pie-chart me-2"></i>Status
+                                                Breakdown</h6>
                                         </div>
                                         <div
                                             class="card-body d-flex justify-content-center align-items-center">
@@ -1416,9 +1691,9 @@
                                         style="border-radius:12px;">
                                         <div class="card-header bg-white border-0 pt-3 pb-0">
                                             <h6 class="mb-0"
-                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
-                                                <i class="bi bi-exclamation-triangle me-2"></i>Priority
-                                                Distribution (Open) </h6>
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                    class="bi bi-exclamation-triangle me-2"></i>Priority
+                                                Distribution (Open)</h6>
                                         </div>
                                         <div
                                             class="card-body d-flex justify-content-center align-items-center">
@@ -1431,9 +1706,9 @@
                                         style="border-radius:12px;">
                                         <div class="card-header bg-white border-0 pt-3 pb-0">
                                             <h6 class="mb-0"
-                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
-                                                <i class="bi bi-people me-2"></i>Top Customers by
-                                                Volume </h6>
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                    class="bi bi-people me-2"></i>Top Customers by
+                                                Volume</h6>
                                         </div>
                                         <div class="card-body">
                                             <canvas id="customersChart" height="160"></canvas>
@@ -1441,14 +1716,12 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- ── Project Health Table ── -->
                             <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
                                 <div
                                     class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3">
                                     <h6 class="mb-0"
-                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
-                                        <i class="bi bi-folder2-open me-2"></i>Project Health </h6>
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                            class="bi bi-folder2-open me-2"></i>Project Health</h6>
                                     <small class="text-muted">Sorted by health score (worst first)</small>
                                 </div>
                                 <div class="card-body p-0">
@@ -1479,20 +1752,17 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- ── Focal Person Leaderboard ── -->
                             <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
                                 <div
                                     class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3">
                                     <h6 class="mb-0"
-                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
-                                        <i class="bi bi-trophy me-2"></i>Focal Person Leaderboard </h6>
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                            class="bi bi-trophy me-2"></i>Focal Person Leaderboard</h6>
                                     <a id="execReportLink"
                                         href="/customer_support/admin/report/executive?days=30"
-                                        target="_blank"
-                                        class="btn btn-sm"
-                                        style="background:#1a3a5c;color:#fff;border-radius:6px;font-size:12px;">
-                                        <i class="bi bi-printer me-1"></i>Print Executive Report </a>
+                                        target="_blank" class="btn btn-sm"
+                                        style="background:#1a3a5c;color:#fff;border-radius:6px;font-size:12px;"><i
+                                            class="bi bi-printer me-1"></i>Print Executive Report</a>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
@@ -1523,524 +1793,243 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
 
-                    </div>
-                </div>
-            </div>
+                    </div><!--
+                    /tab-content -->
+                </div><!--
+                /container-fluid -->
+            </div><!--
+            /dashboard-wrapper -->
 
-            <!-- Bootstrap JS -->
             <script
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-            <!-- ═══ SLA POLICY MANAGER JS ═══ -->
+            <!-- 1. ADMIN BELL NOTIFICATIONS -->
             <script type="text/javascript">
                 //<![CDATA[
 (function(){
 'use strict';
-
-var PRIORITY_LABELS = {any:'Any',low:'Low',medium:'Medium',high:'High',urgent:'Urgent'};
-var PRIORITY_COLORS = {any:'secondary',low:'info',medium:'primary',high:'warning',urgent:'danger'};
-
-function slaAlert(msg, type){
-    var el = document.getElementById('slaAlert');
-    if(!el) return;
-    el.className = 'alert alert-' + (type||'success') + ' mb-3';
-    el.textContent = msg;
-    setTimeout(function(){ el.className = 'd-none'; }, 4000);
-}
-
-function slaLoadPolicies(){
-    fetch('/customer_support/sla/policies', {credentials:'same-origin'})
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-        var tbody = document.getElementById('slaPoliciesBody');
-        if(!tbody) return;
-        if(!d.policies || d.policies.length === 0){
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3"><i class="bi bi-inbox me-2"></i>No SLA policies defined yet. Add one above.</td></tr>';
-            return;
-        }
-        tbody.innerHTML = d.policies.map(function(p){
-            var pc = PRIORITY_COLORS[p.priority_level] || 'secondary';
-            var pl = PRIORITY_LABELS[p.priority_level] || p.priority_level;
-            return '<tr>' +
-                '<td><strong>' + p.name + '</strong></td>' +
-                '<td><span class="badge bg-dark">' + p.response_time + ' ' + p.time_unit + '</span></td>' +
-                '<td><span class="badge bg-' + pc + '">' + pl + '</span></td>' +
-                '<td><small class="text-muted">' + (p.description || '-') + '</small></td>' +
-                '<td>' +
-                    '<button class="btn btn-sm btn-outline-primary me-1" onclick="slaOpenEdit(' + JSON.stringify(p) + ')" title="Edit"><i class="bi bi-pencil"></i></button>' +
-                    '<button class="btn btn-sm btn-outline-danger" onclick="slaDelete(' + p.id + ',\'' + p.name + '\')" title="Delete"><i class="bi bi-trash3"></i></button>' +
-                '</td>' +
-            '</tr>';
-        }).join('');
-    })
-    .catch(function(e){ console.warn('SLA load failed:', e); });
-}
-
-window.slaCreate = function(e){
-    e.preventDefault();
-    var form = document.getElementById('slaCreateForm');
-    var data = new FormData(form);
-    var csrf = document.querySelector('input[name="csrf_token"]');
-    if(csrf) data.set('csrf_token', csrf.value);
-    fetch('/customer_support/sla/create', {method:'POST', credentials:'same-origin', body: new URLSearchParams(data)})
-    .then(function(r){
-        if(r.redirected || r.ok){
-            slaAlert('SLA policy created successfully!', 'success');
-            form.reset();
-            slaLoadPolicies();
-        } else {
-            slaAlert('Failed to create policy.', 'danger');
-        }
-    })
-    .catch(function(){ slaAlert('Network error.', 'danger'); });
-};
-
-window.slaOpenEdit = function(p){
-    document.getElementById('editSlaId').value = p.id;
-    document.getElementById('editSlaName').value = p.name;
-    document.getElementById('editSlaTime').value = p.response_time;
-    document.getElementById('editSlaUnit').value = p.time_unit;
-    document.getElementById('editSlaPriority').value = p.priority_level;
-    document.getElementById('editSlaDesc').value = p.description || '';
-    var modal = new bootstrap.Modal(document.getElementById('slaEditModal'));
-    modal.show();
-};
-
-window.slaSaveEdit = function(){
-    var id = document.getElementById('editSlaId').value;
-    var data = new URLSearchParams({
-        sla_name: document.getElementById('editSlaName').value,
-        sla_response_time: document.getElementById('editSlaTime').value,
-        sla_time_unit: document.getElementById('editSlaUnit').value,
-        sla_priority_level: document.getElementById('editSlaPriority').value,
-        sla_description: document.getElementById('editSlaDesc').value,
-    });
-    var csrf = document.querySelector('input[name="csrf_token"]');
-    if(csrf) data.set('csrf_token', csrf.value);
-    fetch('/customer_support/sla/' + id + '/update', {method:'POST', credentials:'same-origin', body: data})
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-        bootstrap.Modal.getInstance(document.getElementById('slaEditModal')).hide();
-        if(d.success){
-            slaAlert('SLA policy updated.', 'success');
-            slaLoadPolicies();
-        } else {
-            slaAlert('Update failed: ' + (d.error||'unknown'), 'danger');
-        }
-    });
-};
-
-window.slaDelete = function(id, name){
-    if(!confirm('Delete SLA policy "' + name + '"? This cannot be undone.')) return;
-    fetch('/customer_support/sla/' + id + '/delete', {method:'POST', credentials:'same-origin'})
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-        if(d.success){ slaAlert('Policy deleted.', 'success'); slaLoadPolicies(); }
-        else { slaAlert('Delete failed.', 'danger'); }
-    });
-};
-
-// Load policies when ticket settings modal opens
-document.addEventListener('DOMContentLoaded', function(){
-    var modal = document.getElementById('ticketSettingsModal');
-    if(modal){
-        modal.addEventListener('shown.bs.modal', function(){ slaLoadPolicies(); });
-    }
-});
-
+var bell=document.getElementById('adminNotifBell'),bellIcon=document.getElementById('adminBellIcon'),dropdown=document.getElementById('adminNotifDropdown'),badge=document.getElementById('adminNotifBadge'),list=document.getElementById('adminNotifList'),prevTotal=0;
+bell.addEventListener('click',function(e){e.stopPropagation();dropdown.classList.toggle('open');});
+document.addEventListener('click',function(){dropdown.classList.remove('open');});
+dropdown.addEventListener('click',function(e){e.stopPropagation();});
+document.getElementById('adminMarkAllRead').addEventListener('click',function(){list.querySelectorAll('.admin-notif-item').forEach(function(i){i.classList.remove('unread');});badge.classList.add('hidden');});
+document.getElementById('notifViewAllTickets').addEventListener('click',function(e){e.preventDefault();dropdown.classList.remove('open');var t=document.getElementById('ticket-assignment-tab');if(t)new bootstrap.Tab(t).show();});
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function loadNotifications(){fetch('/customer_support/admin/notifications',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){renderNotifications(d);}).catch(function(e){console.warn('Admin notifications failed:',e);});}
+function renderNotifications(data){var sla=data.sla_breaches||[],unassigned=data.unassigned||[],sc=data.status_changes||[];var total=sla.length+unassigned.length+sc.length;if(total===0){badge.classList.add('hidden');}else{badge.textContent=total>99?'99+':total;badge.classList.remove('hidden');if(total>prevTotal){bellIcon.classList.add('bell-ring');badge.classList.add('bump');setTimeout(function(){bellIcon.classList.remove('bell-ring');badge.classList.remove('bump');},600);}}prevTotal=total;if(total===0){list.innerHTML='<div class="admin-notif-empty"><i class="bi bi-check-circle-fill" style="font-size:2rem;color:#22c55e;display:block;margin-bottom:.5rem;"></i>All clear &#x2014; no active alerts!</div>';return;}var html='';if(sla.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-x-octagon-fill me-1" style="color:#ef4444;"></i>SLA Breaches</span><span class="section-count">'+sla.length+'</span></div>';html+=sla.map(function(a){return'<a class="admin-notif-item unread" href="/customer_support/admin_view/ticket/'+a.ticket_id+'"><div class="admin-notif-icon sla-breach"><i class="bi bi-x-octagon-fill"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(a.ticket_name)+' &#x2014; '+esc(a.subject)+'</div><div class="admin-notif-sub">Agent: '+esc(a.agent_name)+' &middot; '+esc(a.time_display)+'</div><div class="admin-notif-time">Priority: '+esc(a.priority)+'</div></div><div class="admin-notif-dot sla-breach"></div></a>';}).join('');}if(unassigned.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-inbox-fill me-1" style="color:#3b82f6;"></i>Unassigned Tickets</span><span class="section-count">'+unassigned.length+'</span></div>';html+=unassigned.map(function(t){return'<a class="admin-notif-item unread" href="/customer_support/admin_view/ticket/'+t.ticket_id+'"><div class="admin-notif-icon unassigned"><i class="bi bi-inbox-fill"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(t.ticket_name)+' &#x2014; '+esc(t.subject)+'</div><div class="admin-notif-sub">Waiting '+esc(t.waiting)+' &middot; Priority: '+esc(t.priority)+'</div><div class="admin-notif-time">Created: '+esc(t.create_date)+'</div></div><div class="admin-notif-dot unassigned"></div></a>';}).join('');}if(sc.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-arrow-left-right me-1" style="color:#10b981;"></i>Recent Status Changes</span><span class="section-count">'+sc.length+'</span></div>';html+=sc.map(function(s){return'<a class="admin-notif-item" href="/customer_support/admin_view/ticket/'+s.ticket_id+'"><div class="admin-notif-icon status-chg"><i class="bi bi-arrow-left-right"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(s.ticket_name)+' &#x2014; '+esc(s.subject)+'</div><div class="admin-notif-sub">&#x2192; '+esc(s.new_state)+' &middot; Agent: '+esc(s.agent_name)+'</div><div class="admin-notif-time">'+esc(s.changed_at)+'</div></div><div class="admin-notif-dot status-chg"></div></a>';}).join('');}list.innerHTML=html;}
+document.addEventListener('DOMContentLoaded',function(){loadNotifications();setInterval(loadNotifications,30000);});
 })();
 //]]>
             </script>
 
-            <!-- Live Analytics Auto-Refresh (polls every 15s) — UNCHANGED -->
+            <!-- 2. AGENT WORKLOAD PANEL -->
             <script type="text/javascript">
                 //<![CDATA[
 (function(){
-    'use strict';
-    var INTERVAL=15000;
-    var A=[
-        {key:'open_tickets',sel:'[data-key="open_tickets"] .stat-value'},
-        {key:'total_tickets',sel:'[data-key="total_tickets"] .stat-value'},
-        {key:'high_priority',sel:'[data-key="high_priority"] .stat-value'},
-        {key:'urgent',sel:'[data-key="urgent"] .stat-value'},
-        {key:'avg_open_hours',sel:'[data-key="avg_open_hours"] .stat-value'},
-        {key:'total_hours',sel:'[data-key="total_hours"] .stat-value'},
-        {key:'avg_high_hours',sel:'[data-key="avg_high_hours"] .stat-value'},
-        {key:'avg_urgent_hours',sel:'[data-key="avg_urgent_hours"] .stat-value'},
-        {key:'resolved_tickets',sel:'[data-key="resolved_tickets"] .stat-value'},
-        {key:'solve_rate',sel:'[data-key="solve_rate"] .stat-value',sfx:'%'},
-        {key:'high_resolved',sel:'[data-key="high_resolved"] .stat-value'},
-        {key:'urgent_resolved',sel:'[data-key="urgent_resolved"] .stat-value'},
-    ];
-    var P=[
-        {key:'today_closed',sel:'[data-key="today_closed"] .performance-value'},
-        {key:'avg_resolve_rate',sel:'[data-key="avg_resolve_rate"] .performance-value',sfx:'%'},
-        {key:'daily_target',sel:'[data-key="daily_target"] .performance-value',sfx:'%'},
-        {key:'achievement',sel:'[data-key="achievement"] .performance-value',sfx:'%'},
-        {key:'sample_performance',sel:'[data-key="sample_performance"] .score-badge',sfx:'%'},
-    ];
-    var C=[
-        {key:'new',sel:'[data-key="count_new"] .quick-stat-value'},
-        {key:'assigned',sel:'[data-key="count_assigned"] .quick-stat-value'},
-        {key:'resolved',sel:'[data-key="count_resolved"] .quick-stat-value'},
-        {key:'total',sel:'[data-key="count_total"] .quick-stat-value'},
-    ];
-    function upd(sel,val,sfx){var el=document.querySelector(sel);if(el)el.textContent=val+(sfx||'');}
-    function flash(sel){var el=document.querySelector(sel);if(el){el.style.transition='color 0.3s';el.style.color='#1e88c7';setTimeout(function(){el.style.color='';},600);}}
-    function updBar(v){var b=document.querySelector('.progress-bar');if(b){b.style.width=v+'%';b.className='progress-bar '+(v>=80?'bg-success':'bg-warning');}}
-    function updBarLabel(v){var ls=document.querySelectorAll('.progress-label span');if(ls.length>=2)ls[1].textContent=v+'%';}
-    function updTime(){var now=new Date();var t=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});document.querySelectorAll('.last-updated').forEach(function(el){el.innerHTML='<i class="bi bi-clock me-1"></i>Updated at '+t;});}
-    function run(){
-        fetch('/customer_support/dashboard/analytics',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}})
-        .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-        .then(function(d){
-            var a=d.analytics||{},p=d.performance||{},c=d.ticket_counts||{};
-            A.forEach(function(i){var v=a[i.key];if(v!==undefined){upd(i.sel,v,i.sfx||'');flash(i.sel);}});
-            P.forEach(function(i){var v=p[i.key];if(v!==undefined)upd(i.sel,v,i.sfx||'');});
-            if(p.achievement!==undefined){updBar(p.achievement);updBarLabel(p.achievement);}
-            C.forEach(function(i){var v=c[i.key];if(v!==undefined)upd(i.sel,v,'');});
-            updTime();
-        })
-        .catch(function(e){console.warn('Analytics refresh failed:',e);});
-    }
-    document.addEventListener('DOMContentLoaded',function(){run();setInterval(run,INTERVAL);});
+'use strict';
+var panel=document.getElementById('workloadPanel'),overlay=document.getElementById('workloadOverlay'),btn=document.getElementById('workloadBtn'),closeBtn=document.getElementById('workloadClose'),body=document.getElementById('workloadPanelBody'),lastUpd=document.getElementById('workloadLastUpdated'),refreshBtn=document.getElementById('workloadRefreshBtn');
+function openPanel(){panel.classList.add('open');overlay.classList.add('open');btn.classList.add('active');}
+function closePanel(){panel.classList.remove('open');overlay.classList.remove('open');btn.classList.remove('active');}
+btn.addEventListener('click',function(){panel.classList.contains('open')?closePanel():openPanel();});
+closeBtn.addEventListener('click',closePanel);overlay.addEventListener('click',closePanel);refreshBtn.addEventListener('click',loadWorkload);
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function loadWorkload(){lastUpd.textContent='Refreshing...';fetch('/customer_support/admin/workload',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){renderWorkload(d);}).catch(function(e){console.warn('Workload failed:',e);body.innerHTML='<div class="workload-empty"><i class="bi bi-exclamation-triangle" style="font-size:2rem;color:#f59e0b;display:block;margin-bottom:.5rem;"></i>Failed to load workload data.</div>';});}
+function renderWorkload(data){var agents=data.agents||[],summary=data.summary||{};var now=new Date();lastUpd.textContent='Updated at '+now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});document.getElementById('ws-agents').textContent=summary.total_agents||agents.length;document.getElementById('ws-total-open').textContent=summary.total_open||0;document.getElementById('ws-overloaded').textContent=summary.overloaded||0;document.getElementById('ws-breached').textContent=summary.total_breached||0;if(agents.length===0){body.innerHTML='<div class="workload-empty"><i class="bi bi-people" style="font-size:2.5rem;display:block;margin-bottom:.5rem;"></i>No agents found.</div>';return;}body.innerHTML=agents.map(function(a){var status=a.total_open>8?'red':a.total_open>=5?'amber':'ok';var pillLabel=status==='red'?'Overloaded':status==='amber'?'Busy':'Available';var barColor=a.resolve_rate>=75?'#22c55e':a.resolve_rate>=50?'#f59e0b':'#ef4444';var wPct=Math.min(100,Math.round((a.total_open/10)*100));var wColor=status==='red'?'#ef4444':status==='amber'?'#f59e0b':'#22c55e';var avatar='/web/image/res.users/'+a.user_id+'/avatar_128';return'<div class="workload-card status-'+status+'"><div class="workload-agent-row"><img class="workload-agent-avatar" src="'+avatar+'" onerror="this.src=\'/web/static/img/avatar_gray.svg\'"/><div><div class="workload-agent-name">'+esc(a.name)+'</div><div class="workload-agent-sub">'+esc(a.email||'Support Agent')+'</div></div><span class="workload-status-pill '+status+'">'+pillLabel+'</span></div><div class="workload-stats-row"><div class="workload-stat-box"><div class="workload-stat-val">'+a.assigned+'</div><div class="workload-stat-lbl">Assigned</div></div><div class="workload-stat-box"><div class="workload-stat-val">'+a.in_progress+'</div><div class="workload-stat-lbl">In Progress</div></div><div class="workload-stat-box"><div class="workload-stat-val">'+a.resolved+'</div><div class="workload-stat-lbl">Resolved</div></div><div class="workload-stat-box"><div class="workload-stat-val">'+(a.breached>0?'<span style="color:#ef4444;font-weight:800;">'+a.breached+'</span>':a.breached)+'</div><div class="workload-stat-lbl">Breached</div></div></div><div class="workload-bar-wrap"><div class="workload-bar-label"><span>Workload</span><span>'+a.total_open+' / 10 open</span></div><div class="workload-bar-bg"><div class="workload-bar-fill" style="width:'+wPct+'%;background:'+wColor+';"></div></div></div><div class="workload-bar-wrap"><div class="workload-bar-label"><span>Resolve Rate</span><span>'+a.resolve_rate+'%</span></div><div class="workload-bar-bg"><div class="workload-bar-fill" style="width:'+a.resolve_rate+'%;background:'+barColor+';"></div></div></div></div>';}).join('');}
+document.addEventListener('DOMContentLoaded',function(){loadWorkload();setInterval(loadWorkload,60000);});
 })();
 //]]>
             </script>
 
-            <!-- Existing Tab Navigation JavaScript (unchanged) -->
+            <!-- 3. SLA POLICY MANAGER -->
             <script type="text/javascript">
                 //<![CDATA[
-(function() {
-    'use strict';
-    function activateTabFromURL() {
-        var urlParams = new URLSearchParams(window.location.search);
-        var tabParam = urlParams.get('tab');
-        var hashParam = window.location.hash.substring(1);
-        var targetTab = tabParam || hashParam;
-        if (targetTab) {
-            var targetSelector = '#' + targetTab;
-            var tabButton = document.querySelector('.header-left button[data-bs-target="' + targetSelector + '"]');
-            if (tabButton) {
-                document.querySelectorAll('.header-left button').forEach(function(btn) {
-                    btn.classList.remove('active');
-                    btn.setAttribute('aria-selected', 'false');
-                });
-                document.querySelectorAll('.tab-pane').forEach(function(pane) {
-                    pane.classList.remove('show', 'active');
-                });
-                tabButton.classList.add('active');
-                tabButton.setAttribute('aria-selected', 'true');
-                var targetPane = document.querySelector(targetSelector);
-                if (targetPane) { targetPane.classList.add('show', 'active'); }
-            }
-        }
-    }
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', activateTabFromURL);
-    } else { activateTabFromURL(); }
-    window.addEventListener('load', activateTabFromURL);
-    window.addEventListener('hashchange', activateTabFromURL);
-    document.addEventListener('DOMContentLoaded', function() {
-        var triggerTabList = [].slice.call(document.querySelectorAll('.header-left button[data-bs-toggle="tab"]'));
-        triggerTabList.forEach(function(triggerEl) {
-            triggerEl.addEventListener('click', function(event) {
-                event.preventDefault();
-                new bootstrap.Tab(triggerEl).show();
-            });
-        });
-        triggerTabList.forEach(function(tab) {
-            tab.addEventListener('shown.bs.tab', function(e) {
-                localStorage.setItem('activeDashboardTab', e.target.getAttribute('data-bs-target'));
-            });
-        });
-        document.querySelectorAll('.action-card[data-bs-toggle="tab"]').forEach(function(card) {
-            card.addEventListener('click', function(e) {
-                e.preventDefault();
-                var tab = document.querySelector('.header-left button[data-bs-target="' + this.getAttribute('href') + '"]');
-                if (tab) new bootstrap.Tab(tab).show();
-            });
-        });
-        activateTabFromURL();
-        document.querySelectorAll('.alert-success, .alert-danger').forEach(function(alert) {
-            setTimeout(function() { new bootstrap.Alert(alert).close(); }, 5000);
-        });
-    });
+(function(){
+'use strict';
+var PL={any:'Any',low:'Low',medium:'Medium',high:'High',urgent:'Urgent'};
+var PC={any:'secondary',low:'info',medium:'primary',high:'warning',urgent:'danger'};
+function slaAlert(msg,type){var el=document.getElementById('slaAlert');if(!el)return;el.className='alert alert-'+(type||'success')+' mb-3';el.textContent=msg;setTimeout(function(){el.className='d-none';},4000);}
+function slaLoadPolicies(){fetch('/customer_support/sla/policies',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){var tb=document.getElementById('slaPoliciesBody');if(!tb)return;if(!d.policies||!d.policies.length){tb.innerHTML='<tr><td colspan="5" class="text-center text-muted py-3"><i class="bi bi-inbox me-2"></i>No SLA policies defined yet.</td></tr>';return;}tb.innerHTML=d.policies.map(function(p){return'<tr><td><strong>'+p.name+'</strong></td><td><span class="badge bg-dark">'+p.response_time+' '+p.time_unit+'</span></td><td><span class="badge bg-'+(PC[p.priority_level]||'secondary')+'">'+(PL[p.priority_level]||p.priority_level)+'</span></td><td><small class="text-muted">'+(p.description||'-')+'</small></td><td><button class="btn btn-sm btn-outline-primary me-1" onclick="slaOpenEdit('+JSON.stringify(p)+')"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger" onclick="slaDelete('+p.id+',\''+p.name+'\')"><i class="bi bi-trash3"></i></button></td></tr>';}).join('');}).catch(function(e){console.warn('SLA load failed:',e);});}
+window.slaCreate=function(e){e.preventDefault();var form=document.getElementById('slaCreateForm');var data=new FormData(form);var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)data.set('csrf_token',csrf.value);fetch('/customer_support/sla/create',{method:'POST',credentials:'same-origin',body:new URLSearchParams(data)}).then(function(r){if(r.redirected||r.ok){slaAlert('SLA policy created!','success');form.reset();slaLoadPolicies();}else{slaAlert('Failed.','danger');}}).catch(function(){slaAlert('Network error.','danger');});};
+window.slaOpenEdit=function(p){document.getElementById('editSlaId').value=p.id;document.getElementById('editSlaName').value=p.name;document.getElementById('editSlaTime').value=p.response_time;document.getElementById('editSlaUnit').value=p.time_unit;document.getElementById('editSlaPriority').value=p.priority_level;document.getElementById('editSlaDesc').value=p.description||'';new bootstrap.Modal(document.getElementById('slaEditModal')).show();};
+window.slaSaveEdit=function(){var id=document.getElementById('editSlaId').value;var data=new URLSearchParams({sla_name:document.getElementById('editSlaName').value,sla_response_time:document.getElementById('editSlaTime').value,sla_time_unit:document.getElementById('editSlaUnit').value,sla_priority_level:document.getElementById('editSlaPriority').value,sla_description:document.getElementById('editSlaDesc').value});var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)data.set('csrf_token',csrf.value);fetch('/customer_support/sla/'+id+'/update',{method:'POST',credentials:'same-origin',body:data}).then(function(r){return r.json();}).then(function(d){bootstrap.Modal.getInstance(document.getElementById('slaEditModal')).hide();if(d.success){slaAlert('Updated.','success');slaLoadPolicies();}else{slaAlert('Failed:'+(d.error||'unknown'),'danger');}});};
+window.slaDelete=function(id,name){if(!confirm('Delete "'+name+'"?'))return;fetch('/customer_support/sla/'+id+'/delete',{method:'POST',credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){if(d.success){slaAlert('Deleted.','success');slaLoadPolicies();}else{slaAlert('Delete failed.','danger');}});};
+document.addEventListener('DOMContentLoaded',function(){var m=document.getElementById('ticketSettingsModal');if(m)m.addEventListener('shown.bs.modal',function(){slaLoadPolicies();});});
 })();
 //]]>
             </script>
 
-            <!-- Chart.js for Reporting Tab -->
+            <!-- 4. LIVE ANALYTICS -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+var INTERVAL=15000;
+var A=[{key:'open_tickets',sel:'[data-key="open_tickets"] .stat-value'},{key:'total_tickets',sel:'[data-key="total_tickets"] .stat-value'},{key:'high_priority',sel:'[data-key="high_priority"] .stat-value'},{key:'urgent',sel:'[data-key="urgent"] .stat-value'},{key:'avg_open_hours',sel:'[data-key="avg_open_hours"] .stat-value'},{key:'total_hours',sel:'[data-key="total_hours"] .stat-value'},{key:'avg_high_hours',sel:'[data-key="avg_high_hours"] .stat-value'},{key:'avg_urgent_hours',sel:'[data-key="avg_urgent_hours"] .stat-value'},{key:'resolved_tickets',sel:'[data-key="resolved_tickets"] .stat-value'},{key:'solve_rate',sel:'[data-key="solve_rate"] .stat-value',sfx:'%'},{key:'high_resolved',sel:'[data-key="high_resolved"] .stat-value'},{key:'urgent_resolved',sel:'[data-key="urgent_resolved"] .stat-value'}];
+var P=[{key:'today_closed',sel:'[data-key="today_closed"] .performance-value'},{key:'avg_resolve_rate',sel:'[data-key="avg_resolve_rate"] .performance-value',sfx:'%'},{key:'daily_target',sel:'[data-key="daily_target"] .performance-value',sfx:'%'},{key:'achievement',sel:'[data-key="achievement"] .performance-value',sfx:'%'},{key:'sample_performance',sel:'[data-key="sample_performance"] .score-badge',sfx:'%'}];
+var C=[{key:'new',sel:'[data-key="count_new"] .quick-stat-value'},{key:'assigned',sel:'[data-key="count_assigned"] .quick-stat-value'},{key:'resolved',sel:'[data-key="count_resolved"] .quick-stat-value'},{key:'total',sel:'[data-key="count_total"] .quick-stat-value'}];
+function upd(sel,val,sfx){var el=document.querySelector(sel);if(el)el.textContent=val+(sfx||'');}
+function flash(sel){var el=document.querySelector(sel);if(el){el.style.transition='color 0.3s';el.style.color='#1e88c7';setTimeout(function(){el.style.color='';},600);}}
+function updBar(v){var b=document.querySelector('.progress-bar');if(b){b.style.width=v+'%';b.className='progress-bar '+(v>=80?'bg-success':'bg-warning');}}
+function updBarLabel(v){var ls=document.querySelectorAll('.progress-label span');if(ls.length>=2)ls[1].textContent=v+'%';}
+function updTime(){var t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});document.querySelectorAll('.last-updated').forEach(function(el){el.innerHTML='<i class="bi bi-clock me-1"></i>Updated at '+t;});}
+function run(){fetch('/customer_support/dashboard/analytics',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){var a=d.analytics||{},p=d.performance||{},c=d.ticket_counts||{};A.forEach(function(i){var v=a[i.key];if(v!==undefined){upd(i.sel,v,i.sfx||'');flash(i.sel);}});P.forEach(function(i){var v=p[i.key];if(v!==undefined)upd(i.sel,v,i.sfx||'');});if(p.achievement!==undefined){updBar(p.achievement);updBarLabel(p.achievement);}C.forEach(function(i){var v=c[i.key];if(v!==undefined)upd(i.sel,v,'');});updTime();}).catch(function(e){console.warn('Analytics refresh failed:',e);});}
+document.addEventListener('DOMContentLoaded',function(){run();setInterval(run,INTERVAL);});
+})();
+//]]>
+            </script>
+
+            <!-- 5. TAB NAVIGATION -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+function activateTabFromURL(){var urlParams=new URLSearchParams(window.location.search);var tabParam=urlParams.get('tab');var hashParam=window.location.hash.substring(1);var targetTab=tabParam||hashParam;if(targetTab){var ts='#'+targetTab;var tb=document.querySelector('.header-left button[data-bs-target="'+ts+'"]');if(tb){document.querySelectorAll('.header-left button').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('show','active');});tb.classList.add('active');tb.setAttribute('aria-selected','true');var tp=document.querySelector(ts);if(tp)tp.classList.add('show','active');}}}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',activateTabFromURL);}else{activateTabFromURL();}
+window.addEventListener('load',activateTabFromURL);window.addEventListener('hashchange',activateTabFromURL);
+document.addEventListener('DOMContentLoaded',function(){
+  var tl=[].slice.call(document.querySelectorAll('.header-left button[data-bs-toggle="tab"]'));
+  tl.forEach(function(t){t.addEventListener('click',function(e){e.preventDefault();new bootstrap.Tab(t).show();});});
+  tl.forEach(function(t){t.addEventListener('shown.bs.tab',function(e){localStorage.setItem('activeDashboardTab',e.target.getAttribute('data-bs-target'));});});
+  document.querySelectorAll('.action-card[data-bs-toggle="tab"]').forEach(function(c){c.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector('.header-left button[data-bs-target="'+this.getAttribute('href')+'"]');if(t)new bootstrap.Tab(t).show();});});
+  activateTabFromURL();
+  document.querySelectorAll('.alert-success,.alert-danger').forEach(function(a){setTimeout(function(){new bootstrap.Alert(a).close();},5000);});
+});
+})();
+//]]>
+            </script>
+
             <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-            <!-- ═══ REPORTING TAB JS ═══ -->
+            <!-- 6. REPORTING TAB JS -->
             <script type="text/javascript">
                 //<![CDATA[
 (function(){
 'use strict';
-
-var currentDays = 30;
-var charts = {};
-
-var STATUS_COLORS = {
-    new:         '#3498db',
-    assigned:    '#9b59b6',
-    in_progress: '#e8b84b',
-    resolved:    '#2ecc71',
-    closed:      '#95a5a6',
-};
-var PRIORITY_COLORS = {
-    urgent: '#e74c3c',
-    high:   '#e67e22',
-    medium: '#3498db',
-    low:    '#2ecc71',
-};
-
-function destroyChart(id){
-    if(charts[id]){ charts[id].destroy(); delete charts[id]; }
-}
-
-function buildVolumeChart(trend){
-    destroyChart('volume');
-    var ctx = document.getElementById('volumeChart');
-    if(!ctx) return;
-    charts['volume'] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: trend.map(function(d){ return d.date; }),
-            datasets: [{
-                label: 'Tickets',
-                data: trend.map(function(d){ return d.count; }),
-                backgroundColor: 'rgba(26,58,92,0.75)',
-                borderColor: '#1a3a5c',
-                borderWidth: 1,
-                borderRadius: 4,
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } },
-                x: { ticks: { maxTicksLimit: 14, maxRotation: 45 } }
-            }
-        }
-    });
-}
-
-function buildStatusChart(breakdown){
-    destroyChart('status');
-    var ctx = document.getElementById('statusChart');
-    if(!ctx) return;
-    var labels = Object.keys(breakdown);
-    charts['status'] = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels.map(function(l){ return l.replace('_',' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }),
-            datasets: [{
-                data: Object.values(breakdown),
-                backgroundColor: labels.map(function(l){ return STATUS_COLORS[l] || '#aaa'; }),
-                borderWidth: 2,
-                borderColor: '#fff',
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
-            cutout: '60%',
-        }
-    });
-}
-
-function buildPriorityChart(dist){
-    destroyChart('priority');
-    var ctx = document.getElementById('priorityChart');
-    if(!ctx) return;
-    var labels = ['urgent','high','medium','low'];
-    charts['priority'] = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: ['Urgent','High','Medium','Low'],
-            datasets: [{
-                data: labels.map(function(l){ return dist[l] || 0; }),
-                backgroundColor: labels.map(function(l){ return PRIORITY_COLORS[l]; }),
-                borderWidth: 2,
-                borderColor: '#fff',
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
-        }
-    });
-}
-
-function buildCustomersChart(customers){
-    destroyChart('customers');
-    var ctx = document.getElementById('customersChart');
-    if(!ctx) return;
-    charts['customers'] = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: customers.map(function(c){ return c.name; }),
-            datasets: [{
-                label: 'Tickets',
-                data: customers.map(function(c){ return c.count; }),
-                backgroundColor: 'rgba(232,184,75,0.85)',
-                borderColor: '#e8b84b',
-                borderWidth: 1,
-                borderRadius: 4,
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
-        }
-    });
-}
-
-function healthBadge(h){
-    var map = {
-        green: '<span class="badge bg-success">Good</span>',
-        amber: '<span class="badge bg-warning text-dark">Attention</span>',
-        red:   '<span class="badge bg-danger">Critical</span>'
-    };
-    return map[h] || '<span class="badge bg-secondary">-</span>';
-}
-
-function trendIcon(t){
-    if(t === 'up')   return '<span class="text-danger"><i class="bi bi-arrow-up-right-circle-fill"></i> Up</span>';
-    if(t === 'down') return '<span class="text-success"><i class="bi bi-arrow-down-right-circle-fill"></i> Down</span>';
-    return '<span class="text-muted"><i class="bi bi-dash-circle"></i> Stable</span>';
-}
-
-function scoreBar(val, color){
-    return '<div style="display:flex;align-items:center;gap:6px;">' +
-        '<div style="flex:1;background:#e9ecef;border-radius:4px;height:8px;overflow:hidden;">' +
-        '<div style="width:' + val + '%;height:100%;background:' + color + ';border-radius:4px;"></div></div>' +
-        '<span style="font-size:11px;font-weight:600;width:36px;">' + val + '%</span></div>';
-}
-
-function rateColor(v){ return v >= 80 ? '#2ecc71' : v >= 60 ? '#f39c12' : '#e74c3c'; }
-
-function buildProjectTable(rows, days){
-    var tbody = document.getElementById('projectHealthBody');
-    if(!tbody) return;
-    if(!rows || rows.length === 0){
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No projects found.</td></tr>';
-        return;
-    }
-    tbody.innerHTML = rows.map(function(p){
-        return '<tr>' +
-            '<td class="ps-3"><strong>' + p.name + '</strong>' +
-                (p.code ? ' <span class="badge bg-secondary ms-1" style="font-size:10px;">' + p.code + '</span>' : '') +
-            '</td>' +
-            '<td>' + p.total + '</td>' +
-            '<td>' + p.resolved + '</td>' +
-            '<td>' + p.open + '</td>' +
-            '<td>' + (p.breached > 0 ? '<span class="text-danger fw-bold">' + p.breached + '</span>' : p.breached) + '</td>' +
-            '<td>' + healthBadge(p.health) + '</td>' +
-            '<td>' + trendIcon(p.trend) + '</td>' +
-            '<td class="pe-3"><a href="/customer_support/admin/report/project/' + p.id + '?days=' + days + '" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-printer me-1"></i>Print</a></td>' +
-        '</tr>';
-    }).join('');
-}
-
-function buildFocalTable(rows, days){
-    var tbody = document.getElementById('focalLeaderboardBody');
-    if(!tbody) return;
-    if(!rows || rows.length === 0){
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">No focal persons found.</td></tr>';
-        return;
-    }
-    var medals = ['🥇','🥈','🥉'];
-    tbody.innerHTML = rows.map(function(fp, i){
-        return '<tr>' +
-            '<td class="ps-3">' + (medals[i] || (i+1)) + '</td>' +
-            '<td><strong>' + fp.name + '</strong></td>' +
-            '<td>' + fp.assigned + '</td>' +
-            '<td>' + fp.resolved + '</td>' +
-            '<td>' + fp.open + '</td>' +
-            '<td>' + (fp.breached > 0 ? '<span class="text-danger fw-bold">' + fp.breached + '</span>' : fp.breached) + '</td>' +
-            '<td>' + scoreBar(fp.resolve_rate, rateColor(fp.resolve_rate)) + '</td>' +
-            '<td>' + scoreBar(fp.sla_rate, rateColor(fp.sla_rate)) + '</td>' +
-            '<td class="pe-3"><a href="/customer_support/admin/report/focal/' + fp.id + '?days=' + days + '" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-printer me-1"></i>Print</a></td>' +
-        '</tr>';
-    }).join('');
-}
-
-function loadReportData(days){
-    fetch('/customer_support/admin/reporting/data?days=' + days, {
-        credentials: 'same-origin',
-        headers: {'Accept': 'application/json'}
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-        if(!d.success) return;
-        var s = d.summary || {};
-
-        document.getElementById('r-total-period').textContent  = s.total_period || 0;
-        document.getElementById('r-resolved').textContent      = s.resolved_period || 0;
-        document.getElementById('r-open').textContent          = s.open_tickets || 0;
-        document.getElementById('r-breached').textContent      = s.breached_period || 0;
-        document.getElementById('r-sla-compliance').textContent = (s.sla_compliance || 0) + '%';
-        document.getElementById('r-resolve-rate').textContent  = (s.resolve_rate || 0) + '%';
-
-        buildVolumeChart(d.volume_trend || []);
-        buildStatusChart(d.status_breakdown || {});
-        buildPriorityChart(d.priority_dist || {});
-        buildCustomersChart(d.top_customers || []);
-
-        buildProjectTable(d.project_health || [], days);
-        buildFocalTable(d.focal_leaderboard || [], days);
-
-        var el = document.getElementById('execReportLink');
-        if(el) el.href = '/customer_support/admin/report/executive?days=' + days;
-    })
-    .catch(function(e){ console.warn('Report data load failed:', e); });
-}
-
-document.addEventListener('DOMContentLoaded', function(){
-    // Day filter buttons
-    var group = document.getElementById('reportDaysGroup');
-    if(group){
-        group.addEventListener('click', function(e){
-            var btn = e.target.closest('button[data-days]');
-            if(!btn) return;
-            group.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
-            btn.classList.add('active');
-            currentDays = parseInt(btn.getAttribute('data-days'));
-            loadReportData(currentDays);
-        });
-    }
-
-    // Load when Reporting tab is clicked
-    var reportTab = document.getElementById('reporting-tab');
-    if(reportTab){
-        reportTab.addEventListener('shown.bs.tab', function(){
-            loadReportData(currentDays);
-        });
-        // Load immediately if already on reporting tab
-        if(reportTab.classList.contains('active')){
-            loadReportData(currentDays);
-        }
-    }
-
-    // Load if URL param says tab=reporting
-    var params = new URLSearchParams(window.location.search);
-    if(params.get('tab') === 'reporting' || window.location.hash === '#reporting'){
-        setTimeout(function(){ loadReportData(currentDays); }, 400);
-    }
+var currentDays=30,charts={};
+var SC={new:'#3498db',assigned:'#9b59b6',in_progress:'#e8b84b',resolved:'#2ecc71',closed:'#95a5a6'};
+var PC={urgent:'#e74c3c',high:'#e67e22',medium:'#3498db',low:'#2ecc71'};
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function bVC(trend){dc('volume');var ctx=document.getElementById('volumeChart');if(!ctx)return;charts['volume']=new Chart(ctx,{type:'bar',data:{labels:trend.map(function(d){return d.date;}),datasets:[{label:'Tickets',data:trend.map(function(d){return d.count;}),backgroundColor:'rgba(26,58,92,0.75)',borderColor:'#1a3a5c',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}},x:{ticks:{maxTicksLimit:14,maxRotation:45}}}}});}
+function bSC(bd){dc('status');var ctx=document.getElementById('statusChart');if(!ctx)return;var l=Object.keys(bd);charts['status']=new Chart(ctx,{type:'doughnut',data:{labels:l.map(function(x){return x.replace('_',' ').replace(/\b\w/g,function(c){return c.toUpperCase();});}),datasets:[{data:Object.values(bd),backgroundColor:l.map(function(x){return SC[x]||'#aaa';}),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},cutout:'60%'}});}
+function bPC(dist){dc('priority');var ctx=document.getElementById('priorityChart');if(!ctx)return;var l=['urgent','high','medium','low'];charts['priority']=new Chart(ctx,{type:'pie',data:{labels:['Urgent','High','Medium','Low'],datasets:[{data:l.map(function(x){return dist[x]||0;}),backgroundColor:l.map(function(x){return PC[x];}),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});}
+function bCC(customers){dc('customers');var ctx=document.getElementById('customersChart');if(!ctx)return;charts['customers']=new Chart(ctx,{type:'bar',data:{labels:customers.map(function(c){return c.name;}),datasets:[{label:'Tickets',data:customers.map(function(c){return c.count;}),backgroundColor:'rgba(232,184,75,0.85)',borderColor:'#e8b84b',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{stepSize:1}}}}});}
+function hB(h){return{green:'<span class="badge bg-success">Good</span>',amber:'<span class="badge bg-warning text-dark">Attention</span>',red:'<span class="badge bg-danger">Critical</span>'}[h]||'<span class="badge bg-secondary">-</span>';}
+function tI(t){if(t==='up')return'<span class="text-danger"><i class="bi bi-arrow-up-right-circle-fill"></i> Up</span>';if(t==='down')return'<span class="text-success"><i class="bi bi-arrow-down-right-circle-fill"></i> Down</span>';return'<span class="text-muted"><i class="bi bi-dash-circle"></i> Stable</span>';}
+function sB(v,c){return'<div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;background:#e9ecef;border-radius:4px;height:8px;overflow:hidden;"><div style="width:'+v+'%;height:100%;background:'+c+';border-radius:4px;"></div></div><span style="font-size:11px;font-weight:600;width:36px;">'+v+'%</span></div>';}
+function rC(v){return v>=80?'#2ecc71':v>=60?'#f39c12':'#e74c3c';}
+function bPT(rows,days){var tb=document.getElementById('projectHealthBody');if(!tb)return;if(!rows||!rows.length){tb.innerHTML='<tr><td colspan="8" class="text-center text-muted py-4">No projects found.</td></tr>';return;}tb.innerHTML=rows.map(function(p){return'<tr><td class="ps-3"><strong>'+p.name+'</strong>'+(p.code?'<span class="badge bg-secondary ms-1" style="font-size:10px;">'+p.code+'</span>':'')+'</td><td>'+p.total+'</td><td>'+p.resolved+'</td><td>'+p.open+'</td><td>'+(p.breached>0?'<span class="text-danger fw-bold">'+p.breached+'</span>':p.breached)+'</td><td>'+hB(p.health)+'</td><td>'+tI(p.trend)+'</td><td class="pe-3"><a href="/customer_support/admin/report/project/'+p.id+'?days='+days+'" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-printer me-1"></i>Print</a></td></tr>';}).join('');}
+function bFT(rows,days){var tb=document.getElementById('focalLeaderboardBody');if(!tb)return;if(!rows||!rows.length){tb.innerHTML='<tr><td colspan="9" class="text-center text-muted py-4">No focal persons found.</td></tr>';return;}var m=['🥇','🥈','🥉'];tb.innerHTML=rows.map(function(fp,i){return'<tr><td class="ps-3">'+(m[i]||(i+1))+'</td><td><strong>'+fp.name+'</strong></td><td>'+fp.assigned+'</td><td>'+fp.resolved+'</td><td>'+fp.open+'</td><td>'+(fp.breached>0?'<span class="text-danger fw-bold">'+fp.breached+'</span>':fp.breached)+'</td><td>'+sB(fp.resolve_rate,rC(fp.resolve_rate))+'</td><td>'+sB(fp.sla_rate,rC(fp.sla_rate))+'</td><td class="pe-3"><a href="/customer_support/admin/report/focal/'+fp.id+'?days='+days+'" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-printer me-1"></i>Print</a></td></tr>';}).join('');}
+function loadReportData(days){fetch('/customer_support/admin/reporting/data?days='+days,{credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).then(function(d){if(!d.success)return;var s=d.summary||{};document.getElementById('r-total-period').textContent=s.total_period||0;document.getElementById('r-resolved').textContent=s.resolved_period||0;document.getElementById('r-open').textContent=s.open_tickets||0;document.getElementById('r-breached').textContent=s.breached_period||0;document.getElementById('r-sla-compliance').textContent=(s.sla_compliance||0)+'%';document.getElementById('r-resolve-rate').textContent=(s.resolve_rate||0)+'%';bVC(d.volume_trend||[]);bSC(d.status_breakdown||{});bPC(d.priority_dist||{});bCC(d.top_customers||[]);bPT(d.project_health||[],days);bFT(d.focal_leaderboard||[],days);var el=document.getElementById('execReportLink');if(el)el.href='/customer_support/admin/report/executive?days='+days;}).catch(function(e){console.warn('Report data load failed:',e);});}
+document.addEventListener('DOMContentLoaded',function(){
+  var grp=document.getElementById('reportDaysGroup');if(grp){grp.addEventListener('click',function(e){var b=e.target.closest('button[data-days]');if(!b)return;grp.querySelectorAll('button').forEach(function(x){x.classList.remove('active');});b.classList.add('active');currentDays=parseInt(b.getAttribute('data-days'));loadReportData(currentDays);});}
+  var rt=document.getElementById('reporting-tab');if(rt){rt.addEventListener('shown.bs.tab',function(){loadReportData(currentDays);});if(rt.classList.contains('active'))loadReportData(currentDays);}
+  var params=new URLSearchParams(window.location.search);if(params.get('tab')==='reporting'||window.location.hash==='#reporting'){setTimeout(function(){loadReportData(currentDays);},400);}
 });
-
 })();
 //]]>
             </script>
+
+            <!-- ★ 7. KNOWLEDGE BASE JS ★ -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+var CAT_LABELS={company:'Company Info',services:'Services & Products',projects:'Projects',pricing:'Pricing',technical:'Technical Docs',faq:'FAQ',other:'Other'};
+
+function kbAlert(msg,type){
+    var el=document.getElementById('kbAlert');
+    if(!el)return;
+    el.className='alert alert-'+(type||'success')+' mb-3';
+    el.textContent=msg;
+    el.classList.remove('d-none');
+    setTimeout(function(){el.classList.add('d-none');},4000);
+}
+
+function kbLoadDocs(){
+    fetch('/customer_support/knowledge/list',{credentials:'same-origin',headers:{'Accept':'application/json'}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+        var docs=data.documents||[];
+        document.getElementById('kbTotalDocs').textContent=docs.length;
+        document.getElementById('kbReadyDocs').textContent=docs.filter(function(d){return d.state==='ready';}).length;
+        document.getElementById('kbPendingDocs').textContent=docs.filter(function(d){return d.state==='pending';}).length;
+        document.getElementById('kbErrorDocs').textContent=docs.filter(function(d){return d.state==='error';}).length;
+        var tb=document.getElementById('kbDocsBody');
+        if(!docs.length){
+            tb.innerHTML='<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-folder2-open me-2"></i>No documents uploaded yet. Upload your first document above.</td></tr>';
+            return;
+        }
+        tb.innerHTML=docs.map(function(d){
+            var stateBadge=d.state==='ready'
+                ?'<span class="badge bg-success">&#x2705; Ready</span>'
+                :d.state==='error'
+                ?'<span class="badge bg-danger" title="'+(d.error_msg||'')+'">&#x274C; Error</span>'
+                :'<span class="badge bg-warning text-dark">&#x23F3; Pending</span>';
+            var typeBadge={pdf:'<span class="badge bg-danger">PDF</span>',docx:'<span class="badge bg-primary">DOCX</span>',txt:'<span class="badge bg-success">TXT</span>',xlsx:'<span class="badge bg-info text-dark">XLSX</span>'}[d.file_type]||'<span class="badge bg-secondary">FILE</span>';
+            return'<tr>'
+                +'<td><strong>'+d.name+'</strong>'+(d.description?'<br><small class="text-muted">'+d.description+'</small>':'')+'</td>'
+                +'<td><span class="badge bg-secondary">'+(CAT_LABELS[d.category]||d.category)+'</span></td>'
+                +'<td>'+typeBadge+'</td>'
+                +'<td>'+stateBadge+'</td>'
+                +'<td class="text-center fw-bold text-primary">'+(d.chunk_count||0)+'</td>'
+                +'<td><small class="text-muted">'+(d.create_date||'')+'</small></td>'
+                +'<td><button class="btn btn-sm btn-outline-danger" onclick="kbDelete('+d.id+',\''+d.name.replace(/'/g,"\\'")+'\')" title="Delete"><i class="bi bi-trash3"></i></button></td>'
+                +'</tr>';
+        }).join('');
+    })
+    .catch(function(e){console.warn('KB load failed:',e);});
+}
+
+window.kbUpload=function(){
+    var name=document.getElementById('kbDocName').value.trim();
+    var category=document.getElementById('kbCategory').value;
+    var desc=document.getElementById('kbDescription').value.trim();
+    var fileEl=document.getElementById('kbFile');
+    if(!name||!fileEl.files.length){kbAlert('Please fill in the document name and select a file.','warning');return;}
+    var allowed=['.pdf','.docx','.txt','.xlsx'];
+    var filename=fileEl.files[0].name.toLowerCase();
+    if(!allowed.some(function(ext){return filename.endsWith(ext);})){kbAlert('Invalid file type. Allowed: PDF, DOCX, TXT, XLSX','danger');return;}
+    var formData=new FormData();
+    formData.append('name',name);
+    formData.append('category',category);
+    formData.append('description',desc);
+    formData.append('file',fileEl.files[0]);
+    var csrf=document.querySelector('input[name="csrf_token"]');
+    if(csrf)formData.append('csrf_token',csrf.value);
+    var btn=document.getElementById('kbUploadBtn');
+    if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Processing...';}
+    fetch('/customer_support/knowledge/upload',{method:'POST',credentials:'same-origin',body:formData})
+    .then(function(){
+        kbAlert('Document uploaded and processed successfully! &#x2705;','success');
+        document.getElementById('kbDocName').value='';
+        document.getElementById('kbDescription').value='';
+        document.getElementById('kbFile').value='';
+        kbLoadDocs();
+    })
+    .catch(function(){kbAlert('Upload failed. Please try again.','danger');})
+    .finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="bi bi-upload me-2"></i>Upload &amp; Process';}});
+};
+
+window.kbDelete=function(id,name){
+    if(!confirm('Delete "'+name+'"?\nThe AI will no longer use this document.'))return;
+    var formData=new FormData();
+    var csrf=document.querySelector('input[name="csrf_token"]');
+    if(csrf)formData.append('csrf_token',csrf.value);
+    fetch('/customer_support/knowledge/delete/'+id,{method:'POST',credentials:'same-origin',body:formData})
+    .then(function(){kbAlert('Document deleted.','success');kbLoadDocs();})
+    .catch(function(){kbAlert('Delete failed.','danger');});
+};
+
+document.addEventListener('DOMContentLoaded',function(){
+    var modal=document.getElementById('knowledgeBaseModal');
+    if(modal)modal.addEventListener('shown.bs.modal',function(){kbLoadDocs();});
+});
+})();
+//]]>
+            </script>
+
         </t>
     </template>
 </odoo>
