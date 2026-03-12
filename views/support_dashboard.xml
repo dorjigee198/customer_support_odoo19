@@ -140,13 +140,22 @@
                     /* ── SAVE FEEDBACK TOAST ── */
                     #kanbanToast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
                     background: #1e2535; border: 1px solid rgba(255,255,255,0.1); border-radius:
-                    12px;
-                    padding: 0.75rem 1.25rem; font-size: 0.82rem; color: #e8eaf0; display: flex;
+                    12px; padding: 0.75rem 1.25rem; font-size: 0.82rem; color: #e8eaf0; display:
+                    flex;
                     align-items: center; gap: 0.6rem; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
                     transform: translateY(80px); opacity: 0; transition: all 0.3s ease; }
                     #kanbanToast.show { transform: translateY(0); opacity: 1; }
                     #kanbanToast.success { border-color: rgba(34,197,94,0.4); }
                     #kanbanToast.error { border-color: rgba(239,68,68,0.4); }
+
+                    /* ── NEW TICKET FLASH ANIMATION ── */
+                    @keyframes ticketNewFlash {
+                    0% { border-color: #4f8ef7; box-shadow: 0 0 0 0 rgba(79,142,247,0.5); }
+                    50% { border-color: #60a5fa; box-shadow: 0 0 0 6px rgba(79,142,247,0); }
+                    100% { border-color: rgba(255,255,255,0.07); box-shadow: none; }
+                    }
+                    .kanban-card.ticket-new-flash { animation: ticketNewFlash 1.2s ease-out
+                    forwards; }
                 </style>
             </t>
 
@@ -214,16 +223,16 @@
                                 <ul class="dropdown-menu dropdown-menu-end"
                                     aria-labelledby="userProfileDropdown">
                                     <li>
-                                        <a class="dropdown-item" href="/customer_support/profile"><i
-                                                class="bi bi-person me-2"></i>Edit Profile</a>
+                                        <a class="dropdown-item" href="/customer_support/profile">
+                                            <i class="bi bi-person me-2"></i>Edit Profile </a>
                                     </li>
                                     <li>
                                         <hr class="dropdown-divider" />
                                     </li>
                                     <li>
                                         <a class="dropdown-item text-danger"
-                                            href="/customer_support/logout_manual"><i
-                                                class="bi bi-box-arrow-right me-2"></i>Logout</a>
+                                            href="/customer_support/logout_manual">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Logout </a>
                                     </li>
                                 </ul>
                             </div>
@@ -428,10 +437,10 @@
                                 <h2 class="card-title"><i class="bi bi-graph-up-arrow"></i>My
                                     Performance</h2>
                                 <div class="card-actions">
-                                    <span class="performance-score" data-key="sample_performance"><span
-                                            class="score-badge"><t
-                                                t-esc="performance.get('sample_performance', 85)" />
-                                        %</span> Overall Score</span>
+                                    <span class="performance-score" data-key="sample_performance">
+                                        <span class="score-badge">
+                                            <t t-esc="performance.get('sample_performance', 85)" />
+                                        % </span> Overall Score </span>
                                 </div>
                             </div>
                             <div class="performance-grid">
@@ -537,7 +546,7 @@
                     </div>
                 </div>
 
-                <!-- ═══ TICKETS PAGE — LIST VIEW ═══ -->
+                <!-- ═══ TICKETS PAGE — LIST + KANBAN ═══ -->
                 <div class="page-content dashboard-content" id="tickets-page" style="display: none;">
                     <div class="tickets-header">
                         <div class="search-container">
@@ -554,175 +563,49 @@
                         </div>
                     </div>
 
-                    <!-- List view -->
+                    <!-- ── LIST VIEW ── -->
                     <div id="listView">
                         <div class="ticket-table-wrapper">
-                            <t t-if="tickets">
-                                <table class="ticket-table">
-                                    <thead>
-                                        <tr>
-                                            <th>TICKET</th>
-                                            <th>CUSTOMER</th>
-                                            <th>STATUS</th>
-                                            <th>PRIORITY</th>
-                                            <th>CREATED</th>
-                                            <th>PROJECT</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <t t-foreach="tickets" t-as="ticket">
-                                            <tr class="ticket-row" t-att-data-ticket-id="ticket.id"
-                                                style="cursor: pointer;">
-                                                <td class="ticket-info-col">
-                                                    <div class="ticket-id-badge">
-                                                        <t t-esc="ticket.name" />
-                                                    </div>
-                                                    <div class="ticket-description">
-                                                        <t
-                                                            t-esc="ticket.description or 'No description'" />
-                                                    </div>
-                                                </td>
-                                                <td class="customer-col">
-                                                    <div class="customer-info">
-                                                        <img
-                                                            t-att-src="'/web/image/res.partner/%s/avatar_128' % ticket.customer_id.id if ticket.customer_id else '/web/static/img/avatar_gray.svg'"
-                                                            alt="Customer Avatar"
-                                                            class="customer-avatar"
-                                                            onerror="this.src='/web/static/img/avatar_gray.svg'" />
-                                                        <span class="customer-name">
-                                                            <t
-                                                                t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'" />
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td class="status-col">
-                                                    <t t-set="state_class" t-value="''" />
-                                                    <t t-set="state_display"
-                                                        t-value="ticket.state.replace('_', ' ').title()" />
-                                                    <t t-if="ticket.state == 'new'">
-                                                        <t t-set="state_class"
-                                                            t-value="'status-new'" />
-                                                    </t>
-                                                    <t t-elif="ticket.state == 'in_progress'">
-                                                        <t t-set="state_class"
-                                                            t-value="'status-in-progress'" />
-                                                        <t t-set="state_display"
-                                                            t-value="'In Progress'" />
-                                                    </t>
-                                                    <t t-elif="ticket.state == 'resolved'">
-                                                        <t t-set="state_class"
-                                                            t-value="'status-resolved'" />
-                                                    </t>
-                                                    <t t-elif="ticket.state == 'closed'">
-                                                        <t t-set="state_class"
-                                                            t-value="'status-closed'" />
-                                                    </t>
-                                                    <t t-else="">
-                                                        <t t-set="state_class"
-                                                            t-value="'status-new'" />
-                                                    </t>
-                                                    <span
-                                                        t-att-class="'table-status-badge ' + state_class">
-                                                        <t t-esc="state_display" />
-                                                    </span>
-                                                </td>
-                                                <td class="priority-col">
-                                                    <t t-set="priority_class" t-value="''" />
-                                                    <t t-if="ticket.priority == 'low'">
-                                                        <t t-set="priority_class"
-                                                            t-value="'priority-low'" />
-                                                    </t>
-                                                    <t t-elif="ticket.priority == 'medium'">
-                                                        <t t-set="priority_class"
-                                                            t-value="'priority-medium'" />
-                                                    </t>
-                                                    <t t-elif="ticket.priority == 'high'">
-                                                        <t t-set="priority_class"
-                                                            t-value="'priority-high'" />
-                                                    </t>
-                                                    <t t-elif="ticket.priority == 'urgent'">
-                                                        <t t-set="priority_class"
-                                                            t-value="'priority-urgent'" />
-                                                    </t>
-                                                    <t t-else="">
-                                                        <t t-set="priority_class"
-                                                            t-value="'priority-low'" />
-                                                    </t>
-                                                    <span
-                                                        t-att-class="'table-priority-badge ' + priority_class">
-                                                        <t
-                                                            t-esc="ticket.priority.title() if ticket.priority else 'Low'" />
-                                                    </span>
-                                                </td>
-                                                <td class="created-col">
-                                                    <t t-if="ticket.create_date">
-                                                        <t
-                                                            t-esc="ticket.create_date.strftime('%b %d, %I:%M %p')" />
-                                                    </t>
-                                                    <t t-else="">N/A</t>
-                                                </td>
-                                                <td class="project-col">
-                                                    <i class="bi bi-folder2"></i>
-                                                    <span>Support</span>
-                                                </td>
-                                            </tr>
-                                        </t>
-                                    </tbody>
-                                </table>
-                            </t>
-                            <t t-if="not tickets">
-                                <div class="tickets-empty-state">
-                                    <i class="bi bi-inbox"></i>
-                                    <h3>No tickets assigned to you yet.</h3>
-                                    <p>When you have tickets assigned, they will appear here.</p>
-                                </div>
-                            </t>
+                            <table class="ticket-table" id="ticketTable" style="display:none;">
+                                <thead>
+                                    <tr>
+                                        <th>TICKET</th>
+                                        <th>CUSTOMER</th>
+                                        <th>STATUS</th>
+                                        <th>PRIORITY</th>
+                                        <th>CREATED</th>
+                                        <th>PROJECT</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ticketTableBody">
+                                    <!-- Populated by JS polling -->
+                                </tbody>
+                            </table>
+                            <div class="tickets-empty-state" id="ticketsEmptyState"
+                                style="display:none;">
+                                <i class="bi bi-inbox"></i>
+                                <h3>No tickets assigned to you yet.</h3>
+                                <p>When you have tickets assigned, they will appear here.</p>
+                            </div>
+                            <div class="tickets-empty-state" id="ticketsLoadingState">
+                                <i class="bi bi-arrow-repeat"
+                                    style="animation: spin 1s linear infinite; display:inline-block;"></i>
+                                <h3>Loading tickets...</h3>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- ═══ KANBAN VIEW ═══ -->
+                    <!-- ── KANBAN VIEW ── -->
                     <div id="kanbanView" style="display:none;">
                         <div class="kanban-board" id="kanbanBoard">
 
-                            <!-- New column -->
+                            <!-- New / Assigned column -->
                             <div class="kanban-col" data-state="new">
                                 <div class="kanban-col-header">
                                     <span class="kanban-col-title"><i class="bi bi-circle"></i> New</span>
                                     <span class="kanban-col-count" id="count-new">0</span>
                                 </div>
-                                <div class="kanban-cards" id="col-new">
-                                    <t t-foreach="tickets" t-as="ticket">
-                                        <t t-if="ticket.state == 'new'">
-                                            <div class="kanban-card"
-                                                t-att-data-ticket-id="ticket.id"
-                                                t-att-data-state="ticket.state"
-                                                draggable="true">
-                                                <div class="kanban-card-id">
-                                                    <t t-esc="ticket.name" />
-                                                </div>
-                                                <div class="kanban-card-subject">
-                                                    <t t-esc="ticket.subject" />
-                                                </div>
-                                                <div class="kanban-card-footer">
-                                                    <div class="kanban-card-customer">
-                                                        <img
-                                                            t-att-src="'/web/image/res.partner/%s/avatar_128' % ticket.customer_id.id if ticket.customer_id else '/web/static/img/avatar_gray.svg'"
-                                                            onerror="this.src='/web/static/img/avatar_gray.svg'" />
-                                                        <span>
-                                                            <t
-                                                                t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'" />
-                                                        </span>
-                                                    </div>
-                                                    <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                    <span
-                                                        t-att-class="'kanban-priority priority-' + kp">
-                                                        <t t-esc="kp.title()" />
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </t>
-                                    </t>
-                                </div>
+                                <div class="kanban-cards" id="col-new"></div>
                                 <div class="kanban-drop-zone">Drop here</div>
                             </div>
 
@@ -733,39 +616,7 @@
                                         In Progress</span>
                                     <span class="kanban-col-count" id="count-in_progress">0</span>
                                 </div>
-                                <div class="kanban-cards" id="col-in_progress">
-                                    <t t-foreach="tickets" t-as="ticket">
-                                        <t t-if="ticket.state == 'in_progress'">
-                                            <div class="kanban-card"
-                                                t-att-data-ticket-id="ticket.id"
-                                                t-att-data-state="ticket.state"
-                                                draggable="true">
-                                                <div class="kanban-card-id">
-                                                    <t t-esc="ticket.name" />
-                                                </div>
-                                                <div class="kanban-card-subject">
-                                                    <t t-esc="ticket.subject" />
-                                                </div>
-                                                <div class="kanban-card-footer">
-                                                    <div class="kanban-card-customer">
-                                                        <img
-                                                            t-att-src="'/web/image/res.partner/%s/avatar_128' % ticket.customer_id.id if ticket.customer_id else '/web/static/img/avatar_gray.svg'"
-                                                            onerror="this.src='/web/static/img/avatar_gray.svg'" />
-                                                        <span>
-                                                            <t
-                                                                t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'" />
-                                                        </span>
-                                                    </div>
-                                                    <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                    <span
-                                                        t-att-class="'kanban-priority priority-' + kp">
-                                                        <t t-esc="kp.title()" />
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </t>
-                                    </t>
-                                </div>
+                                <div class="kanban-cards" id="col-in_progress"></div>
                                 <div class="kanban-drop-zone">Drop here</div>
                             </div>
 
@@ -776,39 +627,7 @@
                                         Resolved</span>
                                     <span class="kanban-col-count" id="count-resolved">0</span>
                                 </div>
-                                <div class="kanban-cards" id="col-resolved">
-                                    <t t-foreach="tickets" t-as="ticket">
-                                        <t t-if="ticket.state == 'resolved'">
-                                            <div class="kanban-card"
-                                                t-att-data-ticket-id="ticket.id"
-                                                t-att-data-state="ticket.state"
-                                                draggable="true">
-                                                <div class="kanban-card-id">
-                                                    <t t-esc="ticket.name" />
-                                                </div>
-                                                <div class="kanban-card-subject">
-                                                    <t t-esc="ticket.subject" />
-                                                </div>
-                                                <div class="kanban-card-footer">
-                                                    <div class="kanban-card-customer">
-                                                        <img
-                                                            t-att-src="'/web/image/res.partner/%s/avatar_128' % ticket.customer_id.id if ticket.customer_id else '/web/static/img/avatar_gray.svg'"
-                                                            onerror="this.src='/web/static/img/avatar_gray.svg'" />
-                                                        <span>
-                                                            <t
-                                                                t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'" />
-                                                        </span>
-                                                    </div>
-                                                    <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                    <span
-                                                        t-att-class="'kanban-priority priority-' + kp">
-                                                        <t t-esc="kp.title()" />
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </t>
-                                    </t>
-                                </div>
+                                <div class="kanban-cards" id="col-resolved"></div>
                                 <div class="kanban-drop-zone">Drop here</div>
                             </div>
 
@@ -819,39 +638,7 @@
                                         Closed</span>
                                     <span class="kanban-col-count" id="count-closed">0</span>
                                 </div>
-                                <div class="kanban-cards" id="col-closed">
-                                    <t t-foreach="tickets" t-as="ticket">
-                                        <t t-if="ticket.state == 'closed'">
-                                            <div class="kanban-card"
-                                                t-att-data-ticket-id="ticket.id"
-                                                t-att-data-state="ticket.state"
-                                                draggable="true">
-                                                <div class="kanban-card-id">
-                                                    <t t-esc="ticket.name" />
-                                                </div>
-                                                <div class="kanban-card-subject">
-                                                    <t t-esc="ticket.subject" />
-                                                </div>
-                                                <div class="kanban-card-footer">
-                                                    <div class="kanban-card-customer">
-                                                        <img
-                                                            t-att-src="'/web/image/res.partner/%s/avatar_128' % ticket.customer_id.id if ticket.customer_id else '/web/static/img/avatar_gray.svg'"
-                                                            onerror="this.src='/web/static/img/avatar_gray.svg'" />
-                                                        <span>
-                                                            <t
-                                                                t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'" />
-                                                        </span>
-                                                    </div>
-                                                    <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                    <span
-                                                        t-att-class="'kanban-priority priority-' + kp">
-                                                        <t t-esc="kp.title()" />
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </t>
-                                    </t>
-                                </div>
+                                <div class="kanban-cards" id="col-closed"></div>
                                 <div class="kanban-drop-zone">Drop here</div>
                             </div>
 
@@ -859,7 +646,7 @@
                     </div>
                 </div>
 
-                <!-- FAQ Page -->
+                <!-- ═══ FAQ PAGE ═══ -->
                 <div class="page-content dashboard-content" id="faq-page" style="display: none;">
                     <div class="dashboard-card">
                         <div class="card-header">
@@ -869,7 +656,8 @@
                     </div>
                 </div>
 
-            </div>
+            </div><!--
+            /.dashboard-wrapper -->
 
             <!-- Save feedback toast -->
             <div id="kanbanToast"></div>
@@ -877,33 +665,45 @@
             <script
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-            <!-- ═══ BELL NOTIFICATION ENGINE ═══ -->
+            <!-- ═══════════════════════════════════════════════════════════
+                 1.  BELL / SLA ALERTS  — polls every 30 s
+            ═══════════════════════════════════════════════════════════ -->
             <script type="text/javascript">
                 //<![CDATA[
 (function () {
     'use strict';
     var bell     = document.getElementById('notifBell');
     var dropdown = document.getElementById('notifDropdown');
-    bell.addEventListener('click', function (e) { e.stopPropagation(); dropdown.classList.toggle('open'); });
+
+    bell.addEventListener('click', function (e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+    });
     document.addEventListener('click', function () { dropdown.classList.remove('open'); });
     dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+
     document.getElementById('markAllRead').addEventListener('click', function () {
         document.querySelectorAll('.notif-item').forEach(function (i) { i.classList.remove('unread'); });
         document.getElementById('notifBadge').classList.add('d-none');
     });
+
     document.querySelectorAll('.notif-nav-link').forEach(function (a) {
         a.addEventListener('click', function (e) {
             e.preventDefault();
-            switchView(this.getAttribute('data-view'));
+            window.switchView(this.getAttribute('data-view'));
             dropdown.classList.remove('open');
         });
     });
+
     function loadSlaAlerts() {
-        fetch('/customer_support/dashboard/sla_alerts', { method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+        fetch('/customer_support/dashboard/sla_alerts', {
+            method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' }
+        })
         .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
         .then(function (data) { renderAlerts(data.alerts || []); })
         .catch(function () { renderAlerts([]); });
     }
+
     function renderAlerts(alerts) {
         var list  = document.getElementById('notifList');
         var badge = document.getElementById('notifBadge');
@@ -915,63 +715,118 @@
         badge.textContent = alerts.length;
         badge.classList.remove('d-none');
         list.innerHTML = alerts.map(function (a) {
-            var cls  = a.sla_status === 'breached' ? 'breached' : 'at-risk';
-            var icon = cls === 'breached' ? 'bi-x-octagon-fill' : 'bi-exclamation-triangle-fill';
+            var cls   = a.sla_status === 'breached' ? 'breached' : 'at-risk';
+            var icon  = cls === 'breached' ? 'bi-x-octagon-fill' : 'bi-exclamation-triangle-fill';
             var label = cls === 'breached' ? 'SLA Breached' : 'At Risk';
             return '<a class="notif-item unread" href="/customer_support/ticket/' + a.ticket_id + '">'
                 + '<div class="notif-icon-wrap ' + cls + '"><i class="bi ' + icon + '"></i></div>'
-                + '<div class="notif-body"><div class="notif-title">' + a.ticket_name + ' — ' + a.subject + '</div>'
+                + '<div class="notif-body">'
+                + '<div class="notif-title">' + a.ticket_name + ' — ' + a.subject + '</div>'
                 + '<div class="notif-sub">' + label + ' · ' + a.time_display + '</div>'
-                + '<div class="notif-time-text">Policy: ' + (a.policy_name || 'None') + '</div></div>'
-                + '<div class="notif-dot ' + cls + '"></div></a>';
+                + '<div class="notif-time-text">Policy: ' + (a.policy_name || 'None') + '</div>'
+                + '</div><div class="notif-dot ' + cls + '"></div></a>';
         }).join('');
     }
-    document.addEventListener('DOMContentLoaded', function () { loadSlaAlerts(); setInterval(loadSlaAlerts, 30000); });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadSlaAlerts();
+        setInterval(loadSlaAlerts, 30000);
+    });
 })();
 //]]>
             </script>
 
-            <!-- ═══ LIVE ANALYTICS ═══ -->
+            <!-- ═══════════════════════════════════════════════════════════
+                 2.  LIVE ANALYTICS + PERFORMANCE  — polls every 15 s
+            ═══════════════════════════════════════════════════════════ -->
             <script type="text/javascript">
                 //<![CDATA[
-(function(){
+(function () {
     'use strict';
-    var INTERVAL=15000;
-    var A=[{key:'open_tickets',sel:'[data-key="open_tickets"] .stat-value'},{key:'total_tickets',sel:'[data-key="total_tickets"] .stat-value'},{key:'high_priority',sel:'[data-key="high_priority"] .stat-value'},{key:'urgent',sel:'[data-key="urgent"] .stat-value'},{key:'avg_open_hours',sel:'[data-key="avg_open_hours"] .stat-value'},{key:'total_hours',sel:'[data-key="total_hours"] .stat-value'},{key:'avg_high_hours',sel:'[data-key="avg_high_hours"] .stat-value'},{key:'avg_urgent_hours',sel:'[data-key="avg_urgent_hours"] .stat-value'},{key:'resolved_tickets',sel:'[data-key="resolved_tickets"] .stat-value'},{key:'solve_rate',sel:'[data-key="solve_rate"] .stat-value',sfx:'%'},{key:'high_resolved',sel:'[data-key="high_resolved"] .stat-value'},{key:'urgent_resolved',sel:'[data-key="urgent_resolved"] .stat-value'}];
-    var P=[{key:'today_closed',sel:'[data-key="today_closed"] .performance-value'},{key:'avg_resolve_rate',sel:'[data-key="avg_resolve_rate"] .performance-value',sfx:'%'},{key:'daily_target',sel:'[data-key="daily_target"] .performance-value',sfx:'%'},{key:'achievement',sel:'[data-key="achievement"] .performance-value',sfx:'%'},{key:'sample_performance',sel:'[data-key="sample_performance"] .score-badge',sfx:'%'}];
-    function upd(sel,val,sfx){var el=document.querySelector(sel);if(el)el.textContent=val+(sfx||'');}
-    function flash(sel){var el=document.querySelector(sel);if(el){el.style.transition='color 0.3s';el.style.color='#1e88c7';setTimeout(function(){el.style.color='';},600);}}
-    function updBar(v){var b=document.querySelector('.progress-bar');if(b){b.style.width=v+'%';b.className='progress-bar '+(v>=80?'bg-success':'bg-warning');}}
-    function updBarLabel(v){var ls=document.querySelectorAll('.progress-label span');if(ls.length>=2)ls[1].textContent=v+'%';}
-    function updTime(){var now=new Date();var t=now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});document.querySelectorAll('.last-updated').forEach(function(el){el.innerHTML='<i class="bi bi-clock me-1"></i>Updated at '+t;});}
-    function run(){
-        fetch('/customer_support/dashboard/analytics',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}})
-        .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
-        .then(function(d){
-            var a=d.analytics||{},p=d.performance||{};
-            A.forEach(function(i){var v=a[i.key];if(v!==undefined){upd(i.sel,v,i.sfx||'');flash(i.sel);}});
-            P.forEach(function(i){var v=p[i.key];if(v!==undefined)upd(i.sel,v,i.sfx||'');});
-            if(p.achievement!==undefined){updBar(p.achievement);updBarLabel(p.achievement);}
-            updTime();
-        }).catch(function(e){console.warn('Analytics refresh failed:',e);});
+    var INTERVAL = 15000;
+    var A = [
+        { key: 'open_tickets',    sel: '[data-key="open_tickets"] .stat-value' },
+        { key: 'total_tickets',   sel: '[data-key="total_tickets"] .stat-value' },
+        { key: 'high_priority',   sel: '[data-key="high_priority"] .stat-value' },
+        { key: 'urgent',          sel: '[data-key="urgent"] .stat-value' },
+        { key: 'avg_open_hours',  sel: '[data-key="avg_open_hours"] .stat-value' },
+        { key: 'total_hours',     sel: '[data-key="total_hours"] .stat-value' },
+        { key: 'avg_high_hours',  sel: '[data-key="avg_high_hours"] .stat-value' },
+        { key: 'avg_urgent_hours',sel: '[data-key="avg_urgent_hours"] .stat-value' },
+        { key: 'resolved_tickets',sel: '[data-key="resolved_tickets"] .stat-value' },
+        { key: 'solve_rate',      sel: '[data-key="solve_rate"] .stat-value', sfx: '%' },
+        { key: 'high_resolved',   sel: '[data-key="high_resolved"] .stat-value' },
+        { key: 'urgent_resolved', sel: '[data-key="urgent_resolved"] .stat-value' }
+    ];
+    var P = [
+        { key: 'today_closed',      sel: '[data-key="today_closed"] .performance-value' },
+        { key: 'avg_resolve_rate',  sel: '[data-key="avg_resolve_rate"] .performance-value', sfx: '%' },
+        { key: 'daily_target',      sel: '[data-key="daily_target"] .performance-value', sfx: '%' },
+        { key: 'achievement',       sel: '[data-key="achievement"] .performance-value', sfx: '%' },
+        { key: 'sample_performance',sel: '[data-key="sample_performance"] .score-badge', sfx: '%' }
+    ];
+
+    function upd(sel, val, sfx) { var el = document.querySelector(sel); if (el) el.textContent = val + (sfx || ''); }
+    function flash(sel) {
+        var el = document.querySelector(sel);
+        if (el) { el.style.transition = 'color 0.3s'; el.style.color = '#1e88c7'; setTimeout(function () { el.style.color = ''; }, 600); }
     }
-    document.addEventListener('DOMContentLoaded',function(){run();setInterval(run,INTERVAL);});
+    function updBar(v) {
+        var b = document.querySelector('.progress-bar');
+        if (b) { b.style.width = v + '%'; b.className = 'progress-bar ' + (v >= 80 ? 'bg-success' : 'bg-warning'); }
+    }
+    function updBarLabel(v) {
+        var ls = document.querySelectorAll('.progress-label span');
+        if (ls.length >= 2) ls[1].textContent = v + '%';
+    }
+    function updTime() {
+        var t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.querySelectorAll('.last-updated').forEach(function (el) {
+            el.innerHTML = '<i class="bi bi-clock me-1"></i>Updated at ' + t;
+        });
+    }
+
+    function run() {
+        fetch('/customer_support/dashboard/analytics', {
+            method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' }
+        })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (d) {
+            var a = d.analytics || {}, p = d.performance || {};
+            A.forEach(function (i) { var v = a[i.key]; if (v !== undefined) { upd(i.sel, v, i.sfx || ''); flash(i.sel); } });
+            P.forEach(function (i) { var v = p[i.key]; if (v !== undefined) upd(i.sel, v, i.sfx || ''); });
+            if (p.achievement !== undefined) { updBar(p.achievement); updBarLabel(p.achievement); }
+            updTime();
+        })
+        .catch(function (e) { console.warn('Analytics refresh failed:', e); });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () { run(); setInterval(run, INTERVAL); });
 })();
 //]]>
             </script>
 
-            <!-- ═══ DASHBOARD NAV + KANBAN ENGINE ═══ -->
+            <!-- ═══════════════════════════════════════════════════════════
+                 3.  DASHBOARD NAV + TICKET POLLING + KANBAN ENGINE
+                     Ticket list + kanban polls every 20 s.
+                     "assigned" state is treated as "new" in the kanban.
+            ═══════════════════════════════════════════════════════════ -->
             <script type="text/javascript">
                 //<![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Auto-hide alerts
+    // ── Auto-hide flash alerts ────────────────────────────────────────────
     setTimeout(function () {
         document.querySelectorAll('.alert').forEach(function (a) { new bootstrap.Alert(a).close(); });
     }, 5000);
 
-    // ── Toast helper ──────────────────────────────────────────────────────
-    var toastEl  = document.getElementById('kanbanToast');
+    // ── Spinner keyframe (added once) ────────────────────────────────────
+    var spinStyle = document.createElement('style');
+    spinStyle.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+    document.head.appendChild(spinStyle);
+
+    // ── Toast helper ─────────────────────────────────────────────────────
+    var toastEl = document.getElementById('kanbanToast');
     var toastTimer;
     function showToast(msg, type) {
         toastEl.textContent = msg;
@@ -983,42 +838,20 @@ document.addEventListener('DOMContentLoaded', function () {
     // ── Page switching ────────────────────────────────────────────────────
     window.switchView = function (viewId) {
         document.querySelectorAll('.nav-link').forEach(function (l) { l.classList.remove('active'); });
-        var navLink = document.querySelector('.nav-link[data-view="' + viewId + '"]');
-        if (navLink) navLink.classList.add('active');
+        var nl = document.querySelector('.nav-link[data-view="' + viewId + '"]');
+        if (nl) nl.classList.add('active');
         document.querySelectorAll('.page-content').forEach(function (p) { p.style.display = 'none'; });
         var target = document.getElementById(viewId + '-page');
         if (target) target.style.display = 'block';
     };
     document.querySelectorAll('.nav-link').forEach(function (link) {
-        link.addEventListener('click', function (e) { e.preventDefault(); switchView(this.getAttribute('data-view')); });
+        link.addEventListener('click', function (e) { e.preventDefault(); window.switchView(this.getAttribute('data-view')); });
     });
     document.querySelectorAll('.action-card[data-view]').forEach(function (card) {
-        card.addEventListener('click', function (e) { e.preventDefault(); switchView(this.getAttribute('data-view')); });
+        card.addEventListener('click', function (e) { e.preventDefault(); window.switchView(this.getAttribute('data-view')); });
     });
 
-    // ── Search ────────────────────────────────────────────────────────────
-    var searchInput = document.querySelector('.search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', function () {
-            var term = this.value.toLowerCase();
-            document.querySelectorAll('.ticket-row').forEach(function (row) {
-                row.style.display = row.textContent.toLowerCase().includes(term) ? '' : 'none';
-            });
-            document.querySelectorAll('.kanban-card').forEach(function (card) {
-                card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none';
-            });
-        });
-    }
-
-    // ── Ticket row click ──────────────────────────────────────────────────
-    document.querySelectorAll('.ticket-row').forEach(function (row) {
-        row.addEventListener('click', function () {
-            var ticketId = this.getAttribute('data-ticket-id');
-            if (ticketId) window.location.href = '/customer_support/ticket/' + ticketId;
-        });
-    });
-
-    // ── List / Kanban toggle (buttons inside tickets page) ────────────────
+    // ── List / Kanban view toggle ────────────────────────────────────────
     var listViewBtn   = document.getElementById('listViewBtn');
     var kanbanViewBtn = document.getElementById('kanbanViewBtn');
     var listView      = document.getElementById('listView');
@@ -1040,27 +873,243 @@ document.addEventListener('DOMContentLoaded', function () {
     listViewBtn.addEventListener('click', showList);
     kanbanViewBtn.addEventListener('click', showKanban);
 
-    // ── Header grid button → jump to kanban ───────────────────────────────
-    var kanbanToggleBtn = document.getElementById('kanbanToggleBtn');
-    kanbanToggleBtn.addEventListener('click', function () {
-        switchView('tickets');
+    // ── Header kanban shortcut ───────────────────────────────────────────
+    document.getElementById('kanbanToggleBtn').addEventListener('click', function () {
+        window.switchView('tickets');
         showKanban();
         this.classList.toggle('active');
     });
 
     // ── Column counts ─────────────────────────────────────────────────────
     function updateCounts() {
-        ['new', 'in_progress', 'resolved', 'closed'].forEach(function (state) {
-            var col     = document.getElementById('col-' + state);
-            var countEl = document.getElementById('count-' + state);
-            if (col && countEl) countEl.textContent = col.querySelectorAll('.kanban-card').length;
+        ['new', 'in_progress', 'resolved', 'closed'].forEach(function (s) {
+            var col = document.getElementById('col-' + s);
+            var cnt = document.getElementById('count-' + s);
+            if (col && cnt) cnt.textContent = col.querySelectorAll('.kanban-card').length;
         });
     }
-    updateCounts();
 
-    // ── Drag and Drop ─────────────────────────────────────────────────────
+    // ── Search (works on both views, re-applied after every render) ───────
+    var searchInput = document.querySelector('.search-input');
+    function applySearch() {
+        if (!searchInput) return;
+        var term = searchInput.value.toLowerCase();
+        document.querySelectorAll('.ticket-row').forEach(function (r) {
+            r.style.display = r.textContent.toLowerCase().includes(term) ? '' : 'none';
+        });
+        document.querySelectorAll('.kanban-card').forEach(function (c) {
+            c.style.display = c.textContent.toLowerCase().includes(term) ? '' : 'none';
+        });
+    }
+    if (searchInput) searchInput.addEventListener('input', applySearch);
+
+    // ════════════════════════════════════════════════════════════════════
+    //  TICKET POLLING ENGINE
+    // ════════════════════════════════════════════════════════════════════
+
+    // Tracks which ticket IDs are already rendered so we can detect new ones
+    var _renderedIds = {};
+    var _firstLoad   = true;
+
+    // Maps a ticket state to a kanban column id.
+    // "assigned" and "new" both land in the "new" column.
+    function toColState(state) {
+        if (state === 'assigned' || state === 'new') return 'new';
+        if (state === 'in_progress') return 'in_progress';
+        if (state === 'resolved')    return 'resolved';
+        if (state === 'closed')      return 'closed';
+        return 'new'; // fallback
+    }
+
+    // Human-readable label for the list view STATUS column
+    function stateLabel(state) {
+        var map = {
+            new:         'New',
+            assigned:    'Assigned',
+            in_progress: 'In Progress',
+            resolved:    'Resolved',
+            closed:      'Closed'
+        };
+        return map[state] || state.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    }
+
+    // CSS class for the list view status badge
+    function stateCssClass(state) {
+        if (state === 'new' || state === 'assigned') return 'status-new';
+        if (state === 'in_progress') return 'status-in-progress';
+        if (state === 'resolved')    return 'status-resolved';
+        if (state === 'closed')      return 'status-closed';
+        return 'status-new';
+    }
+
+    // ── Build a list-view <tr> ───────────────────────────────────────────
+    function buildListRow(t) {
+        var av  = t.customer_id
+            ? '/web/image/res.partner/' + t.customer_id + '/avatar_128'
+            : '/web/static/img/avatar_gray.svg';
+        var sc  = stateCssClass(t.state);
+        var sd  = stateLabel(t.state);
+        var pc  = 'priority-' + (t.priority || 'low');
+        var pl  = (t.priority || 'low').charAt(0).toUpperCase() + (t.priority || 'low').slice(1);
+        return '<tr class="ticket-row" data-ticket-id="' + t.id + '" style="cursor:pointer;">'
+            + '<td class="ticket-info-col">'
+            +   '<div class="ticket-id-badge">' + escHtml(t.name) + '</div>'
+            +   '<div class="ticket-description">' + escHtml(t.subject || 'No description') + '</div>'
+            + '</td>'
+            + '<td class="customer-col"><div class="customer-info">'
+            +   '<img src="' + av + '" class="customer-avatar" onerror="this.src=\'/web/static/img/avatar_gray.svg\'" />'
+            +   '<span class="customer-name">' + escHtml(t.customer_name) + '</span>'
+            + '</div></td>'
+            + '<td class="status-col"><span class="table-status-badge ' + sc + '">' + sd + '</span></td>'
+            + '<td class="priority-col"><span class="table-priority-badge ' + pc + '">' + pl + '</span></td>'
+            + '<td class="created-col">' + escHtml(t.create_date) + '</td>'
+            + '<td class="project-col"><i class="bi bi-folder2"></i> <span>Support</span></td>'
+            + '</tr>';
+    }
+
+    // ── Build a kanban card ───────────────────────────────────────────────
+    function buildKanbanCard(t) {
+        var av = t.customer_id
+            ? '/web/image/res.partner/' + t.customer_id + '/avatar_128'
+            : '/web/static/img/avatar_gray.svg';
+        var pc = 'priority-' + (t.priority || 'low');
+        var pl = (t.priority || 'low').charAt(0).toUpperCase() + (t.priority || 'low').slice(1);
+        return '<div class="kanban-card" data-ticket-id="' + t.id + '" data-state="' + toColState(t.state) + '" draggable="true">'
+            + '<div class="kanban-card-id">' + escHtml(t.name) + '</div>'
+            + '<div class="kanban-card-subject">' + escHtml(t.subject || '') + '</div>'
+            + '<div class="kanban-card-footer">'
+            +   '<div class="kanban-card-customer">'
+            +     '<img src="' + av + '" onerror="this.src=\'/web/static/img/avatar_gray.svg\'" />'
+            +     '<span>' + escHtml(t.customer_name) + '</span>'
+            +   '</div>'
+            +   '<span class="kanban-priority ' + pc + '">' + pl + '</span>'
+            + '</div></div>';
+    }
+
+    // ── XSS-safe escape ──────────────────────────────────────────────────
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    // ── Full re-render of both views ─────────────────────────────────────
+    function renderTickets(tickets) {
+        var newIds = {};
+        tickets.forEach(function (t) { newIds[t.id] = true; });
+
+        // Detect truly new tickets (not in previous render, not first load)
+        var addedIds = [];
+        if (!_firstLoad) {
+            tickets.forEach(function (t) {
+                if (!_renderedIds[t.id]) addedIds.push(t.id);
+            });
+        }
+        _renderedIds = newIds;
+        _firstLoad   = false;
+
+        // ── LIST VIEW ────────────────────────────────────────────────────
+        var tbody      = document.getElementById('ticketTableBody');
+        var table      = document.getElementById('ticketTable');
+        var emptyState = document.getElementById('ticketsEmptyState');
+        var loading    = document.getElementById('ticketsLoadingState');
+
+        loading.style.display = 'none';
+
+        if (tickets.length === 0) {
+            table.style.display      = 'none';
+            emptyState.style.display = 'block';
+        } else {
+            emptyState.style.display = 'none';
+            table.style.display      = '';
+            tbody.innerHTML          = tickets.map(buildListRow).join('');
+            bindRowClicks();
+        }
+
+        // ── KANBAN VIEW ─────────────────────────────────────────────────
+        // Group tickets by kanban column
+        var cols = { new: [], in_progress: [], resolved: [], closed: [] };
+        tickets.forEach(function (t) { cols[toColState(t.state)].push(t); });
+
+        // For each column: only update if the set of ticket ids changed
+        // (to avoid wiping cards the user is mid-drag)
+        ['new', 'in_progress', 'resolved', 'closed'].forEach(function (state) {
+            var colEl = document.getElementById('col-' + state);
+            if (!colEl) return;
+
+            // Collect IDs already rendered in this column
+            var existingIds = {};
+            colEl.querySelectorAll('.kanban-card').forEach(function (card) {
+                existingIds[card.getAttribute('data-ticket-id')] = card;
+            });
+
+            // Add cards that are missing
+            cols[state].forEach(function (t) {
+                var tid = String(t.id);
+                if (!existingIds[tid]) {
+                    // New card — append and flash it
+                    var tmp = document.createElement('div');
+                    tmp.innerHTML = buildKanbanCard(t);
+                    var newCard = tmp.firstChild;
+                    colEl.appendChild(newCard);
+                    if (addedIds.indexOf(t.id) !== -1) {
+                        newCard.classList.add('ticket-new-flash');
+                        showToast('📋 New ticket assigned: ' + t.name, 'success');
+                    }
+                }
+            });
+
+            // Remove cards that are no longer in this column
+            var incomingIds = {};
+            cols[state].forEach(function (t) { incomingIds[String(t.id)] = true; });
+            Object.keys(existingIds).forEach(function (tid) {
+                if (!incomingIds[tid]) existingIds[tid].remove();
+            });
+        });
+
+        updateCounts();
+        applySearch();
+        bindDragDrop();
+    }
+
+    // ── Fetch tickets from server ────────────────────────────────────────
+    function loadTickets() {
+        fetch('/customer_support/dashboard/tickets', {
+            method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' }
+        })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (data) { renderTickets(data.tickets || []); })
+        .catch(function (e) { console.warn('Ticket refresh failed:', e); });
+    }
+
+    // Kick off immediately then every 20 s
+    loadTickets();
+    setInterval(loadTickets, 20000);
+
+    // ════════════════════════════════════════════════════════════════════
+    //  ROW CLICK (list view)
+    // ════════════════════════════════════════════════════════════════════
+    function bindRowClicks() {
+        document.querySelectorAll('.ticket-row').forEach(function (row) {
+            row.addEventListener('click', function () {
+                var id = this.getAttribute('data-ticket-id');
+                if (id) window.location.href = '/customer_support/ticket/' + id;
+            });
+        });
+    }
+
+    // ════════════════════════════════════════════════════════════════════
+    //  DRAG AND DROP  (re-bound after every render)
+    // ════════════════════════════════════════════════════════════════════
     var draggedCard = null;
 
+    function bindDragDrop() {
+        // dragstart / dragend use event delegation — bound once on document
+    }
+
+    // Delegated drag events (safe to bind once)
     document.addEventListener('dragstart', function (e) {
         var card = e.target.closest('.kanban-card');
         if (!card) return;
@@ -1077,6 +1126,7 @@ document.addEventListener('DOMContentLoaded', function () {
         draggedCard = null;
     });
 
+    // Column drop listeners (bound once — columns are static in the DOM)
     document.querySelectorAll('.kanban-col').forEach(function (col) {
         col.addEventListener('dragover', function (e) {
             e.preventDefault();
@@ -1090,58 +1140,52 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             this.classList.remove('drag-over');
             if (!draggedCard) return;
-            var newState      = this.getAttribute('data-state');
-            var ticketId      = draggedCard.getAttribute('data-ticket-id');
-            var oldState      = draggedCard.getAttribute('data-state');
-            if (oldState === newState) return;   // no-op if same column
+            var newState = this.getAttribute('data-state');
+            var ticketId = draggedCard.getAttribute('data-ticket-id');
+            var oldState = draggedCard.getAttribute('data-state');
+            if (oldState === newState) return;
+
+            // Move card in DOM immediately (optimistic)
             var cardsContainer = this.querySelector('.kanban-cards');
             cardsContainer.appendChild(draggedCard);
             draggedCard.setAttribute('data-state', newState);
+            // Also update our tracking so the next poll doesn't remove it
+            _renderedIds[ticketId] = true;
             updateCounts();
             saveTicketStatus(ticketId, newState);
         });
     });
 
-    // ── Save to server ────────────────────────────────────────────────────
+    // ── Save status to server ────────────────────────────────────────────
     function saveTicketStatus(ticketId, newState) {
         var fd = new FormData();
         fd.append('status', newState);
         fetch('/customer_support/ticket/' + ticketId + '/update_status', {
-            method: 'POST',
-            body: fd,
-            credentials: 'same-origin',
-            headers: {
-                // This header tells the server it's an AJAX call → returns JSON
-                'Accept': 'application/json'
-            }
+            method: 'POST', body: fd, credentials: 'same-origin', headers: { 'Accept': 'application/json' }
         })
         .then(function (r) { return r.json(); })
         .then(function (data) {
             if (data.success) {
-                showToast('✓ Saved — ' + newState.replace('_', ' '), 'success');
+                showToast('✓ Saved — ' + newState.replace(/_/g, ' '), 'success');
             } else {
                 showToast('✗ ' + (data.error || 'Save failed'), 'error');
             }
         })
-        .catch(function (e) {
-            console.warn('Status update error:', e);
-            showToast('✗ Network error', 'error');
-        });
+        .catch(function (e) { console.warn('Status update error:', e); showToast('✗ Network error', 'error'); });
     }
 
-    // ── Kanban card click → open ticket detail ────────────────────────────
+    // ── Kanban card click → open ticket ─────────────────────────────────
     document.addEventListener('click', function (e) {
         var card = e.target.closest('.kanban-card');
-        if (!card) return;
-        if (!card.classList.contains('dragging')) {
-            var ticketId = card.getAttribute('data-ticket-id');
-            if (ticketId) window.location.href = '/customer_support/ticket/' + ticketId;
-        }
+        if (!card || card.classList.contains('dragging')) return;
+        var id = card.getAttribute('data-ticket-id');
+        if (id) window.location.href = '/customer_support/ticket/' + id;
     });
 
 });
 //]]>
             </script>
+
         </t>
     </template>
 </odoo>
