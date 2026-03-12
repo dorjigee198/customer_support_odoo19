@@ -5,3 +5,6 @@ access_customer_support_portal,customer.support.portal,model_customer_support,ba
 access_customer_support_project_user,customer.support.project.user,model_customer_support_project,base.group_user,1,1,1,0
 access_customer_support_project_manager,customer.support.project.manager,model_customer_support_project,base.group_system,1,1,1,1
 access_customer_support_project_portal,customer.support.project.portal,model_customer_support_project,base.group_portal,1,0,0,0
+access_customer_support_sla_policy_user,customer.support.sla.policy.user,model_customer_support_sla_policy,base.group_user,1,0,0,0
+access_customer_support_sla_policy_manager,customer.support.sla.policy.manager,model_customer_support_sla_policy,base.group_system,1,1,1,1
+access_customer_support_sla_policy_portal,customer.support.sla.policy.portal,model_customer_support_sla_policy,base.group_portal,1,0,0,0

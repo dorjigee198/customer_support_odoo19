@@ -14,19 +14,225 @@
                     border: 1px solid #34d399; color: #065f46; border-radius: 8px; }
                     .alert-error { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
                     border: 1px solid #f87171; color: #991b1b; border-radius: 8px; }
-                    .dashboard-card, .performance-card { transition: transform 0.3s ease, box-shadow
-                    0.3s ease; }
                     .dashboard-card:hover, .performance-card:hover { transform: translateY(-5px);
                     box-shadow: 0 15px 50px rgba(0,0,0,0.15) !important; }
-                    .stat-box, .performance-stat { transition: all 0.2s ease; }
-                    .stat-box:hover, .performance-stat:hover { background: rgba(30, 136, 199, 0.05);
-                    }
                     .priority-badge { padding: 0.25rem 0.75rem; border-radius: 12px; font-size:
                     0.75rem; font-weight: 600; }
                     .priority-low { background: #d1fae5; color: #065f46; }
                     .priority-medium { background: #dbeafe; color: #1e40af; }
                     .priority-high { background: #fee2e2; color: #991b1b; }
                     .priority-urgent { background: #fef3c7; color: #92400e; }
+
+                    /* ── NOTIFICATION BELL ── */
+                    .notif-wrap { position: relative; }
+                    .notif-btn { background: none; border: none; cursor: pointer; padding: 6px 8px;
+                    border-radius: 8px; color: rgba(255,255,255,0.75); font-size: 1.15rem;
+                    transition: all 0.2s; position: relative; display: flex; align-items: center; }
+                    .notif-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+                    .notif-badge { position: absolute; top: 2px; right: 2px; background: #ef4444;
+                    color: #fff; border-radius: 999px; font-size: 0.58rem; font-weight: 700;
+                    min-width: 16px; height: 16px; display: flex; align-items: center;
+                    justify-content: center; border: 2px solid #111827; padding: 0 3px; }
+                    .notif-badge.d-none { display: none !important; }
+                    .notif-dropdown { position: absolute; top: calc(100% + 12px); right: 0;
+                    width: 360px; background: #161b27; border: 1px solid rgba(255,255,255,0.07);
+                    border-radius: 16px; box-shadow: 0 24px 60px rgba(0,0,0,0.55); z-index: 300;
+                    overflow: hidden; opacity: 0; pointer-events: none; transform: translateY(-8px);
+                    transition: opacity 0.18s ease, transform 0.18s ease; }
+                    .notif-dropdown.open { opacity: 1; pointer-events: all; transform:
+                    translateY(0); }
+                    .notif-header { padding: 0.9rem 1.25rem; border-bottom: 1px solid
+                    rgba(255,255,255,0.07);
+                    display: flex; justify-content: space-between; align-items: center; }
+                    .notif-header h6 { font-size: 0.875rem; font-weight: 600; margin: 0; color:
+                    #e8eaf0; }
+                    .notif-mark-read { font-size: 0.75rem; color: #4f8ef7; cursor: pointer;
+                    background: none; border: none; padding: 0; }
+                    .notif-list { max-height: 360px; overflow-y: auto; }
+                    .notif-list::-webkit-scrollbar { width: 4px; }
+                    .notif-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1);
+                    border-radius: 4px; }
+                    .notif-item { display: flex; align-items: flex-start; gap: 0.85rem;
+                    padding: 0.9rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.07);
+                    cursor: pointer; transition: background 0.15s; text-decoration: none; }
+                    .notif-item:last-child { border-bottom: none; }
+                    .notif-item:hover { background: #1e2535; }
+                    .notif-icon-wrap { width: 36px; height: 36px; border-radius: 10px; flex-shrink:
+                    0;
+                    display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+                    .notif-icon-wrap.status { background: rgba(79,142,247,0.15); color: #4f8ef7; }
+                    .notif-icon-wrap.assigned { background: rgba(34,197,94,0.15); color: #22c55e; }
+                    .notif-icon-wrap.breach { background: rgba(239,68,68,0.15); color: #ef4444; }
+                    .notif-body { flex: 1; min-width: 0; }
+                    .notif-title { font-size: 0.82rem; font-weight: 600; color: #e8eaf0;
+                    margin-bottom: 2px; line-height: 1.35; }
+                    .notif-time { font-size: 0.7rem; color: #8892a4; margin-top: 3px; }
+                    .notif-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+                    margin-top: 6px;
+                    background: #4f8ef7; }
+                    .notif-dot.breach { background: #ef4444; }
+                    .notif-dot.assigned { background: #22c55e; }
+                    .notif-empty { padding: 2rem; text-align: center; color: #8892a4; font-size:
+                    0.85rem; }
+                    .notif-footer { padding: 0.75rem 1.25rem; border-top: 1px solid
+                    rgba(255,255,255,0.07);
+                    text-align: center; }
+                    .notif-footer a { font-size: 0.8rem; color: #4f8ef7; text-decoration: none; }
+
+                    /* ── KANBAN BOARD (customer) ── */
+                    .kanban-board { display: flex; gap: 1rem; padding: 1.5rem 2rem; overflow-x:
+                    auto; min-height: calc(100vh - 160px); align-items: flex-start; }
+                    .kanban-board::-webkit-scrollbar { height: 6px; }
+                    .kanban-board::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15);
+                    border-radius: 4px; }
+                    .kanban-col { flex: 0 0 270px; background: #f8fafc; border-radius: 16px;
+                    border: 1px solid #e2e8f0; display: flex; flex-direction: column;
+                    max-height: calc(100vh - 180px); }
+                    .kanban-col-header { padding: 1rem 1rem 0.75rem; border-bottom: 1px solid
+                    #e2e8f0;
+                    display: flex; align-items: center; justify-content: space-between; flex-shrink:
+                    0; }
+                    .kanban-col-title { font-size: 0.8rem; font-weight: 700; text-transform:
+                    uppercase;
+                    letter-spacing: 0.06em; display: flex; align-items: center; gap: 0.5rem; }
+                    .kanban-col-count { font-size: 0.72rem; background: #e2e8f0; color: #64748b;
+                    border-radius: 999px; padding: 2px 8px; font-weight: 600; }
+                    .kanban-col[data-state="new"] .kanban-col-title { color: #3b82f6; }
+                    .kanban-col[data-state="in_progress"] .kanban-col-title { color: #f59e0b; }
+                    .kanban-col[data-state="resolved"] .kanban-col-title { color: #22c55e; }
+                    .kanban-col[data-state="closed"] .kanban-col-title { color: #94a3b8; }
+                    .kanban-col[data-state="new"] { border-top: 3px solid #3b82f6; }
+                    .kanban-col[data-state="in_progress"] { border-top: 3px solid #f59e0b; }
+                    .kanban-col[data-state="resolved"] { border-top: 3px solid #22c55e; }
+                    .kanban-col[data-state="closed"] { border-top: 3px solid #94a3b8; }
+                    .kanban-cards { padding: 0.75rem; display: flex; flex-direction: column;
+                    gap: 0.65rem; overflow-y: auto; flex: 1; min-height: 80px; }
+                    .kanban-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;
+                    padding: 0.9rem; cursor: pointer; transition: all 0.2s;
+                    box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+                    .kanban-card:hover { border-color: #3b82f6; transform: translateY(-2px);
+                    box-shadow: 0 8px 24px rgba(59,130,246,0.12); }
+                    .kanban-card-id { font-size: 0.68rem; color: #3b82f6; font-weight: 700;
+                    font-family: monospace; margin-bottom: 0.4rem; }
+                    .kanban-card-subject { font-size: 0.82rem; font-weight: 600; color: #1e293b;
+                    margin-bottom: 0.6rem; line-height: 1.3; display: -webkit-box;
+                    -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+                    .kanban-card-footer { display: flex; align-items: center;
+                    justify-content: space-between; gap: 0.5rem; }
+                    .kanban-card-focal { display: flex; align-items: center; gap: 0.4rem;
+                    font-size: 0.7rem; color: #64748b; margin-top: 0.5rem;
+                    padding-top: 0.5rem; border-top: 1px solid #f1f5f9; }
+                    .kanban-card-focal i { color: #94a3b8; font-size: 0.75rem; }
+                    .kanban-priority { font-size: 0.65rem; font-weight: 700; padding: 2px 7px;
+                    border-radius: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
+                    .kanban-priority.priority-low { background: #dcfce7; color: #16a34a; }
+                    .kanban-priority.priority-medium { background: #dbeafe; color: #1d4ed8; }
+                    .kanban-priority.priority-high { background: #ffedd5; color: #c2410c; }
+                    .kanban-priority.priority-urgent { background: #fee2e2; color: #dc2626; }
+
+                    /* view toggle */
+                    .view-toggle-btn { background: none; border: none; color:
+                    rgba(255,255,255,0.75);
+                    font-size: 1.2rem; cursor: pointer; padding: 6px 8px; border-radius: 8px;
+                    transition: all 0.2s; }
+                    .view-toggle-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+                    .view-toggle-btn.active { background: rgba(79,142,247,0.2); color: #fff; }
+                    .tickets-header { display: flex; align-items: center; justify-content:
+                    space-between;
+                    padding: 1rem 2rem; }
+                    .view-toggle { display: flex; gap: 0.5rem; }
+                    .view-btn { background: rgba(255,255,255,0.1); border: 1px solid
+                    rgba(255,255,255,0.15);
+                    color: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 8px;
+                    cursor: pointer; transition: all 0.2s; }
+                    .view-btn.active, .view-btn:hover { background: rgba(79,142,247,0.25);
+                    color: #fff; border-color: rgba(79,142,247,0.4); }
+
+                    /* ── REPORTING PAGE ── */
+                    .reporting-page { padding: 1.5rem 2rem; }
+                    .reporting-header { display: flex; align-items: center; justify-content:
+                    space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+                    .reporting-title { color: #e8eaf0; font-size: 1.2rem; font-weight: 700; margin:
+                    0; }
+                    .reporting-controls { display: flex; align-items: center; gap: 0.75rem; }
+                    .day-filter { display: flex; gap: 0.4rem; }
+                    .day-btn { background: rgba(255,255,255,0.08); border: 1px solid
+                    rgba(255,255,255,0.12); color: rgba(255,255,255,0.65); padding: 6px 14px;
+                    border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: 600;
+                    transition: all 0.2s; }
+                    .day-btn:hover { background: rgba(79,142,247,0.2); color: #fff; border-color:
+                    rgba(79,142,247,0.4); }
+                    .day-btn.active { background: rgba(79,142,247,0.3); color: #fff; border-color:
+                    #4f8ef7; }
+                    .print-btn { background: rgba(34,197,94,0.15); border: 1px solid
+                    rgba(34,197,94,0.3); color: #22c55e; padding: 6px 16px; border-radius: 8px;
+                    cursor: pointer; font-size: 0.8rem; font-weight: 600; transition: all 0.2s;
+                    display: flex; align-items: center; gap: 0.4rem; }
+                    .print-btn:hover { background: rgba(34,197,94,0.25); }
+
+                    /* KPI strip */
+                    .report-kpi-strip { display: grid; grid-template-columns: repeat(auto-fit,
+                    minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+                    .report-kpi { background: rgba(255,255,255,0.04); border: 1px solid
+                    rgba(255,255,255,0.07); border-radius: 14px; padding: 1.25rem 1.5rem;
+                    text-align: center; transition: all 0.2s; }
+                    .report-kpi:hover { background: rgba(255,255,255,0.07); transform:
+                    translateY(-2px); }
+                    .report-kpi-value { font-size: 2rem; font-weight: 800; color: #e8eaf0;
+                    line-height: 1; margin-bottom: 0.3rem; }
+                    .report-kpi-value.blue { color: #4f8ef7; }
+                    .report-kpi-value.green { color: #22c55e; }
+                    .report-kpi-value.amber { color: #f59e0b; }
+                    .report-kpi-value.red { color: #ef4444; }
+                    .report-kpi-label { font-size: 0.75rem; color: #8892a4; font-weight: 600;
+                    text-transform: uppercase; letter-spacing: 0.05em; }
+
+                    /* Chart cards */
+                    .report-charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap:
+                    1.25rem; margin-bottom: 1.25rem; }
+                    .report-charts-grid.full { grid-template-columns: 1fr; }
+                    @media (max-width: 900px) { .report-charts-grid { grid-template-columns: 1fr; }
+                    }
+                    .report-chart-card { background: rgba(255,255,255,0.04); border: 1px solid
+                    rgba(255,255,255,0.07); border-radius: 16px; padding: 1.25rem 1.5rem; }
+                    .report-chart-title { font-size: 0.85rem; font-weight: 700; color: #c8cfe0;
+                    margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; }
+                    .report-chart-title i { color: #4f8ef7; }
+                    .chart-wrap { position: relative; height: 240px; }
+                    .chart-wrap.tall { height: 280px; }
+
+                    /* Loading spinner */
+                    .report-loading { display: flex; align-items: center; justify-content: center;
+                    height: 200px; color: #8892a4; font-size: 0.9rem; gap: 0.75rem; }
+                    .spinner { width: 22px; height: 22px; border: 3px solid rgba(79,142,247,0.2);
+                    border-top-color: #4f8ef7; border-radius: 50%; animation: spin 0.7s linear
+                    infinite; }
+                    @keyframes spin { to { transform: rotate(360deg); } }
+
+                    /* ── PRINT STYLES ── */
+                    @media print {
+                    .dashboard-header, .header-nav, .header-right,
+                    .day-filter, .print-btn, .reporting-controls,
+                    #portal-overview-page, #portal-kanban-page { display: none !important; }
+                    .reporting-page { padding: 0 !important; }
+                    .report-chart-card { break-inside: avoid; border: 1px solid #e2e8f0 !important;
+                    background: #fff !important; }
+                    .report-kpi { border: 1px solid #e2e8f0 !important; background: #f8fafc
+                    !important; }
+                    .report-kpi-value { color: #1e293b !important; }
+                    .report-kpi-value.blue { color: #2563eb !important; }
+                    .report-kpi-value.green { color: #16a34a !important; }
+                    .report-kpi-value.amber { color: #d97706 !important; }
+                    .report-kpi-value.red { color: #dc2626 !important; }
+                    .report-kpi-label, .report-chart-title { color: #475569 !important; }
+                    .reporting-title { color: #1e293b !important; }
+                    .print-header { display: block !important; }
+                    }
+                    .print-header { display: none; padding: 1rem 0 1.5rem; border-bottom: 2px solid
+                    #e2e8f0; margin-bottom: 1.5rem; }
+                    .print-header h3 { margin: 0; font-size: 1.3rem; color: #1e293b; font-weight:
+                    700; }
+                    .print-header p { margin: 0.25rem 0 0; font-size: 0.8rem; color: #64748b; }
                 </style>
             </t>
 
@@ -34,25 +240,55 @@
                 <header class="dashboard-header">
                     <div class="header-content">
                         <div class="header-nav">
-                            <a href="/customer_support/dashboard" class="nav-link active"><i
-                                    class="bi bi-speedometer2 me-2"></i>Overview</a>
-                            <a href="/customer_support/tickets" class="nav-link"><i
-                                    class="bi bi-ticket-detailed me-2"></i>Tickets</a>
-                            <a href="#" class="nav-link"><i class="bi bi-graph-up me-2"></i>
-                                Reporting</a>
-                            <a href="/customer_support/chatbot" class="nav-link"><i
-                                    class="bi bi-question-circle me-2"></i>FAQ</a>
+                            <a href="/customer_support/dashboard" class="nav-link active"
+                                id="portalOverviewNav">
+                                <i class="bi bi-speedometer2 me-2"></i>Overview</a>
+                            <a href="#" class="nav-link" id="portalTicketsNav">
+                                <i class="bi bi-ticket-detailed me-2"></i>Tickets</a>
+                            <a href="#" class="nav-link" id="portalReportingNav">
+                                <i class="bi bi-graph-up me-2"></i>Reporting</a>
+                            <a href="/customer_support/chatbot" class="nav-link">
+                                <i class="bi bi-question-circle me-2"></i>FAQ</a>
                         </div>
                         <div class="header-right">
                             <div class="header-actions">
-                                <a href="/customer_support/create_ticket" class="btn-new-ticket"><i
-                                        class="bi bi-plus-circle me-2"></i>New Ticket</a>
+                                <a href="/customer_support/create_ticket" class="btn-new-ticket">
+                                    <i class="bi bi-plus-circle me-2"></i>New Ticket</a>
                             </div>
                             <div class="user-profile dropdown">
-                                <i class="bi bi-grid-3x3-gap-fill text-white me-3"
-                                    style="font-size: 1.2rem; cursor: pointer;"></i>
-                                <i class="bi bi-bell-fill text-white me-3"
-                                    style="font-size: 1.2rem; cursor: pointer;"></i>
+                                <!-- Grid/Kanban toggle -->
+                                <button class="view-toggle-btn me-2" id="portalKanbanBtn"
+                                    title="Toggle Kanban View">
+                                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                                </button>
+
+                                <!-- ── NOTIFICATION BELL ── -->
+                                <div class="notif-wrap me-3">
+                                    <button class="notif-btn" id="portalNotifBell"
+                                        title="Notifications">
+                                        <i class="bi bi-bell-fill"></i>
+                                        <span class="notif-badge d-none" id="portalNotifBadge">0</span>
+                                    </button>
+                                    <div class="notif-dropdown" id="portalNotifDropdown">
+                                        <div class="notif-header">
+                                            <h6><i class="bi bi-bell me-2" style="color:#4f8ef7;"></i>
+                                                Notifications</h6>
+                                            <button class="notif-mark-read" id="portalMarkRead">Mark
+                                                all read</button>
+                                        </div>
+                                        <div class="notif-list" id="portalNotifList">
+                                            <div class="notif-empty">
+                                                <i class="bi bi-arrow-repeat"
+                                                    style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>
+                                                Loading... </div>
+                                        </div>
+                                        <div class="notif-footer">
+                                            <a href="#" id="portalNotifViewTickets">View my tickets
+                                                →</a>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <a class="d-flex align-items-center text-white dropdown-toggle"
                                     href="#" id="userProfileDropdown" data-bs-toggle="dropdown"
                                     aria-expanded="false" style="text-decoration: none;">
@@ -66,16 +302,16 @@
                                 <ul class="dropdown-menu dropdown-menu-end"
                                     aria-labelledby="userProfileDropdown">
                                     <li>
-                                        <a class="dropdown-item" href="/customer_support/profile"><i
-                                                class="bi bi-person me-2"></i>Edit Profile</a>
+                                        <a class="dropdown-item" href="/customer_support/profile">
+                                            <i class="bi bi-person me-2"></i>Edit Profile</a>
                                     </li>
                                     <li>
                                         <hr class="dropdown-divider" />
                                     </li>
                                     <li>
                                         <a class="dropdown-item text-danger"
-                                            href="/customer_support/logout_manual"><i
-                                                class="bi bi-box-arrow-right me-2"></i>Logout</a>
+                                            href="/customer_support/logout_manual">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Logout</a>
                                     </li>
                                 </ul>
                             </div>
@@ -95,8 +331,8 @@
                     <t t-if="request.params.get('error')">
                         <div class="alert alert-error alert-dismissible fade show" role="alert">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Error!</strong>
-                            Failed to create ticket. Please try again. <button type="button"
-                                class="btn-close" data-bs-dismiss="alert"></button>
+                            Failed to create ticket. <button type="button" class="btn-close"
+                                data-bs-dismiss="alert"></button>
                         </div>
                     </t>
                     <t t-if="request.params.get('created')">
@@ -108,11 +344,9 @@
                     </t>
                 </div>
 
-                <!-- Dashboard Content -->
-                <div class="dashboard-content">
+                <!-- ═══ OVERVIEW PAGE ═══ -->
+                <div class="dashboard-content" id="portal-overview-page">
                     <div class="dashboard-grid">
-
-                        <!-- Ticket Analytics Card -->
                         <div class="dashboard-card">
                             <div class="card-header">
                                 <h2 class="card-title"><i class="bi bi-bar-chart-fill me-2"></i>Ticket
@@ -122,8 +356,6 @@
                                         just now</span>
                                 </div>
                             </div>
-
-                            <!-- Row 1 -->
                             <div class="analytics-grid">
                                 <div class="stat-box" data-key="open_tickets">
                                     <div class="stat-icon">
@@ -174,8 +406,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Row 2 -->
                             <div class="analytics-grid">
                                 <div class="stat-box" data-key="avg_open_hours">
                                     <div class="stat-icon">
@@ -226,8 +456,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Row 3 -->
                             <div class="analytics-grid">
                                 <div class="stat-box" data-key="resolved_tickets">
                                     <div class="stat-icon">
@@ -278,8 +506,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- My Performance Card -->
                         <div class="performance-card">
                             <div class="card-header">
                                 <h2 class="card-title"><i class="bi bi-graph-up-arrow me-2"></i>My
@@ -288,7 +514,7 @@
                                     <span class="performance-score" data-key="sample_performance">
                                         <span class="score-badge"><t
                                                 t-esc="performance.get('sample_performance', 85)" />
-                                        %</span> Overall Score </span>
+                                        %</span> Overall Score</span>
                                 </div>
                             </div>
                             <div class="performance-grid">
@@ -352,8 +578,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Quick Actions -->
                     <div class="quick-actions mt-4">
                         <div class="actions-grid">
                             <a href="/customer_support/create_ticket" class="action-card">
@@ -374,7 +598,7 @@
                                     <p>See all your support tickets</p>
                                 </div>
                             </a>
-                            <a href="#" class="action-card">
+                            <a href="#" class="action-card" id="portalReportActionCard">
                                 <div class="action-icon">
                                     <i class="bi bi-file-earmark-text"></i>
                                 </div>
@@ -395,39 +619,284 @@
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Bootstrap JS -->
+                <!-- ═══ KANBAN PAGE (customer — read-only) ═══ -->
+                <div class="dashboard-content" id="portal-kanban-page" style="display:none;">
+                    <div
+                        style="padding:1rem 2rem 0.5rem;display:flex;align-items:center;justify-content:space-between;">
+                        <h5 style="color:#e8eaf0;font-weight:700;margin:0;">
+                            <i class="bi bi-grid-3x3-gap-fill me-2" style="color:#4f8ef7;"></i>My
+                            Tickets — Kanban View </h5>
+                        <div class="view-toggle">
+                            <button class="view-btn" id="portalListBtn"><i class="bi bi-list me-1"></i>
+                                List</button>
+                            <button class="view-btn active" id="portalKanbanActiveBtn"><i
+                                    class="bi bi-grid-3x3-gap me-1"></i>Kanban</button>
+                        </div>
+                    </div>
+                    <div class="kanban-board">
+
+                        <!-- New -->
+                        <div class="kanban-col" data-state="new">
+                            <div class="kanban-col-header">
+                                <span class="kanban-col-title"><i class="bi bi-circle"></i> New</span>
+                                <span class="kanban-col-count" id="portal-count-new">0</span>
+                            </div>
+                            <div class="kanban-cards" id="portal-col-new">
+                                <t t-foreach="tickets" t-as="ticket">
+                                    <t t-if="ticket.state == 'new'">
+                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
+                                            <div class="kanban-card-id">
+                                                <t t-esc="ticket.name" />
+                                            </div>
+                                            <div class="kanban-card-subject">
+                                                <t t-esc="ticket.subject" />
+                                            </div>
+                                            <div class="kanban-card-footer">
+                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
+                                                <span t-att-class="'kanban-priority priority-' + kp">
+                                                    <t t-esc="kp.title()" />
+                                                </span>
+                                            </div>
+                                            <div class="kanban-card-focal">
+                                                <i class="bi bi-person-fill"></i>
+                                                <span>
+                                                    <t
+                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- In Progress -->
+                        <div class="kanban-col" data-state="in_progress">
+                            <div class="kanban-col-header">
+                                <span class="kanban-col-title"><i class="bi bi-arrow-repeat"></i> In
+                                    Progress</span>
+                                <span class="kanban-col-count" id="portal-count-in_progress">0</span>
+                            </div>
+                            <div class="kanban-cards" id="portal-col-in_progress">
+                                <t t-foreach="tickets" t-as="ticket">
+                                    <t t-if="ticket.state == 'in_progress'">
+                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
+                                            <div class="kanban-card-id">
+                                                <t t-esc="ticket.name" />
+                                            </div>
+                                            <div class="kanban-card-subject">
+                                                <t t-esc="ticket.subject" />
+                                            </div>
+                                            <div class="kanban-card-footer">
+                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
+                                                <span t-att-class="'kanban-priority priority-' + kp">
+                                                    <t t-esc="kp.title()" />
+                                                </span>
+                                            </div>
+                                            <div class="kanban-card-focal">
+                                                <i class="bi bi-person-fill"></i>
+                                                <span>
+                                                    <t
+                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Resolved -->
+                        <div class="kanban-col" data-state="resolved">
+                            <div class="kanban-col-header">
+                                <span class="kanban-col-title"><i class="bi bi-check-circle"></i>
+                                    Resolved</span>
+                                <span class="kanban-col-count" id="portal-count-resolved">0</span>
+                            </div>
+                            <div class="kanban-cards" id="portal-col-resolved">
+                                <t t-foreach="tickets" t-as="ticket">
+                                    <t t-if="ticket.state == 'resolved'">
+                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
+                                            <div class="kanban-card-id">
+                                                <t t-esc="ticket.name" />
+                                            </div>
+                                            <div class="kanban-card-subject">
+                                                <t t-esc="ticket.subject" />
+                                            </div>
+                                            <div class="kanban-card-footer">
+                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
+                                                <span t-att-class="'kanban-priority priority-' + kp">
+                                                    <t t-esc="kp.title()" />
+                                                </span>
+                                            </div>
+                                            <div class="kanban-card-focal">
+                                                <i class="bi bi-person-fill"></i>
+                                                <span>
+                                                    <t
+                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+
+                        <!-- Closed -->
+                        <div class="kanban-col" data-state="closed">
+                            <div class="kanban-col-header">
+                                <span class="kanban-col-title"><i class="bi bi-x-circle"></i> Closed</span>
+                                <span class="kanban-col-count" id="portal-count-closed">0</span>
+                            </div>
+                            <div class="kanban-cards" id="portal-col-closed">
+                                <t t-foreach="tickets" t-as="ticket">
+                                    <t t-if="ticket.state == 'closed'">
+                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
+                                            <div class="kanban-card-id">
+                                                <t t-esc="ticket.name" />
+                                            </div>
+                                            <div class="kanban-card-subject">
+                                                <t t-esc="ticket.subject" />
+                                            </div>
+                                            <div class="kanban-card-footer">
+                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
+                                                <span t-att-class="'kanban-priority priority-' + kp">
+                                                    <t t-esc="kp.title()" />
+                                                </span>
+                                            </div>
+                                            <div class="kanban-card-focal">
+                                                <i class="bi bi-person-fill"></i>
+                                                <span>
+                                                    <t
+                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ═══ REPORTING PAGE ═══ -->
+                <div class="dashboard-content reporting-page" id="portal-reporting-page"
+                    style="display:none;">
+
+                    <!-- Print-only header -->
+                    <div class="print-header">
+                        <h3><i class="bi bi-graph-up me-2"></i>My Ticket Report — Dragon Coders
+                            Support</h3>
+                        <p id="reportPrintSubtitle">Generated on <span id="reportPrintDate"></span></p>
+                    </div>
+
+                    <!-- Reporting header (hidden on print) -->
+                    <div class="reporting-header">
+                        <h5 class="reporting-title">
+                            <i class="bi bi-graph-up me-2" style="color:#4f8ef7;"></i>My Ticket
+                            Report </h5>
+                        <div class="reporting-controls">
+                            <div class="day-filter" id="reportDayFilter">
+                                <button class="day-btn" data-days="7">7 Days</button>
+                                <button class="day-btn active" data-days="30">30 Days</button>
+                                <button class="day-btn" data-days="90">90 Days</button>
+                            </div>
+                            <button class="print-btn" onclick="window.print()">
+                                <i class="bi bi-printer-fill"></i> Print / PDF </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading state -->
+                    <div id="reportLoading" class="report-loading">
+                        <div class="spinner"></div>
+                        <span>Loading your report...</span>
+                    </div>
+
+                    <!-- Report content (shown after data loads) -->
+                    <div id="reportContent" style="display:none;">
+
+                        <!-- KPI Strip -->
+                        <div class="report-kpi-strip">
+                            <div class="report-kpi">
+                                <div class="report-kpi-value blue" id="rKpiTotal">—</div>
+                                <div class="report-kpi-label">Total Submitted</div>
+                            </div>
+                            <div class="report-kpi">
+                                <div class="report-kpi-value green" id="rKpiResolved">—</div>
+                                <div class="report-kpi-label">Resolved / Closed</div>
+                            </div>
+                            <div class="report-kpi">
+                                <div class="report-kpi-value amber" id="rKpiOpen">—</div>
+                                <div class="report-kpi-label">Still Open</div>
+                            </div>
+                            <div class="report-kpi">
+                                <div class="report-kpi-value" id="rKpiRate">—</div>
+                                <div class="report-kpi-label">Resolve Rate</div>
+                            </div>
+                            <div class="report-kpi">
+                                <div class="report-kpi-value" id="rKpiAvgHours">—</div>
+                                <div class="report-kpi-label">Avg Resolution (hrs)</div>
+                            </div>
+                        </div>
+
+                        <!-- Charts row 1: Timeline + Status breakdown -->
+                        <div class="report-charts-grid">
+                            <div class="report-chart-card">
+                                <div class="report-chart-title">
+                                    <i class="bi bi-calendar3"></i> Ticket Submissions Over Time </div>
+                                <div class="chart-wrap tall">
+                                    <canvas id="chartTimeline"></canvas>
+                                </div>
+                            </div>
+                            <div class="report-chart-card">
+                                <div class="report-chart-title">
+                                    <i class="bi bi-pie-chart-fill"></i> Status Breakdown </div>
+                                <div class="chart-wrap">
+                                    <canvas id="chartStatus"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Charts row 2: Priority breakdown + Resolve rate trend -->
+                        <div class="report-charts-grid">
+                            <div class="report-chart-card">
+                                <div class="report-chart-title">
+                                    <i class="bi bi-bar-chart-fill"></i> Priority Breakdown </div>
+                                <div class="chart-wrap">
+                                    <canvas id="chartPriority"></canvas>
+                                </div>
+                            </div>
+                            <div class="report-chart-card">
+                                <div class="report-chart-title">
+                                    <i class="bi bi-graph-up-arrow"></i> Weekly Resolve Rate Trend </div>
+                                <div class="chart-wrap">
+                                    <canvas id="chartResolveTrend"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div><!--
+                    /reportContent -->
+                </div><!--
+                /portal-reporting-page -->
+
+            </div><!--
+            /dashboard-wrapper -->
+
             <script
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-            <!-- Live Analytics Auto-Refresh (polls every 15s) -->
+            <!-- ═══ LIVE ANALYTICS ═══ -->
             <script type="text/javascript">
                 //<![CDATA[
 (function(){
     'use strict';
     var INTERVAL=15000;
-    var A=[
-        {key:'open_tickets',sel:'[data-key="open_tickets"] .stat-value'},
-        {key:'total_tickets',sel:'[data-key="total_tickets"] .stat-value'},
-        {key:'high_priority',sel:'[data-key="high_priority"] .stat-value'},
-        {key:'urgent',sel:'[data-key="urgent"] .stat-value'},
-        {key:'avg_open_hours',sel:'[data-key="avg_open_hours"] .stat-value'},
-        {key:'total_hours',sel:'[data-key="total_hours"] .stat-value'},
-        {key:'avg_high_hours',sel:'[data-key="avg_high_hours"] .stat-value'},
-        {key:'avg_urgent_hours',sel:'[data-key="avg_urgent_hours"] .stat-value'},
-        {key:'resolved_tickets',sel:'[data-key="resolved_tickets"] .stat-value'},
-        {key:'solve_rate',sel:'[data-key="solve_rate"] .stat-value',sfx:'%'},
-        {key:'high_resolved',sel:'[data-key="high_resolved"] .stat-value'},
-        {key:'urgent_resolved',sel:'[data-key="urgent_resolved"] .stat-value'},
-    ];
-    var P=[
-        {key:'today_closed',sel:'[data-key="today_closed"] .performance-value'},
-        {key:'avg_resolve_rate',sel:'[data-key="avg_resolve_rate"] .performance-value',sfx:'%'},
-        {key:'daily_target',sel:'[data-key="daily_target"] .performance-value',sfx:'%'},
-        {key:'achievement',sel:'[data-key="achievement"] .performance-value',sfx:'%'},
-        {key:'sample_performance',sel:'[data-key="sample_performance"] .score-badge',sfx:'%'},
-    ];
+    var A=[{key:'open_tickets',sel:'[data-key="open_tickets"] .stat-value'},{key:'total_tickets',sel:'[data-key="total_tickets"] .stat-value'},{key:'high_priority',sel:'[data-key="high_priority"] .stat-value'},{key:'urgent',sel:'[data-key="urgent"] .stat-value'},{key:'avg_open_hours',sel:'[data-key="avg_open_hours"] .stat-value'},{key:'total_hours',sel:'[data-key="total_hours"] .stat-value'},{key:'avg_high_hours',sel:'[data-key="avg_high_hours"] .stat-value'},{key:'avg_urgent_hours',sel:'[data-key="avg_urgent_hours"] .stat-value'},{key:'resolved_tickets',sel:'[data-key="resolved_tickets"] .stat-value'},{key:'solve_rate',sel:'[data-key="solve_rate"] .stat-value',sfx:'%'},{key:'high_resolved',sel:'[data-key="high_resolved"] .stat-value'},{key:'urgent_resolved',sel:'[data-key="urgent_resolved"] .stat-value'}];
+    var P=[{key:'today_closed',sel:'[data-key="today_closed"] .performance-value'},{key:'avg_resolve_rate',sel:'[data-key="avg_resolve_rate"] .performance-value',sfx:'%'},{key:'daily_target',sel:'[data-key="daily_target"] .performance-value',sfx:'%'},{key:'achievement',sel:'[data-key="achievement"] .performance-value',sfx:'%'},{key:'sample_performance',sel:'[data-key="sample_performance"] .score-badge',sfx:'%'}];
     function upd(sel,val,sfx){var el=document.querySelector(sel);if(el)el.textContent=val+(sfx||'');}
     function flash(sel){var el=document.querySelector(sel);if(el){el.style.transition='color 0.3s';el.style.color='#1e88c7';setTimeout(function(){el.style.color='';},600);}}
     function updBar(v){var b=document.querySelector('.progress-bar');if(b){b.style.width=v+'%';b.className='progress-bar '+(v>=80?'bg-success':'bg-warning');}}
@@ -442,36 +911,393 @@
             P.forEach(function(i){var v=p[i.key];if(v!==undefined)upd(i.sel,v,i.sfx||'');});
             if(p.achievement!==undefined){updBar(p.achievement);updBarLabel(p.achievement);}
             updTime();
-        })
-        .catch(function(e){console.warn('Analytics refresh failed:',e);});
+        }).catch(function(e){console.warn('Analytics refresh failed:',e);});
     }
     document.addEventListener('DOMContentLoaded',function(){run();setInterval(run,INTERVAL);});
 })();
 //]]>
             </script>
 
-            <!-- Existing Dashboard JavaScript -->
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                setTimeout(function() {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-                });
-                }, 5000);
+            <!-- ═══ PORTAL JS — BELL + KANBAN + REPORTING ═══ -->
+            <script type="text/javascript">
+                //<![CDATA[
+document.addEventListener('DOMContentLoaded', function () {
 
-                const actionCards = document.querySelectorAll('.action-card');
-                actionCards.forEach(card => {
-                card.addEventListener('click', function(e) {
-                if (!this.href || this.href === '#') {
+    // Auto-hide alerts
+    setTimeout(function () {
+        document.querySelectorAll('.alert').forEach(function (a) { new bootstrap.Alert(a).close(); });
+    }, 5000);
+
+    // ── Column counts ─────────────────────────────────────────────────────
+    function updatePortalCounts() {
+        ['new','in_progress','resolved','closed'].forEach(function(state) {
+            var col     = document.getElementById('portal-col-' + state);
+            var countEl = document.getElementById('portal-count-' + state);
+            if (col && countEl) countEl.textContent = col.querySelectorAll('.kanban-card').length;
+        });
+    }
+    updatePortalCounts();
+
+    // ── Page switching ────────────────────────────────────────────────────
+    function hideAllPages() {
+        document.getElementById('portal-overview-page').style.display  = 'none';
+        document.getElementById('portal-kanban-page').style.display    = 'none';
+        document.getElementById('portal-reporting-page').style.display = 'none';
+    }
+    function setActiveNav(id) {
+        document.querySelectorAll('.header-nav .nav-link').forEach(function(l){ l.classList.remove('active'); });
+        var el = document.getElementById(id);
+        if (el) el.classList.add('active');
+    }
+    function showOverview() {
+        hideAllPages();
+        document.getElementById('portal-overview-page').style.display = 'block';
+        setActiveNav('portalOverviewNav');
+    }
+    function showKanban() {
+        hideAllPages();
+        document.getElementById('portal-kanban-page').style.display = 'block';
+        setActiveNav('portalTicketsNav');
+        updatePortalCounts();
+    }
+    function showReporting() {
+        hideAllPages();
+        document.getElementById('portal-reporting-page').style.display = 'block';
+        setActiveNav('portalReportingNav');
+        loadReportData(currentDays);
+    }
+
+    document.getElementById('portalKanbanBtn').addEventListener('click', function () {
+        showKanban();
+        this.classList.add('active');
+    });
+
+    var ticketsNav = document.getElementById('portalTicketsNav');
+    if (ticketsNav) {
+        ticketsNav.addEventListener('click', function(e) { e.preventDefault(); showKanban(); });
+    }
+
+    var reportingNav = document.getElementById('portalReportingNav');
+    if (reportingNav) {
+        reportingNav.addEventListener('click', function(e) { e.preventDefault(); showReporting(); });
+    }
+
+    var reportActionCard = document.getElementById('portalReportActionCard');
+    if (reportActionCard) {
+        reportActionCard.addEventListener('click', function(e) { e.preventDefault(); showReporting(); });
+    }
+
+    document.getElementById('portalListBtn').addEventListener('click', function () {
+        window.location.href = '/customer_support/tickets';
+    });
+    document.getElementById('portalKanbanActiveBtn').addEventListener('click', showKanban);
+
+    // ── Card click ────────────────────────────────────────────────────────
+    document.querySelectorAll('#portal-kanban-page .kanban-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+            var id = this.getAttribute('data-ticket-id');
+            if (id) window.location.href = '/customer_support/ticket/' + id;
+        });
+    });
+
+    // ── Action cards ──────────────────────────────────────────────────────
+    document.querySelectorAll('.action-card').forEach(function (card) {
+        card.addEventListener('click', function (e) {
+            if (!this.href || this.href === '#' || this.href.endsWith('#')) {
                 e.preventDefault();
                 this.style.transform = 'scale(0.95)';
-                setTimeout(() => { this.style.transform = 'scale(1)'; }, 150);
+                setTimeout(function() { card.style.transform = 'scale(1)'; }, 150);
+            }
+        });
+    });
+
+    // ── NOTIFICATION BELL ─────────────────────────────────────────────────
+    var bell     = document.getElementById('portalNotifBell');
+    var dropdown = document.getElementById('portalNotifDropdown');
+    var badge    = document.getElementById('portalNotifBadge');
+    var list     = document.getElementById('portalNotifList');
+
+    bell.addEventListener('click', function (e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+    });
+    document.addEventListener('click', function () { dropdown.classList.remove('open'); });
+    dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+
+    document.getElementById('portalMarkRead').addEventListener('click', function () {
+        fetch('/customer_support/customer/notifications/mark_read', {
+            method: 'POST', credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(function () {
+            badge.classList.add('d-none');
+            badge.textContent = '0';
+            list.innerHTML = '<div class="notif-empty">'
+                + '<i class="bi bi-check-circle-fill" style="font-size:2rem;color:#22c55e;display:block;margin-bottom:.5rem;"></i>'
+                + 'All caught up!</div>';
+        });
+    });
+
+    document.getElementById('portalNotifViewTickets').addEventListener('click', function (e) {
+        e.preventDefault();
+        dropdown.classList.remove('open');
+        showKanban();
+    });
+
+    function renderNotifications(items) {
+        if (!items.length) {
+            list.innerHTML = '<div class="notif-empty">'
+                + '<i class="bi bi-check-circle-fill" style="font-size:2rem;color:#22c55e;display:block;margin-bottom:.5rem;"></i>'
+                + 'No new notifications</div>';
+            badge.classList.add('d-none');
+            return;
+        }
+        badge.textContent = items.length;
+        badge.classList.remove('d-none');
+        list.innerHTML = items.map(function (n) {
+            var href = n.ticket_id ? '/customer_support/ticket/' + n.ticket_id : '#';
+            return '<a class="notif-item" href="' + href + '">'
+                + '<div class="notif-icon-wrap ' + (n.cls || 'status') + '">'
+                + '<i class="bi ' + (n.icon || 'bi-bell-fill') + '"></i></div>'
+                + '<div class="notif-body">'
+                + '<div class="notif-title">' + (n.message || '') + '</div>'
+                + '<div class="notif-time">' + (n.time || '') + '</div>'
+                + '</div>'
+                + '<div class="notif-dot ' + (n.cls || 'status') + '"></div>'
+                + '</a>';
+        }).join('');
+    }
+
+    function loadNotifications() {
+        fetch('/customer_support/customer/notifications', {
+            method: 'GET', credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) { renderNotifications(data.notifications || []); })
+        .catch(function () { renderNotifications([]); });
+    }
+
+    loadNotifications();
+    setInterval(loadNotifications, 30000);
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // ── REPORTING ──────────────────────────────────────────────────────────
+    // ═══════════════════════════════════════════════════════════════════════
+
+    var currentDays = 30;
+    var chartInstances = {};
+
+    // Day filter buttons
+    document.querySelectorAll('#reportDayFilter .day-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('#reportDayFilter .day-btn').forEach(function(b){ b.classList.remove('active'); });
+            this.classList.add('active');
+            currentDays = parseInt(this.getAttribute('data-days'), 10);
+            loadReportData(currentDays);
+        });
+    });
+
+    function destroyChart(id) {
+        if (chartInstances[id]) {
+            chartInstances[id].destroy();
+            delete chartInstances[id];
+        }
+    }
+
+    function loadReportData(days) {
+        document.getElementById('reportLoading').style.display = 'flex';
+        document.getElementById('reportContent').style.display = 'none';
+
+        fetch('/customer_support/customer/reporting?days=' + days, {
+            method: 'GET', credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' }
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (!data.success) throw new Error('API error');
+            renderReport(data);
+            document.getElementById('reportLoading').style.display = 'none';
+            document.getElementById('reportContent').style.display = 'block';
+            // Set print subtitle
+            var pd = document.getElementById('reportPrintDate');
+            if (pd) pd.textContent = new Date().toLocaleDateString() + ' (Last ' + days + ' days)';
+        })
+        .catch(function(e) {
+            console.error('Reporting fetch failed:', e);
+            document.getElementById('reportLoading').innerHTML =
+                '<i class="bi bi-exclamation-triangle" style="color:#ef4444;font-size:1.5rem;"></i>'
+                + '<span style="color:#ef4444;">Could not load report data.</span>';
+        });
+    }
+
+    function renderReport(data) {
+        var kpis = data.kpis || {};
+
+        // KPI cards
+        document.getElementById('rKpiTotal').textContent    = kpis.total || 0;
+        document.getElementById('rKpiResolved').textContent = kpis.resolved || 0;
+        document.getElementById('rKpiOpen').textContent     = kpis.open || 0;
+        document.getElementById('rKpiAvgHours').textContent = kpis.avg_resolution_hours || 0;
+        var rateEl = document.getElementById('rKpiRate');
+        var rate = kpis.resolve_rate || 0;
+        rateEl.textContent = rate + '%';
+        rateEl.className = 'report-kpi-value ' + (rate >= 80 ? 'green' : rate >= 50 ? 'amber' : 'red');
+
+        // ── Timeline chart ────────────────────────────────────────────────
+        destroyChart('chartTimeline');
+        var tl = data.timeline || [];
+        // Thin out labels for readability if > 14 days
+        var tlLabels = tl.map(function(d, i) {
+            if (tl.length <= 14) return d.date;
+            return i % Math.ceil(tl.length / 14) === 0 ? d.date : '';
+        });
+        chartInstances['chartTimeline'] = new Chart(
+            document.getElementById('chartTimeline').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: tl.map(function(d){ return d.date; }),
+                datasets: [{
+                    label: 'Tickets Submitted',
+                    data: tl.map(function(d){ return d.count; }),
+                    borderColor: '#4f8ef7',
+                    backgroundColor: 'rgba(79,142,247,0.12)',
+                    borderWidth: 2,
+                    pointRadius: tl.length <= 14 ? 4 : 2,
+                    pointBackgroundColor: '#4f8ef7',
+                    fill: true,
+                    tension: 0.35,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#8892a4', font: { size: 10 },
+                            maxTicksLimit: 10,
+                            maxRotation: 45,
+                        },
+                        grid: { color: 'rgba(255,255,255,0.04)' }
+                    },
+                    y: {
+                        ticks: { color: '#8892a4', font: { size: 10 }, stepSize: 1, precision: 0 },
+                        grid: { color: 'rgba(255,255,255,0.06)' },
+                        beginAtZero: true,
+                    }
                 }
-                });
-                });
-                });
+            }
+        });
+
+        // ── Status donut chart ────────────────────────────────────────────
+        destroyChart('chartStatus');
+        var st = data.status_breakdown || {};
+        var stLabels = Object.keys(st);
+        var stValues = stLabels.map(function(k){ return st[k]; });
+        var stColors = { 'New': '#3b82f6', 'In Progress': '#f59e0b', 'Resolved': '#22c55e', 'Closed': '#94a3b8' };
+        chartInstances['chartStatus'] = new Chart(
+            document.getElementById('chartStatus').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: stLabels,
+                datasets: [{
+                    data: stValues,
+                    backgroundColor: stLabels.map(function(l){ return stColors[l] || '#64748b'; }),
+                    borderWidth: 0,
+                    hoverOffset: 8,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                cutout: '62%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#8892a4', font: { size: 11 }, padding: 16 }
+                    }
+                }
+            }
+        });
+
+        // ── Priority bar chart ────────────────────────────────────────────
+        destroyChart('chartPriority');
+        var pr = data.priority_breakdown || {};
+        var prLabels = ['Low', 'Medium', 'High', 'Urgent'];
+        var prValues = prLabels.map(function(k){ return pr[k] || 0; });
+        var prColors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444'];
+        chartInstances['chartPriority'] = new Chart(
+            document.getElementById('chartPriority').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: prLabels,
+                datasets: [{
+                    label: 'Tickets',
+                    data: prValues,
+                    backgroundColor: prColors,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#8892a4', font: { size: 11 } }, grid: { display: false } },
+                    y: {
+                        ticks: { color: '#8892a4', font: { size: 10 }, stepSize: 1, precision: 0 },
+                        grid: { color: 'rgba(255,255,255,0.06)' },
+                        beginAtZero: true,
+                    }
+                }
+            }
+        });
+
+        // ── Resolve rate trend line chart ─────────────────────────────────
+        destroyChart('chartResolveTrend');
+        var rt = data.resolve_trend || [];
+        chartInstances['chartResolveTrend'] = new Chart(
+            document.getElementById('chartResolveTrend').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: rt.map(function(d){ return d.week; }),
+                datasets: [{
+                    label: 'Resolve Rate %',
+                    data: rt.map(function(d){ return d.rate; }),
+                    borderColor: '#22c55e',
+                    backgroundColor: 'rgba(34,197,94,0.1)',
+                    borderWidth: 2.5,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#22c55e',
+                    fill: true,
+                    tension: 0.3,
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(ctx){ return ctx.parsed.y + '%'; }
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { color: '#8892a4', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
+                    y: {
+                        ticks: { color: '#8892a4', font: { size: 10 }, callback: function(v){ return v + '%'; } },
+                        grid: { color: 'rgba(255,255,255,0.06)' },
+                        beginAtZero: true,
+                        max: 100,
+                    }
+                }
+            }
+        });
+    }
+
+});
+//]]>
             </script>
         </t>
     </template>

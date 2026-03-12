@@ -489,25 +489,25 @@
                                                         <th style="width: 5%;">
                                                             <i>Sl.no</i>
                                                         </th>
-                                                        <th style="width: 20%;"><i
+                                                        <th style="width: 18%;"><i
                                                                 class="bi bi-ticket-perforated me-1 align-middle"></i>
                                                             Ticket</th>
-                                                        <th style="width: 15%;"><i
+                                                        <th style="width: 13%;"><i
                                                                 class="bi bi-person-circle me-1 align-middle"></i>
                                                             Client</th>
-                                                        <th style="width: 10%;"><i
+                                                        <th style="width: 8%;"><i
                                                                 class="bi bi-exclamation-triangle me-1 align-middle"></i>
                                                             Priority</th>
-                                                        <th style="width: 10%;"><i
+                                                        <th style="width: 8%;"><i
                                                                 class="bi bi-clock-history me-1 align-middle"></i>
                                                             Status</th>
-                                                        <th style="width: 20%;"><i
+                                                        <th style="width: 13%;"><i
                                                                 class="bi bi-calendar-check me-1 align-middle"></i>
                                                             Created_On</th>
-                                                        <th style="width: 15%;"><i
+                                                        <th style="width: 12%;"><i
                                                                 class="bi bi-person-check me-1 align-middle"></i>
                                                             Assigned_To</th>
-                                                        <th style="width: 7%;"><i
+                                                        <th style="width: 23%;"><i
                                                                 class="bi bi-three-dots-vertical me-1 align-middle"></i>
                                                             Action</th>
                                                     </tr>
@@ -553,12 +553,25 @@
                                                                         class="bi bi-person-circle me-1"></i>
                                                                     <t
                                                                         t-esc="ticket.assigned_to.name" />
+                                                                    <!-- SLA badge if attached -->
+                                                                    <t t-if="ticket.sla_policy_id">
+                                                                        <br />
+                                                                        <small
+                                                                            t-att-class="'badge mt-1 ' + ('bg-danger' if ticket.sla_status == 'breached' else 'bg-warning text-dark' if ticket.sla_status == 'at_risk' else 'bg-success')">
+                                                                            <i
+                                                                                class="bi bi-clock me-1"></i>
+                                                                            <t
+                                                                                t-esc="ticket.sla_policy_id.name" />
+                                                                        </small>
+                                                                    </t>
                                                                 </t>
                                                             </td>
                                                             <td
                                                                 style="position: relative; z-index: 10;">
                                                                 <t
                                                                     t-if="ticket.state in ['new', 'assigned']">
+                                                                    <!-- ── UPDATED ASSIGN FORM with
+                                                                    SLA dropdown ── -->
                                                                     <form
                                                                         t-att-action="'/customer_support/ticket/%s/assign' % ticket.id"
                                                                         method="post"
@@ -566,30 +579,49 @@
                                                                         <input type="hidden"
                                                                             name="csrf_token"
                                                                             t-att-value="request.csrf_token()" />
-                                                                        <div
-                                                                            class="input-group input-group-sm">
-                                                                            <select
-                                                                                class="form-select form-select-sm"
-                                                                                name="assigned_to"
-                                                                                required="required">
-                                                                                <option value="">Select
-                                                                                    User</option>
-                                                                                <t
-                                                                                    t-foreach="request.env['res.users'].sudo().search([('active', '=', True), ('id','!=',1)])"
-                                                                                    t-as="u">
-                                                                                    <option
-                                                                                        t-att-value="u.id">
-                                                                                        <t
-                                                                                            t-esc="u.name" />
-                                                                                    </option>
-                                                                                </t>
-                                                                            </select>
-                                                                            <button type="submit"
-                                                                                class="btn btn-primary btn-sm">
-                                                                                <i
-                                                                                    class="bi bi-person-check"></i>
-                                                                                Assign </button>
-                                                                        </div>
+                                                                        <!-- Focal Person -->
+                                                                        <select
+                                                                            class="form-select form-select-sm mb-1"
+                                                                            name="assigned_to"
+                                                                            required="required">
+                                                                            <option value="">Select
+                                                                                Focal Person</option>
+                                                                            <t
+                                                                                t-foreach="request.env['res.users'].sudo().search([('active', '=', True), ('id','!=',1)])"
+                                                                                t-as="u">
+                                                                                <option
+                                                                                    t-att-value="u.id"
+                                                                                    t-att-selected="'selected' if ticket.assigned_to and ticket.assigned_to.id == u.id else None">
+                                                                                    <t
+                                                                                        t-esc="u.name" />
+                                                                                </option>
+                                                                            </t>
+                                                                        </select>
+                                                                        <!-- SLA Policy -->
+                                                                        <select
+                                                                            class="form-select form-select-sm mb-1"
+                                                                            name="sla_policy_id">
+                                                                            <option value="">No SLA
+                                                                                (optional)</option>
+                                                                            <t
+                                                                                t-foreach="request.env['customer.support.sla.policy'].sudo().search([('active','=',True)])"
+                                                                                t-as="sla">
+                                                                                <option
+                                                                                    t-att-value="sla.id"
+                                                                                    t-att-selected="'selected' if ticket.sla_policy_id and ticket.sla_policy_id.id == sla.id else None">
+                                                                                    <t
+                                                                                        t-esc="sla.name" />
+                                                                                    (<t
+                                                                                        t-esc="sla.response_time" /><t
+                                                                                        t-esc="' ' + sla.time_unit" />
+                                                                                    ) </option>
+                                                                            </t>
+                                                                        </select>
+                                                                        <button type="submit"
+                                                                            class="btn btn-primary btn-sm w-100">
+                                                                            <i
+                                                                                class="bi bi-person-check me-1"></i>
+                                                                            Assign </button>
                                                                     </form>
                                                                 </t>
                                                                 <t
@@ -752,9 +784,8 @@
                                             </div>
                                         </div>
                                         <h3 class="config-title">Ticket Settings</h3>
-                                        <p class="config-description">Manage ticket configurations,
-                                            SLA response times, auto-assignment, and priority
-                                            defaults</p>
+                                        <p class="config-description">Manage SLA policies, response
+                                            times, auto-assignment, and priority defaults</p>
                                         <button class="btn btn-config" data-bs-toggle="modal"
                                             data-bs-target="#ticketSettingsModal"><i
                                                 class="bi bi-gear-fill me-2"></i>Configure</button>
@@ -778,7 +809,7 @@
                                 </div>
                             </div>
 
-                            <!-- General Settings Modal -->
+                            <!-- General Settings Modal (unchanged) -->
                             <div class="modal fade" id="generalSettingsModal" tabindex="-1"
                                 aria-labelledby="generalSettingsModalLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
@@ -827,63 +858,263 @@
                                 </div>
                             </div>
 
-                            <!-- Ticket Settings Modal -->
+                            <!-- ═══ TICKET SETTINGS MODAL (fully rebuilt with SLA manager) ═══ -->
                             <div class="modal fade" id="ticketSettingsModal" tabindex="-1"
                                 aria-labelledby="ticketSettingsModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-lg">
+                                <div class="modal-dialog modal-xl">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="ticketSettingsModalLabel"><i
-                                                    class="bi bi-ticket-perforated me-2"></i>Ticket
-                                                Settings</h5>
+                                            <h5 class="modal-title" id="ticketSettingsModalLabel">
+                                                <i class="bi bi-ticket-perforated me-2"></i>Ticket
+                                                Settings &amp; SLA Policies </h5>
                                             <button type="button" class="btn-close"
                                                 data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form>
-                                                <div class="mb-3">
-                                                    <label class="form-label"><i
-                                                            class="bi bi-hourglass-split me-1"></i>SLA
-                                                        Response Time (hours)</label>
-                                                    <input type="number" class="form-control"
-                                                        value="24" />
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label"><i
-                                                            class="bi bi-robot me-1"></i>
-                                                        Auto-assignment</label>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input"
-                                                            type="checkbox" id="autoAssign"
-                                                            checked="" />
-                                                        <label class="form-check-label"
-                                                            for="autoAssign">Enable auto-assignment</label>
+
+                                            <!-- Alert area for save messages -->
+                                            <div id="slaAlert" class="d-none mb-3"></div>
+
+                                            <!-- Nav tabs inside modal -->
+                                            <ul class="nav nav-tabs mb-4" id="ticketSettingsTabs">
+                                                <li class="nav-item">
+                                                    <button class="nav-link active"
+                                                        data-bs-toggle="tab"
+                                                        data-bs-target="#slaTab" type="button">
+                                                        <i class="bi bi-clock-history me-1"></i>SLA
+                                                        Policies </button>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <button class="nav-link" data-bs-toggle="tab"
+                                                        data-bs-target="#ticketDefaultsTab"
+                                                        type="button">
+                                                        <i class="bi bi-sliders me-1"></i>Ticket
+                                                        Defaults </button>
+                                                </li>
+                                            </ul>
+
+                                            <div class="tab-content">
+
+                                                <!-- ── SLA POLICIES TAB ── -->
+                                                <div class="tab-pane fade show active" id="slaTab">
+
+                                                    <!-- Add New Policy Form -->
+                                                    <div class="card mb-4 border-primary">
+                                                        <div
+                                                            class="card-header bg-primary text-white">
+                                                            <h6 class="mb-0"><i
+                                                                    class="bi bi-plus-circle me-2"></i>Add
+                                                                New SLA Policy</h6>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <form id="slaCreateForm"
+                                                                onsubmit="slaCreate(event)">
+                                                                <div class="row g-3">
+                                                                    <div class="col-md-4">
+                                                                        <label
+                                                                            class="form-label fw-semibold">Policy
+                                                                            Name <span
+                                                                                class="text-danger">
+                                                                            *</span></label>
+                                                                        <input type="text"
+                                                                            class="form-control"
+                                                                            name="sla_name"
+                                                                            placeholder="e.g. Critical Response"
+                                                                            required="required" />
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label
+                                                                            class="form-label fw-semibold">
+                                                                            Time <span
+                                                                                class="text-danger">
+                                                                            *</span></label>
+                                                                        <input type="number"
+                                                                            class="form-control"
+                                                                            name="sla_response_time"
+                                                                            min="1" value="24"
+                                                                            required="required" />
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label
+                                                                            class="form-label fw-semibold">
+                                                                            Unit</label>
+                                                                        <select class="form-select"
+                                                                            name="sla_time_unit">
+                                                                            <option value="hours">
+                                                                                Hours</option>
+                                                                            <option value="days">
+                                                                                Days</option>
+                                                                            <option value="weeks">
+                                                                                Weeks</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label
+                                                                            class="form-label fw-semibold">For
+                                                                            Priority</label>
+                                                                        <select class="form-select"
+                                                                            name="sla_priority_level">
+                                                                            <option value="any">Any</option>
+                                                                            <option value="low">Low</option>
+                                                                            <option value="medium">
+                                                                                Medium</option>
+                                                                            <option value="high">
+                                                                                High</option>
+                                                                            <option value="urgent">
+                                                                                Urgent</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div
+                                                                        class="col-md-2 d-flex align-items-end">
+                                                                        <button type="submit"
+                                                                            class="btn btn-primary w-100">
+                                                                            <i
+                                                                                class="bi bi-plus-circle me-1"></i>Add
+                                                                            Policy </button>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 mt-2">
+                                                                    <label class="form-label">Description
+                                                                        (optional)</label>
+                                                                    <input type="text"
+                                                                        class="form-control"
+                                                                        name="sla_description"
+                                                                        placeholder="When to use this policy..." />
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Existing Policies Table -->
+                                                    <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Existing
+                                                        SLA Policies</h6>
+                                                    <div class="table-responsive">
+                                                        <table
+                                                            class="table table-hover table-bordered align-middle"
+                                                            id="slaPoliciesTable">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>Policy Name</th>
+                                                                    <th>Response Time</th>
+                                                                    <th>For Priority</th>
+                                                                    <th>Description</th>
+                                                                    <th style="width:120px;">Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="slaPoliciesBody">
+                                                                <tr>
+                                                                    <td colspan="5"
+                                                                        class="text-center text-muted py-3">
+                                                                        <i
+                                                                            class="bi bi-hourglass-split me-2"></i>Loading
+                                                                        policies... </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
                                                     </div>
                                                 </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label"><i
-                                                            class="bi bi-flag me-1"></i>Default
-                                                        Priority</label>
-                                                    <select class="form-select">
-                                                        <option>Medium</option>
-                                                        <option>Low</option>
-                                                        <option>High</option>
-                                                        <option>Urgent</option>
-                                                    </select>
+
+                                                <!-- ── TICKET DEFAULTS TAB ── -->
+                                                <div class="tab-pane fade" id="ticketDefaultsTab">
+                                                    <div class="mb-3">
+                                                        <label class="form-label"><i
+                                                                class="bi bi-robot me-1"></i>
+                                                            Auto-assignment</label>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input"
+                                                                type="checkbox" id="autoAssign"
+                                                                checked="" />
+                                                            <label class="form-check-label"
+                                                                for="autoAssign">Enable
+                                                                auto-assignment</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label"><i
+                                                                class="bi bi-flag me-1"></i>Default
+                                                            Priority</label>
+                                                        <select class="form-select">
+                                                            <option>Medium</option>
+                                                            <option>Low</option>
+                                                            <option>High</option>
+                                                            <option>Urgent</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                            </form>
+
+                                            </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary"><i
-                                                    class="bi bi-save me-2"></i>Save Changes</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Project Configuration Modal -->
+                            <!-- Edit SLA Policy Modal (inline) -->
+                            <div class="modal fade" id="slaEditModal" tabindex="-1"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title"><i
+                                                    class="bi bi-pencil-square me-2"></i>Edit SLA
+                                                Policy</h5>
+                                            <button type="button" class="btn-close"
+                                                data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" id="editSlaId" />
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Policy Name</label>
+                                                <input type="text" class="form-control"
+                                                    id="editSlaName" />
+                                            </div>
+                                            <div class="row g-2">
+                                                <div class="col-6">
+                                                    <label class="form-label fw-semibold">Response
+                                                        Time</label>
+                                                    <input type="number" class="form-control"
+                                                        id="editSlaTime" min="1" />
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label fw-semibold">Unit</label>
+                                                    <select class="form-select" id="editSlaUnit">
+                                                        <option value="hours">Hours</option>
+                                                        <option value="days">Days</option>
+                                                        <option value="weeks">Weeks</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 mt-2">
+                                                <label class="form-label fw-semibold">For Priority</label>
+                                                <select class="form-select" id="editSlaPriority">
+                                                    <option value="any">Any</option>
+                                                    <option value="low">Low</option>
+                                                    <option value="medium">Medium</option>
+                                                    <option value="high">High</option>
+                                                    <option value="urgent">Urgent</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Description</label>
+                                                <input type="text" class="form-control"
+                                                    id="editSlaDesc" />
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-primary"
+                                                onclick="slaSaveEdit()">
+                                                <i class="bi bi-save me-1"></i>Save Changes </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Project Configuration Modal (unchanged) -->
                             <div class="modal fade" id="projectConfigModal" tabindex="-1"
                                 aria-labelledby="projectConfigModalLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-xl">
@@ -1038,134 +1269,261 @@
                             </div>
                         </div>
 
-                        <!-- ═══ REPORTING TAB ═══ -->
+                        <!-- ═══ REPORTING TAB (unchanged) ═══ -->
                         <div class="tab-pane fade" id="reporting" role="tabpanel"
                             aria-labelledby="reporting-tab">
-                            <div class="row mb-4">
-                                <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="card text-center h-100">
-                                        <div class="card-body">
-                                            <i
-                                                class="bi bi-file-earmark-text display-4 text-primary mb-3"></i>
-                                            <h5>Daily Reports</h5>
-                                            <p class="text-muted">Generate daily performance reports</p>
-                                            <button class="btn btn-outline-primary"><i
-                                                    class="bi bi-download me-1"></i>Generate</button>
+
+                            <!-- ── Filter Bar ── -->
+                            <div
+                                class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                                <div>
+                                    <h4 class="mb-0"
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;letter-spacing:1px;">
+                                        <i class="bi bi-graph-up-arrow me-2"></i>Analytics &amp;
+                                        Reports </h4>
+                                    <small class="text-muted">Live data from the system</small>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="text-muted small me-1">Period:</span>
+                                    <div class="btn-group" role="group" id="reportDaysGroup">
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-primary active"
+                                            data-days="7">7 Days</button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                            data-days="30">30 Days</button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                            data-days="90">90 Days</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ── Summary KPI Row ── -->
+                            <div class="row g-3 mb-4" id="reportKpiRow">
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #1a3a5c!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-total-period">—</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">New
+                                                Tickets</div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="card text-center h-100">
-                                        <div class="card-body">
-                                            <i class="bi bi-calendar-week display-4 text-info mb-3"></i>
-                                            <h5>Weekly Reports</h5>
-                                            <p class="text-muted">Weekly summary and analytics</p>
-                                            <button class="btn btn-outline-info"><i
-                                                    class="bi bi-download me-1"></i>Generate</button>
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #2ecc71!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-resolved">—</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                                                Resolved</div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="card text-center h-100">
-                                        <div class="card-body">
-                                            <i
-                                                class="bi bi-calendar-month display-4 text-success mb-3"></i>
-                                            <h5>Monthly Reports</h5>
-                                            <p class="text-muted">Monthly performance reports</p>
-                                            <button class="btn btn-outline-success"><i
-                                                    class="bi bi-download me-1"></i>Generate</button>
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #3498db!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-open">—</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                                                Open</div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="card text-center h-100">
-                                        <div class="card-body">
-                                            <i class="bi bi-sliders display-4 text-warning mb-3"></i>
-                                            <h5>Custom Reports</h5>
-                                            <p class="text-muted">Create custom reports</p>
-                                            <button class="btn btn-outline-warning"><i
-                                                    class="bi bi-plus-circle me-1"></i>Create</button>
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #e74c3c!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-breached">—</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">SLA
+                                                Breached</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #2ecc71!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-sla-compliance">—</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">SLA
+                                                Compliance</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #e8b84b!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-resolve-rate">—</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Resolve
+                                                Rate</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Recent
-                                        Reports</h5>
+
+                            <!-- ── Charts Row ── -->
+                            <div class="row g-4 mb-4">
+                                <div class="col-lg-8">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="border-radius:12px;">
+                                        <div class="card-header bg-white border-0 pt-3 pb-0">
+                                            <h6 class="mb-0"
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
+                                                <i class="bi bi-bar-chart-line me-2"></i>Ticket
+                                                Volume Trend </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="volumeChart" height="120"></canvas>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="card-body">
+                                <div class="col-lg-4">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="border-radius:12px;">
+                                        <div class="card-header bg-white border-0 pt-3 pb-0">
+                                            <h6 class="mb-0"
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
+                                                <i class="bi bi-pie-chart me-2"></i>Status Breakdown </h6>
+                                        </div>
+                                        <div
+                                            class="card-body d-flex justify-content-center align-items-center">
+                                            <canvas id="statusChart" style="max-height:200px;"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-4 mb-4">
+                                <div class="col-lg-6">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="border-radius:12px;">
+                                        <div class="card-header bg-white border-0 pt-3 pb-0">
+                                            <h6 class="mb-0"
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
+                                                <i class="bi bi-exclamation-triangle me-2"></i>Priority
+                                                Distribution (Open) </h6>
+                                        </div>
+                                        <div
+                                            class="card-body d-flex justify-content-center align-items-center">
+                                            <canvas id="priorityChart" style="max-height:180px;"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="border-radius:12px;">
+                                        <div class="card-header bg-white border-0 pt-3 pb-0">
+                                            <h6 class="mb-0"
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
+                                                <i class="bi bi-people me-2"></i>Top Customers by
+                                                Volume </h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="customersChart" height="160"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ── Project Health Table ── -->
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+                                <div
+                                    class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3">
+                                    <h6 class="mb-0"
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
+                                        <i class="bi bi-folder2-open me-2"></i>Project Health </h6>
+                                    <small class="text-muted">Sorted by health score (worst first)</small>
+                                </div>
+                                <div class="card-body p-0">
                                     <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
+                                        <table class="table table-hover mb-0"
+                                            style="font-size:13px;">
+                                            <thead style="background:#1a3a5c;color:#fff;">
                                                 <tr>
-                                                    <th>Report Name</th>
-                                                    <th>Type</th>
-                                                    <th>Generated On</th>
-                                                    <th>Period</th>
-                                                    <th>Size</th>
-                                                    <th>Actions</th>
+                                                    <th class="ps-3">Project</th>
+                                                    <th>Total</th>
+                                                    <th>Resolved</th>
+                                                    <th>Open</th>
+                                                    <th>SLA Breaches</th>
+                                                    <th>Health</th>
+                                                    <th>Trend</th>
+                                                    <th class="pe-3">Report</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
+                                            <tbody id="projectHealthBody">
                                                 <tr>
-                                                    <td><i
-                                                            class="bi bi-file-earmark-bar-graph me-2 text-primary"></i>Daily
-                                                        Performance Report</td>
-                                                    <td>
-                                                        <span class="badge bg-primary"><i
-                                                                class="bi bi-sun me-1"></i>Daily</span>
-                                                    </td>
-                                                    <td>2026-01-21 10:30</td>
-                                                    <td>2026-01-21</td>
-                                                    <td>2.4 MB</td>
-                                                    <td>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-primary me-1">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-success me-1">
-                                                            <i class="bi bi-download"></i>
-                                                        </button>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-danger">
-                                                            <i class="bi bi-trash3"></i>
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td><i
-                                                            class="bi bi-file-earmark-spreadsheet me-2 text-info"></i>Weekly
-                                                        Summary Report</td>
-                                                    <td>
-                                                        <span class="badge bg-info"><i
-                                                                class="bi bi-calendar-week me-1"></i>
-                                                            Weekly</span>
-                                                    </td>
-                                                    <td>2026-01-20 15:45</td>
-                                                    <td>2026-01-14 to 2026-01-20</td>
-                                                    <td>5.1 MB</td>
-                                                    <td>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-primary me-1">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-success me-1">
-                                                            <i class="bi bi-download"></i>
-                                                        </button>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-danger">
-                                                            <i class="bi bi-trash3"></i>
-                                                        </button>
-                                                    </td>
+                                                    <td colspan="8"
+                                                        class="text-center text-muted py-4"><i
+                                                            class="bi bi-hourglass-split me-2"></i>
+                                                        Loading...</td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- ── Focal Person Leaderboard ── -->
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+                                <div
+                                    class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3">
+                                    <h6 class="mb-0"
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;">
+                                        <i class="bi bi-trophy me-2"></i>Focal Person Leaderboard </h6>
+                                    <a id="execReportLink"
+                                        href="/customer_support/admin/report/executive?days=30"
+                                        target="_blank"
+                                        class="btn btn-sm"
+                                        style="background:#1a3a5c;color:#fff;border-radius:6px;font-size:12px;">
+                                        <i class="bi bi-printer me-1"></i>Print Executive Report </a>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0"
+                                            style="font-size:13px;">
+                                            <thead style="background:#1a3a5c;color:#fff;">
+                                                <tr>
+                                                    <th class="ps-3" style="width:5%">#</th>
+                                                    <th>Name</th>
+                                                    <th>Assigned</th>
+                                                    <th>Resolved</th>
+                                                    <th>Open</th>
+                                                    <th>SLA Breaches</th>
+                                                    <th>Resolve Rate</th>
+                                                    <th>SLA Rate</th>
+                                                    <th class="pe-3">Report</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="focalLeaderboardBody">
+                                                <tr>
+                                                    <td colspan="9"
+                                                        class="text-center text-muted py-4"><i
+                                                            class="bi bi-hourglass-split me-2"></i>
+                                                        Loading...</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
 
                     </div>
@@ -1176,7 +1534,128 @@
             <script
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-            <!-- Live Analytics Auto-Refresh (polls every 15s) -->
+            <!-- ═══ SLA POLICY MANAGER JS ═══ -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+
+var PRIORITY_LABELS = {any:'Any',low:'Low',medium:'Medium',high:'High',urgent:'Urgent'};
+var PRIORITY_COLORS = {any:'secondary',low:'info',medium:'primary',high:'warning',urgent:'danger'};
+
+function slaAlert(msg, type){
+    var el = document.getElementById('slaAlert');
+    if(!el) return;
+    el.className = 'alert alert-' + (type||'success') + ' mb-3';
+    el.textContent = msg;
+    setTimeout(function(){ el.className = 'd-none'; }, 4000);
+}
+
+function slaLoadPolicies(){
+    fetch('/customer_support/sla/policies', {credentials:'same-origin'})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        var tbody = document.getElementById('slaPoliciesBody');
+        if(!tbody) return;
+        if(!d.policies || d.policies.length === 0){
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3"><i class="bi bi-inbox me-2"></i>No SLA policies defined yet. Add one above.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = d.policies.map(function(p){
+            var pc = PRIORITY_COLORS[p.priority_level] || 'secondary';
+            var pl = PRIORITY_LABELS[p.priority_level] || p.priority_level;
+            return '<tr>' +
+                '<td><strong>' + p.name + '</strong></td>' +
+                '<td><span class="badge bg-dark">' + p.response_time + ' ' + p.time_unit + '</span></td>' +
+                '<td><span class="badge bg-' + pc + '">' + pl + '</span></td>' +
+                '<td><small class="text-muted">' + (p.description || '-') + '</small></td>' +
+                '<td>' +
+                    '<button class="btn btn-sm btn-outline-primary me-1" onclick="slaOpenEdit(' + JSON.stringify(p) + ')" title="Edit"><i class="bi bi-pencil"></i></button>' +
+                    '<button class="btn btn-sm btn-outline-danger" onclick="slaDelete(' + p.id + ',\'' + p.name + '\')" title="Delete"><i class="bi bi-trash3"></i></button>' +
+                '</td>' +
+            '</tr>';
+        }).join('');
+    })
+    .catch(function(e){ console.warn('SLA load failed:', e); });
+}
+
+window.slaCreate = function(e){
+    e.preventDefault();
+    var form = document.getElementById('slaCreateForm');
+    var data = new FormData(form);
+    var csrf = document.querySelector('input[name="csrf_token"]');
+    if(csrf) data.set('csrf_token', csrf.value);
+    fetch('/customer_support/sla/create', {method:'POST', credentials:'same-origin', body: new URLSearchParams(data)})
+    .then(function(r){
+        if(r.redirected || r.ok){
+            slaAlert('SLA policy created successfully!', 'success');
+            form.reset();
+            slaLoadPolicies();
+        } else {
+            slaAlert('Failed to create policy.', 'danger');
+        }
+    })
+    .catch(function(){ slaAlert('Network error.', 'danger'); });
+};
+
+window.slaOpenEdit = function(p){
+    document.getElementById('editSlaId').value = p.id;
+    document.getElementById('editSlaName').value = p.name;
+    document.getElementById('editSlaTime').value = p.response_time;
+    document.getElementById('editSlaUnit').value = p.time_unit;
+    document.getElementById('editSlaPriority').value = p.priority_level;
+    document.getElementById('editSlaDesc').value = p.description || '';
+    var modal = new bootstrap.Modal(document.getElementById('slaEditModal'));
+    modal.show();
+};
+
+window.slaSaveEdit = function(){
+    var id = document.getElementById('editSlaId').value;
+    var data = new URLSearchParams({
+        sla_name: document.getElementById('editSlaName').value,
+        sla_response_time: document.getElementById('editSlaTime').value,
+        sla_time_unit: document.getElementById('editSlaUnit').value,
+        sla_priority_level: document.getElementById('editSlaPriority').value,
+        sla_description: document.getElementById('editSlaDesc').value,
+    });
+    var csrf = document.querySelector('input[name="csrf_token"]');
+    if(csrf) data.set('csrf_token', csrf.value);
+    fetch('/customer_support/sla/' + id + '/update', {method:'POST', credentials:'same-origin', body: data})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        bootstrap.Modal.getInstance(document.getElementById('slaEditModal')).hide();
+        if(d.success){
+            slaAlert('SLA policy updated.', 'success');
+            slaLoadPolicies();
+        } else {
+            slaAlert('Update failed: ' + (d.error||'unknown'), 'danger');
+        }
+    });
+};
+
+window.slaDelete = function(id, name){
+    if(!confirm('Delete SLA policy "' + name + '"? This cannot be undone.')) return;
+    fetch('/customer_support/sla/' + id + '/delete', {method:'POST', credentials:'same-origin'})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if(d.success){ slaAlert('Policy deleted.', 'success'); slaLoadPolicies(); }
+        else { slaAlert('Delete failed.', 'danger'); }
+    });
+};
+
+// Load policies when ticket settings modal opens
+document.addEventListener('DOMContentLoaded', function(){
+    var modal = document.getElementById('ticketSettingsModal');
+    if(modal){
+        modal.addEventListener('shown.bs.modal', function(){ slaLoadPolicies(); });
+    }
+});
+
+})();
+//]]>
+            </script>
+
+            <!-- Live Analytics Auto-Refresh (polls every 15s) — UNCHANGED -->
             <script type="text/javascript">
                 //<![CDATA[
 (function(){
@@ -1232,7 +1711,7 @@
 //]]>
             </script>
 
-            <!-- Existing Tab Navigation JavaScript -->
+            <!-- Existing Tab Navigation JavaScript (unchanged) -->
             <script type="text/javascript">
                 //<![CDATA[
 (function() {
@@ -1290,6 +1769,275 @@
             setTimeout(function() { new bootstrap.Alert(alert).close(); }, 5000);
         });
     });
+})();
+//]]>
+            </script>
+
+            <!-- Chart.js for Reporting Tab -->
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+            <!-- ═══ REPORTING TAB JS ═══ -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+
+var currentDays = 30;
+var charts = {};
+
+var STATUS_COLORS = {
+    new:         '#3498db',
+    assigned:    '#9b59b6',
+    in_progress: '#e8b84b',
+    resolved:    '#2ecc71',
+    closed:      '#95a5a6',
+};
+var PRIORITY_COLORS = {
+    urgent: '#e74c3c',
+    high:   '#e67e22',
+    medium: '#3498db',
+    low:    '#2ecc71',
+};
+
+function destroyChart(id){
+    if(charts[id]){ charts[id].destroy(); delete charts[id]; }
+}
+
+function buildVolumeChart(trend){
+    destroyChart('volume');
+    var ctx = document.getElementById('volumeChart');
+    if(!ctx) return;
+    charts['volume'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: trend.map(function(d){ return d.date; }),
+            datasets: [{
+                label: 'Tickets',
+                data: trend.map(function(d){ return d.count; }),
+                backgroundColor: 'rgba(26,58,92,0.75)',
+                borderColor: '#1a3a5c',
+                borderWidth: 1,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                x: { ticks: { maxTicksLimit: 14, maxRotation: 45 } }
+            }
+        }
+    });
+}
+
+function buildStatusChart(breakdown){
+    destroyChart('status');
+    var ctx = document.getElementById('statusChart');
+    if(!ctx) return;
+    var labels = Object.keys(breakdown);
+    charts['status'] = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels.map(function(l){ return l.replace('_',' ').replace(/\b\w/g,function(c){return c.toUpperCase();}); }),
+            datasets: [{
+                data: Object.values(breakdown),
+                backgroundColor: labels.map(function(l){ return STATUS_COLORS[l] || '#aaa'; }),
+                borderWidth: 2,
+                borderColor: '#fff',
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+            cutout: '60%',
+        }
+    });
+}
+
+function buildPriorityChart(dist){
+    destroyChart('priority');
+    var ctx = document.getElementById('priorityChart');
+    if(!ctx) return;
+    var labels = ['urgent','high','medium','low'];
+    charts['priority'] = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Urgent','High','Medium','Low'],
+            datasets: [{
+                data: labels.map(function(l){ return dist[l] || 0; }),
+                backgroundColor: labels.map(function(l){ return PRIORITY_COLORS[l]; }),
+                borderWidth: 2,
+                borderColor: '#fff',
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } },
+        }
+    });
+}
+
+function buildCustomersChart(customers){
+    destroyChart('customers');
+    var ctx = document.getElementById('customersChart');
+    if(!ctx) return;
+    charts['customers'] = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: customers.map(function(c){ return c.name; }),
+            datasets: [{
+                label: 'Tickets',
+                data: customers.map(function(c){ return c.count; }),
+                backgroundColor: 'rgba(232,184,75,0.85)',
+                borderColor: '#e8b84b',
+                borderWidth: 1,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
+        }
+    });
+}
+
+function healthBadge(h){
+    var map = {
+        green: '<span class="badge bg-success">Good</span>',
+        amber: '<span class="badge bg-warning text-dark">Attention</span>',
+        red:   '<span class="badge bg-danger">Critical</span>'
+    };
+    return map[h] || '<span class="badge bg-secondary">-</span>';
+}
+
+function trendIcon(t){
+    if(t === 'up')   return '<span class="text-danger"><i class="bi bi-arrow-up-right-circle-fill"></i> Up</span>';
+    if(t === 'down') return '<span class="text-success"><i class="bi bi-arrow-down-right-circle-fill"></i> Down</span>';
+    return '<span class="text-muted"><i class="bi bi-dash-circle"></i> Stable</span>';
+}
+
+function scoreBar(val, color){
+    return '<div style="display:flex;align-items:center;gap:6px;">' +
+        '<div style="flex:1;background:#e9ecef;border-radius:4px;height:8px;overflow:hidden;">' +
+        '<div style="width:' + val + '%;height:100%;background:' + color + ';border-radius:4px;"></div></div>' +
+        '<span style="font-size:11px;font-weight:600;width:36px;">' + val + '%</span></div>';
+}
+
+function rateColor(v){ return v >= 80 ? '#2ecc71' : v >= 60 ? '#f39c12' : '#e74c3c'; }
+
+function buildProjectTable(rows, days){
+    var tbody = document.getElementById('projectHealthBody');
+    if(!tbody) return;
+    if(!rows || rows.length === 0){
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No projects found.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = rows.map(function(p){
+        return '<tr>' +
+            '<td class="ps-3"><strong>' + p.name + '</strong>' +
+                (p.code ? ' <span class="badge bg-secondary ms-1" style="font-size:10px;">' + p.code + '</span>' : '') +
+            '</td>' +
+            '<td>' + p.total + '</td>' +
+            '<td>' + p.resolved + '</td>' +
+            '<td>' + p.open + '</td>' +
+            '<td>' + (p.breached > 0 ? '<span class="text-danger fw-bold">' + p.breached + '</span>' : p.breached) + '</td>' +
+            '<td>' + healthBadge(p.health) + '</td>' +
+            '<td>' + trendIcon(p.trend) + '</td>' +
+            '<td class="pe-3"><a href="/customer_support/admin/report/project/' + p.id + '?days=' + days + '" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-printer me-1"></i>Print</a></td>' +
+        '</tr>';
+    }).join('');
+}
+
+function buildFocalTable(rows, days){
+    var tbody = document.getElementById('focalLeaderboardBody');
+    if(!tbody) return;
+    if(!rows || rows.length === 0){
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4">No focal persons found.</td></tr>';
+        return;
+    }
+    var medals = ['🥇','🥈','🥉'];
+    tbody.innerHTML = rows.map(function(fp, i){
+        return '<tr>' +
+            '<td class="ps-3">' + (medals[i] || (i+1)) + '</td>' +
+            '<td><strong>' + fp.name + '</strong></td>' +
+            '<td>' + fp.assigned + '</td>' +
+            '<td>' + fp.resolved + '</td>' +
+            '<td>' + fp.open + '</td>' +
+            '<td>' + (fp.breached > 0 ? '<span class="text-danger fw-bold">' + fp.breached + '</span>' : fp.breached) + '</td>' +
+            '<td>' + scoreBar(fp.resolve_rate, rateColor(fp.resolve_rate)) + '</td>' +
+            '<td>' + scoreBar(fp.sla_rate, rateColor(fp.sla_rate)) + '</td>' +
+            '<td class="pe-3"><a href="/customer_support/admin/report/focal/' + fp.id + '?days=' + days + '" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-printer me-1"></i>Print</a></td>' +
+        '</tr>';
+    }).join('');
+}
+
+function loadReportData(days){
+    fetch('/customer_support/admin/reporting/data?days=' + days, {
+        credentials: 'same-origin',
+        headers: {'Accept': 'application/json'}
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+        if(!d.success) return;
+        var s = d.summary || {};
+
+        document.getElementById('r-total-period').textContent  = s.total_period || 0;
+        document.getElementById('r-resolved').textContent      = s.resolved_period || 0;
+        document.getElementById('r-open').textContent          = s.open_tickets || 0;
+        document.getElementById('r-breached').textContent      = s.breached_period || 0;
+        document.getElementById('r-sla-compliance').textContent = (s.sla_compliance || 0) + '%';
+        document.getElementById('r-resolve-rate').textContent  = (s.resolve_rate || 0) + '%';
+
+        buildVolumeChart(d.volume_trend || []);
+        buildStatusChart(d.status_breakdown || {});
+        buildPriorityChart(d.priority_dist || {});
+        buildCustomersChart(d.top_customers || []);
+
+        buildProjectTable(d.project_health || [], days);
+        buildFocalTable(d.focal_leaderboard || [], days);
+
+        var el = document.getElementById('execReportLink');
+        if(el) el.href = '/customer_support/admin/report/executive?days=' + days;
+    })
+    .catch(function(e){ console.warn('Report data load failed:', e); });
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+    // Day filter buttons
+    var group = document.getElementById('reportDaysGroup');
+    if(group){
+        group.addEventListener('click', function(e){
+            var btn = e.target.closest('button[data-days]');
+            if(!btn) return;
+            group.querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+            btn.classList.add('active');
+            currentDays = parseInt(btn.getAttribute('data-days'));
+            loadReportData(currentDays);
+        });
+    }
+
+    // Load when Reporting tab is clicked
+    var reportTab = document.getElementById('reporting-tab');
+    if(reportTab){
+        reportTab.addEventListener('shown.bs.tab', function(){
+            loadReportData(currentDays);
+        });
+        // Load immediately if already on reporting tab
+        if(reportTab.classList.contains('active')){
+            loadReportData(currentDays);
+        }
+    }
+
+    // Load if URL param says tab=reporting
+    var params = new URLSearchParams(window.location.search);
+    if(params.get('tab') === 'reporting' || window.location.hash === '#reporting'){
+        setTimeout(function(){ loadReportData(currentDays); }, 400);
+    }
+});
+
 })();
 //]]>
             </script>
