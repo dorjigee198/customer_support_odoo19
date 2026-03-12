@@ -7,6 +7,7 @@ Handles the dashboard route for internal users (focal persons / support agents):
   - Shows ticket status counts and analytics
   - Redirects admins and customers to their own dashboards
   - Provides SLA alerts JSON endpoint for the bell notification dropdown
+  - Provides live ticket list JSON endpoint for polling
 
 Access: Authenticated internal users (base.group_user).
 Admins and portal users are redirected away automatically.
@@ -137,7 +138,153 @@ class CustomerSupportAgent(http.Controller):
             )
 
     # =========================================================================
-    # SLA ALERTS — Bell notification endpoint
+    # LIVE TICKET LIST — Polled every 20 s by the focal dashboard frontend
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/dashboard/tickets",
+        type="http",
+        auth="user",
+        website=True,
+        csrf=False,
+    )
+    def dashboard_tickets(self, **kw):
+        """
+        Returns the current focal user's assigned tickets as JSON.
+        Polled every 20 s by the dashboard JS so that newly assigned
+        tickets (state = 'assigned') appear in the Kanban "New" column
+        and the list view without requiring a page refresh.
+        """
+        try:
+            user = request.env.user
+
+            tickets = (
+                request.env["customer.support"]
+                .sudo()
+                .search(
+                    [("assigned_to", "=", user.id)],
+                    order="create_date desc",
+                )
+            )
+
+            ticket_list = []
+            for t in tickets:
+                ticket_list.append(
+                    {
+                        "id": t.id,
+                        "name": t.name or "",
+                        "subject": t.subject or "",
+                        "state": t.state or "new",
+                        "priority": t.priority or "low",
+                        "customer_id": t.customer_id.id if t.customer_id else None,
+                        "customer_name": (
+                            t.customer_id.name if t.customer_id else "Unknown"
+                        ),
+                        "create_date": (
+                            t.create_date.strftime("%b %d, %I:%M %p")
+                            if t.create_date
+                            else "N/A"
+                        ),
+                    }
+                )
+
+            _logger.info(
+                f"Ticket poll — {user.name} (ID: {user.id}): {len(ticket_list)} tickets"
+            )
+
+            return request.make_response(
+                json.dumps({"tickets": ticket_list}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Dashboard tickets poll error: {str(e)}")
+            return request.make_response(
+                json.dumps({"tickets": [], "error": str(e)}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+    # =========================================================================
+    # LIVE ANALYTICS — Polled every 15 s by the focal dashboard frontend
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/dashboard/analytics",
+        type="http",
+        auth="user",
+        website=True,
+        csrf=False,
+    )
+    def dashboard_analytics(self, **kw):
+        """
+        Returns analytics + performance JSON for the overview cards.
+        Polled every 15 s by the dashboard JS.
+        """
+        try:
+            user = request.env.user
+
+            analytics = {}
+            performance = {}
+            try:
+                dashboard_model = request.env["customer_support.dashboard"]
+                analytics = dashboard_model.get_ticket_analytics(user.id)
+                performance = dashboard_model.get_user_performance(user.id)
+            except Exception as e:
+                _logger.warning(f"Analytics model error: {str(e)}")
+                tickets = (
+                    request.env["customer.support"]
+                    .sudo()
+                    .search([("assigned_to", "=", user.id)])
+                )
+                open_count = len(
+                    tickets.filtered(
+                        lambda t: t.state in ["new", "assigned", "in_progress"]
+                    )
+                )
+                resolved_count = len(
+                    tickets.filtered(lambda t: t.state in ["resolved", "closed"])
+                )
+                total = len(tickets)
+                analytics = {
+                    "open_tickets": open_count,
+                    "total_tickets": total,
+                    "high_priority": len(
+                        tickets.filtered(lambda t: t.priority == "high")
+                    ),
+                    "urgent": len(tickets.filtered(lambda t: t.priority == "urgent")),
+                    "avg_open_hours": 0,
+                    "total_hours": 0,
+                    "avg_high_hours": 0,
+                    "avg_urgent_hours": 0,
+                    "resolved_tickets": resolved_count,
+                    "solve_rate": (
+                        round(resolved_count / total * 100, 1) if total else 0
+                    ),
+                    "high_resolved": 0,
+                    "urgent_resolved": 0,
+                }
+                performance = {
+                    "today_closed": 0,
+                    "avg_resolve_rate": 0,
+                    "daily_target": 80.00,
+                    "achievement": 0,
+                    "sample_performance": 85.00,
+                }
+
+            return request.make_response(
+                json.dumps({"analytics": analytics, "performance": performance}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Dashboard analytics error: {str(e)}")
+            return request.make_response(
+                json.dumps({"analytics": {}, "performance": {}, "error": str(e)}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+    # =========================================================================
+    # SLA ALERTS — Bell notification endpoint, polled every 30 s
     # =========================================================================
 
     @http.route(
@@ -165,7 +312,6 @@ class CustomerSupportAgent(http.Controller):
             now = fields.Datetime.now()
 
             # Fetch all open tickets assigned to this agent that have a deadline
-            # No sla_status filter — we calculate it live below
             tickets = (
                 request.env["customer.support"]
                 .sudo()
@@ -184,13 +330,10 @@ class CustomerSupportAgent(http.Controller):
 
                 # Calculate live SLA status
                 if remaining_seconds <= 0:
-                    # Already breached
                     live_status = "breached"
                 elif remaining_seconds <= 2 * 3600:
-                    # Less than 2 hours left → at risk
                     live_status = "at_risk"
                 else:
-                    # Check percentage remaining if we have assigned_date
                     if ticket.assigned_date and ticket.sla_deadline:
                         total_seconds = (
                             ticket.sla_deadline - ticket.assigned_date
@@ -204,7 +347,6 @@ class CustomerSupportAgent(http.Controller):
                     else:
                         live_status = "on_track"
 
-                # Only include at_risk and breached in the bell alerts
                 if live_status not in ["at_risk", "breached"]:
                     continue
 
@@ -248,12 +390,12 @@ class CustomerSupportAgent(http.Controller):
 
             return request.make_response(
                 json.dumps({"alerts": alerts}),
-                headers={"Content-Type": "application/json"},
+                headers=[("Content-Type", "application/json")],
             )
 
         except Exception as e:
             _logger.error(f"SLA alerts error: {str(e)}")
             return request.make_response(
                 json.dumps({"alerts": [], "error": str(e)}),
-                headers={"Content-Type": "application/json"},
+                headers=[("Content-Type", "application/json")],
             )
