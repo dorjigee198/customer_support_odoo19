@@ -67,7 +67,7 @@ class ChatBotBackend:
         except requests.exceptions.ConnectionError:
             return (
                 "error",
-                "⚠️ AI service offline. Contact Create a New Ticket for help.",
+                "⚠️ AI service offline. Create a New Ticket for help.",
             )
         except requests.exceptions.Timeout:
             return "error", "⚠️ AI timed out. Try again."
