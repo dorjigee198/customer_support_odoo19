@@ -45,11 +45,24 @@ class KnowledgeDocument(models.Model):
     )
     extracted_text = fields.Text(string="Extracted Text", readonly=True)
     chunk_count = fields.Integer(string="Chunks", compute="_compute_chunk_count")
+    embedded_count = fields.Integer(
+        string="Embedded Chunks", compute="_compute_chunk_count"
+    )
     active = fields.Boolean(default=True)
     state = fields.Selection(
         [("pending", "Pending"), ("ready", "Ready"), ("error", "Error")],
         default="pending",
         string="Status",
+    )
+    embedding_state = fields.Selection(
+        [
+            ("none", "Not Embedded"),
+            ("partial", "Partially Embedded"),
+            ("done", "Fully Embedded"),
+        ],
+        string="Embedding Status",
+        default="none",
+        readonly=True,
     )
     error_msg = fields.Char(string="Error", readonly=True)
 
@@ -71,23 +84,34 @@ class KnowledgeDocument(models.Model):
     @api.depends("extracted_text")
     def _compute_chunk_count(self):
         for rec in self:
-            rec.chunk_count = self.env["dc.knowledge.chunk"].search_count(
+            all_chunks = self.env["dc.knowledge.chunk"].search(
                 [("document_id", "=", rec.id)]
             )
+            rec.chunk_count = len(all_chunks)
+            rec.embedded_count = len(all_chunks.filtered("has_embedding"))
 
     def action_process(self):
-        """Extract text from file and split into chunks."""
+        """Extract text, split into chunks, then embed all chunks."""
         for rec in self:
             try:
+                # Step 1: Extract text from file
                 text = rec._extract_text()
                 if not text or not text.strip():
                     rec.state = "error"
                     rec.error_msg = "No text could be extracted from this file."
                     continue
+
                 rec.extracted_text = text
+
+                # Step 2: Split into chunks and save to DB
                 rec._create_chunks(text)
+
+                # Step 3: Embed all chunks via pgvector
+                rec._embed_all_chunks()
+
                 rec.state = "ready"
                 rec.error_msg = False
+
             except Exception as e:
                 _logger.error("Knowledge doc error: %s", e)
                 rec.state = "error"
@@ -168,6 +192,43 @@ class KnowledgeDocument(models.Model):
 
         if chunks:
             self.env["dc.knowledge.chunk"].create(chunks)
+            _logger.info("Created %s chunks for document '%s'", len(chunks), self.name)
+
+    def _embed_all_chunks(self):
+        """Embed all chunks of this document and update embedding_state."""
+        chunks = self.env["dc.knowledge.chunk"].search([("document_id", "=", self.id)])
+
+        if not chunks:
+            self.embedding_state = "none"
+            return
+
+        total = len(chunks)
+        success = 0
+
+        for chunk in chunks:
+            try:
+                result = chunk.embed_and_store()
+                if result:
+                    success += 1
+            except Exception as e:
+                _logger.error("Failed to embed chunk %s: %s", chunk.id, e)
+
+        # Update embedding state
+        if success == 0:
+            self.embedding_state = "none"
+        elif success < total:
+            self.embedding_state = "partial"
+        else:
+            self.embedding_state = "done"
+
+        _logger.info(
+            "Embedded %s/%s chunks for document '%s'", success, total, self.name
+        )
+
+    def action_re_embed(self):
+        """Manual re-embedding button — useful if embedding failed earlier."""
+        for rec in self:
+            rec._embed_all_chunks()
 
     def action_delete(self):
         """Delete document and its chunks."""

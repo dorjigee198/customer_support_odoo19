@@ -3,6 +3,7 @@
     <template id="landing_page" name="Premium Landing Page - Dragon Support">
         <t t-call="web.layout">
             <t t-set="head">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
                 <!-- Bootstrap Icons -->
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet"/>
                 
@@ -91,15 +92,16 @@
                         document.querySelector('.minimal-landing').classList.add('loaded');
                     }, 100);
                     
-                    // Parallax effect on mouse move
-                    const welcomeBox = document.querySelector('.welcome-box');
-                    
-                    document.addEventListener('mousemove', function(e) {
-                        const x = (e.clientX / window.innerWidth - 0.5) * 20;
-                        const y = (e.clientY / window.innerHeight - 0.5) * 20;
-                        
-                        welcomeBox.style.transform = `perspective(1000px) rotateY(${x * 0.1}deg) rotateX(${-y * 0.1}deg)`;
-                    });
+                    // Parallax effect on mouse move — desktop only
+const welcomeBox = document.querySelector('.welcome-box');
+
+if (window.innerWidth > 768) {
+    document.addEventListener('mousemove', function(e) {
+        const x = (e.clientX / window.innerWidth - 0.5) * 20;
+        const y = (e.clientY / window.innerHeight - 0.5) * 20;
+        welcomeBox.style.transform = `perspective(1000px) rotateY(${x * 0.1}deg) rotateX(${-y * 0.1}deg)`;
+    });
+}
                     
                     // Hide scroll indicator on scroll
                     const scrollIndicator = document.querySelector('.scroll-indicator');

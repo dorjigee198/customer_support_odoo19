@@ -729,3 +729,60 @@
                             bottom: 100px;
                         }
                     }
+
+                    /* ============================================
+   MOBILE FIXES — BIGGER FORM
+   ============================================ */
+                    @media (max-width: 575.98px) {
+                        .login-form-container {
+                            padding: 1.5rem 1.2rem !important;
+                            min-height: 100dvh !important;
+                            display: flex !important;
+                            align-items: center !important;
+                        }
+
+                        .login-box {
+                            max-width: 100% !important;
+                            width: 100% !important;
+                        }
+
+                        .logo-container {
+                            width: 90px !important;
+                            height: 90px !important;
+                            margin-bottom: 1rem !important;
+                        }
+
+                        .logo-section {
+                            margin-bottom: 1.5rem !important;
+                        }
+
+                        .login-title {
+                            font-size: 1.3rem !important;
+                            margin-bottom: 1.5rem !important;
+                        }
+
+                        .form-label {
+                            font-size: 0.9rem !important;
+                        }
+
+                        .form-control-custom {
+                            padding: 0.75rem 1rem !important;
+                            font-size: 16px !important;
+                        }
+
+                        .input-group-custom {
+                            margin-bottom: 1.2rem !important;
+                        }
+
+                        .submit-btn {
+                            padding: 0.9rem !important;
+                            font-size: 1rem !important;
+                        }
+
+                        .login-links {
+                            flex-direction: row !important;
+                            justify-content: space-between !important;
+                            font-size: 0.8rem !important;
+                            margin-bottom: 1.2rem !important;
+                        }
+                    }

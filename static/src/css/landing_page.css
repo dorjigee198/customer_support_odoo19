@@ -974,3 +974,46 @@ body {
     opacity: 0.98;
     transition: opacity 1.5s ease;
 }
+
+/* ============================================
+   MOBILE FIXES — NO ZOOM, BIGGER NAV
+   ============================================ */
+@media (max-width: 768px) {
+
+    /* Disable ONLY the cinematic zoom — keep all other animations */
+    .background-image {
+        animation: none !important;
+        transform: scale(1) !important;
+    }
+
+    /* Bigger logo */
+    .logo-circle {
+        width: 75px !important;
+        height: 75px !important;
+    }
+
+    /* Bigger FAQ button */
+    .faq-link {
+        padding: 0.85rem 1.6rem !important;
+        font-size: 1rem !important;
+    }
+
+    /* Always show FAQ text on mobile */
+    .faq-link span {
+        display: inline !important;
+    }
+
+    .faq-link i {
+        font-size: 1.1rem !important;
+    }
+
+    /* Better nav spacing */
+    .nav-container {
+        gap: 1rem !important;
+        padding: 0 1.2rem !important;
+    }
+
+    .top-nav {
+        padding: 1.2rem 0 !important;
+    }
+}
