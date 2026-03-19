@@ -1391,18 +1391,6 @@ body {
 }
 
 @media (max-width: 576px) {
-<<<<<<< HEAD
-=======
-    .nav-link {
-        font-size: 0;
-        padding: 1rem 0.75rem;
-    }
-
-    .nav-link i {
-        font-size: 1.1rem;
-    }
-
->>>>>>> origin/main
     .stat-value,
     .performance-value {
         font-size: 1.5rem;
@@ -1436,12 +1424,7 @@ body {
     }
 
     .score-badge {
-<<<<<<< HEAD
         padding: 0.3rem 0.7rem;
         font-size: 0.85rem;
-=======
-        padding: 0.25rem 0.6rem;
-        font-size: 0.8rem;
->>>>>>> origin/main
     }
 }
