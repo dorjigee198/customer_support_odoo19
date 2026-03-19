@@ -1,5 +1,18 @@
+# -*- coding: utf-8 -*-
+"""
+Customer Support Ticket Model (updated with SLA fields)
+=======================================================
+Added fields:
+  - sla_policy_id   → the SLA policy attached at assignment time
+  - sla_deadline    → auto-calculated when sla_policy_id or assigned_date is set
+  - sla_status      → computed: on_track / at_risk / breached
+"""
+
 from odoo import models, fields, api
-from datetime import datetime
+from datetime import datetime, timedelta
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class CustomerSupport(models.Model):
@@ -14,7 +27,6 @@ class CustomerSupport(models.Model):
     subject = fields.Char(string="Subject", required=True, tracking=True)
     description = fields.Text(string="Description", required=True)
 
-    # ============ ADD THIS FIELD HERE ============
     # Project Information
     project_id = fields.Many2one(
         "customer_support.project",
@@ -23,7 +35,6 @@ class CustomerSupport(models.Model):
         tracking=True,
         help="The project this ticket belongs to",
     )
-    # ============ END OF NEW FIELD ============
 
     # Customer Information
     customer_id = fields.Many2one(
@@ -70,7 +81,36 @@ class CustomerSupport(models.Model):
         tracking=True,
     )
 
-    # Timestamps
+    # ── SLA Fields ────────────────────────────────────────────────────────────
+
+    sla_policy_id = fields.Many2one(
+        "customer.support.sla.policy",
+        string="SLA Policy",
+        tracking=True,
+        help="The SLA policy applied to this ticket at assignment time",
+    )
+
+    sla_deadline = fields.Datetime(
+        string="SLA Deadline",
+        tracking=True,
+        help="Auto-calculated: assigned_date + policy duration",
+    )
+
+    sla_status = fields.Selection(
+        [
+            ("none", "No SLA"),
+            ("on_track", "On Track"),
+            ("at_risk", "At Risk"),
+            ("breached", "Breached"),
+        ],
+        string="SLA Status",
+        compute="_compute_sla_status",
+        store=True,
+        help="Current SLA compliance status",
+    )
+
+    # ── Timestamps ────────────────────────────────────────────────────────────
+
     resolved_date = fields.Datetime(string="Resolved Date", tracking=True)
     closed_date = fields.Datetime(string="Closed Date", tracking=True)
 
@@ -84,27 +124,41 @@ class CustomerSupport(models.Model):
     )
     is_overdue = fields.Boolean(string="Is Overdue", compute="_compute_is_overdue")
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        """
-        Override create to handle both single dict and list of dicts
-        and generate ticket numbers for new tickets
-        """
-        # Ensure vals_list is always a list
-        if not isinstance(vals_list, list):
-            vals_list = [vals_list]
+    # ── Compute Methods ───────────────────────────────────────────────────────
 
-        # Generate ticket numbers for new tickets
-        for vals in vals_list:
-            if vals.get("name", "New") == "New":
-                vals["name"] = (
-                    self.env["ir.sequence"].sudo().next_by_code("customer.support")
-                    or "New"
+    @api.depends("sla_deadline", "state", "resolved_date", "closed_date", "assigned_date")
+    def _compute_sla_status(self):
+        """
+        Compute SLA status based on deadline vs now.
+        """
+        now = fields.Datetime.now()
+
+        for record in self:
+            if not record.sla_deadline:
+                record.sla_status = "none"
+                continue
+
+            # If ticket already resolved or closed
+            if record.state in ["resolved", "closed"]:
+                end_time = record.resolved_date or record.closed_date or now
+                record.sla_status = (
+                    "on_track" if end_time <= record.sla_deadline else "breached"
                 )
+                continue
 
-        tickets = super(CustomerSupport, self).create(vals_list)
-        
-        return tickets
+            # Ticket still active
+            if now > record.sla_deadline:
+                record.sla_status = "breached"
+            else:
+                if record.assigned_date:
+                    total = (record.sla_deadline - record.assigned_date).total_seconds()
+                    remaining = (record.sla_deadline - now).total_seconds()
+
+                    pct_remaining = (remaining / total * 100) if total > 0 else 100
+                    record.sla_status = "on_track" if pct_remaining > 20 else "at_risk"
+                else:
+                    remaining_hours = (record.sla_deadline - now).total_seconds() / 3600
+                    record.sla_status = "on_track" if remaining_hours > 2 else "at_risk"
     
     def _track_subtype(self, init_values):
         """
@@ -112,17 +166,17 @@ class CustomerSupport(models.Model):
         This is a NEW method - doesn't change any existing behavior.
         """
         self.ensure_one()
-        
+
         # Make state changes visible as comments
-        if 'state' in init_values:
-            return self.env.ref('mail.mt_comment')
-        
+        if "state" in init_values:
+            return self.env.ref("mail.mt_comment")
+
         # Default behavior for other fields
         return super(CustomerSupport, self)._track_subtype(init_values)
 
+
     @api.depends("create_date", "closed_date")
     def _compute_days_open(self):
-        """Calculate how many days the ticket has been open"""
         for record in self:
             if record.create_date:
                 if record.closed_date:
@@ -135,25 +189,108 @@ class CustomerSupport(models.Model):
 
     @api.depends("state", "days_open")
     def _compute_is_overdue(self):
-        """Check if ticket is overdue (open for more than 7 days)"""
         for record in self:
             if record.state not in ["resolved", "closed"]:
                 record.is_overdue = record.days_open > 7
             else:
                 record.is_overdue = False
 
+    # ── Helpers ───────────────────────────────────────────────────────────────
+
+    def _calculate_sla_deadline(self, policy, start_time):
+        """
+        Given an SLA policy and a start datetime, return the deadline datetime.
+        Supports time_unit: 'hours', 'days', 'weeks'.
+        Uses policy.response_time (the correct field name on customer.support.sla.policy).
+        """
+        if not policy or not start_time:
+            return False
+        try:
+            if policy.time_unit == "hours":
+                return start_time + timedelta(hours=policy.response_time)
+            elif policy.time_unit == "weeks":
+                return start_time + timedelta(weeks=policy.response_time)
+            else:  # days
+                return start_time + timedelta(days=policy.response_time)
+        except Exception as e:
+            _logger.error(f"SLA deadline calculation failed: {e}")
+            return False
+
+    # ── CRUD ──────────────────────────────────────────────────────────────────
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        if not isinstance(vals_list, list):
+            vals_list = [vals_list]
+        for vals in vals_list:
+            if vals.get("name", "New") == "New":
+                vals["name"] = (
+                    self.env["ir.sequence"].sudo().next_by_code("customer.support")
+                    or "New"
+                )
+        records = super(CustomerSupport, self).create(vals_list)
+
+        # Auto-calculate deadline if policy is set at creation time
+        for record in records:
+            if record.sla_policy_id and not record.sla_deadline:
+                start = record.assigned_date or record.create_date
+                deadline = record._calculate_sla_deadline(record.sla_policy_id, start)
+                if deadline:
+                    record.sudo().write({"sla_deadline": deadline})
+                    _logger.info(
+                        f"SLA deadline set at creation for {record.name}: {deadline}"
+                    )
+
+        return records
+
+    def write(self, vals):
+        result = super(CustomerSupport, self).write(vals)
+
+        # Recalculate sla_deadline whenever sla_policy_id or assigned_date changes
+        if "sla_policy_id" in vals or "assigned_date" in vals:
+            for record in self:
+                if record.sla_policy_id:
+                    start = record.assigned_date or record.create_date
+                    deadline = record._calculate_sla_deadline(
+                        record.sla_policy_id, start
+                    )
+                    if deadline:
+                        # Use super().write to avoid recursion
+                        super(CustomerSupport, record).write({"sla_deadline": deadline})
+                        _logger.info(
+                            f"SLA deadline recalculated for {record.name}: {deadline} "
+                            f"(policy: {record.sla_policy_id.name}, start: {start})"
+                        )
+                else:
+                    # Policy removed — clear the deadline too
+                    super(CustomerSupport, record).write({"sla_deadline": False})
+                    _logger.info(f"SLA deadline cleared for {record.name} (no policy)")
+
+        return result
+
+    # ── Action Methods ────────────────────────────────────────────────────────
+
     def action_assign(self):
-        """Assign ticket to a focal person"""
         self.ensure_one()
         if self.assigned_to:
-            self.write(
-                {
-                    "state": "assigned",
-                    "assigned_by": self.env.user.id,
-                    "assigned_date": fields.Datetime.now(),
-                }
-            )
-            # Send notification to assigned person
+            now = fields.Datetime.now()
+            write_vals = {
+                "state": "assigned",
+                "assigned_by": self.env.user.id,
+                "assigned_date": now,
+            }
+
+            # If a policy is already set, calculate the deadline right now
+            if self.sla_policy_id:
+                deadline = self._calculate_sla_deadline(self.sla_policy_id, now)
+                if deadline:
+                    write_vals["sla_deadline"] = deadline
+                    _logger.info(
+                        f"SLA deadline set on assign for {self.name}: {deadline} "
+                        f"(policy: {self.sla_policy_id.name})"
+                    )
+
+            self.write(write_vals)
             self.message_post(
                 body=f"Ticket assigned to {self.assigned_to.name}",
                 subject="Ticket Assigned",
@@ -162,7 +299,6 @@ class CustomerSupport(models.Model):
         return True
 
     def action_start_progress(self):
-        """Focal person starts working on ticket"""
         self.ensure_one()
         self.write({"state": "in_progress"})
         self.message_post(
@@ -172,10 +308,8 @@ class CustomerSupport(models.Model):
         return True
 
     def action_resolve(self):
-        """Mark ticket as resolved"""
         self.ensure_one()
         self.write({"state": "resolved", "resolved_date": fields.Datetime.now()})
-        # Notify customer
         if self.customer_id:
             self.message_post(
                 body="Your ticket has been resolved. Please review the resolution.",
@@ -185,7 +319,6 @@ class CustomerSupport(models.Model):
         return True
 
     def action_close(self):
-        """Close the ticket"""
         self.ensure_one()
         self.write({"state": "closed", "closed_date": fields.Datetime.now()})
         self.message_post(
@@ -194,7 +327,6 @@ class CustomerSupport(models.Model):
         return True
 
     def action_reopen(self):
-        """Reopen a closed ticket"""
         self.ensure_one()
         self.write(
             {"state": "in_progress", "resolved_date": False, "closed_date": False}
@@ -205,7 +337,6 @@ class CustomerSupport(models.Model):
         return True
 
     def action_pending(self):
-        """Mark ticket as pending customer response"""
         self.ensure_one()
         self.write({"state": "pending"})
         if self.customer_id:
@@ -218,11 +349,9 @@ class CustomerSupport(models.Model):
 
     @api.model
     def _cron_check_overdue_tickets(self):
-        """Cron job to check and notify about overdue tickets"""
         overdue_tickets = self.search(
             [("state", "not in", ["resolved", "closed"]), ("days_open", ">", 7)]
         )
-
         for ticket in overdue_tickets:
             if ticket.assigned_to:
                 ticket.message_post(
@@ -231,4 +360,45 @@ class CustomerSupport(models.Model):
                     partner_ids=[ticket.assigned_to.partner_id.id],
                 )
 
+
+        return True
+
+        return True
+
+    @api.model
+    def _cron_check_sla_breaches(self):
+        """
+        Cron job: notify assigned agents when SLA is at risk or breached.
+        Run this every hour via a scheduled action.
+        """
+        now = fields.Datetime.now()
+        at_risk = self.search(
+            [
+                ("state", "not in", ["resolved", "closed"]),
+                ("sla_deadline", "!=", False),
+                ("sla_deadline", ">", now),
+            ]
+        )
+        for ticket in at_risk:
+            remaining = (ticket.sla_deadline - now).total_seconds() / 3600
+            if remaining <= 2 and ticket.assigned_to:
+                ticket.message_post(
+                    body=f"⚠️ SLA Warning: Only {remaining:.1f} hours remaining to resolve this ticket.",
+                    subject="SLA At Risk",
+                    partner_ids=[ticket.assigned_to.partner_id.id],
+                )
+
+        breached = self.search(
+            [
+                ("state", "not in", ["resolved", "closed"]),
+                ("sla_deadline", "<", now),
+            ]
+        )
+        for ticket in breached:
+            if ticket.assigned_to:
+                ticket.message_post(
+                    body=f"🚨 SLA Breached: This ticket passed its deadline on {ticket.sla_deadline}.",
+                    subject="SLA Breached",
+                    partner_ids=[ticket.assigned_to.partner_id.id],
+                )
         return True

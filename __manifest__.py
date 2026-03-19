@@ -31,6 +31,7 @@
         "views/admin_ticket_detail.xml",
         "views/user_management.xml",
         "views/system_configuration.xml",
+        "views/report_templates.xml",
         "views/templates/ticket_detail.xml",
         "views/templates/customer_ticket_detail.xml",
     ],

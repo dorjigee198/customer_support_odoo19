@@ -3,186 +3,272 @@
     <template id="portal_dashboard" name="Customer Support Dashboard">
         <t t-call="web.layout">
             <t t-set="head">
-                <!-- Bootstrap 5 CSS -->
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
                     rel="stylesheet" />
                 <link
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
+                <!-- ?v=3 busts Odoo asset cache — increment whenever you update the CSS -->
+                <link rel="stylesheet"
+                    href="/customer_support/static/src/css/portal_dashboard.css?v=3" />
 
-                <!-- Custom Dashboard CSS -->
-                <link rel="stylesheet" href="/customer_support/static/src/css/portal_dashboard.css" />
-
-                <!-- Additional Styles -->
+                <!-- ═══════════════════════════════════════════════════════════
+                     INLINE STYLE BLOCK
+                     Embedded directly in the page — never affected by Odoo's
+                     external-asset cache. Uses !important to override any
+                     stale cached version of portal_dashboard.css.
+                     ═══════════════════════════════════════════════════════════ -->
                 <style>
-                    /* Success/Error Messages */
-                    .alert-success {
-                    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-                    border: 1px solid #34d399;
-                    color: #065f46;
-                    border-radius: 8px;
+                    /* ── PAGE ── */
+                    .dashboard-wrapper { background: #e0f2fe !important; }
+
+                    /* ── HEADER ── */
+                    .dashboard-header { background: #0c4a6e !important; }
+                    .nav-link { color: rgba(255,255,255,0.85) !important; position: relative; }
+                    .nav-link:hover, .nav-link.active { color: #ffffff !important; }
+                    .nav-link.active::after {
+                    content: ''; position: absolute; bottom: 0; left: 0;
+                    width: 100%; height: 2px; background: #ffffff; border-radius: 2px;
                     }
 
-                    .alert-error {
-                    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-                    border: 1px solid #f87171;
-                    color: #991b1b;
-                    border-radius: 8px;
-                    }
-
-                    /* Dashboard Cards Enhancement */
+                    /* ── DASHBOARD CARDS ── */
                     .dashboard-card, .performance-card {
-                    transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    background: #f0f9ff !important;
+                    border: 1px solid rgba(12,74,110,0.1) !important;
+                    border-radius: 12px !important;
+                    box-shadow: 0 4px 15px rgba(12,74,110,0.1) !important;
                     }
-
-                    .dashboard-card:hover, .performance-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.15) !important;
-                    }
-
-                    /* Stat Box Enhancement */
+                    .card-title { color: #0c4a6e !important; }
                     .stat-box, .performance-stat {
-                    transition: all 0.2s ease;
+                    background: #ffffff !important;
+                    border: 1px solid rgba(12,74,110,0.12) !important;
+                    }
+                    .stat-icon, .performance-icon {
+                    background: linear-gradient(135deg,#e0f2fe,#bae6fd) !important;
+                    color: #0c4a6e !important;
+                    }
+                    .stat-value, .performance-value { color: #0c4a6e !important; }
+                    .stat-label, .performance-label { color: #475569 !important; }
+                    .stat-subtitle, .performance-subtitle { color: #64748b !important; }
+                    .score-badge { background: linear-gradient(135deg,#0c4a6e,#075985) !important;
+                    color: #fff !important; }
+                    .action-card { background: #ffffff !important; }
+                    .action-content h4 { color: #0c4a6e !important; }
+                    .action-content p { color: #475569 !important; }
+                    .action-icon { background: linear-gradient(135deg,#0c4a6e,#0284c7) !important;
+                    color: #fff !important; }
+
+                    /* ── REPORTING TITLE ── */
+                    .reporting-title { color: #0c4a6e !important; font-weight: 700 !important; }
+                    .reporting-title i { color: #0284c7 !important; }
+
+                    /* ── KPI CARDS ── */
+                    .report-kpi {
+                    background: #ffffff !important;
+                    border: 1px solid rgba(12,74,110,0.12) !important;
+                    border-radius: 12px !important;
+                    box-shadow: 0 2px 8px rgba(12,74,110,0.07) !important;
+                    }
+                    .report-kpi-value { color: #0c4a6e !important; }
+                    .report-kpi-value.blue { color: #0284c7 !important; }
+                    .report-kpi-value.green { color: #059669 !important; }
+                    .report-kpi-value.amber { color: #d97706 !important; }
+                    .report-kpi-value.red { color: #dc2626 !important; }
+                    .report-kpi-label {
+                    color: #475569 !important;
+                    font-weight: 700 !important;
+                    text-transform: uppercase !important;
+                    letter-spacing: 0.06em !important;
+                    font-size: 0.72rem !important;
                     }
 
-                    .stat-box:hover, .performance-stat:hover {
-                    background: rgba(30, 136, 199, 0.05);
+                    /* ── CHART CARDS ── */
+                    .report-chart-card {
+                    background: #ffffff !important;
+                    border: 1px solid rgba(12,74,110,0.12) !important;
+                    border-radius: 16px !important;
+                    box-shadow: 0 2px 8px rgba(12,74,110,0.07) !important;
                     }
-
-                    /* Priority Colors */
-                    .priority-badge {
-                    padding: 0.25rem 0.75rem;
-                    border-radius: 12px;
-                    font-size: 0.75rem;
-                    font-weight: 600;
+                    .report-chart-title {
+                    color: #0c4a6e !important;
+                    font-weight: 700 !important;
+                    border-bottom: 1px solid rgba(12,74,110,0.08) !important;
+                    padding-bottom: 0.75rem !important;
+                    margin-bottom: 1.25rem !important;
                     }
+                    .report-chart-title i { color: #0284c7 !important; }
 
-                    .priority-low { background: #d1fae5; color: #065f46; }
-                    .priority-medium { background: #dbeafe; color: #1e40af; }
-                    .priority-high { background: #fee2e2; color: #991b1b; }
-                    .priority-urgent { background: #fef3c7; color: #92400e; }
+                    /* ── DAY FILTER BUTTONS ── */
+                    .day-btn {
+                    background: #ffffff !important; border: 1px solid rgba(12,74,110,0.2)
+                    !important;
+                    color: #475569 !important; border-radius: 8px !important; font-weight: 600
+                    !important;
+                    }
+                    .day-btn:hover { background: #e0f2fe !important; color: #0c4a6e !important; }
+                    .day-btn.active { background: #0c4a6e !important; color: #ffffff !important;
+                    border-color: #0c4a6e !important; }
+
+                    /* ── PRINT BUTTON ── */
+                    .print-btn {
+                    background: #d1fae5 !important; border: 1px solid #6ee7b7 !important;
+                    color: #065f46 !important; border-radius: 8px !important; font-weight: 600
+                    !important;
+                    }
+                    .print-btn:hover { background: #a7f3d0 !important; }
+
+                    /* ── LOADING SPINNER ── */
+                    .report-loading { color: #475569 !important; }
+                    .spinner { border-color: rgba(12,74,110,0.12) !important; border-top-color:
+                    #0c4a6e !important; }
+
+                    /* ── NOTIFICATION DROPDOWN ── */
+                    .notif-dropdown {
+                    background: #ffffff !important;
+                    border: 1px solid rgba(12,74,110,0.15) !important;
+                    border-radius: 16px !important;
+                    box-shadow: 0 12px 40px rgba(12,74,110,0.18) !important;
+                    }
+                    .notif-header {
+                    background: #f0f9ff !important;
+                    border-bottom: 1px solid rgba(12,74,110,0.1) !important;
+                    }
+                    .notif-header h6 { color: #0c4a6e !important; }
+                    .notif-header h6 i { color: #0284c7 !important; }
+                    .notif-mark-read { color: #0284c7 !important; }
+                    .notif-mark-read:hover { color: #0c4a6e !important; }
+                    .notif-title { color: #0c4a6e !important; }
+                    .notif-time { color: #64748b !important; }
+                    .notif-item:hover { background: #f0f9ff !important; }
+                    .notif-empty { color: #475569 !important; }
+                    .notif-footer { background: #f0f9ff !important; border-top: 1px solid
+                    rgba(12,74,110,0.08) !important; }
+                    .notif-footer a { color: #0284c7 !important; }
+                    .notif-footer a:hover { color: #0c4a6e !important; }
                 </style>
             </t>
 
             <div class="dashboard-wrapper">
-                <!-- Top Navigation Header with New Ticket Button -->
                 <header class="dashboard-header">
                     <div class="header-content">
                         <div class="header-nav">
-                            <a href="/customer_support/dashboard" class="nav-link active">
+                            <a href="#" class="nav-link active" id="portalOverviewNav">
                                 <i class="bi bi-speedometer2 me-2"></i>Overview </a>
-                            <a href="/customer_support/tickets" class="nav-link">
+                            <a href="#" class="nav-link" id="portalTicketsNav">
                                 <i class="bi bi-ticket-detailed me-2"></i>Tickets </a>
-                            <a href="#" class="nav-link">
+                            <a href="#" class="nav-link" id="portalReportingNav">
                                 <i class="bi bi-graph-up me-2"></i>Reporting </a>
                             <a href="/customer_support/chatbot" class="nav-link">
                                 <i class="bi bi-question-circle me-2"></i>FAQ </a>
                         </div>
                         <div class="header-right">
-                            <!-- New Ticket Button -->
                             <div class="header-actions">
                                 <a href="/customer_support/create_ticket" class="btn-new-ticket">
                                     <i class="bi bi-plus-circle me-2"></i>New Ticket </a>
                             </div>
-
-
-                            <!-- User Profile -->
                             <div class="user-profile dropdown">
-                                <i class="bi bi-grid-3x3-gap-fill text-white me-3"
-                                    style="font-size: 1.2rem; cursor: pointer;"></i>
+                                <button class="view-toggle-btn me-2" id="portalKanbanBtn"
+                                    title="Toggle Kanban View">
+                                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                                </button>
 
-                                <i class="bi bi-bell-fill text-white me-3"
-                                    style="font-size: 1.2rem; cursor: pointer;"></i>
+                                <!-- NOTIFICATION BELL -->
+                                <div class="notif-wrap me-3">
+                                    <button class="notif-btn" id="portalNotifBell"
+                                        title="Notifications">
+                                        <i class="bi bi-bell-fill"></i>
+                                        <span class="notif-badge d-none" id="portalNotifBadge">0</span>
+                                    </button>
+                                    <div class="notif-dropdown" id="portalNotifDropdown">
+                                        <div class="notif-header">
+                                            <!-- FIX: #4f8ef7 (dark theme) → #0284c7 (light theme) -->
+                                            <h6><i class="bi bi-bell me-2" style="color:#0284c7;"></i>
+                                                Notifications</h6>
+                                            <button class="notif-mark-read" id="portalMarkRead">Mark
+                                                all read</button>
+                                        </div>
+                                        <div class="notif-list" id="portalNotifList">
+                                            <div class="notif-empty">
+                                                <i class="bi bi-arrow-repeat"
+                                                    style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>
+                                                Loading... </div>
+                                        </div>
+                                        <div class="notif-footer">
+                                            <a href="#" id="portalNotifViewTickets">View my tickets
+                                                &#8594;</a>
+                                        </div>
+                                    </div>
+                                </div>
 
-                                <!-- Clickable Profile -->
                                 <a class="d-flex align-items-center text-white dropdown-toggle"
-                                    href="#"
-                                    id="userProfileDropdown"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                    style="text-decoration: none;">
-
+                                    href="#" id="userProfileDropdown" data-bs-toggle="dropdown"
+                                    aria-expanded="false" style="text-decoration: none;">
                                     <span class="user-name me-3">
                                         <t t-esc="user.name" />
                                     </span>
-
                                     <img t-att-src="'/web/image/res.users/%s/avatar_128' % user.id"
-                                        alt="User Avatar"
-                                        class="user-avatar"
+                                        alt="User Avatar" class="user-avatar"
                                         onerror="this.src='/web/static/img/avatar_gray.svg'" />
                                 </a>
-
-                                <!-- Dropdown Menu -->
                                 <ul class="dropdown-menu dropdown-menu-end"
                                     aria-labelledby="userProfileDropdown">
-
                                     <li>
-                                        <a class="dropdown-item"
-                                            href="/customer_support/profile">
-                                            <i class="bi bi-person me-2"></i> Edit Profile </a>
+                                        <a class="dropdown-item" href="/customer_support/profile">
+                                            <i class="bi bi-person me-2"></i>Edit Profile </a>
                                     </li>
-
                                     <li>
                                         <hr class="dropdown-divider" />
                                     </li>
-
                                     <li>
                                         <a class="dropdown-item text-danger"
                                             href="/customer_support/logout_manual">
-                                            <i class="bi bi-box-arrow-right me-2"></i> Logout </a>
+                                            <i class="bi bi-box-arrow-right me-2"></i>Logout </a>
                                     </li>
                                 </ul>
                             </div>
-
                         </div>
                     </div>
                 </header>
 
-                <!-- Success/Error Messages -->
+                <!-- ALERTS -->
                 <div class="container-fluid mt-3 px-4">
                     <t t-if="request.params.get('success')">
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong>Success!</strong>
+                            <i class="bi bi-check-circle-fill me-2"></i><strong>Success!</strong>
                             Ticket created successfully. <button type="button" class="btn-close"
                                 data-bs-dismiss="alert"></button>
                         </div>
                     </t>
                     <t t-if="request.params.get('error')">
                         <div class="alert alert-error alert-dismissible fade show" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            <strong>Error!</strong>
-                            Failed to create ticket. Please try again. <button type="button"
-                                class="btn-close" data-bs-dismiss="alert"></button>
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Error!</strong>
+                            Failed to create ticket. <button type="button" class="btn-close"
+                                data-bs-dismiss="alert"></button>
                         </div>
                     </t>
                     <t t-if="request.params.get('created')">
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="bi bi-check-circle-fill me-2"></i>
-                            <strong>Success!</strong>
+                            <i class="bi bi-check-circle-fill me-2"></i><strong>Success!</strong>
                             Ticket has been created successfully. <button type="button"
                                 class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     </t>
                 </div>
 
-                <!-- Dashboard Content -->
-                <div class="dashboard-content">
+                <!-- ═══ OVERVIEW PAGE ═══ -->
+                <div class="dashboard-content" id="portal-overview-page">
                     <div class="dashboard-grid">
-                        <!-- Left Section - Ticket Analytics -->
                         <div class="dashboard-card">
                             <div class="card-header">
-                                <h2 class="card-title">
-                                    <i class="bi bi-bar-chart-fill me-2"></i>Ticket Analytics </h2>
+                                <h2 class="card-title"><i class="bi bi-bar-chart-fill me-2"></i>Ticket
+                                    Analytics</h2>
                                 <div class="card-actions">
-                                    <span class="last-updated">
-                                        <i class="bi bi-clock me-1"></i>Updated just now </span>
+                                    <span class="last-updated"><i class="bi bi-clock me-1"></i>Updated
+                                        just now</span>
                                 </div>
                             </div>
-
-                            <!-- Top Row - Main Stats -->
                             <div class="analytics-grid">
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="open_tickets">
                                     <div class="stat-icon">
                                         <i class="bi bi-folder-plus"></i>
                                     </div>
@@ -194,8 +280,7 @@
                                         <div class="stat-subtitle">Active Tickets</div>
                                     </div>
                                 </div>
-
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="total_tickets">
                                     <div class="stat-icon">
                                         <i class="bi bi-stack"></i>
                                     </div>
@@ -207,8 +292,7 @@
                                         <div class="stat-subtitle">All Tickets</div>
                                     </div>
                                 </div>
-
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="high_priority">
                                     <div class="stat-icon">
                                         <i class="bi bi-exclamation-triangle"></i>
                                     </div>
@@ -220,8 +304,7 @@
                                         <div class="stat-subtitle">High Priority</div>
                                     </div>
                                 </div>
-
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="urgent">
                                     <div class="stat-icon">
                                         <i class="bi bi-lightning-charge"></i>
                                     </div>
@@ -234,10 +317,8 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Second Row - Time Metrics -->
                             <div class="analytics-grid">
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="avg_open_hours">
                                     <div class="stat-icon">
                                         <i class="bi bi-clock-history"></i>
                                     </div>
@@ -249,8 +330,7 @@
                                         <div class="stat-subtitle">Hours</div>
                                     </div>
                                 </div>
-
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="total_hours">
                                     <div class="stat-icon">
                                         <i class="bi bi-clock-fill"></i>
                                     </div>
@@ -262,8 +342,7 @@
                                         <div class="stat-subtitle">Hours Open</div>
                                     </div>
                                 </div>
-
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="avg_high_hours">
                                     <div class="stat-icon">
                                         <i class="bi bi-exclamation-octagon"></i>
                                     </div>
@@ -275,8 +354,7 @@
                                         <div class="stat-subtitle">Hours</div>
                                     </div>
                                 </div>
-
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="avg_urgent_hours">
                                     <div class="stat-icon">
                                         <i class="bi bi-lightning-charge-fill"></i>
                                     </div>
@@ -289,10 +367,8 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Third Row - Resolved Stats -->
                             <div class="analytics-grid">
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="resolved_tickets">
                                     <div class="stat-icon">
                                         <i class="bi bi-check-circle"></i>
                                     </div>
@@ -304,8 +380,7 @@
                                         <div class="stat-subtitle">Fixed Tickets</div>
                                     </div>
                                 </div>
-
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="solve_rate">
                                     <div class="stat-icon">
                                         <i class="bi bi-percent"></i>
                                     </div>
@@ -316,8 +391,7 @@
                                         <div class="stat-subtitle">Success Rate</div>
                                     </div>
                                 </div>
-
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="high_resolved">
                                     <div class="stat-icon">
                                         <i class="bi bi-check-square"></i>
                                     </div>
@@ -329,8 +403,7 @@
                                         <div class="stat-subtitle">High Fixed</div>
                                     </div>
                                 </div>
-
-                                <div class="stat-box">
+                                <div class="stat-box" data-key="urgent_resolved">
                                     <div class="stat-icon">
                                         <i class="bi bi-check-all"></i>
                                     </div>
@@ -345,21 +418,19 @@
                             </div>
                         </div>
 
-                        <!-- Right Section - My Performance -->
                         <div class="performance-card">
                             <div class="card-header">
-                                <h2 class="card-title">
-                                    <i class="bi bi-graph-up-arrow me-2"></i>My Performance </h2>
+                                <h2 class="card-title"><i class="bi bi-graph-up-arrow me-2"></i>My
+                                    Performance</h2>
                                 <div class="card-actions">
-                                    <span class="performance-score">
-                                        <span class="score-badge">
-                                            <t t-esc="performance.get('sample_performance', 85)" />% </span>
-                                        Overall Score </span>
+                                    <span class="performance-score" data-key="sample_performance">
+                                        <span class="score-badge"><t
+                                                t-esc="performance.get('sample_performance', 85)" />
+                                        %</span> Overall Score </span>
                                 </div>
                             </div>
-
                             <div class="performance-grid">
-                                <div class="performance-stat">
+                                <div class="performance-stat" data-key="today_closed">
                                     <div class="performance-icon">
                                         <i class="bi bi-calendar-check"></i>
                                     </div>
@@ -371,8 +442,7 @@
                                         <div class="performance-subtitle">Tickets Closed Today</div>
                                     </div>
                                 </div>
-
-                                <div class="performance-stat">
+                                <div class="performance-stat" data-key="avg_resolve_rate">
                                     <div class="performance-icon">
                                         <i class="bi bi-calendar-week"></i>
                                     </div>
@@ -383,8 +453,7 @@
                                         <div class="performance-subtitle">Resolve Rate</div>
                                     </div>
                                 </div>
-
-                                <div class="performance-stat">
+                                <div class="performance-stat" data-key="daily_target">
                                     <div class="performance-icon">
                                         <i class="bi bi-target"></i>
                                     </div>
@@ -395,8 +464,7 @@
                                         <div class="performance-subtitle">Target Achievement</div>
                                     </div>
                                 </div>
-
-                                <div class="performance-stat">
+                                <div class="performance-stat" data-key="achievement">
                                     <div class="performance-icon">
                                         <i class="bi bi-trophy"></i>
                                     </div>
@@ -408,25 +476,21 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Progress Bar -->
                             <div class="performance-progress mt-4">
                                 <div class="progress-label">
                                     <span>Daily Goal Progress</span>
-                                    <span><t t-esc="performance.get('achievement', 0)" />%</span>
+                                    <span><t t-esc="performance.get('achievement', 0) or 0" />%</span>
                                 </div>
                                 <div class="progress">
-                                    <div class="progress-bar"
-                                        role="progressbar"
-                                        t-att-style="'width: ' + str(performance.get('achievement', 0)) + '%;'"
-                                        t-att-class="'bg-success' if performance.get('achievement', 0) >= 80 else 'bg-warning'">
+                                    <div class="progress-bar" role="progressbar"
+                                        t-att-style="'width: ' + str(performance.get('achievement', 0) or 0) + '%;'"
+                                        t-att-class="'bg-success' if (performance.get('achievement', 0) or 0) >= 80 else 'bg-warning'">
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Quick Actions Row -->
                     <div class="quick-actions mt-4">
                         <div class="actions-grid">
                             <a href="/customer_support/create_ticket" class="action-card">
@@ -438,8 +502,6 @@
                                     <p>Submit a new support request</p>
                                 </div>
                             </a>
-
-
                             <a href="/customer_support/tickets" class="action-card">
                                 <div class="action-icon">
                                     <i class="bi bi-list-task"></i>
@@ -449,8 +511,7 @@
                                     <p>See all your support tickets</p>
                                 </div>
                             </a>
-
-                            <a href="#" class="action-card">
+                            <a href="#" class="action-card" id="portalReportActionCard">
                                 <div class="action-icon">
                                     <i class="bi bi-file-earmark-text"></i>
                                 </div>
@@ -459,8 +520,7 @@
                                     <p>Download performance report</p>
                                 </div>
                             </a>
-
-                            <a href="#" class="action-card">
+                            <a href="/customer_support/chatbot" class="action-card">
                                 <div class="action-icon">
                                     <i class="bi bi-question-circle-fill"></i>
                                 </div>
@@ -472,73 +532,603 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                <!-- /portal-overview-page -->
 
-            <!-- Bootstrap JS -->
+                <!-- ═══ KANBAN PAGE ═══ -->
+                <div class="dashboard-content" id="portal-kanban-page" style="display:none;">
+                    <!-- FIX: color:#e8eaf0 (invisible on light bg) → #0c4a6e -->
+                    <div
+                        style="padding:1rem 2rem 0.5rem;display:flex;align-items:center;justify-content:space-between;">
+                        <h5 style="color:#0c4a6e;font-weight:700;margin:0;">
+                            <!-- FIX: color:#4f8ef7 (dark theme) → #0284c7 -->
+                            <i
+                                class="bi bi-grid-3x3-gap-fill me-2" style="color:#0284c7;"></i>My
+                            Tickets &#8212; Kanban View </h5>
+                        <div class="view-toggle">
+                            <button class="view-btn" id="portalListBtn">
+                                <i class="bi bi-list me-1"></i>List </button>
+                            <button class="view-btn active" id="portalKanbanActiveBtn">
+                                <i class="bi bi-grid-3x3-gap me-1"></i>Kanban </button>
+                        </div>
+                    </div>
+                    <div class="kanban-board">
+                        <!-- New -->
+                        <div class="kanban-col" data-state="new">
+                            <div class="kanban-col-header">
+                                <span class="kanban-col-title"><i class="bi bi-circle"></i> New</span>
+                                <span class="kanban-col-count" id="portal-count-new">0</span>
+                            </div>
+                            <div class="kanban-cards" id="portal-col-new">
+                                <t t-foreach="tickets" t-as="ticket">
+                                    <t t-if="ticket.state == 'new'">
+                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
+                                            <div class="kanban-card-id">
+                                                <t t-esc="ticket.name" />
+                                            </div>
+                                            <div class="kanban-card-subject">
+                                                <t t-esc="ticket.subject" />
+                                            </div>
+                                            <div class="kanban-card-footer">
+                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
+                                                <span t-att-class="'kanban-priority priority-' + kp">
+                                                    <t t-esc="kp.title()" />
+                                                </span>
+                                            </div>
+                                            <div class="kanban-card-focal">
+                                                <i class="bi bi-person-fill"></i>
+                                                <span>
+                                                    <t
+                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+                        <!-- In Progress -->
+                        <div class="kanban-col" data-state="in_progress">
+                            <div class="kanban-col-header">
+                                <span class="kanban-col-title"><i class="bi bi-arrow-repeat"></i> In
+                                    Progress</span>
+                                <span class="kanban-col-count" id="portal-count-in_progress">0</span>
+                            </div>
+                            <div class="kanban-cards" id="portal-col-in_progress">
+                                <t t-foreach="tickets" t-as="ticket">
+                                    <t t-if="ticket.state == 'in_progress'">
+                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
+                                            <div class="kanban-card-id">
+                                                <t t-esc="ticket.name" />
+                                            </div>
+                                            <div class="kanban-card-subject">
+                                                <t t-esc="ticket.subject" />
+                                            </div>
+                                            <div class="kanban-card-footer">
+                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
+                                                <span t-att-class="'kanban-priority priority-' + kp">
+                                                    <t t-esc="kp.title()" />
+                                                </span>
+                                            </div>
+                                            <div class="kanban-card-focal">
+                                                <i class="bi bi-person-fill"></i>
+                                                <span>
+                                                    <t
+                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+                        <!-- Resolved -->
+                        <div class="kanban-col" data-state="resolved">
+                            <div class="kanban-col-header">
+                                <span class="kanban-col-title"><i class="bi bi-check-circle"></i>
+                                    Resolved</span>
+                                <span class="kanban-col-count" id="portal-count-resolved">0</span>
+                            </div>
+                            <div class="kanban-cards" id="portal-col-resolved">
+                                <t t-foreach="tickets" t-as="ticket">
+                                    <t t-if="ticket.state == 'resolved'">
+                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
+                                            <div class="kanban-card-id">
+                                                <t t-esc="ticket.name" />
+                                            </div>
+                                            <div class="kanban-card-subject">
+                                                <t t-esc="ticket.subject" />
+                                            </div>
+                                            <div class="kanban-card-footer">
+                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
+                                                <span t-att-class="'kanban-priority priority-' + kp">
+                                                    <t t-esc="kp.title()" />
+                                                </span>
+                                            </div>
+                                            <div class="kanban-card-focal">
+                                                <i class="bi bi-person-fill"></i>
+                                                <span>
+                                                    <t
+                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+                        <!-- Closed -->
+                        <div class="kanban-col" data-state="closed">
+                            <div class="kanban-col-header">
+                                <span class="kanban-col-title"><i class="bi bi-x-circle"></i> Closed</span>
+                                <span class="kanban-col-count" id="portal-count-closed">0</span>
+                            </div>
+                            <div class="kanban-cards" id="portal-col-closed">
+                                <t t-foreach="tickets" t-as="ticket">
+                                    <t t-if="ticket.state == 'closed'">
+                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
+                                            <div class="kanban-card-id">
+                                                <t t-esc="ticket.name" />
+                                            </div>
+                                            <div class="kanban-card-subject">
+                                                <t t-esc="ticket.subject" />
+                                            </div>
+                                            <div class="kanban-card-footer">
+                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
+                                                <span t-att-class="'kanban-priority priority-' + kp">
+                                                    <t t-esc="kp.title()" />
+                                                </span>
+                                            </div>
+                                            <div class="kanban-card-focal">
+                                                <i class="bi bi-person-fill"></i>
+                                                <span>
+                                                    <t
+                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /portal-kanban-page -->
+
+                <!-- ═══ REPORTING PAGE ═══ -->
+                <div class="dashboard-content reporting-page" id="portal-reporting-page"
+                    style="display:none;">
+
+                    <div class="print-header">
+                        <h3><i class="bi bi-graph-up me-2"></i>My Ticket Report</h3>
+                        <p id="reportPrintSubtitle">Generated on <span id="reportPrintDate"></span></p>
+                    </div>
+
+                    <div class="reporting-header">
+                        <!-- FIX: icon color #4f8ef7 (dark theme) → #0284c7 -->
+                        <h5 class="reporting-title">
+                            <i class="bi bi-graph-up me-2" style="color:#0284c7;"></i>My Ticket
+                            Report </h5>
+                        <div class="reporting-controls">
+                            <div class="day-filter" id="reportDayFilter">
+                                <button class="day-btn" data-days="7">7 Days</button>
+                                <button class="day-btn active" data-days="30">30 Days</button>
+                                <button class="day-btn" data-days="90">90 Days</button>
+                            </div>
+                            <button class="print-btn" onclick="window.print()">
+                                <i class="bi bi-printer-fill"></i> Print / PDF </button>
+                        </div>
+                    </div>
+
+                    <div id="reportLoading" class="report-loading">
+                        <div class="spinner"></div>
+                        <span>Loading your report...</span>
+                    </div>
+
+                    <div id="reportContent" style="display:none;">
+                        <div class="report-kpi-strip">
+                            <div class="report-kpi">
+                                <div class="report-kpi-value blue" id="rKpiTotal">&#8212;</div>
+                                <div class="report-kpi-label">Total Submitted</div>
+                            </div>
+                            <div class="report-kpi">
+                                <div class="report-kpi-value green" id="rKpiResolved">&#8212;</div>
+                                <div class="report-kpi-label">Resolved / Closed</div>
+                            </div>
+                            <div class="report-kpi">
+                                <div class="report-kpi-value amber" id="rKpiOpen">&#8212;</div>
+                                <div class="report-kpi-label">Still Open</div>
+                            </div>
+                            <div class="report-kpi">
+                                <div class="report-kpi-value amber" id="rKpiRate">&#8212;</div>
+                                <div class="report-kpi-label">Resolve Rate</div>
+                            </div>
+                            <div class="report-kpi">
+                                <div class="report-kpi-value" id="rKpiAvgHours">&#8212;</div>
+                                <div class="report-kpi-label">Avg Resolution (hrs)</div>
+                            </div>
+                        </div>
+
+                        <div class="report-charts-grid">
+                            <div class="report-chart-card">
+                                <div class="report-chart-title"><i class="bi bi-calendar3"></i>
+                                    Ticket Submissions Over Time</div>
+                                <div class="chart-wrap tall">
+                                    <canvas id="chartTimeline"></canvas>
+                                </div>
+                            </div>
+                            <div class="report-chart-card">
+                                <div class="report-chart-title"><i class="bi bi-pie-chart-fill"></i>
+                                    Status Breakdown</div>
+                                <div class="chart-wrap">
+                                    <canvas id="chartStatus"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="report-charts-grid">
+                            <div class="report-chart-card">
+                                <div class="report-chart-title"><i class="bi bi-bar-chart-fill"></i>
+                                    Priority Breakdown</div>
+                                <div class="chart-wrap">
+                                    <canvas id="chartPriority"></canvas>
+                                </div>
+                            </div>
+                            <div class="report-chart-card">
+                                <div class="report-chart-title"><i class="bi bi-graph-up-arrow"></i>
+                                    Weekly Resolve Rate Trend</div>
+                                <div class="chart-wrap">
+                                    <canvas id="chartResolveTrend"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /reportContent -->
+
+                </div>
+                <!-- /portal-reporting-page -->
+
+            </div>
+            <!-- /dashboard-wrapper -->
+
             <script
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-            <!-- Dashboard JavaScript -->
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                // Auto-hide alerts after 5 seconds
-                setTimeout(function() {
-                const alerts = document.querySelectorAll('.alert');
-                alerts.forEach(function(alert) {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-                });
-                }, 5000);
+            <!-- ═══ LIVE ANALYTICS POLLER ═══ -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function () {
+    'use strict';
+    var INTERVAL = 15000;
+    var A = [
+        { key: 'open_tickets',     sel: '[data-key="open_tickets"] .stat-value' },
+        { key: 'total_tickets',    sel: '[data-key="total_tickets"] .stat-value' },
+        { key: 'high_priority',    sel: '[data-key="high_priority"] .stat-value' },
+        { key: 'urgent',           sel: '[data-key="urgent"] .stat-value' },
+        { key: 'avg_open_hours',   sel: '[data-key="avg_open_hours"] .stat-value' },
+        { key: 'total_hours',      sel: '[data-key="total_hours"] .stat-value' },
+        { key: 'avg_high_hours',   sel: '[data-key="avg_high_hours"] .stat-value' },
+        { key: 'avg_urgent_hours', sel: '[data-key="avg_urgent_hours"] .stat-value' },
+        { key: 'resolved_tickets', sel: '[data-key="resolved_tickets"] .stat-value' },
+        { key: 'solve_rate',       sel: '[data-key="solve_rate"] .stat-value', sfx: '%' },
+        { key: 'high_resolved',    sel: '[data-key="high_resolved"] .stat-value' },
+        { key: 'urgent_resolved',  sel: '[data-key="urgent_resolved"] .stat-value' }
+    ];
+    var P = [
+        { key: 'today_closed',       sel: '[data-key="today_closed"] .performance-value' },
+        { key: 'avg_resolve_rate',   sel: '[data-key="avg_resolve_rate"] .performance-value', sfx: '%' },
+        { key: 'daily_target',       sel: '[data-key="daily_target"] .performance-value', sfx: '%' },
+        { key: 'achievement',        sel: '[data-key="achievement"] .performance-value', sfx: '%' },
+        { key: 'sample_performance', sel: '[data-key="sample_performance"] .score-badge', sfx: '%' }
+    ];
+    function upd(sel, val, sfx) { var el = document.querySelector(sel); if (el) el.textContent = val + (sfx || ''); }
+    function flash(sel) {
+        var el = document.querySelector(sel);
+        if (el) { el.style.transition = 'color 0.3s'; el.style.color = '#0284c7'; setTimeout(function () { el.style.color = ''; }, 600); }
+    }
+    function updBar(v) {
+        var b = document.querySelector('.progress-bar');
+        if (b) { b.style.width = v + '%'; b.className = 'progress-bar ' + (v >= 80 ? 'bg-success' : 'bg-warning'); }
+    }
+    function updBarLabel(v) {
+        var ls = document.querySelectorAll('.progress-label span');
+        if (ls.length >= 2) ls[1].textContent = v + '%';
+    }
+    function updTime() {
+        var t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.querySelectorAll('.last-updated').forEach(function (el) { el.innerHTML = '<i class="bi bi-clock me-1"></i>Updated at ' + t; });
+    }
+    function run() {
+        fetch('/customer_support/dashboard/analytics', { method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (d) {
+            var a = d.analytics || {}, p = d.performance || {};
+            A.forEach(function (i) { var v = a[i.key]; if (v !== undefined) { upd(i.sel, v, i.sfx || ''); flash(i.sel); } });
+            P.forEach(function (i) { var v = p[i.key]; if (v !== undefined) upd(i.sel, v, i.sfx || ''); });
+            if (p.achievement !== undefined) { updBar(p.achievement); updBarLabel(p.achievement); }
+            updTime();
+        })
+        .catch(function (e) { console.warn('Analytics refresh failed:', e); });
+    }
+    document.addEventListener('DOMContentLoaded', function () { run(); setInterval(run, INTERVAL); });
+})();
+        //]]>
+            </script>
 
-                // Animate stat numbers
-                function animateNumbers() {
-                const statValues = document.querySelectorAll('.stat-value');
-                const performanceValues = document.querySelectorAll('.performance-value');
-                [...statValues, ...performanceValues].forEach(element => {
-                const finalValue = element.textContent;
-                let current = 0;
-                const increment = 1;
-                const interval = 30; // ms
+            <!-- ═══ PORTAL NAVIGATION + BELL + KANBAN + REPORTING ═══ -->
+            <script type="text/javascript">
+                //<![CDATA[
+document.addEventListener('DOMContentLoaded', function () {
 
-                const counter = setInterval(() => {
-                current += increment;
-                if (current >= parseInt(finalValue)) {
-                element.textContent = finalValue;
-                clearInterval(counter);
-                } else {
-                element.textContent = current;
-                }
-                }, interval);
-                });
-                }
+    setTimeout(function () {
+        document.querySelectorAll('.alert').forEach(function (a) {
+            try { new bootstrap.Alert(a).close(); } catch (e) { a.style.display = 'none'; }
+        });
+    }, 5000);
 
-                // Start animation when page loads
-                setTimeout(animateNumbers, 500);
+    function updatePortalCounts() {
+        ['new', 'in_progress', 'resolved', 'closed'].forEach(function (state) {
+            var col = document.getElementById('portal-col-' + state);
+            var countEl = document.getElementById('portal-count-' + state);
+            if (col && countEl) countEl.textContent = col.querySelectorAll('.kanban-card').length;
+        });
+    }
+    updatePortalCounts();
 
-                // Add click effects to action cards
-                const actionCards = document.querySelectorAll('.action-card');
-                actionCards.forEach(card => {
-                card.addEventListener('click', function(e) {
-                if (!this.href || this.href === '#') {
+    var pages = {
+        overview:  document.getElementById('portal-overview-page'),
+        kanban:    document.getElementById('portal-kanban-page'),
+        reporting: document.getElementById('portal-reporting-page')
+    };
+    var kanbanBtn = document.getElementById('portalKanbanBtn');
+
+    function hideAllPages() {
+        Object.keys(pages).forEach(function (k) { if (pages[k]) pages[k].style.display = 'none'; });
+    }
+    function setActiveNav(navId, isKanban) {
+        document.querySelectorAll('.header-nav .nav-link').forEach(function (l) { l.classList.remove('active'); });
+        var el = document.getElementById(navId);
+        if (el) el.classList.add('active');
+        if (kanbanBtn) kanbanBtn.classList.toggle('active', !!isKanban);
+    }
+    function showOverview() { hideAllPages(); pages.overview.style.display = 'block'; setActiveNav('portalOverviewNav', false); }
+    function showKanban()   { hideAllPages(); pages.kanban.style.display = 'block'; setActiveNav('portalTicketsNav', true); updatePortalCounts(); }
+
+    var reportFetchInFlight = false;
+
+    function showReporting() {
+        hideAllPages(); pages.reporting.style.display = 'block';
+        setActiveNav('portalReportingNav', false);
+        syncDayFilterUI();
+        loadReportData(currentDays);
+    }
+
+    var overviewNav = document.getElementById('portalOverviewNav');
+    if (overviewNav) overviewNav.addEventListener('click', function (e) { e.preventDefault(); showOverview(); });
+    var ticketsNav = document.getElementById('portalTicketsNav');
+    if (ticketsNav) ticketsNav.addEventListener('click', function (e) { e.preventDefault(); showKanban(); });
+    var reportingNav = document.getElementById('portalReportingNav');
+    if (reportingNav) reportingNav.addEventListener('click', function (e) { e.preventDefault(); showReporting(); });
+    if (kanbanBtn) kanbanBtn.addEventListener('click', function () { showKanban(); });
+    var reportActionCard = document.getElementById('portalReportActionCard');
+    if (reportActionCard) reportActionCard.addEventListener('click', function (e) { e.preventDefault(); showReporting(); });
+    var listBtn = document.getElementById('portalListBtn');
+    if (listBtn) listBtn.addEventListener('click', function () { window.location.href = '/customer_support/tickets'; });
+    var kanbanActiveBtn = document.getElementById('portalKanbanActiveBtn');
+    if (kanbanActiveBtn) kanbanActiveBtn.addEventListener('click', function () { showKanban(); });
+
+    document.querySelectorAll('#portal-kanban-page .kanban-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+            var id = this.getAttribute('data-ticket-id');
+            if (id) window.location.href = '/customer_support/ticket/' + id;
+        });
+    });
+    document.querySelectorAll('.action-card').forEach(function (card) {
+        card.addEventListener('click', function (e) {
+            var href = this.getAttribute('href');
+            if (!href || href === '#' || href.endsWith('#')) {
                 e.preventDefault();
-                this.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                this.style.transform = 'scale(1)';
-                }, 150);
-                }
-                });
-                });
+                var self = this;
+                self.style.transform = 'scale(0.95)';
+                setTimeout(function () { self.style.transform = ''; }, 150);
+            }
+        });
+    });
 
-                // Refresh data every 60 seconds
-                setInterval(function() {
-                fetch('/customer_support/dashboard')
-                .then(response => response.text())
-                .then(data => {
-                // You could update specific elements here
-                console.log('Dashboard data refreshed');
-                });
-                }, 60000);
-                });
+    // ── NOTIFICATION BELL ─────────────────────────────────────────────────
+    var bell      = document.getElementById('portalNotifBell');
+    var dropdown  = document.getElementById('portalNotifDropdown');
+    var badge     = document.getElementById('portalNotifBadge');
+    var notifList = document.getElementById('portalNotifList');
+
+    if (bell && dropdown) {
+        bell.addEventListener('click', function (e) { e.stopPropagation(); dropdown.classList.toggle('open'); });
+        document.addEventListener('click', function () { dropdown.classList.remove('open'); });
+        dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+    }
+    var markReadBtn = document.getElementById('portalMarkRead');
+    if (markReadBtn) {
+        markReadBtn.addEventListener('click', function () {
+            fetch('/customer_support/customer/notifications/mark_read', { method: 'POST', credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+            .then(function () {
+                if (badge) { badge.classList.add('d-none'); badge.textContent = '0'; }
+                if (notifList) { notifList.innerHTML = '<div class="notif-empty"><i class="bi bi-check-circle-fill" style="font-size:2rem;color:#22c55e;display:block;margin-bottom:.5rem;"></i>All caught up!</div>'; }
+            })
+            .catch(function (e) { console.warn('Mark read failed:', e); });
+        });
+    }
+    var viewTicketsLink = document.getElementById('portalNotifViewTickets');
+    if (viewTicketsLink) {
+        viewTicketsLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (dropdown) dropdown.classList.remove('open');
+            showKanban();
+        });
+    }
+    function sanitise(str) { var d = document.createElement('div'); d.textContent = String(str || ''); return d.innerHTML; }
+    function renderNotifications(items) {
+        if (!notifList) return;
+        if (!items || !items.length) {
+            notifList.innerHTML = '<div class="notif-empty"><i class="bi bi-check-circle-fill" style="font-size:2rem;color:#22c55e;display:block;margin-bottom:.5rem;"></i>No new notifications</div>';
+            if (badge) badge.classList.add('d-none');
+            return;
+        }
+        if (badge) { badge.textContent = items.length; badge.classList.remove('d-none'); }
+        notifList.innerHTML = items.map(function (n) {
+            var href = n.ticket_id ? '/customer_support/ticket/' + encodeURIComponent(n.ticket_id) : '#';
+            var cls  = sanitise(n.cls  || 'status');
+            var icon = sanitise(n.icon || 'bi-bell-fill');
+            var msg  = sanitise(n.message || '');
+            var time = sanitise(n.time   || '');
+            return '<a class="notif-item" href="' + href + '">'
+                + '<div class="notif-icon-wrap ' + cls + '"><i class="bi ' + icon + '"></i></div>'
+                + '<div class="notif-body"><div class="notif-title">' + msg + '</div><div class="notif-time">' + time + '</div></div>'
+                + '<div class="notif-dot ' + cls + '"></div></a>';
+        }).join('');
+    }
+    function loadNotifications() {
+        fetch('/customer_support/customer/notifications', { method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (data) { renderNotifications(data.notifications || []); })
+        .catch(function () { renderNotifications([]); });
+    }
+    loadNotifications();
+    setInterval(loadNotifications, 30000);
+
+    // ── REPORTING ─────────────────────────────────────────────────────────
+    var currentDays    = 30;
+    var chartInstances = {};
+
+    function syncDayFilterUI() {
+        document.querySelectorAll('#reportDayFilter .day-btn').forEach(function (b) {
+            b.classList.toggle('active', parseInt(b.getAttribute('data-days'), 10) === currentDays);
+        });
+    }
+    document.querySelectorAll('#reportDayFilter .day-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            currentDays = parseInt(this.getAttribute('data-days'), 10);
+            syncDayFilterUI();
+            loadReportData(currentDays);
+        });
+    });
+    function destroyChart(id) {
+        if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+        var canvas = document.getElementById(id);
+        if (canvas) { var ctx = canvas.getContext('2d'); if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    }
+    function loadReportData(days) {
+        if (reportFetchInFlight) return;
+        reportFetchInFlight = true;
+        var loadingEl = document.getElementById('reportLoading');
+        var contentEl = document.getElementById('reportContent');
+        if (loadingEl) { loadingEl.style.display = 'flex'; loadingEl.innerHTML = '<div class="spinner"></div><span>Loading your report...</span>'; }
+        if (contentEl) contentEl.style.display = 'none';
+        fetch('/customer_support/customer/reporting?days=' + days, { method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            reportFetchInFlight = false;
+            if (!data.success) throw new Error('API error');
+            renderReport(data);
+            if (loadingEl) loadingEl.style.display = 'none';
+            if (contentEl) contentEl.style.display = 'block';
+            var pd = document.getElementById('reportPrintDate');
+            if (pd) pd.textContent = new Date().toLocaleDateString() + ' (Last ' + days + ' days)';
+        })
+        .catch(function (e) {
+            reportFetchInFlight = false;
+            console.error('Reporting fetch failed:', e);
+            if (loadingEl) {
+                loadingEl.style.display = 'flex';
+                loadingEl.innerHTML = '<i class="bi bi-exclamation-triangle" style="color:#dc2626;font-size:1.5rem;margin-right:.5rem;"></i><span style="color:#dc2626;">Could not load report data. Please try again.</span>';
+            }
+        });
+    }
+
+    function renderReport(data) {
+        var kpis = data.kpis || {};
+        var rate = kpis.resolve_rate || 0;
+        document.getElementById('rKpiTotal').textContent    = kpis.total    || 0;
+        document.getElementById('rKpiResolved').textContent = kpis.resolved || 0;
+        document.getElementById('rKpiOpen').textContent     = kpis.open     || 0;
+        document.getElementById('rKpiAvgHours').textContent = kpis.avg_resolution_hours || 0;
+        var rateEl = document.getElementById('rKpiRate');
+        rateEl.textContent = rate + '%';
+        rateEl.className   = 'report-kpi-value ' + (rate >= 80 ? 'green' : rate >= 50 ? 'amber' : 'red');
+
+        /* FIX: all chart tick colors #8892a4 → #475569 (readable on white)
+                all chart grid colors rgba(255,255,255,0.06) → rgba(12,74,110,0.08) */
+
+        // ── Timeline ──────────────────────────────────────────────────────
+        destroyChart('chartTimeline');
+        var tl = data.timeline || [];
+        chartInstances['chartTimeline'] = new Chart(document.getElementById('chartTimeline').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: tl.map(function (d) { return d.date; }),
+                datasets: [{ label: 'Tickets Submitted', data: tl.map(function (d) { return d.count; }),
+                    borderColor: '#0284c7', backgroundColor: 'rgba(2,132,199,0.1)',
+                    borderWidth: 2, pointRadius: tl.length <= 14 ? 4 : 2, pointBackgroundColor: '#0284c7', fill: true, tension: 0.35 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#475569', font: { size: 10 }, maxTicksLimit: 10, maxRotation: 45 }, grid: { color: 'rgba(12,74,110,0.08)' } },
+                    y: { ticks: { color: '#475569', font: { size: 10 }, stepSize: 1, precision: 0 }, grid: { color: 'rgba(12,74,110,0.08)' }, beginAtZero: true }
+                }
+            }
+        });
+
+        // ── Status donut ──────────────────────────────────────────────────
+        destroyChart('chartStatus');
+        var st = data.status_breakdown || {};
+        var stLabels = Object.keys(st);
+        var stColors = { 'New': '#3b82f6', 'In Progress': '#f59e0b', 'Resolved': '#22c55e', 'Closed': '#94a3b8' };
+        chartInstances['chartStatus'] = new Chart(document.getElementById('chartStatus').getContext('2d'), {
+            type: 'doughnut',
+            data: { labels: stLabels, datasets: [{ data: stLabels.map(function (k) { return st[k]; }),
+                backgroundColor: stLabels.map(function (l) { return stColors[l] || '#64748b'; }), borderWidth: 0, hoverOffset: 8 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '62%',
+                plugins: { legend: { position: 'bottom', labels: { color: '#475569', font: { size: 11 }, padding: 16 } } } }
+        });
+
+        // ── Priority bar ──────────────────────────────────────────────────
+        destroyChart('chartPriority');
+        var pr = data.priority_breakdown || {};
+        var prLabels = ['Low', 'Medium', 'High', 'Urgent'];
+        chartInstances['chartPriority'] = new Chart(document.getElementById('chartPriority').getContext('2d'), {
+            type: 'bar',
+            data: { labels: prLabels, datasets: [{ label: 'Tickets', data: prLabels.map(function (k) { return pr[k] || 0; }),
+                backgroundColor: ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444'], borderRadius: 8, borderSkipped: false }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { color: '#475569', font: { size: 11 } }, grid: { display: false } },
+                    y: { ticks: { color: '#475569', font: { size: 10 }, stepSize: 1, precision: 0 }, grid: { color: 'rgba(12,74,110,0.08)' }, beginAtZero: true }
+                }
+            }
+        });
+
+        // ── Resolve rate trend ────────────────────────────────────────────
+        destroyChart('chartResolveTrend');
+        var rt = data.resolve_trend || [];
+        chartInstances['chartResolveTrend'] = new Chart(document.getElementById('chartResolveTrend').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: rt.map(function (d) { return d.week; }),
+                datasets: [{ label: 'Resolve Rate %', data: rt.map(function (d) { return d.rate; }),
+                    borderColor: '#059669', backgroundColor: 'rgba(5,150,105,0.08)',
+                    borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: '#059669', fill: true, tension: 0.3 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (ctx) { return ctx.parsed.y + '%'; } } } },
+                scales: {
+                    x: { ticks: { color: '#475569', font: { size: 11 } }, grid: { color: 'rgba(12,74,110,0.08)' } },
+                    y: { ticks: { color: '#475569', font: { size: 10 }, callback: function (v) { return v + '%'; } }, grid: { color: 'rgba(12,74,110,0.08)' }, beginAtZero: true, max: 100 }
+                }
+            }
+        });
+    }
+
+});
+        //]]>
             </script>
         </t>
     </template>

@@ -9,6 +9,9 @@ Handles all routes for system administrators related to:
   - Edit user form and update
   - Toggle user active/inactive
   - Delete (archive) user
+  - Reporting data API endpoints (JSON) for charts + printable reports
+  - Admin notifications bell (SLA breaches, unassigned, status changes)
+  - Agent workload overview
 
 Access: All routes require the user to be in base.group_system (admin).
 Non-admin users are redirected to the customer dashboard.
@@ -18,8 +21,10 @@ Email notifications are delegated to EmailService:
   - Welcome email to new focal persons (different template)
 """
 
+import json
 import logging
-from odoo import http
+from datetime import timedelta
+from odoo import http, fields
 from odoo.http import request
 import werkzeug
 
@@ -42,26 +47,16 @@ class CustomerSupportAdminUsers(http.Controller):
         "/customer_support/admin_dashboard", type="http", auth="user", website=True
     )
     def admin_dashboard(self, **kw):
-        """
-        Admin Dashboard - Main overview for system administrators
-        Working: Shows all tickets, analytics, performance stats, and a
-                 user summary table across all roles.
-        Access: Authenticated system administrators only
-        """
         user = request.env.user
-
-        # Block non-admin users from accessing this route
         if not user.has_group("base.group_system"):
             return werkzeug.utils.redirect("/customer_support/dashboard")
 
-        # Fetch every ticket across all customers, newest first
         tickets = (
             request.env["customer.support"]
             .search([])
             .sorted(key=lambda r: r.create_date, reverse=True)
         )
 
-        # Build a count summary per ticket status for the stat cards
         ticket_counts = {
             "new": len(tickets.filtered(lambda t: t.state == "new")),
             "assigned": len(tickets.filtered(lambda t: t.state == "assigned")),
@@ -70,8 +65,6 @@ class CustomerSupportAdminUsers(http.Controller):
             "total": len(tickets),
         }
 
-        # Attempt to load advanced analytics from the dashboard model.
-        # Falls back to safe defaults if the model is unavailable.
         analytics = {}
         performance = {}
         try:
@@ -80,7 +73,6 @@ class CustomerSupportAdminUsers(http.Controller):
             performance = dashboard_model.get_user_performance(user.id)
         except Exception as e:
             _logger.warning(f"Admin dashboard analytics failed: {str(e)}")
-            # Safe defaults so the template never throws a KeyError
             open_tickets = ticket_counts.get("new", 0) + ticket_counts.get(
                 "assigned", 0
             )
@@ -107,7 +99,6 @@ class CustomerSupportAdminUsers(http.Controller):
                 "sample_performance": 85.00,
             }
 
-        # Fetch all active non-system users for the User Management tab
         all_users = (
             request.env["res.users"]
             .search(
@@ -119,7 +110,6 @@ class CustomerSupportAdminUsers(http.Controller):
             .sorted(key=lambda r: r.create_date, reverse=True)
         )
 
-        # Build user list with role labels and badge styles for the template
         users_data = []
         for u in all_users:
             if u.has_group("base.group_system"):
@@ -160,6 +150,947 @@ class CustomerSupportAdminUsers(http.Controller):
         )
 
     # =========================================================================
+    # ADMIN REPORTING DATA API
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/admin/reporting/data",
+        type="http",
+        auth="user",
+        methods=["GET"],
+        website=True,
+        csrf=False,
+    )
+    def admin_reporting_data(self, **kw):
+        """
+        Returns all reporting data as JSON for the admin reporting tab.
+        Supports ?days=7|30|90 filter.
+        """
+        try:
+            user = request.env.user
+            if not user.has_group("base.group_system"):
+                return request.make_response(
+                    json.dumps({"success": False, "error": "Access denied"}),
+                    headers=[("Content-Type", "application/json")],
+                    status=403,
+                )
+
+            days = int(kw.get("days", 30))
+            since = fields.Datetime.now() - timedelta(days=days)
+
+            all_tickets = request.env["customer.support"].sudo().search([])
+            period_tickets = all_tickets.filtered(
+                lambda t: t.create_date and t.create_date >= since
+            )
+
+            # ── Status breakdown ─────────────────────────────────────────────
+            states = ["new", "assigned", "in_progress", "resolved", "closed"]
+            status_breakdown = {
+                s: len(all_tickets.filtered(lambda t: t.state == s)) for s in states
+            }
+
+            # ── Priority distribution (open tickets only) ─────────────────────
+            open_tickets = all_tickets.filtered(
+                lambda t: t.state not in ["resolved", "closed"]
+            )
+            priorities = ["low", "medium", "high", "urgent"]
+            priority_dist = {
+                p: len(open_tickets.filtered(lambda t: t.priority == p))
+                for p in priorities
+            }
+
+            # ── Ticket volume trend (daily for selected period) ───────────────
+            volume_trend = []
+            for i in range(min(days, 30)):
+                day_start = fields.Datetime.now() - timedelta(
+                    days=(min(days, 30) - 1 - i)
+                )
+                day_end = day_start + timedelta(days=1)
+                day_start = day_start.replace(hour=0, minute=0, second=0)
+                day_end = day_end.replace(hour=0, minute=0, second=0)
+                count = len(
+                    all_tickets.filtered(
+                        lambda t, s=day_start, e=day_end: t.create_date
+                        and s <= t.create_date < e
+                    )
+                )
+                volume_trend.append(
+                    {
+                        "date": day_start.strftime("%b %d"),
+                        "count": count,
+                    }
+                )
+
+            # ── Project health ────────────────────────────────────────────────
+            projects = (
+                request.env["customer_support.project"]
+                .sudo()
+                .search([("active", "=", True)])
+            )
+            project_health = []
+            for proj in projects:
+                proj_tickets = all_tickets.filtered(
+                    lambda t: t.project_id.id == proj.id
+                )
+                proj_period = period_tickets.filtered(
+                    lambda t: t.project_id.id == proj.id
+                )
+                total = len(proj_tickets)
+                open_count = len(
+                    proj_tickets.filtered(
+                        lambda t: t.state not in ["resolved", "closed"]
+                    )
+                )
+                resolved_count = len(
+                    proj_tickets.filtered(lambda t: t.state in ["resolved", "closed"])
+                )
+                breached = len(
+                    proj_tickets.filtered(lambda t: t.sla_status == "breached")
+                )
+
+                p_urgent = len(proj_tickets.filtered(lambda t: t.priority == "urgent"))
+                p_high = len(proj_tickets.filtered(lambda t: t.priority == "high"))
+                p_medium = len(proj_tickets.filtered(lambda t: t.priority == "medium"))
+                p_low = len(proj_tickets.filtered(lambda t: t.priority == "low"))
+
+                resolved_with_dates = proj_tickets.filtered(
+                    lambda t: t.state in ["resolved", "closed"]
+                    and t.resolved_date
+                    and t.create_date
+                )
+                avg_resolution = 0
+                if resolved_with_dates:
+                    total_hours = sum(
+                        (t.resolved_date - t.create_date).total_seconds() / 3600
+                        for t in resolved_with_dates
+                    )
+                    avg_resolution = round(total_hours / len(resolved_with_dates), 1)
+
+                if total == 0:
+                    health = "green"
+                    health_score = 100
+                else:
+                    resolve_rate = (resolved_count / total) * 100
+                    breach_penalty = (
+                        min((breached / total) * 50, 50) if total > 0 else 0
+                    )
+                    health_score = round(max(0, resolve_rate - breach_penalty), 1)
+                    health = (
+                        "green"
+                        if health_score >= 80
+                        else "amber" if health_score >= 50 else "red"
+                    )
+
+                prev_since = since - timedelta(days=days)
+                prev_tickets = proj_tickets.filtered(
+                    lambda t: t.create_date and prev_since <= t.create_date < since
+                )
+                trend = "stable"
+                if len(prev_tickets) > 0:
+                    change = len(proj_period) - len(prev_tickets)
+                    trend = "up" if change > 0 else "down" if change < 0 else "stable"
+
+                project_health.append(
+                    {
+                        "id": proj.id,
+                        "name": proj.name,
+                        "code": proj.code or "",
+                        "total": total,
+                        "open": open_count,
+                        "resolved": resolved_count,
+                        "breached": breached,
+                        "health": health,
+                        "health_score": health_score,
+                        "avg_resolution_hours": avg_resolution,
+                        "trend": trend,
+                        "period_count": len(proj_period),
+                        "priorities": {
+                            "urgent": p_urgent,
+                            "high": p_high,
+                            "medium": p_medium,
+                            "low": p_low,
+                        },
+                    }
+                )
+
+            project_health.sort(key=lambda p: p["health_score"])
+
+            # ── Focal person leaderboard ──────────────────────────────────────
+            focal_persons = (
+                request.env["res.users"]
+                .sudo()
+                .search(
+                    [
+                        ("id", "not in", [1, request.env.ref("base.public_user").id]),
+                        ("active", "=", True),
+                    ]
+                )
+            )
+            focal_persons = focal_persons.filtered(
+                lambda u: u.has_group("base.group_user")
+            )
+
+            focal_leaderboard = []
+            for fp in focal_persons:
+                fp_tickets = all_tickets.filtered(
+                    lambda t: t.assigned_to and t.assigned_to.id == fp.id
+                )
+                fp_period = period_tickets.filtered(
+                    lambda t: t.assigned_to and t.assigned_to.id == fp.id
+                )
+                assigned = len(fp_tickets)
+                resolved = len(
+                    fp_tickets.filtered(lambda t: t.state in ["resolved", "closed"])
+                )
+                breached = len(
+                    fp_tickets.filtered(lambda t: t.sla_status == "breached")
+                )
+                open_count = len(
+                    fp_tickets.filtered(lambda t: t.state not in ["resolved", "closed"])
+                )
+
+                sla_tickets = fp_tickets.filtered(lambda t: t.sla_policy_id)
+                sla_ok = len(sla_tickets.filtered(lambda t: t.sla_status != "breached"))
+                sla_rate = (
+                    round((sla_ok / len(sla_tickets)) * 100, 1)
+                    if sla_tickets
+                    else 100.0
+                )
+
+                resolved_with_dates = fp_tickets.filtered(
+                    lambda t: t.state in ["resolved", "closed"]
+                    and t.resolved_date
+                    and t.create_date
+                )
+                avg_res = 0
+                if resolved_with_dates:
+                    total_h = sum(
+                        (t.resolved_date - t.create_date).total_seconds() / 3600
+                        for t in resolved_with_dates
+                    )
+                    avg_res = round(total_h / len(resolved_with_dates), 1)
+
+                resolve_rate = (
+                    round((resolved / assigned) * 100, 1) if assigned > 0 else 0
+                )
+
+                focal_leaderboard.append(
+                    {
+                        "id": fp.id,
+                        "name": fp.name,
+                        "assigned": assigned,
+                        "resolved": resolved,
+                        "open": open_count,
+                        "breached": breached,
+                        "resolve_rate": resolve_rate,
+                        "sla_rate": sla_rate,
+                        "avg_resolution_hours": avg_res,
+                        "period_resolved": len(
+                            fp_period.filtered(
+                                lambda t: t.state in ["resolved", "closed"]
+                            )
+                        ),
+                    }
+                )
+
+            focal_leaderboard.sort(key=lambda f: f["resolved"], reverse=True)
+
+            # ── Top customers ─────────────────────────────────────────────────
+            from collections import Counter
+
+            customer_counts = Counter(
+                t.customer_id.name for t in period_tickets if t.customer_id
+            )
+            top_customers = [
+                {"name": name, "count": count}
+                for name, count in customer_counts.most_common(10)
+            ]
+
+            # ── Summary KPIs ──────────────────────────────────────────────────
+            total_period = len(period_tickets)
+            resolved_period = len(
+                period_tickets.filtered(lambda t: t.state in ["resolved", "closed"])
+            )
+            breached_period = len(
+                period_tickets.filtered(lambda t: t.sla_status == "breached")
+            )
+            sla_all = period_tickets.filtered(lambda t: t.sla_policy_id)
+            sla_compliant = len(sla_all.filtered(lambda t: t.sla_status != "breached"))
+            sla_compliance = (
+                round((sla_compliant / len(sla_all)) * 100, 1) if sla_all else 100.0
+            )
+
+            summary = {
+                "total_period": total_period,
+                "resolved_period": resolved_period,
+                "breached_period": breached_period,
+                "sla_compliance": sla_compliance,
+                "resolve_rate": (
+                    round((resolved_period / total_period) * 100, 1)
+                    if total_period > 0
+                    else 0
+                ),
+                "open_tickets": len(
+                    all_tickets.filtered(
+                        lambda t: t.state not in ["resolved", "closed"]
+                    )
+                ),
+            }
+
+            return request.make_response(
+                json.dumps(
+                    {
+                        "success": True,
+                        "days": days,
+                        "summary": summary,
+                        "status_breakdown": status_breakdown,
+                        "priority_dist": priority_dist,
+                        "volume_trend": volume_trend,
+                        "project_health": project_health,
+                        "focal_leaderboard": focal_leaderboard,
+                        "top_customers": top_customers,
+                    }
+                ),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Admin reporting data error: {e}")
+            return request.make_response(
+                json.dumps({"success": False, "error": str(e)}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+    # =========================================================================
+    # PRINTABLE REPORT PAGES
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/admin/report/project/<int:project_id>",
+        type="http",
+        auth="user",
+        website=True,
+    )
+    def report_project(self, project_id, **kw):
+        """Printable Project Health Report for a single project."""
+        user = request.env.user
+        if not user.has_group("base.group_system"):
+            return werkzeug.utils.redirect("/customer_support/dashboard")
+
+        days = int(kw.get("days", 30))
+        since = fields.Datetime.now() - timedelta(days=days)
+
+        proj = request.env["customer_support.project"].sudo().browse(project_id)
+        if not proj.exists():
+            return werkzeug.utils.redirect(
+                "/customer_support/admin_dashboard?tab=reporting&error=Project not found"
+            )
+
+        all_tickets = (
+            request.env["customer.support"]
+            .sudo()
+            .search([("project_id", "=", project_id)])
+        )
+        period_tickets = all_tickets.filtered(
+            lambda t: t.create_date and t.create_date >= since
+        )
+
+        states = ["new", "assigned", "in_progress", "resolved", "closed"]
+        status_breakdown = {
+            s: len(all_tickets.filtered(lambda t: t.state == s)) for s in states
+        }
+        priorities = ["urgent", "high", "medium", "low"]
+        priority_breakdown = {
+            p: len(all_tickets.filtered(lambda t: t.priority == p)) for p in priorities
+        }
+
+        breached = all_tickets.filtered(lambda t: t.sla_status == "breached")
+        resolved_tickets = all_tickets.filtered(
+            lambda t: t.state in ["resolved", "closed"]
+        )
+        resolved_with_dates = resolved_tickets.filtered(
+            lambda t: t.resolved_date and t.create_date
+        )
+        avg_resolution = 0
+        if resolved_with_dates:
+            avg_resolution = round(
+                sum(
+                    (t.resolved_date - t.create_date).total_seconds() / 3600
+                    for t in resolved_with_dates
+                )
+                / len(resolved_with_dates),
+                1,
+            )
+
+        total = len(all_tickets)
+        resolved_count = len(resolved_tickets)
+        breach_count = len(breached)
+        resolve_rate = round((resolved_count / total) * 100, 1) if total > 0 else 0
+        breach_penalty = min((breach_count / total) * 50, 50) if total > 0 else 0
+        health_score = round(max(0, resolve_rate - breach_penalty), 1)
+        health = (
+            "green" if health_score >= 80 else "amber" if health_score >= 50 else "red"
+        )
+
+        focal_map = {}
+        for t in all_tickets:
+            if t.assigned_to:
+                fp_id = t.assigned_to.id
+                if fp_id not in focal_map:
+                    focal_map[fp_id] = {
+                        "name": t.assigned_to.name,
+                        "assigned": 0,
+                        "resolved": 0,
+                    }
+                focal_map[fp_id]["assigned"] += 1
+                if t.state in ["resolved", "closed"]:
+                    focal_map[fp_id]["resolved"] += 1
+        focal_summary = sorted(
+            focal_map.values(), key=lambda x: x["resolved"], reverse=True
+        )
+
+        company = request.env["res.company"].sudo().search([], limit=1)
+
+        return request.render(
+            "customer_support.report_project_health",
+            {
+                "user": user,
+                "project": proj,
+                "company": company,
+                "days": days,
+                "since": since,
+                "all_tickets": all_tickets,
+                "period_tickets": period_tickets,
+                "status_breakdown": status_breakdown,
+                "priority_breakdown": priority_breakdown,
+                "breached": breached,
+                "avg_resolution": avg_resolution,
+                "total": total,
+                "resolved_count": resolved_count,
+                "breach_count": breach_count,
+                "resolve_rate": resolve_rate,
+                "health": health,
+                "health_score": health_score,
+                "focal_summary": focal_summary,
+                "generated_at": fields.Datetime.now().strftime("%Y-%m-%d %H:%M"),
+            },
+        )
+
+    @http.route(
+        "/customer_support/admin/report/focal/<int:focal_id>",
+        type="http",
+        auth="user",
+        website=True,
+    )
+    def report_focal_person(self, focal_id, **kw):
+        """Printable Focal Person Performance Report."""
+        user = request.env.user
+        if not user.has_group("base.group_system"):
+            return werkzeug.utils.redirect("/customer_support/dashboard")
+
+        days = int(kw.get("days", 30))
+        since = fields.Datetime.now() - timedelta(days=days)
+
+        fp = request.env["res.users"].sudo().browse(focal_id)
+        if not fp.exists():
+            return werkzeug.utils.redirect(
+                "/customer_support/admin_dashboard?tab=reporting&error=User not found"
+            )
+
+        all_tickets = (
+            request.env["customer.support"]
+            .sudo()
+            .search([("assigned_to", "=", focal_id)])
+        )
+        period_tickets = all_tickets.filtered(
+            lambda t: t.create_date and t.create_date >= since
+        )
+
+        resolved = all_tickets.filtered(lambda t: t.state in ["resolved", "closed"])
+        open_tickets = all_tickets.filtered(
+            lambda t: t.state not in ["resolved", "closed"]
+        )
+        breached = all_tickets.filtered(lambda t: t.sla_status == "breached")
+
+        sla_tickets = all_tickets.filtered(lambda t: t.sla_policy_id)
+        sla_ok = len(sla_tickets.filtered(lambda t: t.sla_status != "breached"))
+        sla_rate = round((sla_ok / len(sla_tickets)) * 100, 1) if sla_tickets else 100.0
+
+        resolved_with_dates = resolved.filtered(
+            lambda t: t.resolved_date and t.create_date
+        )
+        avg_resolution = 0
+        if resolved_with_dates:
+            avg_resolution = round(
+                sum(
+                    (t.resolved_date - t.create_date).total_seconds() / 3600
+                    for t in resolved_with_dates
+                )
+                / len(resolved_with_dates),
+                1,
+            )
+
+        priorities = ["urgent", "high", "medium", "low"]
+        priority_breakdown = {
+            p: len(all_tickets.filtered(lambda t: t.priority == p)) for p in priorities
+        }
+
+        project_map = {}
+        for t in all_tickets:
+            if t.project_id:
+                pid = t.project_id.id
+                if pid not in project_map:
+                    project_map[pid] = {
+                        "name": t.project_id.name,
+                        "count": 0,
+                        "resolved": 0,
+                    }
+                project_map[pid]["count"] += 1
+                if t.state in ["resolved", "closed"]:
+                    project_map[pid]["resolved"] += 1
+        project_summary = sorted(
+            project_map.values(), key=lambda x: x["count"], reverse=True
+        )
+
+        company = request.env["res.company"].sudo().search([], limit=1)
+
+        return request.render(
+            "customer_support.report_focal_performance",
+            {
+                "user": user,
+                "focal": fp,
+                "company": company,
+                "days": days,
+                "since": since,
+                "all_tickets": all_tickets,
+                "period_tickets": period_tickets,
+                "resolved": resolved,
+                "open_tickets": open_tickets,
+                "breached": breached,
+                "sla_rate": sla_rate,
+                "avg_resolution": avg_resolution,
+                "priority_breakdown": priority_breakdown,
+                "project_summary": project_summary,
+                "resolve_rate": (
+                    round((len(resolved) / len(all_tickets)) * 100, 1)
+                    if all_tickets
+                    else 0
+                ),
+                "generated_at": fields.Datetime.now().strftime("%Y-%m-%d %H:%M"),
+            },
+        )
+
+    @http.route(
+        "/customer_support/admin/report/executive",
+        type="http",
+        auth="user",
+        website=True,
+    )
+    def report_executive(self, **kw):
+        """Printable Executive Summary Report — all projects + all focal persons."""
+        user = request.env.user
+        if not user.has_group("base.group_system"):
+            return werkzeug.utils.redirect("/customer_support/dashboard")
+
+        days = int(kw.get("days", 30))
+        since = fields.Datetime.now() - timedelta(days=days)
+
+        all_tickets = request.env["customer.support"].sudo().search([])
+        period_tickets = all_tickets.filtered(
+            lambda t: t.create_date and t.create_date >= since
+        )
+
+        total = len(all_tickets)
+        resolved_count = len(
+            all_tickets.filtered(lambda t: t.state in ["resolved", "closed"])
+        )
+        open_count = len(
+            all_tickets.filtered(lambda t: t.state not in ["resolved", "closed"])
+        )
+        breached_count = len(all_tickets.filtered(lambda t: t.sla_status == "breached"))
+        sla_all = all_tickets.filtered(lambda t: t.sla_policy_id)
+        sla_ok = len(sla_all.filtered(lambda t: t.sla_status != "breached"))
+        sla_compliance = round((sla_ok / len(sla_all)) * 100, 1) if sla_all else 100.0
+
+        projects = (
+            request.env["customer_support.project"]
+            .sudo()
+            .search([("active", "=", True)])
+        )
+        project_rows = []
+        for proj in projects:
+            pt = all_tickets.filtered(lambda t: t.project_id.id == proj.id)
+            tot = len(pt)
+            res = len(pt.filtered(lambda t: t.state in ["resolved", "closed"]))
+            br = len(pt.filtered(lambda t: t.sla_status == "breached"))
+            score = (
+                round(max(0, (res / tot * 100) - min((br / tot) * 50, 50)), 1)
+                if tot > 0
+                else 100
+            )
+            health = "green" if score >= 80 else "amber" if score >= 50 else "red"
+            project_rows.append(
+                {
+                    "name": proj.name,
+                    "total": tot,
+                    "resolved": res,
+                    "open": tot - res,
+                    "breached": br,
+                    "health": health,
+                    "health_score": score,
+                }
+            )
+        project_rows.sort(key=lambda x: x["health_score"])
+
+        focal_persons = (
+            request.env["res.users"]
+            .sudo()
+            .search(
+                [
+                    ("id", "not in", [1, request.env.ref("base.public_user").id]),
+                    ("active", "=", True),
+                ]
+            )
+        )
+        focal_persons = focal_persons.filtered(lambda u: u.has_group("base.group_user"))
+        focal_rows = []
+        for fp in focal_persons:
+            ft = all_tickets.filtered(
+                lambda t: t.assigned_to and t.assigned_to.id == fp.id
+            )
+            tot = len(ft)
+            res = len(ft.filtered(lambda t: t.state in ["resolved", "closed"]))
+            br = len(ft.filtered(lambda t: t.sla_status == "breached"))
+            sla_t = ft.filtered(lambda t: t.sla_policy_id)
+            sla_r = (
+                round(
+                    (
+                        len(sla_t.filtered(lambda t: t.sla_status != "breached"))
+                        / len(sla_t)
+                    )
+                    * 100,
+                    1,
+                )
+                if sla_t
+                else 100.0
+            )
+            rw = ft.filtered(
+                lambda t: t.state in ["resolved", "closed"]
+                and t.resolved_date
+                and t.create_date
+            )
+            avg_r = (
+                round(
+                    sum(
+                        (t.resolved_date - t.create_date).total_seconds() / 3600
+                        for t in rw
+                    )
+                    / len(rw),
+                    1,
+                )
+                if rw
+                else 0
+            )
+            focal_rows.append(
+                {
+                    "name": fp.name,
+                    "assigned": tot,
+                    "resolved": res,
+                    "open": tot - res,
+                    "breached": br,
+                    "resolve_rate": round((res / tot) * 100, 1) if tot > 0 else 0,
+                    "sla_rate": sla_r,
+                    "avg_resolution": avg_r,
+                }
+            )
+        focal_rows.sort(key=lambda x: x["resolved"], reverse=True)
+
+        company = request.env["res.company"].sudo().search([], limit=1)
+
+        return request.render(
+            "customer_support.report_executive_summary",
+            {
+                "user": user,
+                "company": company,
+                "days": days,
+                "since": since,
+                "total": total,
+                "resolved_count": resolved_count,
+                "open_count": open_count,
+                "breached_count": breached_count,
+                "sla_compliance": sla_compliance,
+                "resolve_rate": (
+                    round((resolved_count / total) * 100, 1) if total > 0 else 0
+                ),
+                "project_rows": project_rows,
+                "focal_rows": focal_rows,
+                "period_total": len(period_tickets),
+                "generated_at": fields.Datetime.now().strftime("%Y-%m-%d %H:%M"),
+            },
+        )
+
+    # =========================================================================
+    # ADMIN NOTIFICATIONS  — polled every 30s by the bell dropdown
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/admin/notifications",
+        type="http",
+        auth="user",
+        website=True,
+        csrf=False,
+    )
+    def admin_notifications(self, **kw):
+        """
+        Returns 3 notification categories for the admin bell:
+          1. sla_breaches   — tickets with breached SLA across ALL agents
+          2. unassigned     — tickets with no assigned_to and state = 'new'
+          3. status_changes — tickets whose write_date is within last 30 min
+        """
+        try:
+            now = fields.Datetime.now()
+            Ticket = request.env["customer.support"].sudo()
+
+            # ── 1. SLA Breaches across all agents ────────────────────────────
+            breached_tickets = Ticket.search(
+                [
+                    ("sla_deadline", "!=", False),
+                    ("sla_deadline", "<", now),
+                    ("state", "not in", ["resolved", "closed"]),
+                ],
+                limit=20,
+                order="sla_deadline asc",
+            )
+
+            sla_breaches = []
+            for t in breached_tickets:
+                over_seconds = (now - t.sla_deadline).total_seconds()
+                h = int(over_seconds // 3600)
+                m = int((over_seconds % 3600) // 60)
+                time_display = (
+                    f"{h}h {m}m past deadline" if h > 0 else f"{m}m past deadline"
+                )
+                sla_breaches.append(
+                    {
+                        "ticket_id": t.id,
+                        "ticket_name": t.name or "",
+                        "subject": t.subject or "(No subject)",
+                        "agent_name": (
+                            t.assigned_to.name if t.assigned_to else "Unassigned"
+                        ),
+                        "priority": (t.priority or "low").capitalize(),
+                        "time_display": time_display,
+                    }
+                )
+
+            # ── 2. Unassigned tickets ─────────────────────────────────────────
+            unassigned_tickets = Ticket.search(
+                [
+                    ("assigned_to", "=", False),
+                    ("state", "in", ["new"]),
+                ],
+                limit=15,
+                order="create_date asc",
+            )
+
+            unassigned = []
+            for t in unassigned_tickets:
+                if t.create_date:
+                    waiting_secs = (now - t.create_date).total_seconds()
+                    h = int(waiting_secs // 3600)
+                    m = int((waiting_secs % 3600) // 60)
+                    waiting = f"{h}h {m}m" if h > 0 else f"{m}m"
+                else:
+                    waiting = "Unknown"
+                unassigned.append(
+                    {
+                        "ticket_id": t.id,
+                        "ticket_name": t.name or "",
+                        "subject": t.subject or "(No subject)",
+                        "priority": (t.priority or "low").capitalize(),
+                        "waiting": waiting,
+                        "create_date": (
+                            t.create_date.strftime("%b %d, %H:%M")
+                            if t.create_date
+                            else "—"
+                        ),
+                    }
+                )
+
+            # ── 3. Status changes in last 30 minutes ──────────────────────────
+            cutoff = now - timedelta(minutes=30)
+            recently_changed = Ticket.search(
+                [
+                    ("write_date", ">=", cutoff),
+                    ("state", "not in", ["new"]),
+                ],
+                limit=15,
+                order="write_date desc",
+            )
+
+            status_changes = []
+            state_labels = {
+                "new": "New",
+                "assigned": "Assigned",
+                "in_progress": "In Progress",
+                "resolved": "Resolved",
+                "closed": "Closed",
+            }
+            for t in recently_changed:
+                status_changes.append(
+                    {
+                        "ticket_id": t.id,
+                        "ticket_name": t.name or "",
+                        "subject": t.subject or "(No subject)",
+                        "new_state": state_labels.get(t.state, t.state),
+                        "agent_name": (
+                            t.assigned_to.name if t.assigned_to else "Unassigned"
+                        ),
+                        "changed_at": (
+                            t.write_date.strftime("%b %d, %H:%M")
+                            if t.write_date
+                            else "—"
+                        ),
+                    }
+                )
+
+            return request.make_response(
+                json.dumps(
+                    {
+                        "sla_breaches": sla_breaches,
+                        "unassigned": unassigned,
+                        "status_changes": status_changes,
+                    }
+                ),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Admin notifications error: {str(e)}")
+            return request.make_response(
+                json.dumps(
+                    {
+                        "sla_breaches": [],
+                        "unassigned": [],
+                        "status_changes": [],
+                    }
+                ),
+                headers=[("Content-Type", "application/json")],
+            )
+
+    # =========================================================================
+    # AGENT WORKLOAD OVERVIEW  — polled every 60s by the workload panel
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/admin/workload",
+        type="http",
+        auth="user",
+        website=True,
+        csrf=False,
+    )
+    def admin_workload(self, **kw):
+        """
+        Returns workload stats per active internal user (focal person).
+        For each agent:
+          - assigned    : tickets in state 'assigned' or 'new'
+          - in_progress : tickets in state 'in_progress'
+          - resolved    : tickets in state 'resolved' or 'closed'
+          - total_open  : assigned + in_progress
+          - breached    : open tickets with sla_deadline < now
+          - resolve_rate: resolved / total * 100  (rounded)
+        """
+        try:
+            now = fields.Datetime.now()
+            Ticket = request.env["customer.support"].sudo()
+
+            # Active internal users only (exclude admin id=1 and portal users)
+            users = (
+                request.env["res.users"]
+                .sudo()
+                .search(
+                    [
+                        ("active", "=", True),
+                        ("id", "!=", 1),
+                        ("share", "=", False),
+                    ]
+                )
+            )
+
+            agents = []
+            total_open_system = 0
+            total_breached_system = 0
+            overloaded_count = 0
+
+            for user in users:
+                user_tickets = Ticket.search([("assigned_to", "=", user.id)])
+
+                assigned = len(
+                    user_tickets.filtered(lambda t: t.state in ["new", "assigned"])
+                )
+                in_progress = len(
+                    user_tickets.filtered(lambda t: t.state == "in_progress")
+                )
+                resolved = len(
+                    user_tickets.filtered(lambda t: t.state in ["resolved", "closed"])
+                )
+                total_open = assigned + in_progress
+                total_all = len(user_tickets)
+
+                breached = len(
+                    user_tickets.filtered(
+                        lambda t: t.sla_deadline
+                        and t.sla_deadline < now
+                        and t.state not in ["resolved", "closed"]
+                    )
+                )
+
+                resolve_rate = (
+                    round((resolved / total_all) * 100) if total_all > 0 else 0
+                )
+
+                total_open_system += total_open
+                total_breached_system += breached
+                if total_open > 8:
+                    overloaded_count += 1
+
+                agents.append(
+                    {
+                        "user_id": user.id,
+                        "name": user.name,
+                        "email": user.email or "",
+                        "assigned": assigned,
+                        "in_progress": in_progress,
+                        "resolved": resolved,
+                        "total_open": total_open,
+                        "breached": breached,
+                        "resolve_rate": resolve_rate,
+                    }
+                )
+
+            # Sort: most loaded first
+            agents.sort(key=lambda a: a["total_open"], reverse=True)
+
+            summary = {
+                "total_agents": len(agents),
+                "total_open": total_open_system,
+                "overloaded": overloaded_count,
+                "total_breached": total_breached_system,
+            }
+
+            return request.make_response(
+                json.dumps({"agents": agents, "summary": summary}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Admin workload error: {str(e)}")
+            return request.make_response(
+                json.dumps({"agents": [], "summary": {}}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+    # =========================================================================
     # USER MANAGEMENT LIST
     # =========================================================================
 
@@ -170,18 +1101,10 @@ class CustomerSupportAdminUsers(http.Controller):
         website=True,
     )
     def admin_users_list(self, **kw):
-        """
-        User Management Page - Lists all users split by role
-        Working: Displays focal persons and customers in separate sections
-        Access: Authenticated system administrators only
-        """
         user = request.env.user
-
-        # Block non-admin users
         if not user.has_group("base.group_system"):
             return werkzeug.utils.redirect("/customer_support/dashboard")
 
-        # Fetch all active non-system users
         all_users = (
             request.env["res.users"]
             .search(
@@ -193,7 +1116,6 @@ class CustomerSupportAdminUsers(http.Controller):
             .sorted(key=lambda r: r.create_date, reverse=True)
         )
 
-        # Split into focal persons and customers for separate display sections
         focal_persons = all_users.filtered(lambda u: u.has_group("base.group_user"))
         customers = all_users.filtered(
             lambda u: u.has_group("base.group_portal")
@@ -223,19 +1145,10 @@ class CustomerSupportAdminUsers(http.Controller):
         website=True,
     )
     def admin_create_user_form(self, **kw):
-        """
-        Create User Form - Displays the new user form
-        Working: Renders form for creating focal persons or customers,
-                 includes project selection dropdown
-        Access: Authenticated system administrators only
-        """
         user = request.env.user
-
-        # Block non-admin users
         if not user.has_group("base.group_system"):
             return werkzeug.utils.redirect("/customer_support/dashboard")
 
-        # Fetch all active projects to populate the dropdown
         projects = (
             request.env["customer_support.project"]
             .sudo()
@@ -246,7 +1159,7 @@ class CustomerSupportAdminUsers(http.Controller):
             "customer_support.admin_create_user_form",
             {
                 "user": user,
-                "projects": projects,  # Passed to template for dropdown
+                "projects": projects,
                 "page_name": "create_user",
                 "error": kw.get("error", ""),
             },
@@ -261,30 +1174,13 @@ class CustomerSupportAdminUsers(http.Controller):
         csrf=True,
     )
     def admin_submit_user(self, **post):
-        """
-        Submit User - Handles new user creation
-        Working: Creates partner record, then user record with the correct
-                 access group. Sends a role-appropriate welcome email.
-        Access: Authenticated system administrators only
-
-        Email behaviour:
-          - customer      → EmailService.send_welcome_email()
-          - focal_person  → EmailService.send_welcome_email_focal_person()
-          Email failures are non-fatal; user creation is already committed.
-        """
         try:
             user = request.env.user
-
-            # Block non-admin users
             if not user.has_group("base.group_system"):
                 return werkzeug.utils.redirect("/customer_support/dashboard")
 
-            # Normalize post data to a plain dict
             post_dict = dict(post) if not isinstance(post, dict) else post
 
-            # ------------------------------------------------------------------
-            # Extract and validate required fields
-            # ------------------------------------------------------------------
             name = post_dict.get("name", "").strip()
             email = post_dict.get("email", "").strip()
             password = post_dict.get("password", "").strip()
@@ -309,7 +1205,6 @@ class CustomerSupportAdminUsers(http.Controller):
                     "/customer_support/admin_dashboard/create_user?error=Project is required"
                 )
 
-            # Prevent duplicate accounts — check active AND archived users
             existing_user = (
                 request.env["res.users"]
                 .sudo()
@@ -321,9 +1216,6 @@ class CustomerSupportAdminUsers(http.Controller):
                     "/customer_support/admin_dashboard/create_user?error=A user with this email already exists"
                 )
 
-            # ------------------------------------------------------------------
-            # Create the partner record first (user record links to it)
-            # ------------------------------------------------------------------
             partner = (
                 request.env["res.partner"]
                 .sudo()
@@ -333,22 +1225,16 @@ class CustomerSupportAdminUsers(http.Controller):
                         "email": email,
                         "phone": phone,
                         "is_company": False,
-                        "project_id": int(project_id),  # Link partner to project
+                        "project_id": int(project_id),
                     }
                 )
             )
 
-            # ------------------------------------------------------------------
-            # Determine which Odoo group to assign based on user_type
-            # ------------------------------------------------------------------
             if user_type == "focal_person":
-                # Internal user — can access the backend and resolve tickets
                 groups_to_add = [request.env.ref("base.group_user").id]
             else:
-                # Portal user (customer) — restricted to the portal only
                 groups_to_add = [request.env.ref("base.group_portal").id]
 
-            # Create the user record (suppress Odoo's default reset-password email)
             new_user = (
                 request.env["res.users"]
                 .sudo()
@@ -365,25 +1251,18 @@ class CustomerSupportAdminUsers(http.Controller):
                 )
             )
 
-            # Assign the correct access group
             if groups_to_add:
                 new_user.sudo().write({"group_ids": [(6, 0, groups_to_add)]})
 
             _logger.info(
-                f"User created: {new_user.name} ({user_type}) "
-                f"assigned to project {project_id} by {user.name}"
+                f"User created: {new_user.name} ({user_type}) assigned to project "
+                f"{project_id} by {user.name}"
             )
 
-            # ------------------------------------------------------------------
-            # Send a role-appropriate welcome email.
-            # Failures are caught and logged but do NOT roll back user creation.
-            # ------------------------------------------------------------------
             try:
                 if user_type == "customer":
-                    # Welcome email with portal-specific messaging
                     EmailService.send_welcome_email(email, name, password)
                 elif user_type == "focal_person":
-                    # Welcome email with agent/support-specific messaging
                     EmailService.send_welcome_email_focal_person(email, name, password)
             except Exception as email_error:
                 _logger.error(f"Welcome email failed for {email}: {str(email_error)}")
@@ -392,15 +1271,13 @@ class CustomerSupportAdminUsers(http.Controller):
                 "Focal Person" if user_type == "focal_person" else "Customer"
             )
             return werkzeug.utils.redirect(
-                f"/customer_support/admin_dashboard/users"
-                f"?success={user_type_label} created successfully"
+                f"/customer_support/admin_dashboard/users?success={user_type_label} created successfully"
             )
 
         except Exception as e:
             _logger.exception(f"Create user error: {str(e)}")
             return werkzeug.utils.redirect(
-                "/customer_support/admin_dashboard/create_user"
-                "?error=Error creating user. Please try again."
+                "/customer_support/admin_dashboard/create_user?error=Error creating user. Please try again."
             )
 
     # =========================================================================
@@ -414,14 +1291,7 @@ class CustomerSupportAdminUsers(http.Controller):
         website=True,
     )
     def admin_edit_user_form(self, user_id, **kw):
-        """
-        Edit User Form - Displays the edit form pre-populated with user data
-        Working: Loads existing user info and current role for the form
-        Access: Authenticated system administrators only
-        """
         current_user = request.env.user
-
-        # Block non-admin users
         if not current_user.has_group("base.group_system"):
             return werkzeug.utils.redirect("/customer_support/dashboard")
 
@@ -431,7 +1301,6 @@ class CustomerSupportAdminUsers(http.Controller):
                 "/customer_support/admin_dashboard/users?error=User not found"
             )
 
-        # Determine the user's current role to pre-select in the form
         user_type = (
             "focal_person" if edit_user.has_group("base.group_user") else "customer"
         )
@@ -456,16 +1325,8 @@ class CustomerSupportAdminUsers(http.Controller):
         csrf=True,
     )
     def admin_update_user(self, user_id, **post):
-        """
-        Update User - Processes the edit user form submission
-        Working: Updates partner and user records; swaps access group if
-                 the user_type has changed; optionally resets password.
-        Access: Authenticated system administrators only
-        """
         try:
             current_user = request.env.user
-
-            # Block non-admin users
             if not current_user.has_group("base.group_system"):
                 return werkzeug.utils.redirect("/customer_support/dashboard")
 
@@ -475,12 +1336,8 @@ class CustomerSupportAdminUsers(http.Controller):
                     "/customer_support/admin_dashboard/users?error=User not found"
                 )
 
-            # Normalize post data to a plain dict
             post_dict = dict(post) if not isinstance(post, dict) else post
 
-            # ------------------------------------------------------------------
-            # Extract and validate required fields
-            # ------------------------------------------------------------------
             name = post_dict.get("name", "").strip()
             email = post_dict.get("email", "").strip()
             phone = post_dict.get("phone", "").strip()
@@ -489,16 +1346,13 @@ class CustomerSupportAdminUsers(http.Controller):
 
             if not name:
                 return werkzeug.utils.redirect(
-                    f"/customer_support/admin_dashboard/user/{user_id}/edit"
-                    "?error=Name is required"
+                    f"/customer_support/admin_dashboard/user/{user_id}/edit?error=Name is required"
                 )
             if not email:
                 return werkzeug.utils.redirect(
-                    f"/customer_support/admin_dashboard/user/{user_id}/edit"
-                    "?error=Email is required"
+                    f"/customer_support/admin_dashboard/user/{user_id}/edit?error=Email is required"
                 )
 
-            # Prevent duplicate email — exclude the user currently being edited
             existing_user = (
                 request.env["res.users"]
                 .sudo()
@@ -514,27 +1368,17 @@ class CustomerSupportAdminUsers(http.Controller):
             )
             if existing_user:
                 return werkzeug.utils.redirect(
-                    f"/customer_support/admin_dashboard/user/{user_id}/edit"
-                    "?error=Email already exists"
+                    f"/customer_support/admin_dashboard/user/{user_id}/edit?error=Email already exists"
                 )
 
-            # Update the linked partner record
             edit_user.partner_id.sudo().write(
                 {"name": name, "email": email, "phone": phone}
             )
 
-            # Build user update payload
-            update_vals = {
-                "name": name,
-                "login": email,
-                "email": email,
-            }
-
-            # Only update password if a new one was provided
+            update_vals = {"name": name, "login": email, "email": email}
             if password:
                 update_vals["password"] = password
 
-            # Swap access group to match the selected user_type
             if user_type == "focal_person":
                 groups_to_add = [request.env.ref("base.group_user").id]
                 groups_to_remove = [request.env.ref("base.group_portal").id]
@@ -543,12 +1387,11 @@ class CustomerSupportAdminUsers(http.Controller):
                 groups_to_remove = [request.env.ref("base.group_user").id]
 
             update_vals["group_ids"] = [
-                (4, groups_to_add[0]),  # (4, id) → link/add group
-                (3, groups_to_remove[0]),  # (3, id) → unlink/remove group
+                (4, groups_to_add[0]),
+                (3, groups_to_remove[0]),
             ]
 
             edit_user.sudo().write(update_vals)
-
             _logger.info(f"User updated: {edit_user.name} by {current_user.name}")
 
             return werkzeug.utils.redirect(
@@ -558,8 +1401,7 @@ class CustomerSupportAdminUsers(http.Controller):
         except Exception as e:
             _logger.exception(f"Update user error: {str(e)}")
             return werkzeug.utils.redirect(
-                f"/customer_support/admin_dashboard/user/{user_id}/edit"
-                "?error=Error updating user"
+                f"/customer_support/admin_dashboard/user/{user_id}/edit?error=Error updating user"
             )
 
     # =========================================================================
@@ -575,16 +1417,8 @@ class CustomerSupportAdminUsers(http.Controller):
         csrf=True,
     )
     def admin_toggle_user_active(self, user_id, **post):
-        """
-        Toggle User Active/Inactive - Flips a user's active flag
-        Working: Activates an inactive user or deactivates an active one.
-                 Admins cannot deactivate their own account.
-        Access: Authenticated system administrators only
-        """
         try:
             current_user = request.env.user
-
-            # Block non-admin users
             if not current_user.has_group("base.group_system"):
                 return werkzeug.utils.redirect("/customer_support/dashboard")
 
@@ -594,30 +1428,24 @@ class CustomerSupportAdminUsers(http.Controller):
                     "/customer_support/admin_dashboard/users?error=User not found"
                 )
 
-            # Prevent admins from locking themselves out
             if edit_user.id == current_user.id:
                 return werkzeug.utils.redirect(
-                    "/customer_support/admin_dashboard/users"
-                    "?error=Cannot deactivate yourself"
+                    "/customer_support/admin_dashboard/users?error=Cannot deactivate yourself"
                 )
 
-            # Flip the active flag
             new_status = not edit_user.active
             edit_user.sudo().write({"active": new_status})
-
             status_text = "activated" if new_status else "deactivated"
             _logger.info(f"User {status_text}: {edit_user.name} by {current_user.name}")
 
             return werkzeug.utils.redirect(
-                f"/customer_support/admin_dashboard/users"
-                f"?success=User {status_text} successfully"
+                f"/customer_support/admin_dashboard/users?success=User {status_text} successfully"
             )
 
         except Exception as e:
             _logger.exception(f"Toggle user active error: {str(e)}")
             return werkzeug.utils.redirect(
-                "/customer_support/admin_dashboard/users"
-                "?error=Error updating user status"
+                "/customer_support/admin_dashboard/users?error=Error updating user status"
             )
 
     # =========================================================================
@@ -633,17 +1461,8 @@ class CustomerSupportAdminUsers(http.Controller):
         csrf=True,
     )
     def admin_delete_user(self, user_id, **post):
-        """
-        Delete User - Soft-deletes a user by archiving them
-        Working: Sets active=False instead of removing the record, preserving
-                 all historical data (tickets, messages, etc.).
-                 Admins cannot delete their own account.
-        Access: Authenticated system administrators only
-        """
         try:
             current_user = request.env.user
-
-            # Block non-admin users
             if not current_user.has_group("base.group_system"):
                 return werkzeug.utils.redirect("/customer_support/dashboard")
 
@@ -653,23 +1472,17 @@ class CustomerSupportAdminUsers(http.Controller):
                     "/customer_support/admin_dashboard/users?error=User not found"
                 )
 
-            # Prevent admins from deleting themselves
             if edit_user.id == current_user.id:
                 return werkzeug.utils.redirect(
-                    "/customer_support/admin_dashboard/users"
-                    "?error=Cannot delete yourself"
+                    "/customer_support/admin_dashboard/users?error=Cannot delete yourself"
                 )
 
             user_name = edit_user.name
-
-            # Soft-delete: archive instead of unlink to preserve history
             edit_user.sudo().write({"active": False})
-
             _logger.info(f"User archived: {user_name} by {current_user.name}")
 
             return werkzeug.utils.redirect(
-                "/customer_support/admin_dashboard/users"
-                "?success=User deleted successfully"
+                "/customer_support/admin_dashboard/users?success=User deleted successfully"
             )
 
         except Exception as e:

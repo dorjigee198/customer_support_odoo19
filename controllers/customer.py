@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import base64
+import json
 import logging
-from odoo import http
+from odoo import http, fields
 from odoo.http import request
+from datetime import datetime, timedelta
 import werkzeug
 
 _logger = logging.getLogger(__name__)
@@ -158,7 +160,7 @@ class CustomerSupportCustomer(http.Controller):
                                         "type": "binary",
                                         "datas": base64.b64encode(file_data).decode(
                                             "utf-8"
-                                        ),  # FIXED
+                                        ),
                                         "res_model": "customer.support",
                                         "res_id": ticket.id,
                                         "mimetype": uploaded_file.content_type
@@ -185,4 +187,278 @@ class CustomerSupportCustomer(http.Controller):
             _logger.exception(f"Submit ticket error: {str(e)}")
             return werkzeug.utils.redirect(
                 "/customer_support/create_ticket?error=Error creating ticket. Please try again."
+            )
+
+    # =========================================================================
+    # CUSTOMER NOTIFICATIONS — fetch unread
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/customer/notifications",
+        type="http",
+        auth="user",
+        methods=["GET"],
+        website=True,
+        csrf=False,
+    )
+    def get_customer_notifications(self, **kw):
+        """
+        Returns unread notifications for the logged-in customer as JSON.
+        Polled every 30 seconds by the portal dashboard bell.
+        """
+        try:
+            user = request.env.user
+            partner = user.partner_id
+
+            notifications = (
+                request.env["customer.support.notification"]
+                .sudo()
+                .search(
+                    [("customer_id", "=", partner.id), ("is_read", "=", False)],
+                    order="create_date desc",
+                    limit=30,
+                )
+            )
+
+            items = []
+            for n in notifications:
+                type_meta = {
+                    "status_change": {"icon": "bi-arrow-left-right", "cls": "status"},
+                    "assigned": {"icon": "bi-person-check-fill", "cls": "assigned"},
+                    "sla_breach": {
+                        "icon": "bi-exclamation-octagon-fill",
+                        "cls": "breach",
+                    },
+                }.get(n.notification_type, {"icon": "bi-bell-fill", "cls": "status"})
+
+                # Human-readable time
+                time_str = ""
+                if n.create_date:
+                    now = fields.Datetime.now()
+                    secs = int((now - n.create_date).total_seconds())
+                    if secs < 60:
+                        time_str = "just now"
+                    elif secs < 3600:
+                        time_str = f"{secs // 60}m ago"
+                    elif secs < 86400:
+                        time_str = f"{secs // 3600}h ago"
+                    else:
+                        time_str = f"{secs // 86400}d ago"
+
+                items.append(
+                    {
+                        "id": n.id,
+                        "ticket_id": n.ticket_id.id if n.ticket_id else None,
+                        "message": n.message or "",
+                        "type": n.notification_type,
+                        "icon": type_meta["icon"],
+                        "cls": type_meta["cls"],
+                        "time": time_str,
+                    }
+                )
+
+            return request.make_response(
+                json.dumps(
+                    {"success": True, "notifications": items, "count": len(items)}
+                ),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Customer notifications error: {e}")
+            return request.make_response(
+                json.dumps({"success": False, "notifications": [], "count": 0}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+    # =========================================================================
+    # CUSTOMER NOTIFICATIONS — mark all read
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/customer/notifications/mark_read",
+        type="http",
+        auth="user",
+        methods=["POST"],
+        website=True,
+        csrf=False,
+    )
+    def mark_notifications_read(self, **kw):
+        """Marks all unread notifications for the current customer as read."""
+        try:
+            user = request.env.user
+            partner = user.partner_id
+
+            unread = (
+                request.env["customer.support.notification"]
+                .sudo()
+                .search([("customer_id", "=", partner.id), ("is_read", "=", False)])
+            )
+            unread.write({"is_read": True})
+
+            return request.make_response(
+                json.dumps({"success": True, "marked": len(unread)}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Mark notifications read error: {e}")
+            return request.make_response(
+                json.dumps({"success": False}),
+                headers=[("Content-Type", "application/json")],
+            )
+
+    # =========================================================================
+    # CUSTOMER REPORTING — data API
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/customer/reporting",
+        type="http",
+        auth="user",
+        methods=["GET"],
+        website=True,
+        csrf=False,
+    )
+    def get_customer_reporting(self, days="30", **kw):
+        """
+        Returns reporting data for the logged-in customer as JSON.
+        Used by the Reporting tab charts on the portal dashboard.
+        Query param: ?days=7|30|90
+        """
+        try:
+            user = request.env.user
+            partner = user.partner_id
+            days_int = int(days) if str(days).isdigit() else 30
+            since = datetime.now() - timedelta(days=days_int)
+
+            # All tickets for this customer
+            all_tickets = (
+                request.env["customer.support"]
+                .sudo()
+                .search([("customer_id", "=", partner.id)])
+            )
+
+            # Tickets within the selected period
+            period_tickets = all_tickets.filtered(
+                lambda t: t.create_date
+                and t.create_date >= fields.Datetime.to_datetime(since)
+            )
+
+            # ── KPI cards ────────────────────────────────────────────────
+            total = len(period_tickets)
+            resolved = len(
+                period_tickets.filtered(lambda t: t.state in ("resolved", "closed"))
+            )
+            open_count = len(
+                period_tickets.filtered(lambda t: t.state in ("new", "in_progress"))
+            )
+
+            # Avg resolution time (hours) for resolved tickets in period
+            res_times = []
+            for t in period_tickets.filtered(
+                lambda t: t.state in ("resolved", "closed")
+            ):
+                if t.create_date and t.write_date:
+                    diff = (t.write_date - t.create_date).total_seconds() / 3600
+                    res_times.append(diff)
+            avg_resolution = (
+                round(sum(res_times) / len(res_times), 1) if res_times else 0
+            )
+
+            # ── Status breakdown ─────────────────────────────────────────
+            status_data = {
+                "New": len(period_tickets.filtered(lambda t: t.state == "new")),
+                "In Progress": len(
+                    period_tickets.filtered(lambda t: t.state == "in_progress")
+                ),
+                "Resolved": len(
+                    period_tickets.filtered(lambda t: t.state == "resolved")
+                ),
+                "Closed": len(period_tickets.filtered(lambda t: t.state == "closed")),
+            }
+
+            # ── Priority breakdown ────────────────────────────────────────
+            priority_data = {
+                "Low": len(
+                    period_tickets.filtered(lambda t: (t.priority or "low") == "low")
+                ),
+                "Medium": len(
+                    period_tickets.filtered(lambda t: (t.priority or "low") == "medium")
+                ),
+                "High": len(
+                    period_tickets.filtered(lambda t: (t.priority or "low") == "high")
+                ),
+                "Urgent": len(
+                    period_tickets.filtered(lambda t: (t.priority or "low") == "urgent")
+                ),
+            }
+
+            # ── Ticket timeline (daily counts for selected period) ────────
+            timeline = []
+            for i in range(days_int):
+                day = since + timedelta(days=i)
+                day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
+                day_end = day_start + timedelta(days=1)
+                count = len(
+                    period_tickets.filtered(
+                        lambda t, ds=day_start, de=day_end: t.create_date
+                        and ds <= t.create_date < de
+                    )
+                )
+                timeline.append(
+                    {
+                        "date": day_start.strftime("%b %d"),
+                        "count": count,
+                    }
+                )
+
+            # ── Resolve rate trend (weekly buckets) ──────────────────────
+            resolve_trend = []
+            weeks = max(1, days_int // 7)
+            for w in range(weeks):
+                wk_start = since + timedelta(weeks=w)
+                wk_end = wk_start + timedelta(weeks=1)
+                wk_tickets = period_tickets.filtered(
+                    lambda t, ws=wk_start, we=wk_end: t.create_date
+                    and ws <= t.create_date < we
+                )
+                wk_total = len(wk_tickets)
+                wk_resolved = len(
+                    wk_tickets.filtered(lambda t: t.state in ("resolved", "closed"))
+                )
+                rate = round((wk_resolved / wk_total * 100), 1) if wk_total else 0
+                resolve_trend.append(
+                    {
+                        "week": f"Wk {w + 1}",
+                        "rate": rate,
+                    }
+                )
+
+            data = {
+                "success": True,
+                "days": days_int,
+                "kpis": {
+                    "total": total,
+                    "resolved": resolved,
+                    "open": open_count,
+                    "avg_resolution_hours": avg_resolution,
+                    "resolve_rate": round((resolved / total * 100), 1) if total else 0,
+                },
+                "status_breakdown": status_data,
+                "priority_breakdown": priority_data,
+                "timeline": timeline,
+                "resolve_trend": resolve_trend,
+            }
+
+            return request.make_response(
+                json.dumps(data),
+                headers=[("Content-Type", "application/json")],
+            )
+
+        except Exception as e:
+            _logger.error(f"Customer reporting error: {e}")
+            return request.make_response(
+                json.dumps({"success": False, "error": str(e)}),
+                headers=[("Content-Type", "application/json")],
             )

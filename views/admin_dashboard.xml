@@ -3,117 +3,100 @@
     <template id="admin_dashboard" name="Admin Dashboard">
         <t t-call="web.layout">
             <t t-set="head">
-                <!-- Bootstrap 5 CSS -->
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
                     rel="stylesheet" />
                 <link
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
-                <!-- Font Awesome for icons -->
                 <link
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
                     rel="stylesheet" />
-                <!-- Custom CSS -->
                 <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard.css" />
+                <style>
 
+                </style>
             </t>
 
             <div class="dashboard-wrapper">
-                <!-- Top Navigation Header -->
                 <header class="dashboard-header">
                     <div class="header-content">
-                        <!-- LEFT SECTION - Navigation Tabs -->
                         <div class="header-left" role="tablist">
-                            <button class="nav-link active"
-                                id="overview-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#overview"
-                                type="button"
-                                role="tab"
-                                aria-controls="overview"
-                                aria-selected="true">
-                                <i class="bi bi-speedometer2 me-2"></i>Overview </button>
-                            <button class="nav-link"
-                                id="ticket-assignment-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#ticket-assignment"
-                                type="button"
-                                role="tab"
-                                aria-controls="ticket-assignment"
+                            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab"
+                                data-bs-target="#overview" type="button" role="tab"
+                                aria-controls="overview" aria-selected="true">
+                                <i class="bi bi-speedometer2 me-2"></i>Overview</button>
+                            <button class="nav-link" id="ticket-assignment-tab" data-bs-toggle="tab"
+                                data-bs-target="#ticket-assignment" type="button" role="tab"
+                                aria-controls="ticket-assignment" aria-selected="false">
+                                <i class="bi bi-clipboard-check me-2"></i>Ticket Assignment</button>
+                            <button class="nav-link" id="user-management-tab" data-bs-toggle="tab"
+                                data-bs-target="#user-management" type="button" role="tab"
+                                aria-controls="user-management" aria-selected="false">
+                                <i class="bi bi-people me-2"></i>User Management</button>
+                            <button class="nav-link" id="system-configuration-tab"
+                                data-bs-toggle="tab" data-bs-target="#system-configuration"
+                                type="button" role="tab" aria-controls="system-configuration"
                                 aria-selected="false">
-                                <i class="bi bi-clipboard-check me-2"></i>Ticket Assignment </button>
-                            <button class="nav-link"
-                                id="user-management-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#user-management"
-                                type="button"
-                                role="tab"
-                                aria-controls="user-management"
-                                aria-selected="false">
-                                <i class="bi bi-people me-2"></i>User Management </button>
-                            <button class="nav-link"
-                                id="system-configuration-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#system-configuration"
-                                type="button"
-                                role="tab"
-                                aria-controls="system-configuration"
-                                aria-selected="false">
-                                <i class="bi bi-gear me-2"></i>System Configuration </button>
-                            <button class="nav-link"
-                                id="reporting-tab"
-                                data-bs-toggle="tab"
-                                data-bs-target="#reporting"
-                                type="button"
-                                role="tab"
-                                aria-controls="reporting"
-                                aria-selected="false">
-                                <i class="bi bi-graph-up-arrow me-2"></i>Reporting </button>
+                                <i class="bi bi-gear me-2"></i>System Configuration</button>
+                            <button class="nav-link" id="reporting-tab" data-bs-toggle="tab"
+                                data-bs-target="#reporting" type="button" role="tab"
+                                aria-controls="reporting" aria-selected="false">
+                                <i class="bi bi-graph-up-arrow me-2"></i>Reporting</button>
                         </div>
-
-                        <!-- RIGHT SECTION - User Profile & Icons -->
                         <div class="header-right">
-                            <!-- User Profile -->
+                            <button class="admin-grid-btn me-2" id="workloadBtn"
+                                title="Agent Workload Overview">
+                                <i class="bi bi-grid-3x3-gap-fill"></i>
+                            </button>
+                            <div class="admin-notif-wrap me-3">
+                                <button class="admin-notif-btn" id="adminNotifBell"
+                                    title="Notifications">
+                                    <i class="bi bi-bell-fill" id="adminBellIcon"></i>
+                                    <span class="admin-notif-badge hidden" id="adminNotifBadge">0</span>
+                                </button>
+                                <div class="admin-notif-dropdown" id="adminNotifDropdown">
+                                    <div class="admin-notif-header">
+                                        <h6><i class="bi bi-bell-fill me-2" style="color:#1a3a5c;"></i>
+                                            Notifications</h6>
+                                        <button class="admin-notif-mark-read" id="adminMarkAllRead">Mark
+                                            all read</button>
+                                    </div>
+                                    <div class="admin-notif-list" id="adminNotifList">
+                                        <div class="admin-notif-empty"><i class="bi bi-arrow-repeat"
+                                                style="font-size:1.6rem;display:block;margin-bottom:.5rem;"></i>
+                                            Loading...</div>
+                                    </div>
+                                    <div class="admin-notif-footer">
+                                        <a href="#" id="notifViewAllTickets">View all tickets
+                                            &#x2192;</a>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="user-profile dropdown">
-                                <i class="bi bi-grid-3x3-gap-fill text-white me-3"
-                                    style="font-size: 1.2rem; cursor: pointer;"></i>
-
-                                <i class="bi bi-bell-fill text-white me-3"
-                                    style="font-size: 1.2rem; cursor: pointer;"></i>
-
-                                <!-- Clickable Profile -->
                                 <a class="d-flex align-items-center text-white dropdown-toggle"
-                                    href="#"
-                                    id="userProfileDropdown"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                    style="text-decoration: none;">
-
+                                    href="#" id="userProfileDropdown" data-bs-toggle="dropdown"
+                                    aria-expanded="false" style="text-decoration:none;">
                                     <span class="user-name me-3">
                                         <t t-esc="user.name" />
                                     </span>
-
                                     <img t-att-src="'/web/image/res.users/%s/avatar_128' % user.id"
-                                        alt="User Avatar"
-                                        class="user-avatar"
+                                        alt="User Avatar" class="user-avatar"
                                         onerror="this.src='/web/static/img/avatar_gray.svg'" />
                                 </a>
-
-                                <!-- Dropdown Menu -->
                                 <ul class="dropdown-menu dropdown-menu-end"
                                     aria-labelledby="userProfileDropdown">
                                     <li>
-                                        <a class="dropdown-item"
-                                            href="/customer_support/profile">
-                                            <i class="bi bi-person me-2"></i> Edit Profile </a>
+                                        <a class="dropdown-item" href="/customer_support/profile"><i
+                                                class="bi bi-person me-2"></i>Edit Profile</a>
                                     </li>
                                     <li>
                                         <hr class="dropdown-divider" />
                                     </li>
                                     <li>
                                         <a class="dropdown-item text-danger"
-                                            href="/customer_support/logout_manual">
-                                            <i class="bi bi-box-arrow-right me-2"></i> Logout </a>
+                                            href="/customer_support/logout_manual"><i
+                                                class="bi bi-box-arrow-right me-2"></i>Logout</a>
                                     </li>
                                 </ul>
                             </div>
@@ -121,127 +104,150 @@
                     </div>
                 </header>
 
-                <!-- Main Content Area -->
+                <!-- WORKLOAD OVERLAY + PANEL -->
+                <div class="workload-overlay" id="workloadOverlay"></div>
+                <div class="workload-panel" id="workloadPanel">
+                    <div class="workload-panel-header">
+                        <h5><i class="bi bi-people-fill"></i>Agent Workload Overview</h5>
+                        <button class="workload-close-btn" id="workloadClose">&#x2715;</button>
+                    </div>
+                    <div class="workload-summary-bar">
+                        <div class="workload-summary-item">
+                            <div class="workload-summary-val" id="ws-agents">—</div>
+                            <div class="workload-summary-lbl">Agents</div>
+                        </div>
+                        <div class="workload-summary-item">
+                            <div class="workload-summary-val" id="ws-total-open">—</div>
+                            <div class="workload-summary-lbl">Total Open</div>
+                        </div>
+                        <div class="workload-summary-item">
+                            <div class="workload-summary-val" id="ws-overloaded">—</div>
+                            <div class="workload-summary-lbl">Overloaded</div>
+                        </div>
+                        <div class="workload-summary-item">
+                            <div class="workload-summary-val" id="ws-breached">—</div>
+                            <div class="workload-summary-lbl">SLA Breached</div>
+                        </div>
+                    </div>
+                    <div class="workload-panel-body" id="workloadPanelBody">
+                        <div class="workload-empty"><i class="bi bi-arrow-repeat"
+                                style="font-size:2rem;display:block;margin-bottom:.5rem;"></i>Loading
+                            agent workloads...</div>
+                    </div>
+                    <div class="workload-refresh-row">
+                        <span id="workloadLastUpdated">Updating...</span>
+                        <button class="workload-refresh-btn" id="workloadRefreshBtn"><i
+                                class="bi bi-arrow-clockwise me-1"></i>Refresh</button>
+                    </div>
+                </div>
+
                 <div class="container-fluid admin-dashboard py-4">
-                    <!-- Tab Content -->
                     <div class="tab-content" id="dashboardTabsContent">
 
-                        <!-- Overview Tab -->
+                        <!-- ═══ OVERVIEW TAB ═══ -->
                         <div class="tab-pane fade show active" id="overview" role="tabpanel"
                             aria-labelledby="overview-tab">
                             <div class="dashboard-content">
                                 <div class="dashboard-grid">
-                                    <!-- Left Section - Ticket Analytics -->
                                     <div class="dashboard-card">
                                         <div class="card-header">
-                                            <h2 class="card-title">
-                                                <i class="bi bi-bar-chart-fill me-2"></i>Ticket
-                                                Analytics </h2>
+                                            <h2 class="card-title"><i
+                                                    class="bi bi-bar-chart-fill me-2"></i>Ticket
+                                                Analytics</h2>
                                             <div class="card-actions">
-                                                <span class="last-updated">
-                                                    <i class="bi bi-clock me-1"></i>Updated just now </span>
+                                                <span class="last-updated"><i
+                                                        class="bi bi-clock me-1"></i>Updated just
+                                                    now</span>
                                             </div>
                                         </div>
-
-                                        <!-- Top Row - Main Stats -->
                                         <div class="analytics-grid">
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="open_tickets">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-folder-plus"></i>
                                                 </div>
                                                 <div class="stat-content">
                                                     <div class="stat-label">Open Tickets</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('open_tickets', 0)" />
+                                                        <t t-esc="analytics.get('open_tickets',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Active Tickets</div>
                                                 </div>
                                             </div>
-
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="total_tickets">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-stack"></i>
                                                 </div>
                                                 <div class="stat-content">
                                                     <div class="stat-label">Total Tickets</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('total_tickets', 0)" />
+                                                        <t t-esc="analytics.get('total_tickets',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">All Tickets</div>
                                                 </div>
                                             </div>
-
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="high_priority">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-exclamation-triangle"></i>
                                                 </div>
                                                 <div class="stat-content">
                                                     <div class="stat-label">High Priority</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('high_priority', 0)" />
+                                                        <t t-esc="analytics.get('high_priority',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">High Priority</div>
                                                 </div>
                                             </div>
-
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="urgent">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-lightning-charge"></i>
                                                 </div>
                                                 <div class="stat-content">
                                                     <div class="stat-label">Urgent</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('urgent', 0)" />
+                                                        <t t-esc="analytics.get('urgent',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Urgent Priority</div>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <!-- Second Row - Time Metrics -->
                                         <div class="analytics-grid">
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="avg_open_hours">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-clock-history"></i>
                                                 </div>
                                                 <div class="stat-content">
                                                     <div class="stat-label">Avg Open Hours</div>
                                                     <div class="stat-value">
-                                                        <t
-                                                            t-esc="analytics.get('avg_open_hours', 0)" />
+                                                        <t t-esc="analytics.get('avg_open_hours',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Hours</div>
                                                 </div>
                                             </div>
-
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="total_hours">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-clock-fill"></i>
                                                 </div>
                                                 <div class="stat-content">
                                                     <div class="stat-label">Total Hours</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('total_hours', 0)" />
+                                                        <t t-esc="analytics.get('total_hours',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Hours Open</div>
                                                 </div>
                                             </div>
-
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="avg_high_hours">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-exclamation-octagon"></i>
                                                 </div>
                                                 <div class="stat-content">
                                                     <div class="stat-label">Avg High Priority Hours</div>
                                                     <div class="stat-value">
-                                                        <t
-                                                            t-esc="analytics.get('avg_high_hours', 0)" />
+                                                        <t t-esc="analytics.get('avg_high_hours',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Hours</div>
                                                 </div>
                                             </div>
-
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="avg_urgent_hours">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-lightning-charge-fill"></i>
                                                 </div>
@@ -249,16 +255,14 @@
                                                     <div class="stat-label">Avg Urgent Hours</div>
                                                     <div class="stat-value">
                                                         <t
-                                                            t-esc="analytics.get('avg_urgent_hours', 0)" />
+                                                            t-esc="analytics.get('avg_urgent_hours',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Hours</div>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <!-- Third Row - Resolved Stats -->
                                         <div class="analytics-grid">
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="resolved_tickets">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-check-circle"></i>
                                                 </div>
@@ -266,39 +270,36 @@
                                                     <div class="stat-label">Resolved Tickets</div>
                                                     <div class="stat-value">
                                                         <t
-                                                            t-esc="analytics.get('resolved_tickets', 0)" />
+                                                            t-esc="analytics.get('resolved_tickets',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Fixed Tickets</div>
                                                 </div>
                                             </div>
-
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="solve_rate">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-percent"></i>
                                                 </div>
                                                 <div class="stat-content">
                                                     <div class="stat-label">Solve Rate</div>
                                                     <div class="stat-value"><t
-                                                            t-esc="analytics.get('solve_rate', 0)" />
+                                                            t-esc="analytics.get('solve_rate',0)" />
                                                         %</div>
                                                     <div class="stat-subtitle">Success Rate</div>
                                                 </div>
                                             </div>
-
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="high_resolved">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-check-square"></i>
                                                 </div>
                                                 <div class="stat-content">
                                                     <div class="stat-label">High Priority Resolved</div>
                                                     <div class="stat-value">
-                                                        <t t-esc="analytics.get('high_resolved', 0)" />
+                                                        <t t-esc="analytics.get('high_resolved',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">High Fixed</div>
                                                 </div>
                                             </div>
-
-                                            <div class="stat-box">
+                                            <div class="stat-box" data-key="urgent_resolved">
                                                 <div class="stat-icon">
                                                     <i class="bi bi-check-all"></i>
                                                 </div>
@@ -306,73 +307,67 @@
                                                     <div class="stat-label">Urgent Resolved</div>
                                                     <div class="stat-value">
                                                         <t
-                                                            t-esc="analytics.get('urgent_resolved', 0)" />
+                                                            t-esc="analytics.get('urgent_resolved',0)" />
                                                     </div>
                                                     <div class="stat-subtitle">Urgent Fixed</div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Right Section - My Performance -->
                                     <div class="performance-card">
                                         <div class="card-header">
-                                            <h2 class="card-title">
-                                                <i class="bi bi-graph-up-arrow me-2"></i>My
-                                                Performance </h2>
+                                            <h2 class="card-title"><i
+                                                    class="bi bi-graph-up-arrow me-2"></i>My
+                                                Performance</h2>
                                             <div class="card-actions">
-                                                <span class="performance-score">
-                                                    <span class="score-badge">
-                                                        <t
-                                                            t-esc="performance.get('sample_performance', 85)" />
-                                                    % </span> Overall Score </span>
+                                                <span class="performance-score"
+                                                    data-key="sample_performance"><span
+                                                        class="score-badge"><t
+                                                            t-esc="performance.get('sample_performance',85)" />
+                                                    %</span> Overall Score</span>
                                             </div>
                                         </div>
-
                                         <div class="performance-grid">
-                                            <div class="performance-stat">
+                                            <div class="performance-stat" data-key="today_closed">
                                                 <div class="performance-icon">
                                                     <i class="bi bi-calendar-check"></i>
                                                 </div>
                                                 <div class="performance-content">
                                                     <div class="performance-label">Today Closed</div>
                                                     <div class="performance-value">
-                                                        <t
-                                                            t-esc="performance.get('today_closed', 0)" />
+                                                        <t t-esc="performance.get('today_closed',0)" />
                                                     </div>
                                                     <div class="performance-subtitle">Tickets Closed
                                                         Today</div>
                                                 </div>
                                             </div>
-
-                                            <div class="performance-stat">
+                                            <div class="performance-stat"
+                                                data-key="avg_resolve_rate">
                                                 <div class="performance-icon">
                                                     <i class="bi bi-calendar-week"></i>
                                                 </div>
                                                 <div class="performance-content">
                                                     <div class="performance-label">Avg Last 7 Days</div>
                                                     <div class="performance-value"><t
-                                                            t-esc="performance.get('avg_resolve_rate', 0)" />
+                                                            t-esc="performance.get('avg_resolve_rate',0)" />
                                                         %</div>
                                                     <div class="performance-subtitle">Resolve Rate</div>
                                                 </div>
                                             </div>
-
-                                            <div class="performance-stat">
+                                            <div class="performance-stat" data-key="daily_target">
                                                 <div class="performance-icon">
                                                     <i class="bi bi-target"></i>
                                                 </div>
                                                 <div class="performance-content">
                                                     <div class="performance-label">Daily Target</div>
                                                     <div class="performance-value"><t
-                                                            t-esc="performance.get('daily_target', 80)" />
+                                                            t-esc="performance.get('daily_target',80)" />
                                                         %</div>
                                                     <div class="performance-subtitle">Target
                                                         Achievement</div>
                                                 </div>
                                             </div>
-
-                                            <div class="performance-stat">
+                                            <div class="performance-stat" data-key="achievement">
                                                 <div class="performance-icon">
                                                     <i class="bi bi-trophy"></i>
                                                 </div>
@@ -380,33 +375,27 @@
                                                     <div class="performance-label">Current
                                                         Achievement</div>
                                                     <div class="performance-value"><t
-                                                            t-esc="performance.get('achievement', 0)" />
+                                                            t-esc="performance.get('achievement',0)" />
                                                         %</div>
                                                     <div class="performance-subtitle">Target
                                                         Progress</div>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <!-- Progress Bar -->
                                         <div class="performance-progress mt-4">
                                             <div class="progress-label">
                                                 <span>Daily Goal Progress</span>
-                                                <span><t t-esc="performance.get('achievement', 0)" />
+                                                <span><t t-esc="performance.get('achievement',0)" />
                                                     %</span>
                                             </div>
                                             <div class="progress">
-                                                <div class="progress-bar"
-                                                    role="progressbar"
-                                                    t-att-style="'width: ' + str(performance.get('achievement', 0)) + '%;'"
-                                                    t-att-class="'bg-success' if performance.get('achievement', 0) >= 80 else 'bg-warning'">
-                                                </div>
+                                                <div class="progress-bar" role="progressbar"
+                                                    t-att-style="'width: ' + str(performance.get('achievement',0)) + '%;'"
+                                                    t-att-class="'bg-success' if performance.get('achievement',0) >= 80 else 'bg-warning'"></div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Quick Actions Row -->
                                 <div class="quick-actions mt-4">
                                     <div class="actions-grid">
                                         <a href="/customer_support/admin_dashboard/users"
@@ -419,7 +408,6 @@
                                                 <p>Add, edit, or remove system users</p>
                                             </div>
                                         </a>
-
                                         <a href="#ticket-assignment" class="action-card"
                                             data-bs-toggle="tab">
                                             <div class="action-icon">
@@ -430,7 +418,6 @@
                                                 <p>Assign tickets to support agents</p>
                                             </div>
                                         </a>
-
                                         <a href="#reporting" class="action-card"
                                             data-bs-toggle="tab">
                                             <div class="action-icon">
@@ -441,7 +428,6 @@
                                                 <p>Download system reports</p>
                                             </div>
                                         </a>
-
                                         <a href="#system-configuration" class="action-card"
                                             data-bs-toggle="tab">
                                             <div class="action-icon">
@@ -457,94 +443,85 @@
                             </div>
                         </div>
 
-                        <!-- Ticket Assignment Tab -->
+                        <!-- ═══ TICKET ASSIGNMENT TAB ═══ -->
                         <div class="tab-pane fade" id="ticket-assignment" role="tabpanel"
                             aria-labelledby="ticket-assignment-tab">
-
-                            <!-- SUCCESS/ERROR MESSAGES -->
                             <t t-if="request.params.get('success')">
                                 <div class="alert alert-success alert-dismissible fade show"
                                     role="alert">
                                     <i class="bi bi-check-circle-fill me-2"></i>
                                     <strong>Success!</strong>
                                     <t t-esc="request.params.get('success')" />
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
                             </t>
-
                             <t t-if="request.params.get('error')">
                                 <div class="alert alert-danger alert-dismissible fade show"
                                     role="alert">
                                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                                     <strong>Error!</strong>
                                     <t t-esc="request.params.get('error')" />
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                        aria-label="Close"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
                             </t>
-
-                            <!-- Quick Stats -->
                             <div class="row mb-4">
                                 <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="quick-stat-card">
+                                    <div class="quick-stat-card" data-key="count_new">
                                         <div class="quick-stat-icon">
                                             <i class="bi bi-file-earmark-plus text-primary"></i>
                                         </div>
                                         <div class="quick-stat-label">New Tickets</div>
                                         <div class="quick-stat-value">
-                                            <t t-esc="ticket_counts.get('new', 0)" />
+                                            <t t-esc="ticket_counts.get('new',0)" />
                                         </div>
-                                        <div class="quick-stat-trend positive">
-                                            <i class="bi bi-arrow-up-short"></i>+2 today </div>
+                                        <div class="quick-stat-trend positive"><i
+                                                class="bi bi-arrow-up-short"></i>+2 today</div>
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="quick-stat-card">
+                                    <div class="quick-stat-card" data-key="count_assigned">
                                         <div class="quick-stat-icon">
                                             <i class="bi bi-person-check text-info"></i>
                                         </div>
                                         <div class="quick-stat-label">Assigned Tickets</div>
                                         <div class="quick-stat-value">
-                                            <t t-esc="ticket_counts.get('assigned', 0)" />
+                                            <t t-esc="ticket_counts.get('assigned',0)" />
                                         </div>
-                                        <div class="quick-stat-trend positive">
-                                            <i class="bi bi-arrow-up-short"></i>+3 today </div>
+                                        <div class="quick-stat-trend positive"><i
+                                                class="bi bi-arrow-up-short"></i>+3 today</div>
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="quick-stat-card">
+                                    <div class="quick-stat-card" data-key="count_resolved">
                                         <div class="quick-stat-icon">
                                             <i class="bi bi-check-circle text-success"></i>
                                         </div>
                                         <div class="quick-stat-label">Resolved Tickets</div>
                                         <div class="quick-stat-value">
-                                            <t t-esc="ticket_counts.get('resolved', 0)" />
+                                            <t t-esc="ticket_counts.get('resolved',0)" />
                                         </div>
-                                        <div class="quick-stat-trend positive">
-                                            <i class="bi bi-arrow-up-short"></i>+5 today </div>
+                                        <div class="quick-stat-trend positive"><i
+                                                class="bi bi-arrow-up-short"></i>+5 today</div>
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="quick-stat-card">
+                                    <div class="quick-stat-card" data-key="count_total">
                                         <div class="quick-stat-icon">
                                             <i class="bi bi-stack text-secondary"></i>
                                         </div>
                                         <div class="quick-stat-label">Total Tickets</div>
                                         <div class="quick-stat-value">
-                                            <t t-esc="ticket_counts.get('total', 0)" />
+                                            <t t-esc="ticket_counts.get('total',0)" />
                                         </div>
-                                        <div class="quick-stat-trend">
-                                            <i class="bi bi-infinity"></i>All time </div>
+                                        <div class="quick-stat-trend"><i class="bi bi-infinity"></i>All
+                                            time</div>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Ticket Assignment Table -->
                             <div class="card">
                                 <div class="card-header">
-                                    <h5 class="mb-0">
-                                        <i class="bi bi-table me-2"></i>Ticket Assignment Management </h5>
+                                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>Ticket
+                                        Assignment Management</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="ticket-table-container">
@@ -552,33 +529,34 @@
                                             <table class="table table-hover ticket-table">
                                                 <thead>
                                                     <tr>
-                                                        <th style="width: 5%;">
+                                                        <th style="width:5%;">
                                                             <i>Sl.no</i>
                                                         </th>
-                                                        <th style="width: 20%;"><i
+                                                        <th style="width:18%;"><i
                                                                 class="bi bi-ticket-perforated me-1 align-middle"></i>
                                                             Ticket</th>
-                                                        <th style="width: 15%;"><i
+                                                        <th style="width:13%;"><i
                                                                 class="bi bi-person-circle me-1 align-middle"></i>
                                                             Client</th>
-                                                        <th style="width: 10%;"><i
+                                                        <th style="width:8%;"><i
                                                                 class="bi bi-exclamation-triangle me-1 align-middle"></i>
                                                             Priority</th>
-                                                        <th style="width: 10%;"><i
+                                                        <th style="width:8%;"><i
                                                                 class="bi bi-clock-history me-1 align-middle"></i>
                                                             Status</th>
-                                                        <th style="width: 20%;"><i
+                                                        <th style="width:13%;"><i
                                                                 class="bi bi-calendar-check me-1 align-middle"></i>
                                                             Created_On</th>
-                                                        <th style="width: 15%;"><i
+                                                        <th style="width:12%;"><i
                                                                 class="bi bi-person-check me-1 align-middle"></i>
                                                             Assigned_To</th>
-                                                        <th style="width: 7%;"><i
+                                                        <th style="width:23%;"><i
                                                                 class="bi bi-three-dots-vertical me-1 align-middle"></i>
                                                             Action</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
+                                                            
     <t t-foreach="tickets" t-as="ticket">
         <tr class="ticket-row" 
             t-attf-data-href="/customer_support/admin_view/ticket/#{ticket.id}"
@@ -644,6 +622,121 @@
         </tr>
     </t>
 </tbody>
+                                                    <t t-foreach="tickets" t-as="ticket">
+                                                        <tr class="position-relative">
+                                                            <td>
+                                                                <a
+                                                                    t-att-href="'/customer_support/admin_view/ticket/%s' % ticket.id"
+                                                                    class="stretched-link text-decoration-none text-reset">
+                                                                    <t t-esc="ticket.id" />
+                                                                </a>
+                                                            </td>
+                                                            <td>
+                                                                <i class="bi bi-link-45deg me-1"></i>
+                                                                <t t-esc="ticket.subject" />
+                                                            </td>
+                                                            <td>
+                                                                <t t-esc="ticket.customer_id.name" />
+                                                            </td>
+                                                            <td>
+                                                                <span
+                                                                    t-att-class="'priority-badge priority-' + ticket.priority">
+                                                                    <t
+                                                                        t-esc="ticket.priority.capitalize()" />
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="status-badge"
+                                                                    t-att-class="'status-' + ticket.state">
+                                                                    <t
+                                                                        t-esc="ticket.state.replace('_',' ').capitalize()" />
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <t
+                                                                    t-esc="ticket.create_date.strftime('%Y-%m-%d %H:%M') if ticket.create_date else ''" />
+                                                            </td>
+                                                            <td>
+                                                                <t t-if="ticket.assigned_to">
+                                                                    <i
+                                                                        class="bi bi-person-circle me-1"></i>
+                                                                    <t
+                                                                        t-esc="ticket.assigned_to.name" />
+                                                                    <t t-if="ticket.sla_policy_id">
+                                                                        <br />
+                                                                        <small
+                                                                            t-att-class="'badge mt-1 ' + ('bg-danger' if ticket.sla_status == 'breached' else 'bg-warning text-dark' if ticket.sla_status == 'at_risk' else 'bg-success')">
+                                                                            <i
+                                                                                class="bi bi-clock me-1"></i>
+                                                                            <t
+                                                                                t-esc="ticket.sla_policy_id.name" />
+                                                                        </small>
+                                                                    </t>
+                                                                </t>
+                                                            </td>
+                                                            <td
+                                                                style="position:relative;z-index:10;">
+                                                                <t
+                                                                    t-if="ticket.state in ['new','assigned']">
+                                                                    <form
+                                                                        t-att-action="'/customer_support/ticket/%s/assign' % ticket.id"
+                                                                        method="post"
+                                                                        class="assign-form">
+                                                                        <input type="hidden"
+                                                                            name="csrf_token"
+                                                                            t-att-value="request.csrf_token()" />
+                                                                        <select
+                                                                            class="form-select form-select-sm mb-1"
+                                                                            name="assigned_to"
+                                                                            required="required">
+                                                                            <option value="">Select
+                                                                                Focal Person</option>
+                                                                            <t
+                                                                                t-foreach="request.env['res.users'].sudo().search([('active','=',True),('id','!=',1)])"
+                                                                                t-as="u">
+                                                                                <option
+                                                                                    t-att-value="u.id"
+                                                                                    t-att-selected="'selected' if ticket.assigned_to and ticket.assigned_to.id == u.id else None">
+                                                                                    <t
+                                                                                        t-esc="u.name" />
+                                                                                </option>
+                                                                            </t>
+                                                                        </select>
+                                                                        <select
+                                                                            class="form-select form-select-sm mb-1"
+                                                                            name="sla_policy_id">
+                                                                            <option value="">No SLA
+                                                                                (optional)</option>
+                                                                            <t
+                                                                                t-foreach="request.env['customer.support.sla.policy'].sudo().search([('active','=',True)])"
+                                                                                t-as="sla">
+                                                                                <option
+                                                                                    t-att-value="sla.id"
+                                                                                    t-att-selected="'selected' if ticket.sla_policy_id and ticket.sla_policy_id.id == sla.id else None"><t
+                                                                                        t-esc="sla.name" />
+                                                                                    (<t
+                                                                                        t-esc="sla.response_time" /><t
+                                                                                        t-esc="' ' + sla.time_unit" />
+                                                                                    )</option>
+                                                                            </t>
+                                                                        </select>
+                                                                        <button type="submit"
+                                                                            class="btn btn-primary btn-sm w-100"><i
+                                                                                class="bi bi-person-check me-1"></i>
+                                                                            Assign</button>
+                                                                    </form>
+                                                                </t>
+                                                                <t
+                                                                    t-if="ticket.state in ['resolved','closed']">
+                                                                    <span class="text-success"><i
+                                                                            class="bi bi-check-circle me-1"></i>No
+                                                                        Action</span>
+                                                                </t>
+                                                            </td>
+                                                        </tr>
+                                                    </t>
+                                                
+
                                             </table>
                                         </div>
                                     </div>
@@ -651,7 +744,7 @@
                             </div>
                         </div>
 
-                        <!-- User Management Tab -->
+                        <!-- ═══ USER MANAGEMENT TAB ═══ -->
                         <div class="tab-pane fade" id="user-management" role="tabpanel"
                             aria-labelledby="user-management-tab">
                             <div class="row">
@@ -659,11 +752,11 @@
                                     <div class="card">
                                         <div
                                             class="card-header d-flex justify-content-between align-items-center">
-                                            <h5 class="mb-0">
-                                                <i class="bi bi-people-fill me-2"></i>System Users </h5>
+                                            <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>System
+                                                Users</h5>
                                             <a href="/customer_support/admin_dashboard/users"
-                                                class="btn btn-primary btn-sm">
-                                                <i class="bi bi-person-plus me-2"></i> Add New User </a>
+                                                class="btn btn-primary btn-sm"><i
+                                                    class="bi bi-person-plus me-2"></i>Add New User</a>
                                         </div>
                                         <div class="card-body">
                                             <div class="table-responsive">
@@ -707,54 +800,47 @@
                                                                 <td>
                                                                     <t t-if="user_item['active']">
                                                                         <span
-                                                                            class="badge bg-success">
-                                                                            <i
+                                                                            class="badge bg-success"><i
                                                                                 class="bi bi-check-circle me-1"></i>
-                                                                            Active </span>
+                                                                            Active</span>
                                                                     </t>
                                                                     <t
                                                                         t-if="not user_item['active']">
                                                                         <span
-                                                                            class="badge bg-secondary">
-                                                                            <i
+                                                                            class="badge bg-secondary"><i
                                                                                 class="bi bi-x-circle me-1"></i>
-                                                                            Inactive </span>
+                                                                            Inactive</span>
                                                                     </t>
                                                                 </td>
                                                                 <td>
                                                                     <a
-                                                                        t-att-href="'/customer_support/admin_dashboard/user/%s/edit'
-                                                                    % user_item['id']"
-                                                                        class="btn
-                                                                    btn-sm btn-outline-primary me-1"
-                                                                        title="Edit User">
+                                                                        t-att-href="'/customer_support/admin_dashboard/user/%s/edit' % user_item['id']"
+                                                                        class="btn btn-sm btn-outline-primary me-1">
                                                                         <i
                                                                             class="bi bi-pencil-square"></i>
                                                                     </a>
                                                                     <form
                                                                         t-att-action="'/customer_support/admin_dashboard/user/%s/toggle_active' % user_item['id']"
                                                                         method="post"
-                                                                        style="display: inline-block;">
+                                                                        style="display:inline-block;">
                                                                         <input type="hidden"
                                                                             name="csrf_token"
                                                                             t-att-value="request.csrf_token()" />
                                                                         <button type="submit"
-                                                                            class="btn btn-sm btn-outline-warning me-1"
-                                                                            title="Toggle Status">
+                                                                            class="btn btn-sm btn-outline-warning me-1">
                                                                             <i class="bi bi-power"></i>
                                                                         </button>
                                                                     </form>
                                                                     <form
                                                                         t-att-action="'/customer_support/admin_dashboard/user/%s/delete' % user_item['id']"
                                                                         method="post"
-                                                                        style="display: inline-block;"
-                                                                        onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                                                        style="display:inline-block;"
+                                                                        onsubmit="return confirm('Are you sure?');">
                                                                         <input type="hidden"
                                                                             name="csrf_token"
                                                                             t-att-value="request.csrf_token()" />
                                                                         <button type="submit"
-                                                                            class="btn btn-sm btn-outline-danger"
-                                                                            title="Delete User">
+                                                                            class="btn btn-sm btn-outline-danger">
                                                                             <i class="bi bi-trash3"></i>
                                                                         </button>
                                                                     </form>
@@ -770,14 +856,14 @@
                             </div>
                         </div>
 
-                        <!-- System Configuration Tab -->
+                        <!-- ═══ SYSTEM CONFIGURATION TAB ═══ -->
                         <div class="tab-pane fade" id="system-configuration" role="tabpanel"
                             aria-labelledby="system-configuration-tab">
 
-                            <!-- Configuration Options Grid -->
+                            <!-- ── 4 Config Cards ── -->
                             <div class="row g-4 mb-4">
-                                <!-- General Settings Card -->
-                                <div class="col-md-4">
+                                <!-- General Settings -->
+                                <div class="col-md-3">
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
                                             <div class="config-icon">
@@ -785,17 +871,14 @@
                                             </div>
                                         </div>
                                         <h3 class="config-title">General Settings</h3>
-                                        <p class="config-description">Configure system-wide settings
-                                            including system name, timezone, and language
-                                            preferences</p>
+                                        <p class="config-description">Configure system-wide settings</p>
                                         <button class="btn btn-config" data-bs-toggle="modal"
-                                            data-bs-target="#generalSettingsModal">
-                                            <i class="bi bi-gear-fill me-2"></i>Configure </button>
+                                            data-bs-target="#generalSettingsModal"><i
+                                                class="bi bi-gear-fill me-2"></i>Configure</button>
                                     </div>
                                 </div>
-
-                                <!-- Ticket Settings Card -->
-                                <div class="col-md-4">
+                                <!-- Ticket Settings -->
+                                <div class="col-md-3">
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
                                             <div class="config-icon">
@@ -803,17 +886,15 @@
                                             </div>
                                         </div>
                                         <h3 class="config-title">Ticket Settings</h3>
-                                        <p class="config-description">Manage ticket configurations,
-                                            SLA response times, auto-assignment, and priority
+                                        <p class="config-description">Manage SLA policies and ticket
                                             defaults</p>
                                         <button class="btn btn-config" data-bs-toggle="modal"
-                                            data-bs-target="#ticketSettingsModal">
-                                            <i class="bi bi-gear-fill me-2"></i>Configure </button>
+                                            data-bs-target="#ticketSettingsModal"><i
+                                                class="bi bi-gear-fill me-2"></i>Configure</button>
                                     </div>
                                 </div>
-
-                                <!-- Project Configuration Card -->
-                                <div class="col-md-4">
+                                <!-- Project Configuration -->
+                                <div class="col-md-3">
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
                                             <div class="config-icon">
@@ -822,47 +903,57 @@
                                         </div>
                                         <h3 class="config-title">Project Configuration</h3>
                                         <p class="config-description">Define and manage software
-                                            projects including tech stack, timelines, and compliance
-                                            standards</p>
+                                            projects</p>
                                         <button class="btn btn-config" data-bs-toggle="modal"
-                                            data-bs-target="#projectConfigModal">
-                                            <i class="bi bi-folder-plus me-2"></i>View Projects </button>
+                                            data-bs-target="#projectConfigModal"><i
+                                                class="bi bi-folder-plus me-2"></i>View Projects</button>
+                                    </div>
+                                </div>
+                                <!-- ★ NEW: Knowledge Base ★ -->
+                                <div class="col-md-3">
+                                    <div class="config-option-card">
+                                        <div class="config-icon-wrapper">
+                                            <div class="config-icon">
+                                                <i class="bi bi-database-fill"></i>
+                                            </div>
+                                        </div>
+                                        <h3 class="config-title">Knowledge Base</h3>
+                                        <p class="config-description">Upload documents for the AI
+                                            chatbot to answer customer questions</p>
+                                        <button class="btn btn-config" data-bs-toggle="modal"
+                                            data-bs-target="#knowledgeBaseModal"><i
+                                                class="bi bi-cloud-upload me-2"></i>Manage Docs</button>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- General Settings Modal -->
                             <div class="modal fade" id="generalSettingsModal" tabindex="-1"
-                                aria-labelledby="generalSettingsModalLabel" aria-hidden="true">
+                                aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="generalSettingsModalLabel">
-                                                <i class="bi bi-sliders me-2"></i>General Settings </h5>
+                                            <h5 class="modal-title"><i class="bi bi-sliders me-2"></i>General
+                                                Settings</h5>
                                             <button type="button" class="btn-close"
-                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
                                             <form>
                                                 <div class="mb-3">
-                                                    <label class="form-label">
-                                                        <i class="bi bi-building me-1"></i>System
-                                                        Name </label>
+                                                    <label class="form-label">System Name</label>
                                                     <input type="text" class="form-control"
                                                         value="Customer Support System" />
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label class="form-label">
-                                                        <i class="bi bi-clock me-1"></i>Time Zone </label>
+                                                    <label class="form-label">Time Zone</label>
                                                     <select class="form-select">
                                                         <option>UTC-05:00 (Eastern Time)</option>
                                                         <option>UTC-08:00 (Pacific Time)</option>
                                                     </select>
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label class="form-label">
-                                                        <i class="bi bi-translate me-1"></i>Default
-                                                        Language </label>
+                                                    <label class="form-label">Default Language</label>
                                                     <select class="form-select">
                                                         <option>English</option>
                                                         <option>Spanish</option>
@@ -873,8 +964,8 @@
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary">
-                                                <i class="bi bi-save me-2"></i>Save Changes </button>
+                                            <button type="button" class="btn btn-primary"><i
+                                                    class="bi bi-save me-2"></i>Save Changes</button>
                                         </div>
                                     </div>
                                 </div>
@@ -882,230 +973,338 @@
 
                             <!-- Ticket Settings Modal -->
                             <div class="modal fade" id="ticketSettingsModal" tabindex="-1"
-                                aria-labelledby="ticketSettingsModalLabel" aria-hidden="true">
-                                <div class="modal-dialog modal-lg">
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-xl">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="ticketSettingsModalLabel">
-                                                <i class="bi bi-ticket-perforated me-2"></i>Ticket
-                                                Settings </h5>
+                                            <h5 class="modal-title"><i
+                                                    class="bi bi-ticket-perforated me-2"></i>Ticket
+                                                Settings &amp; SLA Policies</h5>
                                             <button type="button" class="btn-close"
-                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form>
-                                                <div class="mb-3">
-                                                    <label class="form-label">
-                                                        <i class="bi bi-hourglass-split me-1"></i>SLA
-                                                        Response Time (hours) </label>
-                                                    <input type="number" class="form-control"
-                                                        value="24" />
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">
-                                                        <i class="bi bi-robot me-1"></i>
-                                                        Auto-assignment </label>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input"
-                                                            type="checkbox" id="autoAssign"
-                                                            checked="" />
-                                                        <label class="form-check-label"
-                                                            for="autoAssign">
-                                                            Enable auto-assignment
-                                                        </label>
+                                            <div id="slaAlert" class="d-none mb-3"></div>
+                                            <ul class="nav nav-tabs mb-4">
+                                                <li class="nav-item">
+                                                    <button class="nav-link active"
+                                                        data-bs-toggle="tab"
+                                                        data-bs-target="#slaTab" type="button"><i
+                                                            class="bi bi-clock-history me-1"></i>SLA
+                                                        Policies</button>
+                                                </li>
+                                                <li class="nav-item">
+                                                    <button class="nav-link" data-bs-toggle="tab"
+                                                        data-bs-target="#ticketDefaultsTab"
+                                                        type="button"><i class="bi bi-sliders me-1"></i>Ticket
+                                                        Defaults</button>
+                                                </li>
+                                            </ul>
+                                            <div class="tab-content">
+                                                <div class="tab-pane fade show active" id="slaTab">
+                                                    <div class="card mb-4 border-primary">
+                                                        <div
+                                                            class="card-header bg-primary text-white">
+                                                            <h6 class="mb-0"><i
+                                                                    class="bi bi-plus-circle me-2"></i>Add
+                                                                New SLA Policy</h6>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <form id="slaCreateForm"
+                                                                onsubmit="slaCreate(event)">
+                                                                <div class="row g-3">
+                                                                    <div class="col-md-4">
+                                                                        <label
+                                                                            class="form-label fw-semibold">Policy
+                                                                            Name <span
+                                                                                class="text-danger">
+                                                                            *</span></label>
+                                                                        <input type="text"
+                                                                            class="form-control"
+                                                                            name="sla_name"
+                                                                            placeholder="e.g. Critical Response"
+                                                                            required="required" />
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label
+                                                                            class="form-label fw-semibold">
+                                                                            Time <span
+                                                                                class="text-danger">
+                                                                            *</span></label>
+                                                                        <input type="number"
+                                                                            class="form-control"
+                                                                            name="sla_response_time"
+                                                                            min="1" value="24"
+                                                                            required="required" />
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label
+                                                                            class="form-label fw-semibold">
+                                                                            Unit</label>
+                                                                        <select class="form-select"
+                                                                            name="sla_time_unit">
+                                                                            <option value="hours">
+                                                                                Hours</option>
+                                                                            <option value="days">
+                                                                                Days</option>
+                                                                            <option value="weeks">
+                                                                                Weeks</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <label
+                                                                            class="form-label fw-semibold">For
+                                                                            Priority</label>
+                                                                        <select class="form-select"
+                                                                            name="sla_priority_level">
+                                                                            <option value="any">Any</option>
+                                                                            <option value="low">Low</option>
+                                                                            <option value="medium">
+                                                                                Medium</option>
+                                                                            <option value="high">
+                                                                                High</option>
+                                                                            <option value="urgent">
+                                                                                Urgent</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div
+                                                                        class="col-md-2 d-flex align-items-end">
+                                                                        <button type="submit"
+                                                                            class="btn btn-primary w-100"><i
+                                                                                class="bi bi-plus-circle me-1"></i>Add
+                                                                            Policy</button>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12 mt-2">
+                                                                    <label class="form-label">Description
+                                                                        (optional)</label>
+                                                                    <input type="text"
+                                                                        class="form-control"
+                                                                        name="sla_description"
+                                                                        placeholder="When to use this policy..." />
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                    <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Existing
+                                                        SLA Policies</h6>
+                                                    <div class="table-responsive">
+                                                        <table
+                                                            class="table table-hover table-bordered align-middle">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>Policy Name</th>
+                                                                    <th>Response Time</th>
+                                                                    <th>For Priority</th>
+                                                                    <th>Description</th>
+                                                                    <th style="width:120px;">Actions</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody id="slaPoliciesBody">
+                                                                <tr>
+                                                                    <td colspan="5"
+                                                                        class="text-center text-muted py-3"><i
+                                                                            class="bi bi-hourglass-split me-2"></i>Loading
+                                                                        policies...</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
                                                     </div>
                                                 </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">
-                                                        <i class="bi bi-flag me-1"></i>Default
-                                                        Priority </label>
-                                                    <select class="form-select">
-                                                        <option>Medium</option>
-                                                        <option>Low</option>
-                                                        <option>High</option>
-                                                        <option>Urgent</option>
-                                                    </select>
+                                                <div class="tab-pane fade" id="ticketDefaultsTab">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Auto-assignment</label>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input"
+                                                                type="checkbox" id="autoAssign"
+                                                                checked="" />
+                                                            <label class="form-check-label"
+                                                                for="autoAssign">Enable
+                                                                auto-assignment</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Default Priority</label>
+                                                        <select class="form-select">
+                                                            <option>Medium</option>
+                                                            <option>Low</option>
+                                                            <option>High</option>
+                                                            <option>Urgent</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                            </form>
+                                            </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary">
-                                                <i class="bi bi-save me-2"></i>Save Changes </button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Project Configuration Modal -->
+                            <!-- Edit SLA Modal -->
+                            <div class="modal fade" id="slaEditModal" tabindex="-1"
+                                aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title"><i
+                                                    class="bi bi-pencil-square me-2"></i>Edit SLA
+                                                Policy</h5>
+                                            <button type="button" class="btn-close"
+                                                data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" id="editSlaId" />
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Policy Name</label>
+                                                <input type="text" class="form-control"
+                                                    id="editSlaName" />
+                                            </div>
+                                            <div class="row g-2">
+                                                <div class="col-6">
+                                                    <label class="form-label fw-semibold">Response
+                                                        Time</label>
+                                                    <input type="number" class="form-control"
+                                                        id="editSlaTime" min="1" />
+                                                </div>
+                                                <div class="col-6">
+                                                    <label class="form-label fw-semibold">Unit</label>
+                                                    <select class="form-select" id="editSlaUnit">
+                                                        <option value="hours">Hours</option>
+                                                        <option value="days">Days</option>
+                                                        <option value="weeks">Weeks</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 mt-2">
+                                                <label class="form-label fw-semibold">For Priority</label>
+                                                <select class="form-select" id="editSlaPriority">
+                                                    <option value="any">Any</option>
+                                                    <option value="low">Low</option>
+                                                    <option value="medium">Medium</option>
+                                                    <option value="high">High</option>
+                                                    <option value="urgent">Urgent</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Description</label>
+                                                <input type="text" class="form-control"
+                                                    id="editSlaDesc" />
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-primary"
+                                                onclick="slaSaveEdit()"><i class="bi bi-save me-1"></i>Save
+                                                Changes</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Project Config Modal -->
                             <div class="modal fade" id="projectConfigModal" tabindex="-1"
-                                aria-labelledby="projectConfigModalLabel" aria-hidden="true">
+                                aria-hidden="true">
                                 <div class="modal-dialog modal-xl">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="projectConfigModalLabel">
-                                                <i class="bi bi-folder-fill me-2"></i>Project
-                                                Configuration </h5>
+                                            <h5 class="modal-title"><i
+                                                    class="bi bi-folder-fill me-2"></i>Project
+                                                Configuration</h5>
                                             <button type="button" class="btn-close"
-                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <!-- Add New Project Button -->
                                             <div
                                                 class="d-flex justify-content-between align-items-center mb-4">
-                                                <h6 class="mb-0">
-                                                    <i class="bi bi-list-ul me-2"></i>Configured
-                                                    Projects </h6>
+                                                <h6 class="mb-0"><i class="bi bi-list-ul me-2"></i>Configured
+                                                    Projects</h6>
                                                 <a
                                                     href="/customer_support/admin_dashboard/system_configuration?tab=project"
-                                                    class="btn btn-primary btn-sm">
-                                                    <i
+                                                    class="btn btn-primary btn-sm"><i
                                                         class="bi bi-plus-circle me-2"></i>Configure
-                                                    New Project </a>
+                                                    New Project</a>
                                             </div>
-
-                                            <!-- Projects Table -->
                                             <div class="table-responsive">
                                                 <table class="table table-hover">
                                                     <thead>
                                                         <tr>
-                                                            <th><i class="bi bi-hash me-1"></i>ID</th>
-                                                            <th><i class="bi bi-tag me-1"></i>Project
-                                                                Name</th>
-                                                            <th><i class="bi bi-key me-1"></i>
-                                                                Identifier</th>
-                                                            <th><i class="bi bi-folder2 me-1"></i>
-                                                                Type</th>
-                                                            <th><i class="bi bi-calendar-range me-1"></i>
-                                                                Timeline</th>
-                                                            <th><i class="bi bi-activity me-1"></i>
-                                                                Status</th>
-                                                            <th><i class="bi bi-gear me-1"></i>
-                                                                Actions</th>
+                                                            <th>ID</th>
+                                                            <th>Project Name</th>
+                                                            <th>Identifier</th>
+                                                            <th>Type</th>
+                                                            <th>Timeline</th>
+                                                            <th>Status</th>
+                                                            <th>Actions</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <!-- Preload all configs to avoid
-                                                        per-project queries -->
                                                         <t t-set="configs"
                                                             t-value="dict((c.project_id.id, c) for c in request.env['customer_support.project.config'].sudo().search([]))" />
-
-                                                        <!-- Loop through all projects -->
                                                         <t
                                                             t-foreach="request.env['customer_support.project'].sudo().search([])"
                                                             t-as="project">
-                                                            <!-- Get config for this project -->
                                                             <t t-set="config"
                                                                 t-value="configs.get(project.id)" />
                                                             <tr>
-                                                                <!-- Project ID -->
                                                                 <td>
                                                                     <t t-esc="project.id" />
                                                                 </td>
-
-                                                                <!-- Project Name with Icon -->
                                                                 <td>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'web_app'"
-                                                                        class="bi bi-laptop me-2 text-primary"></i>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'mobile'"
-                                                                        class="bi bi-phone me-2 text-success"></i>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'machine_learning'"
-                                                                        class="bi bi-brain me-2 text-warning"></i>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'iot'"
-                                                                        class="bi bi-cloud-lightning me-2 text-info"></i>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'api'"
-                                                                        class="bi bi-box-seam me-2 text-dark"></i>
-                                                                    <i
-                                                                        t-if="config and config.project_type == 'other'"
-                                                                        class="bi bi-gear me-2 text-muted"></i>
                                                                     <t t-esc="project.name" />
                                                                 </td>
-
-                                                                <!-- Project Code / Identifier -->
                                                                 <td>
                                                                     <span class="badge bg-info">
                                                                         <t t-esc="project.code" />
                                                                     </span>
                                                                 </td>
-
-                                                                <!-- Project Type -->
                                                                 <td>
                                                                     <t
                                                                         t-esc="config.project_type.replace('_',' ').title() if config else '-'" />
                                                                 </td>
-
-                                                                <!-- Timeline -->
                                                                 <td>
                                                                     <small class="text-muted">
-                                                                        <i
-                                                                            class="bi bi-calendar-event me-1"></i>
                                                                         <t
                                                                             t-esc="(config.start_date.strftime('%b %Y') if config and config.start_date else '-') + ' - ' + (config.end_date.strftime('%b %Y') if config and config.end_date else '-')" />
                                                                     </small>
                                                                 </td>
-
-                                                                <!-- Status -->
                                                                 <td>
-                                                                    <!-- Use context_today() which
-                                                                    is available globally in QWeb -->
                                                                     <t t-set="today"
                                                                         t-value="datetime.date.today()" />
-
                                                                     <t
                                                                         t-if="config and config.start_date and config.end_date and config.start_date &lt;= today and today &lt;= config.end_date">
                                                                         <span
                                                                             class="badge bg-success">
-                                                                            <i
-                                                                                class="bi bi-play-circle me-1"></i>
-                                                                            Active </span>
+                                                                            Active</span>
                                                                     </t>
-
                                                                     <t
                                                                         t-if="config and config.start_date and config.start_date &gt; today">
                                                                         <span
                                                                             class="badge bg-warning">
-                                                                            <i
-                                                                                class="bi bi-clock-history me-1"></i>
-                                                                            Planning </span>
+                                                                            Planning</span>
                                                                     </t>
-
                                                                     <t t-if="not config">
                                                                         <span
                                                                             class="badge bg-secondary">No
                                                                             Config</span>
                                                                     </t>
                                                                 </td>
-
-                                                                <!-- Actions -->
-                                                                <!-- Actions -->
                                                                 <td>
                                                                     <a
-                                                                        t-att-href="'/customer_support/admin_dashboard/projects/%d/edit'
-                                                                    % project.id"
-                                                                        class="btn btn-sm
-                                                                    btn-outline-primary me-1"
-                                                                        title="Edit Project">
+                                                                        t-att-href="'/customer_support/admin_dashboard/projects/%d/edit' % project.id"
+                                                                        class="btn btn-sm btn-outline-primary me-1">
                                                                         <i
                                                                             class="bi bi-pencil-square"></i>
                                                                     </a>
-                                                                    <button
-                                                                        class="btn btn-sm btn-outline-info me-1"
-                                                                        title="View Details">
-                                                                        <i class="bi bi-eye"></i>
-                                                                    </button>
                                                                     <form
                                                                         t-att-action="'/customer_support/admin_dashboard/projects/delete/%d' % project.id"
                                                                         method="post"
                                                                         style="display:inline">
                                                                         <button type="submit"
                                                                             class="btn btn-sm btn-outline-danger"
-                                                                            title="Archive Project"
                                                                             onclick="return confirm('Archive this project?');">
                                                                             <i class="bi bi-archive"></i>
                                                                         </button>
@@ -1125,143 +1324,419 @@
                                 </div>
                             </div>
 
-                        </div>
+                            <!-- ★ NEW: Knowledge Base Modal ★ -->
+                            <div class="modal fade" id="knowledgeBaseModal" tabindex="-1"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title"><i
+                                                    class="bi bi-database-fill me-2"></i>Knowledge
+                                                Base Management</h5>
+                                            <button type="button" class="btn-close"
+                                                data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
 
-                        <!-- Reporting Tab -->
-                        <div class="tab-pane fade" id="reporting" role="tabpanel"
-                            aria-labelledby="reporting-tab">
-                            <div class="row mb-4">
-                                <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="card text-center h-100">
-                                        <div class="card-body">
-                                            <i
-                                                class="bi bi-file-earmark-text display-4 text-primary mb-3"></i>
-                                            <h5>Daily Reports</h5>
-                                            <p class="text-muted">Generate daily performance reports</p>
-                                            <button class="btn btn-outline-primary">
-                                                <i class="bi bi-download me-1"></i>Generate </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="card text-center h-100">
-                                        <div class="card-body">
-                                            <i class="bi bi-calendar-week display-4 text-info mb-3"></i>
-                                            <h5>Weekly Reports</h5>
-                                            <p class="text-muted">Weekly summary and analytics</p>
-                                            <button class="btn btn-outline-info">
-                                                <i class="bi bi-download me-1"></i>Generate </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="card text-center h-100">
-                                        <div class="card-body">
-                                            <i
-                                                class="bi bi-calendar-month display-4 text-success mb-3"></i>
-                                            <h5>Monthly Reports</h5>
-                                            <p class="text-muted">Monthly performance reports</p>
-                                            <button class="btn btn-outline-success">
-                                                <i class="bi bi-download me-1"></i>Generate </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-sm-6 mb-3">
-                                    <div class="card text-center h-100">
-                                        <div class="card-body">
-                                            <i
-                                                class="bi bi-sliders display-4 text-warning mb-3"></i>
-                                            <h5>Custom Reports</h5>
-                                            <p class="text-muted">Create custom reports</p>
-                                            <button class="btn btn-outline-warning">
-                                                <i class="bi bi-plus-circle me-1"></i>Create </button>
+                                            <!-- Alert -->
+                                            <div id="kbAlert" class="d-none mb-3"></div>
+
+                                            <!-- Stats -->
+                                            <div class="row g-3 mb-4">
+                                                <div class="col-6 col-md-3">
+                                                    <div class="card border-0 shadow-sm text-center"
+                                                        style="border-top:3px solid #1a3a5c!important;border-radius:10px;">
+                                                        <div class="card-body py-3">
+                                                            <div class="fw-bold" id="kbTotalDocs"
+                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                —</div>
+                                                            <div class="text-muted"
+                                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Total
+                                                                Docs</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3">
+                                                    <div class="card border-0 shadow-sm text-center"
+                                                        style="border-top:3px solid #22c55e!important;border-radius:10px;">
+                                                        <div class="card-body py-3">
+                                                            <div class="fw-bold" id="kbReadyDocs"
+                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                —</div>
+                                                            <div class="text-muted"
+                                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                                                                Ready</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3">
+                                                    <div class="card border-0 shadow-sm text-center"
+                                                        style="border-top:3px solid #f59e0b!important;border-radius:10px;">
+                                                        <div class="card-body py-3">
+                                                            <div class="fw-bold" id="kbPendingDocs"
+                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                —</div>
+                                                            <div class="text-muted"
+                                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                                                                Pending</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-6 col-md-3">
+                                                    <div class="card border-0 shadow-sm text-center"
+                                                        style="border-top:3px solid #ef4444!important;border-radius:10px;">
+                                                        <div class="card-body py-3">
+                                                            <div class="fw-bold" id="kbErrorDocs"
+                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                —</div>
+                                                            <div class="text-muted"
+                                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                                                                Errors</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Upload Form -->
+                                            <div class="card mb-4 border-primary">
+                                                <div class="card-header bg-primary text-white">
+                                                    <h6 class="mb-0"><i
+                                                            class="bi bi-cloud-upload me-2"></i>Upload
+                                                        New Document</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-semibold">Document
+                                                                Name <span class="text-danger">*</span></label>
+                                                            <input type="text" class="form-control"
+                                                                id="kbDocName"
+                                                                placeholder="e.g. Dragon Coders Services Overview" />
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label fw-semibold">
+                                                                Category <span class="text-danger">*</span></label>
+                                                            <select class="form-select"
+                                                                id="kbCategory">
+                                                                <option value="company">Company Info</option>
+                                                                <option value="services">Services
+                                                                    &amp; Products</option>
+                                                                <option value="projects">Projects</option>
+                                                                <option value="pricing">Pricing</option>
+                                                                <option value="technical">Technical
+                                                                    Docs</option>
+                                                                <option value="faq">FAQ</option>
+                                                                <option value="other">Other</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-5">
+                                                            <label class="form-label fw-semibold">Description
+                                                                (optional)</label>
+                                                            <input type="text" class="form-control"
+                                                                id="kbDescription"
+                                                                placeholder="Brief description..." />
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <label class="form-label fw-semibold">
+                                                                File <span class="text-danger">*</span> <small
+                                                                    class="text-muted fw-normal ms-1">PDF
+                                                                · DOCX · TXT · XLSX</small></label>
+                                                            <input type="file" class="form-control"
+                                                                id="kbFile"
+                                                                accept=".pdf,.docx,.txt,.xlsx" />
+                                                        </div>
+                                                        <div class="col-md-4 d-flex align-items-end">
+                                                            <button type="button"
+                                                                class="btn btn-primary w-100"
+                                                                id="kbUploadBtn"
+                                                                onclick="kbUpload()">
+                                                                <i class="bi bi-upload me-2"></i>Upload
+                                                                &amp; Process </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Documents Table -->
+                                            <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Uploaded
+                                                Documents</h6>
+                                            <div class="table-responsive">
+                                                <table
+                                                    class="table table-hover table-bordered align-middle">
+                                                    <thead class="table-dark">
+                                                        <tr>
+                                                            <th>Document Name</th>
+                                                            <th>Category</th>
+                                                            <th>Type</th>
+                                                            <th>Status</th>
+                                                            <th style="width:80px;">Chunks</th>
+                                                            <th>Uploaded</th>
+                                                            <th style="width:90px;">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="kbDocsBody">
+                                                        <tr>
+                                                            <td colspan="7"
+                                                                class="text-center text-muted py-4"><i
+                                                                    class="bi bi-hourglass-split me-2"></i>
+                                                                Loading...</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+
+                                        </div><!--
+                                        /modal-body -->
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Close</button>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                            <!-- ★ END Knowledge Base Modal ★ -->
 
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="mb-0">
-                                        <i class="bi bi-clock-history me-2"></i>Recent Reports </h5>
+                        </div><!--
+                        /system-configuration tab-pane -->
+
+                        <!-- ═══ REPORTING TAB ═══ -->
+                        <div class="tab-pane fade" id="reporting" role="tabpanel"
+                            aria-labelledby="reporting-tab">
+                            <div
+                                class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                                <div>
+                                    <h4 class="mb-0"
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;letter-spacing:1px;"><i
+                                            class="bi bi-graph-up-arrow me-2"></i>Analytics &amp;
+                                        Reports</h4>
+                                    <small class="text-muted">Live data from the system</small>
                                 </div>
-                                <div class="card-body">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="text-muted small me-1">Period:</span>
+                                    <div class="btn-group" role="group" id="reportDaysGroup">
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-primary active"
+                                            data-days="7">7 Days</button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                            data-days="30">30 Days</button>
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                            data-days="90">90 Days</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3 mb-4" id="reportKpiRow">
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #1a3a5c!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-total-period">&#x2014;</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">New
+                                                Tickets</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #2ecc71!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-resolved">&#x2014;</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                                                Resolved</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #3498db!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-open">&#x2014;</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
+                                                Open</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #e74c3c!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-breached">&#x2014;</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">SLA
+                                                Breached</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #2ecc71!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-sla-compliance">&#x2014;</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">SLA
+                                                Compliance</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <div class="card text-center border-0 shadow-sm h-100"
+                                        style="border-top:3px solid #e8b84b!important;border-radius:10px;">
+                                        <div class="card-body py-3">
+                                            <div class="fw-bold"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                id="r-resolve-rate">&#x2014;</div>
+                                            <div class="text-muted"
+                                                style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Resolve
+                                                Rate</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-4 mb-4">
+                                <div class="col-lg-8">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="border-radius:12px;">
+                                        <div class="card-header bg-white border-0 pt-3 pb-0">
+                                            <h6 class="mb-0"
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                    class="bi bi-bar-chart-line me-2"></i>Ticket
+                                                Volume Trend</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="volumeChart" height="120"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="border-radius:12px;">
+                                        <div class="card-header bg-white border-0 pt-3 pb-0">
+                                            <h6 class="mb-0"
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                    class="bi bi-pie-chart me-2"></i>Status
+                                                Breakdown</h6>
+                                        </div>
+                                        <div
+                                            class="card-body d-flex justify-content-center align-items-center">
+                                            <canvas id="statusChart" style="max-height:200px;"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-4 mb-4">
+                                <div class="col-lg-6">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="border-radius:12px;">
+                                        <div class="card-header bg-white border-0 pt-3 pb-0">
+                                            <h6 class="mb-0"
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                    class="bi bi-exclamation-triangle me-2"></i>Priority
+                                                Distribution (Open)</h6>
+                                        </div>
+                                        <div
+                                            class="card-body d-flex justify-content-center align-items-center">
+                                            <canvas id="priorityChart" style="max-height:180px;"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="card border-0 shadow-sm h-100"
+                                        style="border-radius:12px;">
+                                        <div class="card-header bg-white border-0 pt-3 pb-0">
+                                            <h6 class="mb-0"
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                    class="bi bi-people me-2"></i>Top Customers by
+                                                Volume</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <canvas id="customersChart" height="160"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+                                <div
+                                    class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3">
+                                    <h6 class="mb-0"
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                            class="bi bi-folder2-open me-2"></i>Project Health</h6>
+                                    <small class="text-muted">Sorted by health score (worst first)</small>
+                                </div>
+                                <div class="card-body p-0">
                                     <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead>
+                                        <table class="table table-hover mb-0"
+                                            style="font-size:13px;">
+                                            <thead style="background:#1a3a5c;color:#fff;">
                                                 <tr>
-                                                    <th><i class="bi bi-file-text me-1"></i>Report
-                                                        Name</th>
-                                                    <th><i class="bi bi-tag me-1"></i>Type</th>
-                                                    <th><i class="bi bi-calendar-check me-1"></i>Generated
-                                                        On</th>
-                                                    <th><i class="bi bi-calendar-range me-1"></i>
-                                                        Period</th>
-                                                    <th><i class="bi bi-hdd me-1"></i>Size</th>
-                                                    <th><i class="bi bi-gear me-1"></i>Actions</th>
+                                                    <th class="ps-3">Project</th>
+                                                    <th>Total</th>
+                                                    <th>Resolved</th>
+                                                    <th>Open</th>
+                                                    <th>SLA Breaches</th>
+                                                    <th>Health</th>
+                                                    <th>Trend</th>
+                                                    <th class="pe-3">Report</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
+                                            <tbody id="projectHealthBody">
                                                 <tr>
-                                                    <td>
-                                                        <i
-                                                            class="bi bi-file-earmark-bar-graph me-2 text-primary"></i>
-                                                        Daily Performance Report </td>
-                                                    <td>
-                                                        <span class="badge bg-primary">
-                                                            <i class="bi bi-sun me-1"></i>Daily </span>
-                                                    </td>
-                                                    <td>2026-01-21 10:30</td>
-                                                    <td>2026-01-21</td>
-                                                    <td>2.4 MB</td>
-                                                    <td>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-primary me-1"
-                                                            title="View Report">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-success me-1"
-                                                            title="Download Report">
-                                                            <i class="bi bi-download"></i>
-                                                        </button>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-danger"
-                                                            title="Delete Report">
-                                                            <i class="bi bi-trash3"></i>
-                                                        </button>
-                                                    </td>
+                                                    <td colspan="8"
+                                                        class="text-center text-muted py-4"><i
+                                                            class="bi bi-hourglass-split me-2"></i>
+                                                        Loading...</td>
                                                 </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card border-0 shadow-sm mb-4" style="border-radius:12px;">
+                                <div
+                                    class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3">
+                                    <h6 class="mb-0"
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                            class="bi bi-trophy me-2"></i>Focal Person Leaderboard</h6>
+                                    <a id="execReportLink"
+                                        href="/customer_support/admin/report/executive?days=30"
+                                        target="_blank" class="btn btn-sm"
+                                        style="background:#1a3a5c;color:#fff;border-radius:6px;font-size:12px;"><i
+                                            class="bi bi-printer me-1"></i>Print Executive Report</a>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover mb-0"
+                                            style="font-size:13px;">
+                                            <thead style="background:#1a3a5c;color:#fff;">
                                                 <tr>
-                                                    <td>
-                                                        <i
-                                                            class="bi bi-file-earmark-spreadsheet me-2 text-info"></i>
-                                                        Weekly Summary Report </td>
-                                                    <td>
-                                                        <span class="badge bg-info">
-                                                            <i class="bi bi-calendar-week me-1"></i>
-                                                            Weekly </span>
-                                                    </td>
-                                                    <td>2026-01-20 15:45</td>
-                                                    <td>2026-01-14 to 2026-01-20</td>
-                                                    <td>5.1 MB</td>
-                                                    <td>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-primary me-1"
-                                                            title="View Report">
-                                                            <i class="bi bi-eye"></i>
-                                                        </button>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-success me-1"
-                                                            title="Download Report">
-                                                            <i class="bi bi-download"></i>
-                                                        </button>
-                                                        <button
-                                                            class="btn btn-sm btn-outline-danger"
-                                                            title="Delete Report">
-                                                            <i class="bi bi-trash3"></i>
-                                                        </button>
-                                                    </td>
+                                                    <th class="ps-3" style="width:5%">#</th>
+                                                    <th>Name</th>
+                                                    <th>Assigned</th>
+                                                    <th>Resolved</th>
+                                                    <th>Open</th>
+                                                    <th>SLA Breaches</th>
+                                                    <th>Resolve Rate</th>
+                                                    <th>SLA Rate</th>
+                                                    <th class="pe-3">Report</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="focalLeaderboardBody">
+                                                <tr>
+                                                    <td colspan="9"
+                                                        class="text-center text-muted py-4"><i
+                                                            class="bi bi-hourglass-split me-2"></i>
+                                                        Loading...</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -1269,17 +1744,21 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Bootstrap JS -->
+                    </div><!--
+                    /tab-content -->
+                </div><!--
+                /container-fluid -->
+            </div><!--
+            /dashboard-wrapper -->
+
             <script
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-            <!-- Custom JavaScript for Dashboard -->
+            <!-- 1. ADMIN BELL NOTIFICATIONS -->
             <script type="text/javascript">
                 //<![CDATA[
+
 (function() {
     'use strict';
     
@@ -1381,9 +1860,230 @@ document.querySelectorAll('tr.ticket-row').forEach(function(row) {
         }
     });
 });
+=======
+(function(){
+'use strict';
+var bell=document.getElementById('adminNotifBell'),bellIcon=document.getElementById('adminBellIcon'),dropdown=document.getElementById('adminNotifDropdown'),badge=document.getElementById('adminNotifBadge'),list=document.getElementById('adminNotifList'),prevTotal=0;
+bell.addEventListener('click',function(e){e.stopPropagation();dropdown.classList.toggle('open');});
+document.addEventListener('click',function(){dropdown.classList.remove('open');});
+dropdown.addEventListener('click',function(e){e.stopPropagation();});
+document.getElementById('adminMarkAllRead').addEventListener('click',function(){list.querySelectorAll('.admin-notif-item').forEach(function(i){i.classList.remove('unread');});badge.classList.add('hidden');});
+document.getElementById('notifViewAllTickets').addEventListener('click',function(e){e.preventDefault();dropdown.classList.remove('open');var t=document.getElementById('ticket-assignment-tab');if(t)new bootstrap.Tab(t).show();});
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function loadNotifications(){fetch('/customer_support/admin/notifications',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){renderNotifications(d);}).catch(function(e){console.warn('Admin notifications failed:',e);});}
+function renderNotifications(data){var sla=data.sla_breaches||[],unassigned=data.unassigned||[],sc=data.status_changes||[];var total=sla.length+unassigned.length+sc.length;if(total===0){badge.classList.add('hidden');}else{badge.textContent=total>99?'99+':total;badge.classList.remove('hidden');if(total>prevTotal){bellIcon.classList.add('bell-ring');badge.classList.add('bump');setTimeout(function(){bellIcon.classList.remove('bell-ring');badge.classList.remove('bump');},600);}}prevTotal=total;if(total===0){list.innerHTML='<div class="admin-notif-empty"><i class="bi bi-check-circle-fill" style="font-size:2rem;color:#22c55e;display:block;margin-bottom:.5rem;"></i>All clear &#x2014; no active alerts!</div>';return;}var html='';if(sla.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-x-octagon-fill me-1" style="color:#ef4444;"></i>SLA Breaches</span><span class="section-count">'+sla.length+'</span></div>';html+=sla.map(function(a){return'<a class="admin-notif-item unread" href="/customer_support/admin_view/ticket/'+a.ticket_id+'"><div class="admin-notif-icon sla-breach"><i class="bi bi-x-octagon-fill"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(a.ticket_name)+' &#x2014; '+esc(a.subject)+'</div><div class="admin-notif-sub">Agent: '+esc(a.agent_name)+' &middot; '+esc(a.time_display)+'</div><div class="admin-notif-time">Priority: '+esc(a.priority)+'</div></div><div class="admin-notif-dot sla-breach"></div></a>';}).join('');}if(unassigned.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-inbox-fill me-1" style="color:#3b82f6;"></i>Unassigned Tickets</span><span class="section-count">'+unassigned.length+'</span></div>';html+=unassigned.map(function(t){return'<a class="admin-notif-item unread" href="/customer_support/admin_view/ticket/'+t.ticket_id+'"><div class="admin-notif-icon unassigned"><i class="bi bi-inbox-fill"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(t.ticket_name)+' &#x2014; '+esc(t.subject)+'</div><div class="admin-notif-sub">Waiting '+esc(t.waiting)+' &middot; Priority: '+esc(t.priority)+'</div><div class="admin-notif-time">Created: '+esc(t.create_date)+'</div></div><div class="admin-notif-dot unassigned"></div></a>';}).join('');}if(sc.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-arrow-left-right me-1" style="color:#10b981;"></i>Recent Status Changes</span><span class="section-count">'+sc.length+'</span></div>';html+=sc.map(function(s){return'<a class="admin-notif-item" href="/customer_support/admin_view/ticket/'+s.ticket_id+'"><div class="admin-notif-icon status-chg"><i class="bi bi-arrow-left-right"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(s.ticket_name)+' &#x2014; '+esc(s.subject)+'</div><div class="admin-notif-sub">&#x2192; '+esc(s.new_state)+' &middot; Agent: '+esc(s.agent_name)+'</div><div class="admin-notif-time">'+esc(s.changed_at)+'</div></div><div class="admin-notif-dot status-chg"></div></a>';}).join('');}list.innerHTML=html;}
+document.addEventListener('DOMContentLoaded',function(){loadNotifications();setInterval(loadNotifications,30000);});
+>>>>>>> origin/main
 })();
 //]]>
-</script>
+            </script>
+
+            <!-- 2. AGENT WORKLOAD PANEL -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+var panel=document.getElementById('workloadPanel'),overlay=document.getElementById('workloadOverlay'),btn=document.getElementById('workloadBtn'),closeBtn=document.getElementById('workloadClose'),body=document.getElementById('workloadPanelBody'),lastUpd=document.getElementById('workloadLastUpdated'),refreshBtn=document.getElementById('workloadRefreshBtn');
+function openPanel(){panel.classList.add('open');overlay.classList.add('open');btn.classList.add('active');}
+function closePanel(){panel.classList.remove('open');overlay.classList.remove('open');btn.classList.remove('active');}
+btn.addEventListener('click',function(){panel.classList.contains('open')?closePanel():openPanel();});
+closeBtn.addEventListener('click',closePanel);overlay.addEventListener('click',closePanel);refreshBtn.addEventListener('click',loadWorkload);
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function loadWorkload(){lastUpd.textContent='Refreshing...';fetch('/customer_support/admin/workload',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){renderWorkload(d);}).catch(function(e){console.warn('Workload failed:',e);body.innerHTML='<div class="workload-empty"><i class="bi bi-exclamation-triangle" style="font-size:2rem;color:#f59e0b;display:block;margin-bottom:.5rem;"></i>Failed to load workload data.</div>';});}
+function renderWorkload(data){var agents=data.agents||[],summary=data.summary||{};var now=new Date();lastUpd.textContent='Updated at '+now.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});document.getElementById('ws-agents').textContent=summary.total_agents||agents.length;document.getElementById('ws-total-open').textContent=summary.total_open||0;document.getElementById('ws-overloaded').textContent=summary.overloaded||0;document.getElementById('ws-breached').textContent=summary.total_breached||0;if(agents.length===0){body.innerHTML='<div class="workload-empty"><i class="bi bi-people" style="font-size:2.5rem;display:block;margin-bottom:.5rem;"></i>No agents found.</div>';return;}body.innerHTML=agents.map(function(a){var status=a.total_open>8?'red':a.total_open>=5?'amber':'ok';var pillLabel=status==='red'?'Overloaded':status==='amber'?'Busy':'Available';var barColor=a.resolve_rate>=75?'#22c55e':a.resolve_rate>=50?'#f59e0b':'#ef4444';var wPct=Math.min(100,Math.round((a.total_open/10)*100));var wColor=status==='red'?'#ef4444':status==='amber'?'#f59e0b':'#22c55e';var avatar='/web/image/res.users/'+a.user_id+'/avatar_128';return'<div class="workload-card status-'+status+'"><div class="workload-agent-row"><img class="workload-agent-avatar" src="'+avatar+'" onerror="this.src=\'/web/static/img/avatar_gray.svg\'"/><div><div class="workload-agent-name">'+esc(a.name)+'</div><div class="workload-agent-sub">'+esc(a.email||'Support Agent')+'</div></div><span class="workload-status-pill '+status+'">'+pillLabel+'</span></div><div class="workload-stats-row"><div class="workload-stat-box"><div class="workload-stat-val">'+a.assigned+'</div><div class="workload-stat-lbl">Assigned</div></div><div class="workload-stat-box"><div class="workload-stat-val">'+a.in_progress+'</div><div class="workload-stat-lbl">In Progress</div></div><div class="workload-stat-box"><div class="workload-stat-val">'+a.resolved+'</div><div class="workload-stat-lbl">Resolved</div></div><div class="workload-stat-box"><div class="workload-stat-val">'+(a.breached>0?'<span style="color:#ef4444;font-weight:800;">'+a.breached+'</span>':a.breached)+'</div><div class="workload-stat-lbl">Breached</div></div></div><div class="workload-bar-wrap"><div class="workload-bar-label"><span>Workload</span><span>'+a.total_open+' / 10 open</span></div><div class="workload-bar-bg"><div class="workload-bar-fill" style="width:'+wPct+'%;background:'+wColor+';"></div></div></div><div class="workload-bar-wrap"><div class="workload-bar-label"><span>Resolve Rate</span><span>'+a.resolve_rate+'%</span></div><div class="workload-bar-bg"><div class="workload-bar-fill" style="width:'+a.resolve_rate+'%;background:'+barColor+';"></div></div></div></div>';}).join('');}
+document.addEventListener('DOMContentLoaded',function(){loadWorkload();setInterval(loadWorkload,60000);});
+})();
+//]]>
+            </script>
+
+            <!-- 3. SLA POLICY MANAGER -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+var PL={any:'Any',low:'Low',medium:'Medium',high:'High',urgent:'Urgent'};
+var PC={any:'secondary',low:'info',medium:'primary',high:'warning',urgent:'danger'};
+function slaAlert(msg,type){var el=document.getElementById('slaAlert');if(!el)return;el.className='alert alert-'+(type||'success')+' mb-3';el.textContent=msg;setTimeout(function(){el.className='d-none';},4000);}
+function slaLoadPolicies(){fetch('/customer_support/sla/policies',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){var tb=document.getElementById('slaPoliciesBody');if(!tb)return;if(!d.policies||!d.policies.length){tb.innerHTML='<tr><td colspan="5" class="text-center text-muted py-3"><i class="bi bi-inbox me-2"></i>No SLA policies defined yet.</td></tr>';return;}tb.innerHTML=d.policies.map(function(p){return'<tr><td><strong>'+p.name+'</strong></td><td><span class="badge bg-dark">'+p.response_time+' '+p.time_unit+'</span></td><td><span class="badge bg-'+(PC[p.priority_level]||'secondary')+'">'+(PL[p.priority_level]||p.priority_level)+'</span></td><td><small class="text-muted">'+(p.description||'-')+'</small></td><td><button class="btn btn-sm btn-outline-primary me-1" onclick="slaOpenEdit('+JSON.stringify(p)+')"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger" onclick="slaDelete('+p.id+',\''+p.name+'\')"><i class="bi bi-trash3"></i></button></td></tr>';}).join('');}).catch(function(e){console.warn('SLA load failed:',e);});}
+window.slaCreate=function(e){e.preventDefault();var form=document.getElementById('slaCreateForm');var data=new FormData(form);var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)data.set('csrf_token',csrf.value);fetch('/customer_support/sla/create',{method:'POST',credentials:'same-origin',body:new URLSearchParams(data)}).then(function(r){if(r.redirected||r.ok){slaAlert('SLA policy created!','success');form.reset();slaLoadPolicies();}else{slaAlert('Failed.','danger');}}).catch(function(){slaAlert('Network error.','danger');});};
+window.slaOpenEdit=function(p){document.getElementById('editSlaId').value=p.id;document.getElementById('editSlaName').value=p.name;document.getElementById('editSlaTime').value=p.response_time;document.getElementById('editSlaUnit').value=p.time_unit;document.getElementById('editSlaPriority').value=p.priority_level;document.getElementById('editSlaDesc').value=p.description||'';new bootstrap.Modal(document.getElementById('slaEditModal')).show();};
+window.slaSaveEdit=function(){var id=document.getElementById('editSlaId').value;var data=new URLSearchParams({sla_name:document.getElementById('editSlaName').value,sla_response_time:document.getElementById('editSlaTime').value,sla_time_unit:document.getElementById('editSlaUnit').value,sla_priority_level:document.getElementById('editSlaPriority').value,sla_description:document.getElementById('editSlaDesc').value});var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)data.set('csrf_token',csrf.value);fetch('/customer_support/sla/'+id+'/update',{method:'POST',credentials:'same-origin',body:data}).then(function(r){return r.json();}).then(function(d){bootstrap.Modal.getInstance(document.getElementById('slaEditModal')).hide();if(d.success){slaAlert('Updated.','success');slaLoadPolicies();}else{slaAlert('Failed:'+(d.error||'unknown'),'danger');}});};
+window.slaDelete=function(id,name){if(!confirm('Delete "'+name+'"?'))return;fetch('/customer_support/sla/'+id+'/delete',{method:'POST',credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){if(d.success){slaAlert('Deleted.','success');slaLoadPolicies();}else{slaAlert('Delete failed.','danger');}});};
+document.addEventListener('DOMContentLoaded',function(){var m=document.getElementById('ticketSettingsModal');if(m)m.addEventListener('shown.bs.modal',function(){slaLoadPolicies();});});
+})();
+//]]>
+            </script>
+
+            <!-- 4. LIVE ANALYTICS -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+var INTERVAL=15000;
+var A=[{key:'open_tickets',sel:'[data-key="open_tickets"] .stat-value'},{key:'total_tickets',sel:'[data-key="total_tickets"] .stat-value'},{key:'high_priority',sel:'[data-key="high_priority"] .stat-value'},{key:'urgent',sel:'[data-key="urgent"] .stat-value'},{key:'avg_open_hours',sel:'[data-key="avg_open_hours"] .stat-value'},{key:'total_hours',sel:'[data-key="total_hours"] .stat-value'},{key:'avg_high_hours',sel:'[data-key="avg_high_hours"] .stat-value'},{key:'avg_urgent_hours',sel:'[data-key="avg_urgent_hours"] .stat-value'},{key:'resolved_tickets',sel:'[data-key="resolved_tickets"] .stat-value'},{key:'solve_rate',sel:'[data-key="solve_rate"] .stat-value',sfx:'%'},{key:'high_resolved',sel:'[data-key="high_resolved"] .stat-value'},{key:'urgent_resolved',sel:'[data-key="urgent_resolved"] .stat-value'}];
+var P=[{key:'today_closed',sel:'[data-key="today_closed"] .performance-value'},{key:'avg_resolve_rate',sel:'[data-key="avg_resolve_rate"] .performance-value',sfx:'%'},{key:'daily_target',sel:'[data-key="daily_target"] .performance-value',sfx:'%'},{key:'achievement',sel:'[data-key="achievement"] .performance-value',sfx:'%'},{key:'sample_performance',sel:'[data-key="sample_performance"] .score-badge',sfx:'%'}];
+var C=[{key:'new',sel:'[data-key="count_new"] .quick-stat-value'},{key:'assigned',sel:'[data-key="count_assigned"] .quick-stat-value'},{key:'resolved',sel:'[data-key="count_resolved"] .quick-stat-value'},{key:'total',sel:'[data-key="count_total"] .quick-stat-value'}];
+function upd(sel,val,sfx){var el=document.querySelector(sel);if(el)el.textContent=val+(sfx||'');}
+function flash(sel){var el=document.querySelector(sel);if(el){el.style.transition='color 0.3s';el.style.color='#1e88c7';setTimeout(function(){el.style.color='';},600);}}
+function updBar(v){var b=document.querySelector('.progress-bar');if(b){b.style.width=v+'%';b.className='progress-bar '+(v>=80?'bg-success':'bg-warning');}}
+function updBarLabel(v){var ls=document.querySelectorAll('.progress-label span');if(ls.length>=2)ls[1].textContent=v+'%';}
+function updTime(){var t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});document.querySelectorAll('.last-updated').forEach(function(el){el.innerHTML='<i class="bi bi-clock me-1"></i>Updated at '+t;});}
+function run(){fetch('/customer_support/dashboard/analytics',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){var a=d.analytics||{},p=d.performance||{},c=d.ticket_counts||{};A.forEach(function(i){var v=a[i.key];if(v!==undefined){upd(i.sel,v,i.sfx||'');flash(i.sel);}});P.forEach(function(i){var v=p[i.key];if(v!==undefined)upd(i.sel,v,i.sfx||'');});if(p.achievement!==undefined){updBar(p.achievement);updBarLabel(p.achievement);}C.forEach(function(i){var v=c[i.key];if(v!==undefined)upd(i.sel,v,'');});updTime();}).catch(function(e){console.warn('Analytics refresh failed:',e);});}
+document.addEventListener('DOMContentLoaded',function(){run();setInterval(run,INTERVAL);});
+})();
+//]]>
+            </script>
+
+            <!-- 5. TAB NAVIGATION -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+function activateTabFromURL(){var urlParams=new URLSearchParams(window.location.search);var tabParam=urlParams.get('tab');var hashParam=window.location.hash.substring(1);var targetTab=tabParam||hashParam;if(targetTab){var ts='#'+targetTab;var tb=document.querySelector('.header-left button[data-bs-target="'+ts+'"]');if(tb){document.querySelectorAll('.header-left button').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('show','active');});tb.classList.add('active');tb.setAttribute('aria-selected','true');var tp=document.querySelector(ts);if(tp)tp.classList.add('show','active');}}}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',activateTabFromURL);}else{activateTabFromURL();}
+window.addEventListener('load',activateTabFromURL);window.addEventListener('hashchange',activateTabFromURL);
+document.addEventListener('DOMContentLoaded',function(){
+  var tl=[].slice.call(document.querySelectorAll('.header-left button[data-bs-toggle="tab"]'));
+  tl.forEach(function(t){t.addEventListener('click',function(e){e.preventDefault();new bootstrap.Tab(t).show();});});
+  tl.forEach(function(t){t.addEventListener('shown.bs.tab',function(e){localStorage.setItem('activeDashboardTab',e.target.getAttribute('data-bs-target'));});});
+  document.querySelectorAll('.action-card[data-bs-toggle="tab"]').forEach(function(c){c.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector('.header-left button[data-bs-target="'+this.getAttribute('href')+'"]');if(t)new bootstrap.Tab(t).show();});});
+  activateTabFromURL();
+  document.querySelectorAll('.alert-success,.alert-danger').forEach(function(a){setTimeout(function(){new bootstrap.Alert(a).close();},5000);});
+});
+})();
+//]]>
+            </script>
+
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+            <!-- 6. REPORTING TAB JS -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+var currentDays=30,charts={};
+var SC={new:'#3498db',assigned:'#9b59b6',in_progress:'#e8b84b',resolved:'#2ecc71',closed:'#95a5a6'};
+var PC={urgent:'#e74c3c',high:'#e67e22',medium:'#3498db',low:'#2ecc71'};
+function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
+function bVC(trend){dc('volume');var ctx=document.getElementById('volumeChart');if(!ctx)return;charts['volume']=new Chart(ctx,{type:'bar',data:{labels:trend.map(function(d){return d.date;}),datasets:[{label:'Tickets',data:trend.map(function(d){return d.count;}),backgroundColor:'rgba(26,58,92,0.75)',borderColor:'#1a3a5c',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}},x:{ticks:{maxTicksLimit:14,maxRotation:45}}}}});}
+function bSC(bd){dc('status');var ctx=document.getElementById('statusChart');if(!ctx)return;var l=Object.keys(bd);charts['status']=new Chart(ctx,{type:'doughnut',data:{labels:l.map(function(x){return x.replace('_',' ').replace(/\b\w/g,function(c){return c.toUpperCase();});}),datasets:[{data:Object.values(bd),backgroundColor:l.map(function(x){return SC[x]||'#aaa';}),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},cutout:'60%'}});}
+function bPC(dist){dc('priority');var ctx=document.getElementById('priorityChart');if(!ctx)return;var l=['urgent','high','medium','low'];charts['priority']=new Chart(ctx,{type:'pie',data:{labels:['Urgent','High','Medium','Low'],datasets:[{data:l.map(function(x){return dist[x]||0;}),backgroundColor:l.map(function(x){return PC[x];}),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});}
+function bCC(customers){dc('customers');var ctx=document.getElementById('customersChart');if(!ctx)return;charts['customers']=new Chart(ctx,{type:'bar',data:{labels:customers.map(function(c){return c.name;}),datasets:[{label:'Tickets',data:customers.map(function(c){return c.count;}),backgroundColor:'rgba(232,184,75,0.85)',borderColor:'#e8b84b',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{stepSize:1}}}}});}
+function hB(h){return{green:'<span class="badge bg-success">Good</span>',amber:'<span class="badge bg-warning text-dark">Attention</span>',red:'<span class="badge bg-danger">Critical</span>'}[h]||'<span class="badge bg-secondary">-</span>';}
+function tI(t){if(t==='up')return'<span class="text-danger"><i class="bi bi-arrow-up-right-circle-fill"></i> Up</span>';if(t==='down')return'<span class="text-success"><i class="bi bi-arrow-down-right-circle-fill"></i> Down</span>';return'<span class="text-muted"><i class="bi bi-dash-circle"></i> Stable</span>';}
+function sB(v,c){return'<div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;background:#e9ecef;border-radius:4px;height:8px;overflow:hidden;"><div style="width:'+v+'%;height:100%;background:'+c+';border-radius:4px;"></div></div><span style="font-size:11px;font-weight:600;width:36px;">'+v+'%</span></div>';}
+function rC(v){return v>=80?'#2ecc71':v>=60?'#f39c12':'#e74c3c';}
+function bPT(rows,days){var tb=document.getElementById('projectHealthBody');if(!tb)return;if(!rows||!rows.length){tb.innerHTML='<tr><td colspan="8" class="text-center text-muted py-4">No projects found.</td></tr>';return;}tb.innerHTML=rows.map(function(p){return'<tr><td class="ps-3"><strong>'+p.name+'</strong>'+(p.code?'<span class="badge bg-secondary ms-1" style="font-size:10px;">'+p.code+'</span>':'')+'</td><td>'+p.total+'</td><td>'+p.resolved+'</td><td>'+p.open+'</td><td>'+(p.breached>0?'<span class="text-danger fw-bold">'+p.breached+'</span>':p.breached)+'</td><td>'+hB(p.health)+'</td><td>'+tI(p.trend)+'</td><td class="pe-3"><a href="/customer_support/admin/report/project/'+p.id+'?days='+days+'" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-printer me-1"></i>Print</a></td></tr>';}).join('');}
+function bFT(rows,days){var tb=document.getElementById('focalLeaderboardBody');if(!tb)return;if(!rows||!rows.length){tb.innerHTML='<tr><td colspan="9" class="text-center text-muted py-4">No focal persons found.</td></tr>';return;}var m=['🥇','🥈','🥉'];tb.innerHTML=rows.map(function(fp,i){return'<tr><td class="ps-3">'+(m[i]||(i+1))+'</td><td><strong>'+fp.name+'</strong></td><td>'+fp.assigned+'</td><td>'+fp.resolved+'</td><td>'+fp.open+'</td><td>'+(fp.breached>0?'<span class="text-danger fw-bold">'+fp.breached+'</span>':fp.breached)+'</td><td>'+sB(fp.resolve_rate,rC(fp.resolve_rate))+'</td><td>'+sB(fp.sla_rate,rC(fp.sla_rate))+'</td><td class="pe-3"><a href="/customer_support/admin/report/focal/'+fp.id+'?days='+days+'" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-printer me-1"></i>Print</a></td></tr>';}).join('');}
+function loadReportData(days){fetch('/customer_support/admin/reporting/data?days='+days,{credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).then(function(d){if(!d.success)return;var s=d.summary||{};document.getElementById('r-total-period').textContent=s.total_period||0;document.getElementById('r-resolved').textContent=s.resolved_period||0;document.getElementById('r-open').textContent=s.open_tickets||0;document.getElementById('r-breached').textContent=s.breached_period||0;document.getElementById('r-sla-compliance').textContent=(s.sla_compliance||0)+'%';document.getElementById('r-resolve-rate').textContent=(s.resolve_rate||0)+'%';bVC(d.volume_trend||[]);bSC(d.status_breakdown||{});bPC(d.priority_dist||{});bCC(d.top_customers||[]);bPT(d.project_health||[],days);bFT(d.focal_leaderboard||[],days);var el=document.getElementById('execReportLink');if(el)el.href='/customer_support/admin/report/executive?days='+days;}).catch(function(e){console.warn('Report data load failed:',e);});}
+document.addEventListener('DOMContentLoaded',function(){
+  var grp=document.getElementById('reportDaysGroup');if(grp){grp.addEventListener('click',function(e){var b=e.target.closest('button[data-days]');if(!b)return;grp.querySelectorAll('button').forEach(function(x){x.classList.remove('active');});b.classList.add('active');currentDays=parseInt(b.getAttribute('data-days'));loadReportData(currentDays);});}
+  var rt=document.getElementById('reporting-tab');if(rt){rt.addEventListener('shown.bs.tab',function(){loadReportData(currentDays);});if(rt.classList.contains('active'))loadReportData(currentDays);}
+  var params=new URLSearchParams(window.location.search);if(params.get('tab')==='reporting'||window.location.hash==='#reporting'){setTimeout(function(){loadReportData(currentDays);},400);}
+});
+})();
+//]]>
+            </script>
+
+            <!-- ★ 7. KNOWLEDGE BASE JS ★ -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+var CAT_LABELS={company:'Company Info',services:'Services & Products',projects:'Projects',pricing:'Pricing',technical:'Technical Docs',faq:'FAQ',other:'Other'};
+
+function kbAlert(msg,type){
+    var el=document.getElementById('kbAlert');
+    if(!el)return;
+    el.className='alert alert-'+(type||'success')+' mb-3';
+    el.textContent=msg;
+    el.classList.remove('d-none');
+    setTimeout(function(){el.classList.add('d-none');},4000);
+}
+
+function kbLoadDocs(){
+    fetch('/customer_support/knowledge/list',{credentials:'same-origin',headers:{'Accept':'application/json'}})
+    .then(function(r){return r.json();})
+    .then(function(data){
+        var docs=data.documents||[];
+        document.getElementById('kbTotalDocs').textContent=docs.length;
+        document.getElementById('kbReadyDocs').textContent=docs.filter(function(d){return d.state==='ready';}).length;
+        document.getElementById('kbPendingDocs').textContent=docs.filter(function(d){return d.state==='pending';}).length;
+        document.getElementById('kbErrorDocs').textContent=docs.filter(function(d){return d.state==='error';}).length;
+        var tb=document.getElementById('kbDocsBody');
+        if(!docs.length){
+            tb.innerHTML='<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-folder2-open me-2"></i>No documents uploaded yet. Upload your first document above.</td></tr>';
+            return;
+        }
+        tb.innerHTML=docs.map(function(d){
+            var stateBadge=d.state==='ready'
+                ?'<span class="badge bg-success">&#x2705; Ready</span>'
+                :d.state==='error'
+                ?'<span class="badge bg-danger" title="'+(d.error_msg||'')+'">&#x274C; Error</span>'
+                :'<span class="badge bg-warning text-dark">&#x23F3; Pending</span>';
+            var typeBadge={pdf:'<span class="badge bg-danger">PDF</span>',docx:'<span class="badge bg-primary">DOCX</span>',txt:'<span class="badge bg-success">TXT</span>',xlsx:'<span class="badge bg-info text-dark">XLSX</span>'}[d.file_type]||'<span class="badge bg-secondary">FILE</span>';
+            return'<tr>'
+                +'<td><strong>'+d.name+'</strong>'+(d.description?'<br><small class="text-muted">'+d.description+'</small>':'')+'</td>'
+                +'<td><span class="badge bg-secondary">'+(CAT_LABELS[d.category]||d.category)+'</span></td>'
+                +'<td>'+typeBadge+'</td>'
+                +'<td>'+stateBadge+'</td>'
+                +'<td class="text-center fw-bold text-primary">'+(d.chunk_count||0)+'</td>'
+                +'<td><small class="text-muted">'+(d.create_date||'')+'</small></td>'
+                +'<td><button class="btn btn-sm btn-outline-danger" onclick="kbDelete('+d.id+',\''+d.name.replace(/'/g,"\\'")+'\')" title="Delete"><i class="bi bi-trash3"></i></button></td>'
+                +'</tr>';
+        }).join('');
+    })
+    .catch(function(e){console.warn('KB load failed:',e);});
+}
+
+window.kbUpload=function(){
+    var name=document.getElementById('kbDocName').value.trim();
+    var category=document.getElementById('kbCategory').value;
+    var desc=document.getElementById('kbDescription').value.trim();
+    var fileEl=document.getElementById('kbFile');
+    if(!name||!fileEl.files.length){kbAlert('Please fill in the document name and select a file.','warning');return;}
+    var allowed=['.pdf','.docx','.txt','.xlsx'];
+    var filename=fileEl.files[0].name.toLowerCase();
+    if(!allowed.some(function(ext){return filename.endsWith(ext);})){kbAlert('Invalid file type. Allowed: PDF, DOCX, TXT, XLSX','danger');return;}
+    var formData=new FormData();
+    formData.append('name',name);
+    formData.append('category',category);
+    formData.append('description',desc);
+    formData.append('file',fileEl.files[0]);
+    var csrf=document.querySelector('input[name="csrf_token"]');
+    if(csrf)formData.append('csrf_token',csrf.value);
+    var btn=document.getElementById('kbUploadBtn');
+    if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Processing...';}
+    fetch('/customer_support/knowledge/upload',{method:'POST',credentials:'same-origin',body:formData})
+    .then(function(){
+        kbAlert('Document uploaded and processed successfully! &#x2705;','success');
+        document.getElementById('kbDocName').value='';
+        document.getElementById('kbDescription').value='';
+        document.getElementById('kbFile').value='';
+        kbLoadDocs();
+    })
+    .catch(function(){kbAlert('Upload failed. Please try again.','danger');})
+    .finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="bi bi-upload me-2"></i>Upload &amp; Process';}});
+};
+
+window.kbDelete=function(id,name){
+    if(!confirm('Delete "'+name+'"?\nThe AI will no longer use this document.'))return;
+    var formData=new FormData();
+    var csrf=document.querySelector('input[name="csrf_token"]');
+    if(csrf)formData.append('csrf_token',csrf.value);
+    fetch('/customer_support/knowledge/delete/'+id,{method:'POST',credentials:'same-origin',body:formData})
+    .then(function(){kbAlert('Document deleted.','success');kbLoadDocs();})
+    .catch(function(){kbAlert('Delete failed.','danger');});
+};
+
+document.addEventListener('DOMContentLoaded',function(){
+    var modal=document.getElementById('knowledgeBaseModal');
+    if(modal)modal.addEventListener('shown.bs.modal',function(){kbLoadDocs();});
+});
+})();
+//]]>
+            </script>
+
         </t>
     </template>
 </odoo>
