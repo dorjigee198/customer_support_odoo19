@@ -3,12 +3,16 @@
     <template id="support_agent_dashboard" name="Support Dashboard">
         <t t-call="web.layout">
             <t t-set="head">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
                     rel="stylesheet" />
                 <link
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
                 <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css" />
+                <!-- ★ MOBILE STYLES ★ -->
+                <link rel="stylesheet"
+                    href="/customer_support/static/src/css/support_dashboard_mobile.css" />
                 <style>
                     /* ── NOTIFICATION BELL DROPDOWN ── */
                     .notif-wrap { position: relative; }
@@ -162,6 +166,13 @@
             <div class="dashboard-wrapper">
                 <header class="dashboard-header">
                     <div class="header-content">
+
+                        <!-- ★ HAMBURGER BUTTON (mobile only — hidden on desktop via CSS) ★ -->
+                        <button class="mobile-hamburger-btn" id="mobileHamburgerBtn"
+                            aria-label="Open navigation">
+                            <i class="bi bi-list"></i>
+                        </button>
+
                         <div class="header-nav">
                             <a href="#" class="nav-link active" data-view="overview">
                                 <i class="bi bi-speedometer2"></i>
@@ -176,6 +187,7 @@
                                 <span>FAQ</span>
                             </a>
                         </div>
+
                         <div class="header-right">
                             <!-- Grid/Kanban toggle button -->
                             <button class="view-toggle-btn me-2" id="kanbanToggleBtn"
@@ -504,172 +516,228 @@
                             </div>
                         </div>
                     </div>
-                    <div class="quick-actions">
-                        <div class="actions-grid">
-                            <a href="#" class="action-card">
-                                <div class="action-icon">
-                                    <i class="bi bi-plus-circle-fill"></i>
+
+
+                    <!-- ═══ TICKETS PAGE — LIST + KANBAN ═══ -->
+                    <div class="page-content dashboard-content" id="tickets-page"
+                        style="display: none;">
+
+                        <div class="tickets-header">
+                            <div class="search-container">
+                                <i class="bi bi-search"></i>
+                                <input type="text" class="search-input"
+                                    placeholder="Search tickets..."></input>
+                            </div>
+                            <div class="view-toggle">
+                                <button class="view-btn active" id="listViewBtn" title="List view">
+                                    <i class="bi bi-list"></i>
+                                </button>
+                                <button class="view-btn" id="kanbanViewBtn" title="Kanban view">
+                                    <i class="bi bi-grid-3x3-gap"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ★ MOBILE VIEW PILL TOGGLE (shown only on mobile via CSS) ★ -->
+                        <div class="mobile-view-pill" id="mobileViewPill">
+                            <button class="mobile-view-pill-btn active" id="mobilePillList"
+                                data-target="list">
+                                <i class="bi bi-list-ul me-1"></i>List </button>
+                            <button class="mobile-view-pill-btn" id="mobilePillKanban"
+                                data-target="kanban">
+                                <i class="bi bi-grid-3x3-gap me-1"></i>Kanban </button>
+                        </div>
+
+                        <!-- ── LIST VIEW ── -->
+                        <div id="listView">
+                            <div class="ticket-table-wrapper">
+                                <table class="ticket-table" id="ticketTable" style="display:none;">
+                                    <thead>
+                                        <tr>
+                                            <th>TICKET</th>
+                                            <th>CUSTOMER</th>
+                                            <th>STATUS</th>
+                                            <th>PRIORITY</th>
+                                            <th>CREATED</th>
+                                            <th>PROJECT</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ticketTableBody">
+                                        <!-- Populated by JS polling -->
+                                    </tbody>
+                                </table>
+                                <div class="tickets-empty-state" id="ticketsEmptyState"
+                                    style="display:none;">
+                                    <i class="bi bi-inbox"></i>
+                                    <h3>No tickets assigned to you yet.</h3>
+                                    <p>When you have tickets assigned, they will appear here.</p>
                                 </div>
-                                <div class="action-content">
-                                    <h4>Create New Ticket</h4>
-                                    <p>Submit a new support request</p>
+                                <div class="tickets-empty-state" id="ticketsLoadingState">
+                                    <i class="bi bi-arrow-repeat"
+                                        style="animation: spin 1s linear infinite; display:inline-block;"></i>
+                                    <h3>Loading tickets...</h3>
                                 </div>
-                            </a>
-                            <a href="#" class="action-card" data-view="tickets">
-                                <div class="action-icon">
-                                    <i class="bi bi-list-task"></i>
+                            </div>
+                        </div>
+
+                        <!-- ── KANBAN VIEW ── -->
+                        <div id="kanbanView" style="display:none;">
+                            <div class="kanban-board" id="kanbanBoard">
+
+                                <!-- New / Assigned column -->
+                                <div class="kanban-col" data-state="new">
+                                    <div class="kanban-col-header" data-col-toggle="new">
+                                        <span class="kanban-col-title"><i class="bi bi-circle"></i>
+                                            New</span>
+                                        <div class="kanban-col-header-right">
+                                            <span class="kanban-col-count" id="count-new">0</span>
+                                            <!-- ★ Mobile collapse chevron ★ -->
+                                            <i
+                                                class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                        </div>
+                                    </div>
+                                    <div class="kanban-cards" id="col-new"></div>
+                                    <div class="kanban-drop-zone">Drop here</div>
                                 </div>
-                                <div class="action-content">
-                                    <h4>View All Tickets</h4>
-                                    <p>See all your support tickets</p>
+
+                                <!-- In Progress column -->
+                                <div class="kanban-col" data-state="in_progress">
+                                    <div class="kanban-col-header" data-col-toggle="in_progress">
+                                        <span class="kanban-col-title"><i class="bi bi-arrow-repeat"></i>
+                                            In Progress</span>
+                                        <div class="kanban-col-header-right">
+                                            <span class="kanban-col-count" id="count-in_progress">0</span>
+                                            <i
+                                                class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                        </div>
+                                    </div>
+                                    <div class="kanban-cards" id="col-in_progress"></div>
+                                    <div class="kanban-drop-zone">Drop here</div>
                                 </div>
-                            </a>
-                            <a href="#" class="action-card">
-                                <div class="action-icon">
-                                    <i class="bi bi-file-earmark-text"></i>
+
+                                <!-- Resolved column -->
+                                <div class="kanban-col" data-state="resolved">
+                                    <div class="kanban-col-header" data-col-toggle="resolved">
+                                        <span class="kanban-col-title"><i class="bi bi-check-circle"></i>
+                                            Resolved</span>
+                                        <div class="kanban-col-header-right">
+                                            <span class="kanban-col-count" id="count-resolved">0</span>
+                                            <i
+                                                class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                        </div>
+                                    </div>
+                                    <div class="kanban-cards" id="col-resolved"></div>
+                                    <div class="kanban-drop-zone">Drop here</div>
                                 </div>
-                                <div class="action-content">
-                                    <h4>Generate Report</h4>
-                                    <p>Download performance report</p>
+
+                                <!-- Closed column -->
+                                <div class="kanban-col" data-state="closed">
+                                    <div class="kanban-col-header" data-col-toggle="closed">
+                                        <span class="kanban-col-title"><i class="bi bi-x-circle"></i>
+                                            Closed</span>
+                                        <div class="kanban-col-header-right">
+                                            <span class="kanban-col-count" id="count-closed">0</span>
+                                            <i
+                                                class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                        </div>
+                                    </div>
+                                    <div class="kanban-cards" id="col-closed"></div>
+                                    <div class="kanban-drop-zone">Drop here</div>
                                 </div>
-                            </a>
-                            <a href="#" class="action-card" data-view="faq">
-                                <div class="action-icon">
-                                    <i class="bi bi-question-circle-fill"></i>
-                                </div>
-                                <div class="action-content">
-                                    <h4>Help Center</h4>
-                                    <p>Browse FAQ and guides</p>
-                                </div>
-                            </a>
+
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- ═══ TICKETS PAGE — LIST + KANBAN ═══ -->
-                <div class="page-content dashboard-content" id="tickets-page" style="display: none;">
-                    <div class="tickets-header">
-                        <div class="search-container">
-                            <i class="bi bi-search"></i>
-                            <input type="text" class="search-input" placeholder="Search tickets..."></input>
+                    <!-- ═══ FAQ PAGE ═══ -->
+                    <div class="page-content dashboard-content" id="faq-page" style="display: none;">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <h2 class="card-title"><i class="bi bi-question-circle"></i>Manage
+                                    FAQ</h2>
+                            </div>
+                            <p class="text-muted">FAQ Management interface coming soon...</p>
                         </div>
-                        <div class="view-toggle">
-                            <button class="view-btn active" id="listViewBtn" title="List view">
-                                <i class="bi bi-list"></i>
+                    </div>
+
+                    <!-- ★ MOBILE NAV OVERLAY ★ -->
+                    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+
+                    <!-- ★ MOBILE NAV DRAWER ★ -->
+                    <div class="mobile-nav-drawer" id="mobileNavDrawer">
+                        <div class="mobile-nav-drawer-header">
+                            <div class="drawer-brand-icon">
+                                <i class="bi bi-headset"></i>
+                            </div>
+                            <div class="drawer-brand-text">
+                                <strong>Customer Support</strong>
+                                <span>Agent Panel</span>
+                            </div>
+                            <button class="mobile-nav-drawer-close" id="mobileNavClose">
+                                <i class="bi bi-x-lg"></i>
                             </button>
-                            <button class="view-btn" id="kanbanViewBtn" title="Kanban view">
-                                <i class="bi bi-grid-3x3-gap"></i>
-                            </button>
+                        </div>
+
+                        <div class="mobile-nav-section-label">Navigation</div>
+
+                        <ul class="mobile-nav-list">
+                            <li>
+                                <a class="mobile-nav-item active" data-view="overview">
+                                    <div class="mobile-nav-item-icon">
+                                        <i class="bi bi-speedometer2"></i>
+                                    </div>
+                                    <div class="mobile-nav-item-text">
+                                        <strong>Overview</strong>
+                                        <span>Dashboard summary</span>
+                                    </div>
+                                    <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="mobile-nav-item" data-view="tickets">
+                                    <div class="mobile-nav-item-icon">
+                                        <i class="bi bi-ticket-detailed"></i>
+                                    </div>
+                                    <div class="mobile-nav-item-text">
+                                        <strong>Tickets</strong>
+                                        <span>View &amp; manage tickets</span>
+                                    </div>
+                                    <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="mobile-nav-item" data-view="faq">
+                                    <div class="mobile-nav-item-icon">
+                                        <i class="bi bi-question-circle"></i>
+                                    </div>
+                                    <div class="mobile-nav-item-text">
+                                        <strong>FAQ</strong>
+                                        <span>Browse help &amp; guides</span>
+                                    </div>
+                                    <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
+                                </a>
+                            </li>
+                        </ul>
+
+                        <div class="mobile-nav-drawer-footer">
+                            <p>Customer Support System &#169; 2025</p>
                         </div>
                     </div>
+                    <!-- ★ END MOBILE NAV DRAWER ★ -->
 
-                    <!-- ── LIST VIEW ── -->
-                    <div id="listView">
-                        <div class="ticket-table-wrapper">
-                            <table class="ticket-table" id="ticketTable" style="display:none;">
-                                <thead>
-                                    <tr>
-                                        <th>TICKET</th>
-                                        <th>CUSTOMER</th>
-                                        <th>STATUS</th>
-                                        <th>PRIORITY</th>
-                                        <th>CREATED</th>
-                                        <th>PROJECT</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="ticketTableBody">
-                                    <!-- Populated by JS polling -->
-                                </tbody>
-                            </table>
-                            <div class="tickets-empty-state" id="ticketsEmptyState"
-                                style="display:none;">
-                                <i class="bi bi-inbox"></i>
-                                <h3>No tickets assigned to you yet.</h3>
-                                <p>When you have tickets assigned, they will appear here.</p>
-                            </div>
-                            <div class="tickets-empty-state" id="ticketsLoadingState">
-                                <i class="bi bi-arrow-repeat"
-                                    style="animation: spin 1s linear infinite; display:inline-block;"></i>
-                                <h3>Loading tickets...</h3>
-                            </div>
-                        </div>
-                    </div>
+                </div><!--/.dashboard-wrapper -->
 
-                    <!-- ── KANBAN VIEW ── -->
-                    <div id="kanbanView" style="display:none;">
-                        <div class="kanban-board" id="kanbanBoard">
+                <!-- Save feedback toast -->
+                <div id="kanbanToast"></div>
 
-                            <!-- New / Assigned column -->
-                            <div class="kanban-col" data-state="new">
-                                <div class="kanban-col-header">
-                                    <span class="kanban-col-title"><i class="bi bi-circle"></i> New</span>
-                                    <span class="kanban-col-count" id="count-new">0</span>
-                                </div>
-                                <div class="kanban-cards" id="col-new"></div>
-                                <div class="kanban-drop-zone">Drop here</div>
-                            </div>
+                <script
+                    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-                            <!-- In Progress column -->
-                            <div class="kanban-col" data-state="in_progress">
-                                <div class="kanban-col-header">
-                                    <span class="kanban-col-title"><i class="bi bi-arrow-repeat"></i>
-                                        In Progress</span>
-                                    <span class="kanban-col-count" id="count-in_progress">0</span>
-                                </div>
-                                <div class="kanban-cards" id="col-in_progress"></div>
-                                <div class="kanban-drop-zone">Drop here</div>
-                            </div>
-
-                            <!-- Resolved column -->
-                            <div class="kanban-col" data-state="resolved">
-                                <div class="kanban-col-header">
-                                    <span class="kanban-col-title"><i class="bi bi-check-circle"></i>
-                                        Resolved</span>
-                                    <span class="kanban-col-count" id="count-resolved">0</span>
-                                </div>
-                                <div class="kanban-cards" id="col-resolved"></div>
-                                <div class="kanban-drop-zone">Drop here</div>
-                            </div>
-
-                            <!-- Closed column -->
-                            <div class="kanban-col" data-state="closed">
-                                <div class="kanban-col-header">
-                                    <span class="kanban-col-title"><i class="bi bi-x-circle"></i>
-                                        Closed</span>
-                                    <span class="kanban-col-count" id="count-closed">0</span>
-                                </div>
-                                <div class="kanban-cards" id="col-closed"></div>
-                                <div class="kanban-drop-zone">Drop here</div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ═══ FAQ PAGE ═══ -->
-                <div class="page-content dashboard-content" id="faq-page" style="display: none;">
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <h2 class="card-title"><i class="bi bi-question-circle"></i>Manage FAQ</h2>
-                        </div>
-                        <p class="text-muted">FAQ Management interface coming soon...</p>
-                    </div>
-                </div>
-
-            </div><!--
-            /.dashboard-wrapper -->
-
-            <!-- Save feedback toast -->
-            <div id="kanbanToast"></div>
-
-            <script
-                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-            <!-- ═══════════════════════════════════════════════════════════
+                <!-- ═══════════════════════════════════════════════════════════
                  1.  BELL / SLA ALERTS  — polls every 30 s
             ═══════════════════════════════════════════════════════════ -->
-            <script type="text/javascript">
-                //<![CDATA[
+                <script type="text/javascript">
+                    //<![CDATA[
 (function () {
     'use strict';
     var bell     = document.getElementById('notifBell');
@@ -721,8 +789,8 @@
             return '<a class="notif-item unread" href="/customer_support/ticket/' + a.ticket_id + '">'
                 + '<div class="notif-icon-wrap ' + cls + '"><i class="bi ' + icon + '"></i></div>'
                 + '<div class="notif-body">'
-                + '<div class="notif-title">' + a.ticket_name + ' — ' + a.subject + '</div>'
-                + '<div class="notif-sub">' + label + ' · ' + a.time_display + '</div>'
+                + '<div class="notif-title">' + a.ticket_name + ' \u2014 ' + a.subject + '</div>'
+                + '<div class="notif-sub">' + label + ' \u00b7 ' + a.time_display + '</div>'
                 + '<div class="notif-time-text">Policy: ' + (a.policy_name || 'None') + '</div>'
                 + '</div><div class="notif-dot ' + cls + '"></div></a>';
         }).join('');
@@ -736,11 +804,11 @@
 //]]>
             </script>
 
-            <!-- ═══════════════════════════════════════════════════════════
+                <!-- ═══════════════════════════════════════════════════════════
                  2.  LIVE ANALYTICS + PERFORMANCE  — polls every 15 s
             ═══════════════════════════════════════════════════════════ -->
-            <script type="text/javascript">
-                //<![CDATA[
+                <script type="text/javascript">
+                    //<![CDATA[
 (function () {
     'use strict';
     var INTERVAL = 15000;
@@ -806,13 +874,11 @@
 //]]>
             </script>
 
-            <!-- ═══════════════════════════════════════════════════════════
+                <!-- ═══════════════════════════════════════════════════════════
                  3.  DASHBOARD NAV + TICKET POLLING + KANBAN ENGINE
-                     Ticket list + kanban polls every 20 s.
-                     "assigned" state is treated as "new" in the kanban.
             ═══════════════════════════════════════════════════════════ -->
-            <script type="text/javascript">
-                //<![CDATA[
+                <script type="text/javascript">
+                    //<![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
 
     // ── Auto-hide flash alerts ────────────────────────────────────────────
@@ -837,21 +903,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ── Page switching ────────────────────────────────────────────────────
     window.switchView = function (viewId) {
-        document.querySelectorAll('.nav-link').forEach(function (l) { l.classList.remove('active'); });
-        var nl = document.querySelector('.nav-link[data-view="' + viewId + '"]');
+        // Desktop nav links
+        document.querySelectorAll('.header-nav .nav-link').forEach(function (l) { l.classList.remove('active'); });
+        var nl = document.querySelector('.header-nav .nav-link[data-view="' + viewId + '"]');
         if (nl) nl.classList.add('active');
+
+        // Mobile drawer items — keep in sync
+        document.querySelectorAll('.mobile-nav-item').forEach(function (i) { i.classList.remove('active'); });
+        var mni = document.querySelector('.mobile-nav-item[data-view="' + viewId + '"]');
+        if (mni) mni.classList.add('active');
+
+        // Pages
         document.querySelectorAll('.page-content').forEach(function (p) { p.style.display = 'none'; });
         var target = document.getElementById(viewId + '-page');
         if (target) target.style.display = 'block';
     };
-    document.querySelectorAll('.nav-link').forEach(function (link) {
+
+    document.querySelectorAll('.header-nav .nav-link').forEach(function (link) {
         link.addEventListener('click', function (e) { e.preventDefault(); window.switchView(this.getAttribute('data-view')); });
     });
     document.querySelectorAll('.action-card[data-view]').forEach(function (card) {
         card.addEventListener('click', function (e) { e.preventDefault(); window.switchView(this.getAttribute('data-view')); });
     });
 
-    // ── List / Kanban view toggle ────────────────────────────────────────
+    // ── List / Kanban view toggle (desktop buttons) ───────────────────────
     var listViewBtn   = document.getElementById('listViewBtn');
     var kanbanViewBtn = document.getElementById('kanbanViewBtn');
     var listView      = document.getElementById('listView');
@@ -862,16 +937,30 @@ document.addEventListener('DOMContentLoaded', function () {
         kanbanView.style.display = 'none';
         listViewBtn.classList.add('active');
         kanbanViewBtn.classList.remove('active');
+        // Sync mobile pill
+        document.getElementById('mobilePillList').classList.add('active');
+        document.getElementById('mobilePillKanban').classList.remove('active');
     }
     function showKanban() {
         listView.style.display   = 'none';
         kanbanView.style.display = 'block';
         listViewBtn.classList.remove('active');
         kanbanViewBtn.classList.add('active');
+        // Sync mobile pill
+        document.getElementById('mobilePillList').classList.remove('active');
+        document.getElementById('mobilePillKanban').classList.add('active');
         updateCounts();
     }
     listViewBtn.addEventListener('click', showList);
     kanbanViewBtn.addEventListener('click', showKanban);
+
+    // ── Mobile pill toggle ────────────────────────────────────────────────
+    document.getElementById('mobilePillList').addEventListener('click', function () {
+        showList();
+    });
+    document.getElementById('mobilePillKanban').addEventListener('click', function () {
+        showKanban();
+    });
 
     // ── Header kanban shortcut ───────────────────────────────────────────
     document.getElementById('kanbanToggleBtn').addEventListener('click', function () {
@@ -889,7 +978,22 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ── Search (works on both views, re-applied after every render) ───────
+    // ── Mobile kanban column collapse ─────────────────────────────────────
+    document.querySelectorAll('.kanban-col-header[data-col-toggle]').forEach(function (header) {
+        header.addEventListener('click', function () {
+            // Only collapse on mobile — guard with CSS class check
+            if (window.innerWidth > 768) return;
+            var col = this.closest('.kanban-col');
+            col.classList.toggle('collapsed');
+            var chevron = this.querySelector('.kanban-col-chevron');
+            if (chevron) {
+                chevron.classList.toggle('bi-chevron-down');
+                chevron.classList.toggle('bi-chevron-up');
+            }
+        });
+    });
+
+    // ── Search ────────────────────────────────────────────────────────────
     var searchInput = document.querySelector('.search-input');
     function applySearch() {
         if (!searchInput) return;
@@ -906,34 +1010,22 @@ document.addEventListener('DOMContentLoaded', function () {
     // ════════════════════════════════════════════════════════════════════
     //  TICKET POLLING ENGINE
     // ════════════════════════════════════════════════════════════════════
-
-    // Tracks which ticket IDs are already rendered so we can detect new ones
     var _renderedIds = {};
     var _firstLoad   = true;
 
-    // Maps a ticket state to a kanban column id.
-    // "assigned" and "new" both land in the "new" column.
     function toColState(state) {
         if (state === 'assigned' || state === 'new') return 'new';
         if (state === 'in_progress') return 'in_progress';
         if (state === 'resolved')    return 'resolved';
         if (state === 'closed')      return 'closed';
-        return 'new'; // fallback
+        return 'new';
     }
 
-    // Human-readable label for the list view STATUS column
     function stateLabel(state) {
-        var map = {
-            new:         'New',
-            assigned:    'Assigned',
-            in_progress: 'In Progress',
-            resolved:    'Resolved',
-            closed:      'Closed'
-        };
+        var map = { new:'New', assigned:'Assigned', in_progress:'In Progress', resolved:'Resolved', closed:'Closed' };
         return map[state] || state.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
     }
 
-    // CSS class for the list view status badge
     function stateCssClass(state) {
         if (state === 'new' || state === 'assigned') return 'status-new';
         if (state === 'in_progress') return 'status-in-progress';
@@ -942,24 +1034,15 @@ document.addEventListener('DOMContentLoaded', function () {
         return 'status-new';
     }
 
-    // ── Build a list-view <tr> ───────────────────────────────────────────
     function buildListRow(t) {
-        var av  = t.customer_id
-            ? '/web/image/res.partner/' + t.customer_id + '/avatar_128'
-            : '/web/static/img/avatar_gray.svg';
+        var av  = t.customer_id ? '/web/image/res.partner/' + t.customer_id + '/avatar_128' : '/web/static/img/avatar_gray.svg';
         var sc  = stateCssClass(t.state);
         var sd  = stateLabel(t.state);
         var pc  = 'priority-' + (t.priority || 'low');
         var pl  = (t.priority || 'low').charAt(0).toUpperCase() + (t.priority || 'low').slice(1);
         return '<tr class="ticket-row" data-ticket-id="' + t.id + '" style="cursor:pointer;">'
-            + '<td class="ticket-info-col">'
-            +   '<div class="ticket-id-badge">' + escHtml(t.name) + '</div>'
-            +   '<div class="ticket-description">' + escHtml(t.subject || 'No description') + '</div>'
-            + '</td>'
-            + '<td class="customer-col"><div class="customer-info">'
-            +   '<img src="' + av + '" class="customer-avatar" onerror="this.src=\'/web/static/img/avatar_gray.svg\'" />'
-            +   '<span class="customer-name">' + escHtml(t.customer_name) + '</span>'
-            + '</div></td>'
+            + '<td class="ticket-info-col"><div class="ticket-id-badge">' + escHtml(t.name) + '</div><div class="ticket-description">' + escHtml(t.subject || 'No description') + '</div></td>'
+            + '<td class="customer-col"><div class="customer-info"><img src="' + av + '" class="customer-avatar" onerror="this.src=\'/web/static/img/avatar_gray.svg\'" /><span class="customer-name">' + escHtml(t.customer_name) + '</span></div></td>'
             + '<td class="status-col"><span class="table-status-badge ' + sc + '">' + sd + '</span></td>'
             + '<td class="priority-col"><span class="table-priority-badge ' + pc + '">' + pl + '</span></td>'
             + '<td class="created-col">' + escHtml(t.create_date) + '</td>'
@@ -967,57 +1050,36 @@ document.addEventListener('DOMContentLoaded', function () {
             + '</tr>';
     }
 
-    // ── Build a kanban card ───────────────────────────────────────────────
     function buildKanbanCard(t) {
-        var av = t.customer_id
-            ? '/web/image/res.partner/' + t.customer_id + '/avatar_128'
-            : '/web/static/img/avatar_gray.svg';
+        var av = t.customer_id ? '/web/image/res.partner/' + t.customer_id + '/avatar_128' : '/web/static/img/avatar_gray.svg';
         var pc = 'priority-' + (t.priority || 'low');
         var pl = (t.priority || 'low').charAt(0).toUpperCase() + (t.priority || 'low').slice(1);
         return '<div class="kanban-card" data-ticket-id="' + t.id + '" data-state="' + toColState(t.state) + '" draggable="true">'
             + '<div class="kanban-card-id">' + escHtml(t.name) + '</div>'
             + '<div class="kanban-card-subject">' + escHtml(t.subject || '') + '</div>'
-            + '<div class="kanban-card-footer">'
-            +   '<div class="kanban-card-customer">'
-            +     '<img src="' + av + '" onerror="this.src=\'/web/static/img/avatar_gray.svg\'" />'
-            +     '<span>' + escHtml(t.customer_name) + '</span>'
-            +   '</div>'
-            +   '<span class="kanban-priority ' + pc + '">' + pl + '</span>'
-            + '</div></div>';
+            + '<div class="kanban-card-footer"><div class="kanban-card-customer"><img src="' + av + '" onerror="this.src=\'/web/static/img/avatar_gray.svg\'" /><span>' + escHtml(t.customer_name) + '</span></div>'
+            + '<span class="kanban-priority ' + pc + '">' + pl + '</span></div></div>';
     }
 
-    // ── XSS-safe escape ──────────────────────────────────────────────────
     function escHtml(str) {
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // ── Full re-render of both views ─────────────────────────────────────
     function renderTickets(tickets) {
         var newIds = {};
         tickets.forEach(function (t) { newIds[t.id] = true; });
-
-        // Detect truly new tickets (not in previous render, not first load)
         var addedIds = [];
         if (!_firstLoad) {
-            tickets.forEach(function (t) {
-                if (!_renderedIds[t.id]) addedIds.push(t.id);
-            });
+            tickets.forEach(function (t) { if (!_renderedIds[t.id]) addedIds.push(t.id); });
         }
         _renderedIds = newIds;
         _firstLoad   = false;
 
-        // ── LIST VIEW ────────────────────────────────────────────────────
         var tbody      = document.getElementById('ticketTableBody');
         var table      = document.getElementById('ticketTable');
         var emptyState = document.getElementById('ticketsEmptyState');
         var loading    = document.getElementById('ticketsLoadingState');
-
         loading.style.display = 'none';
-
         if (tickets.length === 0) {
             table.style.display      = 'none';
             emptyState.style.display = 'block';
@@ -1028,40 +1090,29 @@ document.addEventListener('DOMContentLoaded', function () {
             bindRowClicks();
         }
 
-        // ── KANBAN VIEW ─────────────────────────────────────────────────
-        // Group tickets by kanban column
         var cols = { new: [], in_progress: [], resolved: [], closed: [] };
         tickets.forEach(function (t) { cols[toColState(t.state)].push(t); });
 
-        // For each column: only update if the set of ticket ids changed
-        // (to avoid wiping cards the user is mid-drag)
         ['new', 'in_progress', 'resolved', 'closed'].forEach(function (state) {
             var colEl = document.getElementById('col-' + state);
             if (!colEl) return;
-
-            // Collect IDs already rendered in this column
             var existingIds = {};
             colEl.querySelectorAll('.kanban-card').forEach(function (card) {
                 existingIds[card.getAttribute('data-ticket-id')] = card;
             });
-
-            // Add cards that are missing
             cols[state].forEach(function (t) {
                 var tid = String(t.id);
                 if (!existingIds[tid]) {
-                    // New card — append and flash it
                     var tmp = document.createElement('div');
                     tmp.innerHTML = buildKanbanCard(t);
                     var newCard = tmp.firstChild;
                     colEl.appendChild(newCard);
                     if (addedIds.indexOf(t.id) !== -1) {
                         newCard.classList.add('ticket-new-flash');
-                        showToast('📋 New ticket assigned: ' + t.name, 'success');
+                        showToast('\uD83D\uDCCB New ticket assigned: ' + t.name, 'success');
                     }
                 }
             });
-
-            // Remove cards that are no longer in this column
             var incomingIds = {};
             cols[state].forEach(function (t) { incomingIds[String(t.id)] = true; });
             Object.keys(existingIds).forEach(function (tid) {
@@ -1074,7 +1125,6 @@ document.addEventListener('DOMContentLoaded', function () {
         bindDragDrop();
     }
 
-    // ── Fetch tickets from server ────────────────────────────────────────
     function loadTickets() {
         fetch('/customer_support/dashboard/tickets', {
             method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' }
@@ -1084,13 +1134,9 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(function (e) { console.warn('Ticket refresh failed:', e); });
     }
 
-    // Kick off immediately then every 20 s
     loadTickets();
     setInterval(loadTickets, 20000);
 
-    // ════════════════════════════════════════════════════════════════════
-    //  ROW CLICK (list view)
-    // ════════════════════════════════════════════════════════════════════
     function bindRowClicks() {
         document.querySelectorAll('.ticket-row').forEach(function (row) {
             row.addEventListener('click', function () {
@@ -1100,16 +1146,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ════════════════════════════════════════════════════════════════════
-    //  DRAG AND DROP  (re-bound after every render)
-    // ════════════════════════════════════════════════════════════════════
     var draggedCard = null;
+    function bindDragDrop() {}
 
-    function bindDragDrop() {
-        // dragstart / dragend use event delegation — bound once on document
-    }
-
-    // Delegated drag events (safe to bind once)
     document.addEventListener('dragstart', function (e) {
         var card = e.target.closest('.kanban-card');
         if (!card) return;
@@ -1126,7 +1165,6 @@ document.addEventListener('DOMContentLoaded', function () {
         draggedCard = null;
     });
 
-    // Column drop listeners (bound once — columns are static in the DOM)
     document.querySelectorAll('.kanban-col').forEach(function (col) {
         col.addEventListener('dragover', function (e) {
             e.preventDefault();
@@ -1144,19 +1182,15 @@ document.addEventListener('DOMContentLoaded', function () {
             var ticketId = draggedCard.getAttribute('data-ticket-id');
             var oldState = draggedCard.getAttribute('data-state');
             if (oldState === newState) return;
-
-            // Move card in DOM immediately (optimistic)
             var cardsContainer = this.querySelector('.kanban-cards');
             cardsContainer.appendChild(draggedCard);
             draggedCard.setAttribute('data-state', newState);
-            // Also update our tracking so the next poll doesn't remove it
             _renderedIds[ticketId] = true;
             updateCounts();
             saveTicketStatus(ticketId, newState);
         });
     });
 
-    // ── Save status to server ────────────────────────────────────────────
     function saveTicketStatus(ticketId, newState) {
         var fd = new FormData();
         fd.append('status', newState);
@@ -1165,16 +1199,12 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .then(function (r) { return r.json(); })
         .then(function (data) {
-            if (data.success) {
-                showToast('✓ Saved — ' + newState.replace(/_/g, ' '), 'success');
-            } else {
-                showToast('✗ ' + (data.error || 'Save failed'), 'error');
-            }
+            if (data.success) { showToast('\u2713 Saved \u2014 ' + newState.replace(/_/g, ' '), 'success'); }
+            else { showToast('\u2717 ' + (data.error || 'Save failed'), 'error'); }
         })
-        .catch(function (e) { console.warn('Status update error:', e); showToast('✗ Network error', 'error'); });
+        .catch(function (e) { console.warn('Status update error:', e); showToast('\u2717 Network error', 'error'); });
     }
 
-    // ── Kanban card click → open ticket ─────────────────────────────────
     document.addEventListener('click', function (e) {
         var card = e.target.closest('.kanban-card');
         if (!card || card.classList.contains('dragging')) return;
@@ -1185,6 +1215,55 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 //]]>
             </script>
+
+                <!-- ═══════════════════════════════════════════════════════════
+                 4.  MOBILE HAMBURGER DRAWER JS
+            ═══════════════════════════════════════════════════════════ -->
+                <script type="text/javascript">
+                    //<![CDATA[
+(function () {
+    'use strict';
+    var hamburger = document.getElementById('mobileHamburgerBtn');
+    var overlay   = document.getElementById('mobileNavOverlay');
+    var drawer    = document.getElementById('mobileNavDrawer');
+    var closeBtn  = document.getElementById('mobileNavClose');
+
+    function openDrawer() {
+        drawer.classList.add('open');
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+        drawer.classList.remove('open');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    if (hamburger) hamburger.addEventListener('click', openDrawer);
+    if (closeBtn)  closeBtn.addEventListener('click', closeDrawer);
+    if (overlay)   overlay.addEventListener('click', closeDrawer);
+
+    if (drawer) {
+        drawer.querySelectorAll('.mobile-nav-item').forEach(function (item) {
+            item.addEventListener('click', function () {
+                var viewId = this.getAttribute('data-view');
+
+                // Update active state in drawer
+                drawer.querySelectorAll('.mobile-nav-item').forEach(function (i) { i.classList.remove('active'); });
+                this.classList.add('active');
+
+                // Switch the page view
+                if (window.switchView) window.switchView(viewId);
+
+                closeDrawer();
+            });
+        });
+    }
+})();
+//]]>
+            </script>
+            </div>
 
         </t>
     </template>
