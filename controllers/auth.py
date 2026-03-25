@@ -50,11 +50,16 @@ class CustomerSupportAuth(http.Controller):
         Login Page - Renders the custom login form
         Working: Shows login form with email/password fields
         Access: Public (no login required)
+
+        Accepts an optional `next` query param so that after a successful
+        login the user is taken directly to the page they originally
+        requested (e.g. a specific ticket URL from an email link).
         """
         return request.render(
             "customer_support.portal_login_page",
             {
                 "error": kw.get("error", ""),
+                "next": kw.get("next", ""),  # ← pass next to the template
             },
         )
 
@@ -73,14 +78,22 @@ class CustomerSupportAuth(http.Controller):
                  correct dashboard based on the user's role.
         Access: Public (no login required)
 
-        Redirect targets:
-          - System Admin  → /customer_support/admin_dashboard
-          - Portal User   → /customer_support/dashboard
-          - Internal User → /customer_support/support_dashboard
+        Redirect targets (in priority order):
+          1. `next` param if present and safe  → that URL
+          2. System Admin                       → /customer_support/admin_dashboard
+          3. Portal User                        → /customer_support/dashboard
+          4. Internal User                      → /customer_support/support_dashboard
         """
         try:
             email = post.get("email", "").strip()
             password = post.get("password", "")
+
+            # Read the next param forwarded by the hidden form field
+            next_url = post.get("next", "").strip()
+
+            # Safety check: only allow relative URLs to prevent open-redirect attacks
+            if next_url and not next_url.startswith("/"):
+                next_url = ""
 
             _logger.info(f"Login attempt for email/login: {email}")
 
@@ -128,6 +141,14 @@ class CustomerSupportAuth(http.Controller):
                     return werkzeug.utils.redirect(
                         "/customer_support/login?error=Your account is inactive"
                     )
+
+                # If a safe next URL was provided, go there regardless of role
+                if next_url:
+                    request.session["customer_support_login"] = True
+                    _logger.info(
+                        f"Redirecting authenticated user to next_url: {next_url}"
+                    )
+                    return werkzeug.utils.redirect(next_url)
 
                 # Route to the correct dashboard based on the user's role
                 if user.has_group("base.group_system"):

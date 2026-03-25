@@ -102,8 +102,11 @@ class EmailService:
                 _logger.warning(f"✗ No email for user {assigned_user.name}")
                 return False
 
+            # Agents are redirected to custom login with next param if not authenticated
             ticket_url = (
-                f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}"
+                f"{EmailService._get_base_url()}"
+                f"/customer_support/login"
+                f"?next=/customer_support/ticket/{ticket.id}"
             )
             body = render_assignment_agent(ticket, assigned_user, ticket_url)
             EmailService._send(
@@ -126,8 +129,11 @@ class EmailService:
                 _logger.warning(f"✗ No email for customer {ticket.customer_id.name}")
                 return False
 
+            # Customer is redirected to custom login with next param if not authenticated
             ticket_url = (
-                f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}"
+                f"{EmailService._get_base_url()}"
+                f"/customer_support/login"
+                f"?next=/customer_support/ticket/{ticket.id}"
             )
             body = render_assignment_customer(ticket, assigned_user, ticket_url)
             EmailService._send(
@@ -157,8 +163,11 @@ class EmailService:
                 _logger.warning(f"✗ No email for customer {ticket.customer_id.name}")
                 return False
 
+            # Customer is redirected to custom login with next param if not authenticated
             ticket_url = (
-                f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}"
+                f"{EmailService._get_base_url()}"
+                f"/customer_support/login"
+                f"?next=/customer_support/ticket/{ticket.id}"
             )
             body = render_status_change(ticket, old_status, new_status, ticket_url)
             EmailService._send(

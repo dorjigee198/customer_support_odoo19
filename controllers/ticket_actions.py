@@ -41,16 +41,19 @@ class CustomerSupportTicketActions(http.Controller):
     @http.route(
         "/customer_support/ticket/<int:ticket_id>",
         type="http",
-        auth="user",
+        auth="public",  # Changed to public so we control the redirect ourselves
         website=True,
     )
     def view_ticket(self, ticket_id, **kw):
         try:
             user = request.env.user
 
-            if user.id == request.env.ref("base.public_user").id:
+            # Auth guard: redirect unauthenticated (public) users to custom login
+            # with next param so they land directly on this ticket after login
+            if user._is_public():
+                next_url = f"/customer_support/ticket/{ticket_id}"
                 return werkzeug.utils.redirect(
-                    "/customer_support/login?error=Please login"
+                    f"/customer_support/login?next={next_url}"
                 )
 
             ticket = request.env["customer.support"].browse(ticket_id)

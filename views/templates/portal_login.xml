@@ -69,6 +69,10 @@
                                 
                                 <!-- Login Form -->
                                 <form action="/customer_support/authenticate" method="post">
+
+                                    <!-- Hidden next field: carries the redirect target through the POST -->
+                                    <input type="hidden" name="next" t-att-value="next or ''"/>
+
                                     <!-- Email Input -->
                                     <div class="input-group-custom">
                                         <label for="email" class="form-label">Email Address</label>
