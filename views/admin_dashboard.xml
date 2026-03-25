@@ -13,19 +13,134 @@
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
                     rel="stylesheet" />
                 <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard.css" />
-                <!-- ★ MOBILE STYLES ★ -->
-                <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard_mobile.css" />
+                <link rel="stylesheet"
+                    href="/customer_support/static/src/css/admin_dashboard_mobile.css" />
                 <style>
-
+                    /* ── BACK BUTTON WARNING MODAL ── */
+                    #adminLogoutWarningModal {
+                    display: none;
+                    position: fixed;
+                    top: 0; left: 0;
+                    width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.55);
+                    z-index: 99999;
+                    align-items: center;
+                    justify-content: center;
+                    backdrop-filter: blur(4px);
+                    }
+                    #adminLogoutWarningModal.show {
+                    display: flex !important;
+                    }
+                    .admin-logout-modal-box {
+                    background: #ffffff;
+                    border-radius: 20px;
+                    padding: 2.5rem 2rem;
+                    max-width: 420px;
+                    width: 90%;
+                    box-shadow: 0 24px 60px rgba(26,58,92,0.28);
+                    text-align: center;
+                    animation: adminModalPop 0.25s ease;
+                    }
+                    @keyframes adminModalPop {
+                    from { transform: scale(0.88); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                    }
+                    .admin-logout-modal-icon {
+                    width: 68px; height: 68px;
+                    background: #fef3c7;
+                    border-radius: 50%;
+                    display: flex; align-items: center; justify-content: center;
+                    margin: 0 auto 1.25rem;
+                    border: 3px solid #fde68a;
+                    }
+                    .admin-logout-modal-icon i {
+                    font-size: 1.9rem;
+                    color: #d97706;
+                    }
+                    .admin-logout-modal-box h5 {
+                    color: #1a3a5c;
+                    font-weight: 700;
+                    font-size: 1.2rem;
+                    margin-bottom: 0.6rem;
+                    }
+                    .admin-logout-modal-box p {
+                    color: #475569;
+                    font-size: 0.92rem;
+                    line-height: 1.6;
+                    margin-bottom: 1.75rem;
+                    }
+                    .admin-logout-modal-box p strong {
+                    color: #1a3a5c;
+                    }
+                    .admin-logout-modal-btns {
+                    display: flex;
+                    gap: 0.85rem;
+                    justify-content: center;
+                    }
+                    .admin-btn-stay {
+                    padding: 0.6rem 1.4rem;
+                    border-radius: 10px;
+                    border: 1.5px solid rgba(26,58,92,0.2);
+                    background: #f0f6ff;
+                    color: #1a3a5c;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: background 0.2s, border-color 0.2s;
+                    }
+                    .admin-btn-stay:hover {
+                    background: #dbeafe;
+                    border-color: #1a3a5c;
+                    }
+                    .admin-btn-logout-now {
+                    padding: 0.6rem 1.4rem;
+                    border-radius: 10px;
+                    border: none;
+                    background: #1a3a5c;
+                    color: #ffffff;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    }
+                    .admin-btn-logout-now:hover {
+                    background: #0f2440;
+                    }
                 </style>
             </t>
 
             <div class="dashboard-wrapper">
+
+                <!-- ═══════════════════════════════════════════════════════════
+                     BACK BUTTON WARNING MODAL
+                     Shown when admin presses browser back button.
+                     Forces proper logout instead of silent navigation away.
+                     ═══════════════════════════════════════════════════════════ -->
+                <div id="adminLogoutWarningModal" role="dialog" aria-modal="true"
+                    aria-labelledby="adminLogoutModalTitle">
+                    <div class="admin-logout-modal-box">
+                        <div class="admin-logout-modal-icon">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                        <h5 id="adminLogoutModalTitle">Hold On!</h5>
+                        <p> Please use the <strong>Logout</strong> button to exit safely.<br />
+                            Pressing the back button may leave your admin session unsecured and
+                            expose the system to unauthorised access. </p>
+                        <div class="admin-logout-modal-btns">
+                            <button class="admin-btn-stay" id="adminModalStayBtn">
+                                <i class="bi bi-arrow-left-circle me-1"></i> Stay on Page </button>
+                            <button class="admin-btn-logout-now" id="adminModalLogoutBtn">
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout Properly </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- /adminLogoutWarningModal -->
+
                 <header class="dashboard-header">
                     <div class="header-content">
 
-                        <!-- ★ HAMBURGER BUTTON (mobile only — hidden on desktop via CSS) ★ -->
-                        <button class="mobile-hamburger-btn" id="mobileHamburgerBtn" aria-label="Open navigation">
+                        <button class="mobile-hamburger-btn" id="mobileHamburgerBtn"
+                            aria-label="Open navigation">
                             <i class="bi bi-list"></i>
                         </button>
 
@@ -532,7 +647,6 @@
                                         Assignment Management</h5>
                                 </div>
                                 <div class="card-body">
-                                    <!-- DESKTOP TABLE (hidden on mobile via CSS) -->
                                     <div class="ticket-table-container">
                                         <div class="table-responsive">
                                             <table class="table table-hover ticket-table">
@@ -655,18 +769,22 @@
                                                                                 t-as="sla">
                                                                                 <option
                                                                                     t-att-value="sla.id"
-                                                                                    t-att-selected="'selected' if ticket.sla_policy_id and ticket.sla_policy_id.id == sla.id else None"><t
+                                                                                    t-att-selected="'selected' if ticket.sla_policy_id and ticket.sla_policy_id.id == sla.id else None">
+                                                                                    <t
                                                                                         t-esc="sla.name" />
                                                                                     (<t
                                                                                         t-esc="sla.response_time" /><t
                                                                                         t-esc="' ' + sla.time_unit" />
-                                                                                    )</option>
+                                                                                    )
+                                                                                </option>
                                                                             </t>
                                                                         </select>
                                                                         <button type="submit"
-                                                                            class="btn btn-primary btn-sm w-100"><i
+                                                                            class="btn btn-primary btn-sm w-100">
+                                                                            <i
                                                                                 class="bi bi-person-check me-1"></i>
-                                                                            Assign</button>
+                                                                            Assign
+                                                                        </button>
                                                                     </form>
                                                                 </t>
                                                                 <t
@@ -683,31 +801,27 @@
                                         </div>
                                     </div>
 
-                                    <!-- ★ MOBILE TICKET CARDS (shown only on mobile via CSS) ★ -->
+                                    <!-- MOBILE TICKET CARDS -->
                                     <div class="mobile-ticket-cards">
                                         <t t-foreach="tickets" t-as="ticket">
                                             <div class="mobile-ticket-card">
-
-                                                <!-- Top row: ID + Priority + Status -->
                                                 <div class="mtc-top">
-                                                    <span class="mtc-id">
-                                                        #<t t-esc="ticket.id" />
-                                                    </span>
-                                                    <span t-att-class="'priority-badge priority-' + ticket.priority">
+                                                    <span class="mtc-id">#<t t-esc="ticket.id" /></span>
+                                                    <span
+                                                        t-att-class="'priority-badge priority-' + ticket.priority">
                                                         <t t-esc="ticket.priority.capitalize()" />
                                                     </span>
-                                                    <span class="status-badge" t-att-class="'status-' + ticket.state">
-                                                        <t t-esc="ticket.state.replace('_',' ').capitalize()" />
+                                                    <span class="status-badge"
+                                                        t-att-class="'status-' + ticket.state">
+                                                        <t
+                                                            t-esc="ticket.state.replace('_',' ').capitalize()" />
                                                     </span>
                                                 </div>
-
-                                                <!-- Subject -->
-                                                <a t-att-href="'/customer_support/admin_view/ticket/%s' % ticket.id"
-                                                   class="mtc-subject text-decoration-none">
+                                                <a
+                                                    t-att-href="'/customer_support/admin_view/ticket/%s' % ticket.id"
+                                                    class="mtc-subject text-decoration-none">
                                                     <t t-esc="ticket.subject" />
                                                 </a>
-
-                                                <!-- Meta: client + date -->
                                                 <div class="mtc-meta">
                                                     <span class="mtc-meta-item">
                                                         <i class="bi bi-person-circle"></i>
@@ -715,51 +829,61 @@
                                                     </span>
                                                     <span class="mtc-meta-item">
                                                         <i class="bi bi-calendar3"></i>
-                                                        <t t-esc="ticket.create_date.strftime('%d %b %Y') if ticket.create_date else ''" />
+                                                        <t
+                                                            t-esc="ticket.create_date.strftime('%d %b %Y') if ticket.create_date else ''" />
                                                     </span>
                                                 </div>
-
-                                                <!-- Assigned to -->
                                                 <t t-if="ticket.assigned_to">
                                                     <div class="mtc-assigned">
                                                         <i class="bi bi-person-check-fill"></i>
                                                         <t t-esc="ticket.assigned_to.name" />
                                                         <t t-if="ticket.sla_policy_id">
-                                                            <small t-att-class="'badge ' + ('bg-danger' if ticket.sla_status == 'breached' else 'bg-warning text-dark' if ticket.sla_status == 'at_risk' else 'bg-success')">
+                                                            <small
+                                                                t-att-class="'badge ' + ('bg-danger' if ticket.sla_status == 'breached' else 'bg-warning text-dark' if ticket.sla_status == 'at_risk' else 'bg-success')">
                                                                 <i class="bi bi-clock me-1"></i>
                                                                 <t t-esc="ticket.sla_policy_id.name" />
                                                             </small>
                                                         </t>
                                                     </div>
                                                 </t>
-
-                                                <!-- Assign form or no-action -->
                                                 <t t-if="ticket.state in ['new','assigned']">
                                                     <hr class="mtc-divider" />
-                                                    <form t-att-action="'/customer_support/ticket/%s/assign' % ticket.id"
-                                                          method="post" class="mtc-assign-form">
+                                                    <form
+                                                        t-att-action="'/customer_support/ticket/%s/assign' % ticket.id"
+                                                        method="post" class="mtc-assign-form">
                                                         <input type="hidden" name="csrf_token"
                                                             t-att-value="request.csrf_token()" />
-                                                        <select class="form-select mb-2" name="assigned_to" required="required">
+                                                        <select class="form-select mb-2"
+                                                            name="assigned_to" required="required">
                                                             <option value="">Select Focal Person</option>
-                                                            <t t-foreach="request.env['res.users'].sudo().search([('active','=',True),('id','!=',1)])" t-as="u">
+                                                            <t
+                                                                t-foreach="request.env['res.users'].sudo().search([('active','=',True),('id','!=',1)])"
+                                                                t-as="u">
                                                                 <option t-att-value="u.id"
                                                                     t-att-selected="'selected' if ticket.assigned_to and ticket.assigned_to.id == u.id else None">
                                                                     <t t-esc="u.name" />
                                                                 </option>
                                                             </t>
                                                         </select>
-                                                        <select class="form-select mb-2" name="sla_policy_id">
+                                                        <select class="form-select mb-2"
+                                                            name="sla_policy_id">
                                                             <option value="">No SLA (optional)</option>
-                                                            <t t-foreach="request.env['customer.support.sla.policy'].sudo().search([('active','=',True)])" t-as="sla">
+                                                            <t
+                                                                t-foreach="request.env['customer.support.sla.policy'].sudo().search([('active','=',True)])"
+                                                                t-as="sla">
                                                                 <option t-att-value="sla.id"
                                                                     t-att-selected="'selected' if ticket.sla_policy_id and ticket.sla_policy_id.id == sla.id else None">
-                                                                    <t t-esc="sla.name" /> (<t t-esc="sla.response_time" /><t t-esc="' ' + sla.time_unit" />)
+                                                                    <t t-esc="sla.name" /> (<t
+                                                                        t-esc="sla.response_time" /><t
+                                                                        t-esc="' ' + sla.time_unit" />
+                                                                    )
                                                                 </option>
                                                             </t>
                                                         </select>
-                                                        <button type="submit" class="btn btn-primary">
-                                                            <i class="bi bi-person-check me-1"></i>Assign
+                                                        <button type="submit"
+                                                            class="btn btn-primary">
+                                                            <i class="bi bi-person-check me-1"></i>
+                                                            Assign
                                                         </button>
                                                     </form>
                                                 </t>
@@ -767,23 +891,15 @@
                                                     <hr class="mtc-divider" />
                                                     <span class="mtc-no-action">
                                                         <i class="bi bi-check-circle-fill"></i>
-                                                        Resolved — No Action Needed
-                                                    </span>
+                                                        Resolved — No Action Needed </span>
                                                 </t>
-
                                             </div>
                                         </t>
-
-                                        <!-- Empty state if no tickets -->
                                         <t t-if="not tickets">
                                             <div class="mobile-ticket-empty">
-                                                <i class="bi bi-inbox"></i>
-                                                No tickets to display
-                                            </div>
+                                                <i class="bi bi-inbox"></i> No tickets to display </div>
                                         </t>
                                     </div>
-                                    <!-- ★ END MOBILE TICKET CARDS ★ -->
-
                                 </div>
                             </div>
                         </div>
@@ -903,10 +1019,7 @@
                         <!-- ═══ SYSTEM CONFIGURATION TAB ═══ -->
                         <div class="tab-pane fade" id="system-configuration" role="tabpanel"
                             aria-labelledby="system-configuration-tab">
-
-                            <!-- ── 4 Config Cards ── -->
                             <div class="row g-4 mb-4">
-                                <!-- General Settings -->
                                 <div class="col-md-3">
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
@@ -921,7 +1034,6 @@
                                                 class="bi bi-gear-fill me-2"></i>Configure</button>
                                     </div>
                                 </div>
-                                <!-- Ticket Settings -->
                                 <div class="col-md-3">
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
@@ -937,7 +1049,6 @@
                                                 class="bi bi-gear-fill me-2"></i>Configure</button>
                                     </div>
                                 </div>
-                                <!-- Project Configuration -->
                                 <div class="col-md-3">
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
@@ -953,7 +1064,6 @@
                                                 class="bi bi-folder-plus me-2"></i>View Projects</button>
                                     </div>
                                 </div>
-                                <!-- Knowledge Base -->
                                 <div class="col-md-3">
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
@@ -1033,15 +1143,16 @@
                                                 <li class="nav-item">
                                                     <button class="nav-link active"
                                                         data-bs-toggle="tab"
-                                                        data-bs-target="#slaTab" type="button"><i
-                                                            class="bi bi-clock-history me-1"></i>SLA
-                                                        Policies</button>
+                                                        data-bs-target="#slaTab" type="button">
+                                                        <i class="bi bi-clock-history me-1"></i>SLA
+                                                        Policies </button>
                                                 </li>
                                                 <li class="nav-item">
                                                     <button class="nav-link" data-bs-toggle="tab"
                                                         data-bs-target="#ticketDefaultsTab"
-                                                        type="button"><i class="bi bi-sliders me-1"></i>Ticket
-                                                        Defaults</button>
+                                                        type="button">
+                                                        <i class="bi bi-sliders me-1"></i>Ticket
+                                                        Defaults </button>
                                                 </li>
                                             </ul>
                                             <div class="tab-content">
@@ -1114,9 +1225,10 @@
                                                                     <div
                                                                         class="col-md-2 d-flex align-items-end">
                                                                         <button type="submit"
-                                                                            class="btn btn-primary w-100"><i
+                                                                            class="btn btn-primary w-100">
+                                                                            <i
                                                                                 class="bi bi-plus-circle me-1"></i>Add
-                                                                            Policy</button>
+                                                                            Policy </button>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-12 mt-2">
@@ -1147,9 +1259,10 @@
                                                             <tbody id="slaPoliciesBody">
                                                                 <tr>
                                                                     <td colspan="5"
-                                                                        class="text-center text-muted py-3"><i
+                                                                        class="text-center text-muted py-3">
+                                                                        <i
                                                                             class="bi bi-hourglass-split me-2"></i>Loading
-                                                                        policies...</td>
+                                                                        policies... </td>
                                                                 </tr>
                                                             </tbody>
                                                         </table>
@@ -1242,8 +1355,8 @@
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Cancel</button>
                                             <button type="button" class="btn btn-primary"
-                                                onclick="slaSaveEdit()"><i class="bi bi-save me-1"></i>Save
-                                                Changes</button>
+                                                onclick="slaSaveEdit()">
+                                                <i class="bi bi-save me-1"></i>Save Changes </button>
                                         </div>
                                     </div>
                                 </div>
@@ -1513,9 +1626,11 @@
                                                     <tbody id="kbDocsBody">
                                                         <tr>
                                                             <td colspan="7"
-                                                                class="text-center text-muted py-4"><i
+                                                                class="text-center text-muted py-4">
+                                                                <i
                                                                     class="bi bi-hourglass-split me-2"></i>
-                                                                Loading...</td>
+                                                                Loading...
+                                                            </td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -1528,8 +1643,7 @@
                                     </div>
                                 </div>
                             </div>
-
-                        </div><!--/system-configuration tab-pane -->
+                        </div>
 
                         <!-- ═══ REPORTING TAB ═══ -->
                         <div class="tab-pane fade" id="reporting" role="tabpanel"
@@ -1538,9 +1652,9 @@
                                 class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                                 <div>
                                     <h4 class="mb-0"
-                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;letter-spacing:1px;"><i
-                                            class="bi bi-graph-up-arrow me-2"></i>Analytics &amp;
-                                        Reports</h4>
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;letter-spacing:1px;">
+                                        <i class="bi bi-graph-up-arrow me-2"></i>Analytics &amp;
+                                        Reports </h4>
                                     <small class="text-muted">Live data from the system</small>
                                 </div>
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
@@ -1742,9 +1856,10 @@
                                             class="bi bi-trophy me-2"></i>Focal Person Leaderboard</h6>
                                     <a id="execReportLink"
                                         href="/customer_support/admin/report/executive?days=30"
-                                        target="_blank" class="btn btn-sm"
-                                        style="background:#1a3a5c;color:#fff;border-radius:6px;font-size:12px;"><i
-                                            class="bi bi-printer me-1"></i>Print Executive Report</a>
+                                        target="_blank"
+                                        class="btn btn-sm"
+                                        style="background:#1a3a5c;color:#fff;border-radius:6px;font-size:12px;">
+                                        <i class="bi bi-printer me-1"></i>Print Executive Report </a>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
@@ -1777,13 +1892,13 @@
                             </div>
                         </div>
 
-                    </div><!--/tab-content -->
-                </div><!--/container-fluid -->
+                    </div>
+                </div>
 
-                <!-- ★ MOBILE NAV OVERLAY ★ -->
+                <!-- MOBILE NAV OVERLAY -->
                 <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
 
-                <!-- ★ MOBILE NAV DRAWER ★ -->
+                <!-- MOBILE NAV DRAWER -->
                 <div class="mobile-nav-drawer" id="mobileNavDrawer">
                     <div class="mobile-nav-drawer-header">
                         <div class="drawer-brand-icon">
@@ -1797,9 +1912,7 @@
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
-
                     <div class="mobile-nav-section-label">Navigation</div>
-
                     <ul class="mobile-nav-list">
                         <li>
                             <a class="mobile-nav-item active" data-bs-target="#overview">
@@ -1862,14 +1975,12 @@
                             </a>
                         </li>
                     </ul>
-
                     <div class="mobile-nav-drawer-footer">
                         <p>Customer Support System &#169; 2025</p>
                     </div>
                 </div>
-                <!-- ★ END MOBILE NAV DRAWER ★ -->
 
-            </div><!--/dashboard-wrapper -->
+            </div>
 
             <script
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -2015,61 +2126,90 @@ document.addEventListener('DOMContentLoaded',function(){var modal=document.getEl
 //]]>
             </script>
 
-            <!-- ★ 8. MOBILE HAMBURGER DRAWER JS ★ -->
+            <!-- 8. MOBILE HAMBURGER DRAWER JS -->
             <script type="text/javascript">
                 //<![CDATA[
 (function(){
 'use strict';
-var hamburger = document.getElementById('mobileHamburgerBtn');
-var overlay   = document.getElementById('mobileNavOverlay');
-var drawer    = document.getElementById('mobileNavDrawer');
-var closeBtn  = document.getElementById('mobileNavClose');
-
-function openDrawer(){
-    drawer.classList.add('open');
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeDrawer(){
-    drawer.classList.remove('open');
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-}
-
-if(hamburger) hamburger.addEventListener('click', openDrawer);
-if(closeBtn)  closeBtn.addEventListener('click', closeDrawer);
-if(overlay)   overlay.addEventListener('click', closeDrawer);
-
+var hamburger=document.getElementById('mobileHamburgerBtn');
+var overlay=document.getElementById('mobileNavOverlay');
+var drawer=document.getElementById('mobileNavDrawer');
+var closeBtn=document.getElementById('mobileNavClose');
+function openDrawer(){drawer.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
+function closeDrawer(){drawer.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
+if(hamburger)hamburger.addEventListener('click',openDrawer);
+if(closeBtn)closeBtn.addEventListener('click',closeDrawer);
+if(overlay)overlay.addEventListener('click',closeDrawer);
 if(drawer){
-    drawer.querySelectorAll('.mobile-nav-item').forEach(function(item){
-        item.addEventListener('click', function(){
-            var target = this.getAttribute('data-bs-target');
-
-            // Update active state in drawer
-            drawer.querySelectorAll('.mobile-nav-item')
-                  .forEach(function(i){ i.classList.remove('active'); });
-            this.classList.add('active');
-
-            // Try switching via the hidden desktop tab button first
-            var tabBtn = document.querySelector(
-                '.header-left button[data-bs-target="' + target + '"]'
-            );
-            if(tabBtn){
-                new bootstrap.Tab(tabBtn).show();
-            } else {
-                // Fallback: manually activate the pane
-                document.querySelectorAll('.tab-pane')
-                        .forEach(function(p){ p.classList.remove('show','active'); });
-                var pane = document.querySelector(target);
-                if(pane) pane.classList.add('show','active');
-            }
-
-            closeDrawer();
-        });
+  drawer.querySelectorAll('.mobile-nav-item').forEach(function(item){
+    item.addEventListener('click',function(){
+      var target=this.getAttribute('data-bs-target');
+      drawer.querySelectorAll('.mobile-nav-item').forEach(function(i){i.classList.remove('active');});
+      this.classList.add('active');
+      var tabBtn=document.querySelector('.header-left button[data-bs-target="'+target+'"]');
+      if(tabBtn){new bootstrap.Tab(tabBtn).show();}else{document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('show','active');});var pane=document.querySelector(target);if(pane)pane.classList.add('show','active');}
+      closeDrawer();
     });
+  });
 }
 })();
+//]]>
+            </script>
+
+            <!-- ════════════════════════════════════════════════════════════════
+                 9. BACK BUTTON TRAP
+                 Intercepts browser back navigation and shows a warning modal
+                 instead of silently navigating away to the login page.
+                 ════════════════════════════════════════════════════════════════ -->
+            <script type="text/javascript">
+                //<![CDATA[
+document.addEventListener('DOMContentLoaded', function () {
+    var logoutModal    = document.getElementById('adminLogoutWarningModal');
+    var modalStayBtn   = document.getElementById('adminModalStayBtn');
+    var modalLogoutBtn = document.getElementById('adminModalLogoutBtn');
+
+    // Push an extra history entry so pressing back triggers popstate
+    // instead of actually leaving the page
+    history.pushState(null, null, window.location.href);
+
+    window.addEventListener('popstate', function () {
+        // Cancel the navigation by pushing forward again
+        history.pushState(null, null, window.location.href);
+        // Show the warning modal
+        if (logoutModal) logoutModal.classList.add('show');
+    });
+
+    // Handle bfcache (back-forward cache in Chrome / Firefox)
+    // If browser restores page from cache, push state again to re-arm the trap
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            history.pushState(null, null, window.location.href);
+        }
+    });
+
+    // "Stay on Page" button — just close the modal
+    if (modalStayBtn) {
+        modalStayBtn.addEventListener('click', function () {
+            if (logoutModal) logoutModal.classList.remove('show');
+        });
+    }
+
+    // "Logout Properly" button — go to proper logout route
+    if (modalLogoutBtn) {
+        modalLogoutBtn.addEventListener('click', function () {
+            window.location.href = '/customer_support/logout_manual';
+        });
+    }
+
+    // Close modal if admin clicks the dark backdrop
+    if (logoutModal) {
+        logoutModal.addEventListener('click', function (e) {
+            if (e.target === logoutModal) {
+                logoutModal.classList.remove('show');
+            }
+        });
+    }
+});
 //]]>
             </script>
 
