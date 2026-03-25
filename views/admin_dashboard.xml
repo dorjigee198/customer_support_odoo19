@@ -13,6 +13,8 @@
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
                     rel="stylesheet" />
                 <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard.css" />
+                <!-- ★ MOBILE STYLES ★ -->
+                <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard_mobile.css" />
                 <style>
 
                 </style>
@@ -21,6 +23,12 @@
             <div class="dashboard-wrapper">
                 <header class="dashboard-header">
                     <div class="header-content">
+
+                        <!-- ★ HAMBURGER BUTTON (mobile only — hidden on desktop via CSS) ★ -->
+                        <button class="mobile-hamburger-btn" id="mobileHamburgerBtn" aria-label="Open navigation">
+                            <i class="bi bi-list"></i>
+                        </button>
+
                         <div class="header-left" role="tablist">
                             <button class="nav-link active" id="overview-tab" data-bs-toggle="tab"
                                 data-bs-target="#overview" type="button" role="tab"
@@ -524,6 +532,7 @@
                                         Assignment Management</h5>
                                 </div>
                                 <div class="card-body">
+                                    <!-- DESKTOP TABLE (hidden on mobile via CSS) -->
                                     <div class="ticket-table-container">
                                         <div class="table-responsive">
                                             <table class="table table-hover ticket-table">
@@ -673,6 +682,108 @@
                                             </table>
                                         </div>
                                     </div>
+
+                                    <!-- ★ MOBILE TICKET CARDS (shown only on mobile via CSS) ★ -->
+                                    <div class="mobile-ticket-cards">
+                                        <t t-foreach="tickets" t-as="ticket">
+                                            <div class="mobile-ticket-card">
+
+                                                <!-- Top row: ID + Priority + Status -->
+                                                <div class="mtc-top">
+                                                    <span class="mtc-id">
+                                                        #<t t-esc="ticket.id" />
+                                                    </span>
+                                                    <span t-att-class="'priority-badge priority-' + ticket.priority">
+                                                        <t t-esc="ticket.priority.capitalize()" />
+                                                    </span>
+                                                    <span class="status-badge" t-att-class="'status-' + ticket.state">
+                                                        <t t-esc="ticket.state.replace('_',' ').capitalize()" />
+                                                    </span>
+                                                </div>
+
+                                                <!-- Subject -->
+                                                <a t-att-href="'/customer_support/admin_view/ticket/%s' % ticket.id"
+                                                   class="mtc-subject text-decoration-none">
+                                                    <t t-esc="ticket.subject" />
+                                                </a>
+
+                                                <!-- Meta: client + date -->
+                                                <div class="mtc-meta">
+                                                    <span class="mtc-meta-item">
+                                                        <i class="bi bi-person-circle"></i>
+                                                        <t t-esc="ticket.customer_id.name" />
+                                                    </span>
+                                                    <span class="mtc-meta-item">
+                                                        <i class="bi bi-calendar3"></i>
+                                                        <t t-esc="ticket.create_date.strftime('%d %b %Y') if ticket.create_date else ''" />
+                                                    </span>
+                                                </div>
+
+                                                <!-- Assigned to -->
+                                                <t t-if="ticket.assigned_to">
+                                                    <div class="mtc-assigned">
+                                                        <i class="bi bi-person-check-fill"></i>
+                                                        <t t-esc="ticket.assigned_to.name" />
+                                                        <t t-if="ticket.sla_policy_id">
+                                                            <small t-att-class="'badge ' + ('bg-danger' if ticket.sla_status == 'breached' else 'bg-warning text-dark' if ticket.sla_status == 'at_risk' else 'bg-success')">
+                                                                <i class="bi bi-clock me-1"></i>
+                                                                <t t-esc="ticket.sla_policy_id.name" />
+                                                            </small>
+                                                        </t>
+                                                    </div>
+                                                </t>
+
+                                                <!-- Assign form or no-action -->
+                                                <t t-if="ticket.state in ['new','assigned']">
+                                                    <hr class="mtc-divider" />
+                                                    <form t-att-action="'/customer_support/ticket/%s/assign' % ticket.id"
+                                                          method="post" class="mtc-assign-form">
+                                                        <input type="hidden" name="csrf_token"
+                                                            t-att-value="request.csrf_token()" />
+                                                        <select class="form-select mb-2" name="assigned_to" required="required">
+                                                            <option value="">Select Focal Person</option>
+                                                            <t t-foreach="request.env['res.users'].sudo().search([('active','=',True),('id','!=',1)])" t-as="u">
+                                                                <option t-att-value="u.id"
+                                                                    t-att-selected="'selected' if ticket.assigned_to and ticket.assigned_to.id == u.id else None">
+                                                                    <t t-esc="u.name" />
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                        <select class="form-select mb-2" name="sla_policy_id">
+                                                            <option value="">No SLA (optional)</option>
+                                                            <t t-foreach="request.env['customer.support.sla.policy'].sudo().search([('active','=',True)])" t-as="sla">
+                                                                <option t-att-value="sla.id"
+                                                                    t-att-selected="'selected' if ticket.sla_policy_id and ticket.sla_policy_id.id == sla.id else None">
+                                                                    <t t-esc="sla.name" /> (<t t-esc="sla.response_time" /><t t-esc="' ' + sla.time_unit" />)
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                        <button type="submit" class="btn btn-primary">
+                                                            <i class="bi bi-person-check me-1"></i>Assign
+                                                        </button>
+                                                    </form>
+                                                </t>
+                                                <t t-if="ticket.state in ['resolved','closed']">
+                                                    <hr class="mtc-divider" />
+                                                    <span class="mtc-no-action">
+                                                        <i class="bi bi-check-circle-fill"></i>
+                                                        Resolved — No Action Needed
+                                                    </span>
+                                                </t>
+
+                                            </div>
+                                        </t>
+
+                                        <!-- Empty state if no tickets -->
+                                        <t t-if="not tickets">
+                                            <div class="mobile-ticket-empty">
+                                                <i class="bi bi-inbox"></i>
+                                                No tickets to display
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <!-- ★ END MOBILE TICKET CARDS ★ -->
+
                                 </div>
                             </div>
                         </div>
@@ -842,7 +953,7 @@
                                                 class="bi bi-folder-plus me-2"></i>View Projects</button>
                                     </div>
                                 </div>
-                                <!-- ★ NEW: Knowledge Base ★ -->
+                                <!-- Knowledge Base -->
                                 <div class="col-md-3">
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
@@ -1257,7 +1368,7 @@
                                 </div>
                             </div>
 
-                            <!-- ★ NEW: Knowledge Base Modal ★ -->
+                            <!-- Knowledge Base Modal -->
                             <div class="modal fade" id="knowledgeBaseModal" tabindex="-1"
                                 aria-hidden="true">
                                 <div class="modal-dialog modal-xl">
@@ -1270,11 +1381,7 @@
                                                 data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-
-                                            <!-- Alert -->
                                             <div id="kbAlert" class="d-none mb-3"></div>
-
-                                            <!-- Stats -->
                                             <div class="row g-3 mb-4">
                                                 <div class="col-6 col-md-3">
                                                     <div class="card border-0 shadow-sm text-center"
@@ -1329,8 +1436,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <!-- Upload Form -->
                                             <div class="card mb-4 border-primary">
                                                 <div class="card-header bg-primary text-white">
                                                     <h6 class="mb-0"><i
@@ -1389,8 +1494,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <!-- Documents Table -->
                                             <h6 class="mb-3"><i class="bi bi-list-ul me-2"></i>Uploaded
                                                 Documents</h6>
                                             <div class="table-responsive">
@@ -1417,9 +1520,7 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-
-                                        </div><!--
-                                        /modal-body -->
+                                        </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Close</button>
@@ -1427,10 +1528,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- ★ END Knowledge Base Modal ★ -->
 
-                        </div><!--
-                        /system-configuration tab-pane -->
+                        </div><!--/system-configuration tab-pane -->
 
                         <!-- ═══ REPORTING TAB ═══ -->
                         <div class="tab-pane fade" id="reporting" role="tabpanel"
@@ -1678,12 +1777,99 @@
                             </div>
                         </div>
 
-                    </div><!--
-                    /tab-content -->
-                </div><!--
-                /container-fluid -->
-            </div><!--
-            /dashboard-wrapper -->
+                    </div><!--/tab-content -->
+                </div><!--/container-fluid -->
+
+                <!-- ★ MOBILE NAV OVERLAY ★ -->
+                <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+
+                <!-- ★ MOBILE NAV DRAWER ★ -->
+                <div class="mobile-nav-drawer" id="mobileNavDrawer">
+                    <div class="mobile-nav-drawer-header">
+                        <div class="drawer-brand-icon">
+                            <i class="bi bi-headset"></i>
+                        </div>
+                        <div class="drawer-brand-text">
+                            <strong>Customer Support</strong>
+                            <span>Admin Panel</span>
+                        </div>
+                        <button class="mobile-nav-drawer-close" id="mobileNavClose">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <div class="mobile-nav-section-label">Navigation</div>
+
+                    <ul class="mobile-nav-list">
+                        <li>
+                            <a class="mobile-nav-item active" data-bs-target="#overview">
+                                <div class="mobile-nav-item-icon">
+                                    <i class="bi bi-speedometer2"></i>
+                                </div>
+                                <div class="mobile-nav-item-text">
+                                    <strong>Overview</strong>
+                                    <span>Dashboard summary</span>
+                                </div>
+                                <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="mobile-nav-item" data-bs-target="#ticket-assignment">
+                                <div class="mobile-nav-item-icon">
+                                    <i class="bi bi-clipboard-check"></i>
+                                </div>
+                                <div class="mobile-nav-item-text">
+                                    <strong>Ticket Assignment</strong>
+                                    <span>Manage &amp; assign tickets</span>
+                                </div>
+                                <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="mobile-nav-item" data-bs-target="#user-management">
+                                <div class="mobile-nav-item-icon">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <div class="mobile-nav-item-text">
+                                    <strong>User Management</strong>
+                                    <span>Add, edit, remove users</span>
+                                </div>
+                                <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="mobile-nav-item" data-bs-target="#system-configuration">
+                                <div class="mobile-nav-item-icon">
+                                    <i class="bi bi-gear"></i>
+                                </div>
+                                <div class="mobile-nav-item-text">
+                                    <strong>System Config</strong>
+                                    <span>Settings &amp; SLA policies</span>
+                                </div>
+                                <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="mobile-nav-item" data-bs-target="#reporting">
+                                <div class="mobile-nav-item-icon">
+                                    <i class="bi bi-graph-up-arrow"></i>
+                                </div>
+                                <div class="mobile-nav-item-text">
+                                    <strong>Reporting</strong>
+                                    <span>Analytics &amp; reports</span>
+                                </div>
+                                <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="mobile-nav-drawer-footer">
+                        <p>Customer Support System &#169; 2025</p>
+                    </div>
+                </div>
+                <!-- ★ END MOBILE NAV DRAWER ★ -->
+
+            </div><!--/dashboard-wrapper -->
 
             <script
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -1814,101 +2000,75 @@ document.addEventListener('DOMContentLoaded',function(){
 //]]>
             </script>
 
-            <!-- ★ 7. KNOWLEDGE BASE JS ★ -->
+            <!-- 7. KNOWLEDGE BASE JS -->
             <script type="text/javascript">
                 //<![CDATA[
 (function(){
 'use strict';
 var CAT_LABELS={company:'Company Info',services:'Services & Products',projects:'Projects',pricing:'Pricing',technical:'Technical Docs',faq:'FAQ',other:'Other'};
+function kbAlert(msg,type){var el=document.getElementById('kbAlert');if(!el)return;el.className='alert alert-'+(type||'success')+' mb-3';el.textContent=msg;el.classList.remove('d-none');setTimeout(function(){el.classList.add('d-none');},4000);}
+function kbLoadDocs(){fetch('/customer_support/knowledge/list',{credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).then(function(data){var docs=data.documents||[];document.getElementById('kbTotalDocs').textContent=docs.length;document.getElementById('kbReadyDocs').textContent=docs.filter(function(d){return d.state==='ready';}).length;document.getElementById('kbPendingDocs').textContent=docs.filter(function(d){return d.state==='pending';}).length;document.getElementById('kbErrorDocs').textContent=docs.filter(function(d){return d.state==='error';}).length;var tb=document.getElementById('kbDocsBody');if(!docs.length){tb.innerHTML='<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-folder2-open me-2"></i>No documents uploaded yet. Upload your first document above.</td></tr>';return;}tb.innerHTML=docs.map(function(d){var stateBadge=d.state==='ready'?'<span class="badge bg-success">&#x2705; Ready</span>':d.state==='error'?'<span class="badge bg-danger" title="'+(d.error_msg||'')+'">&#x274C; Error</span>':'<span class="badge bg-warning text-dark">&#x23F3; Pending</span>';var typeBadge={pdf:'<span class="badge bg-danger">PDF</span>',docx:'<span class="badge bg-primary">DOCX</span>',txt:'<span class="badge bg-success">TXT</span>',xlsx:'<span class="badge bg-info text-dark">XLSX</span>'}[d.file_type]||'<span class="badge bg-secondary">FILE</span>';return'<tr><td><strong>'+d.name+'</strong>'+(d.description?'<br><small class="text-muted">'+d.description+'</small>':'')+'</td><td><span class="badge bg-secondary">'+(CAT_LABELS[d.category]||d.category)+'</span></td><td>'+typeBadge+'</td><td>'+stateBadge+'</td><td class="text-center fw-bold text-primary">'+(d.chunk_count||0)+'</td><td><small class="text-muted">'+(d.create_date||'')+'</small></td><td><button class="btn btn-sm btn-outline-danger" onclick="kbDelete('+d.id+',\''+d.name.replace(/'/g,"\\'")+'\')" title="Delete"><i class="bi bi-trash3"></i></button></td></tr>';}).join('');}).catch(function(e){console.warn('KB load failed:',e);});}
+window.kbUpload=function(){var name=document.getElementById('kbDocName').value.trim();var category=document.getElementById('kbCategory').value;var desc=document.getElementById('kbDescription').value.trim();var fileEl=document.getElementById('kbFile');if(!name||!fileEl.files.length){kbAlert('Please fill in the document name and select a file.','warning');return;}var allowed=['.pdf','.docx','.txt','.xlsx'];var filename=fileEl.files[0].name.toLowerCase();if(!allowed.some(function(ext){return filename.endsWith(ext);})){kbAlert('Invalid file type. Allowed: PDF, DOCX, TXT, XLSX','danger');return;}var formData=new FormData();formData.append('name',name);formData.append('category',category);formData.append('description',desc);formData.append('file',fileEl.files[0]);var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);var btn=document.getElementById('kbUploadBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Processing...';}fetch('/customer_support/knowledge/upload',{method:'POST',credentials:'same-origin',body:formData}).then(function(){kbAlert('Document uploaded and processed successfully! &#x2705;','success');document.getElementById('kbDocName').value='';document.getElementById('kbDescription').value='';document.getElementById('kbFile').value='';kbLoadDocs();}).catch(function(){kbAlert('Upload failed. Please try again.','danger');}).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="bi bi-upload me-2"></i>Upload &amp; Process';}});};
+window.kbDelete=function(id,name){if(!confirm('Delete "'+name+'"?\nThe AI will no longer use this document.'))return;var formData=new FormData();var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);fetch('/customer_support/knowledge/delete/'+id,{method:'POST',credentials:'same-origin',body:formData}).then(function(){kbAlert('Document deleted.','success');kbLoadDocs();}).catch(function(){kbAlert('Delete failed.','danger');});};
+document.addEventListener('DOMContentLoaded',function(){var modal=document.getElementById('knowledgeBaseModal');if(modal)modal.addEventListener('shown.bs.modal',function(){kbLoadDocs();});});
+})();
+//]]>
+            </script>
 
-function kbAlert(msg,type){
-    var el=document.getElementById('kbAlert');
-    if(!el)return;
-    el.className='alert alert-'+(type||'success')+' mb-3';
-    el.textContent=msg;
-    el.classList.remove('d-none');
-    setTimeout(function(){el.classList.add('d-none');},4000);
+            <!-- ★ 8. MOBILE HAMBURGER DRAWER JS ★ -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+var hamburger = document.getElementById('mobileHamburgerBtn');
+var overlay   = document.getElementById('mobileNavOverlay');
+var drawer    = document.getElementById('mobileNavDrawer');
+var closeBtn  = document.getElementById('mobileNavClose');
+
+function openDrawer(){
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
 }
 
-function kbLoadDocs(){
-    fetch('/customer_support/knowledge/list',{credentials:'same-origin',headers:{'Accept':'application/json'}})
-    .then(function(r){return r.json();})
-    .then(function(data){
-        var docs=data.documents||[];
-        document.getElementById('kbTotalDocs').textContent=docs.length;
-        document.getElementById('kbReadyDocs').textContent=docs.filter(function(d){return d.state==='ready';}).length;
-        document.getElementById('kbPendingDocs').textContent=docs.filter(function(d){return d.state==='pending';}).length;
-        document.getElementById('kbErrorDocs').textContent=docs.filter(function(d){return d.state==='error';}).length;
-        var tb=document.getElementById('kbDocsBody');
-        if(!docs.length){
-            tb.innerHTML='<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-folder2-open me-2"></i>No documents uploaded yet. Upload your first document above.</td></tr>';
-            return;
-        }
-        tb.innerHTML=docs.map(function(d){
-            var stateBadge=d.state==='ready'
-                ?'<span class="badge bg-success">&#x2705; Ready</span>'
-                :d.state==='error'
-                ?'<span class="badge bg-danger" title="'+(d.error_msg||'')+'">&#x274C; Error</span>'
-                :'<span class="badge bg-warning text-dark">&#x23F3; Pending</span>';
-            var typeBadge={pdf:'<span class="badge bg-danger">PDF</span>',docx:'<span class="badge bg-primary">DOCX</span>',txt:'<span class="badge bg-success">TXT</span>',xlsx:'<span class="badge bg-info text-dark">XLSX</span>'}[d.file_type]||'<span class="badge bg-secondary">FILE</span>';
-            return'<tr>'
-                +'<td><strong>'+d.name+'</strong>'+(d.description?'<br><small class="text-muted">'+d.description+'</small>':'')+'</td>'
-                +'<td><span class="badge bg-secondary">'+(CAT_LABELS[d.category]||d.category)+'</span></td>'
-                +'<td>'+typeBadge+'</td>'
-                +'<td>'+stateBadge+'</td>'
-                +'<td class="text-center fw-bold text-primary">'+(d.chunk_count||0)+'</td>'
-                +'<td><small class="text-muted">'+(d.create_date||'')+'</small></td>'
-                +'<td><button class="btn btn-sm btn-outline-danger" onclick="kbDelete('+d.id+',\''+d.name.replace(/'/g,"\\'")+'\')" title="Delete"><i class="bi bi-trash3"></i></button></td>'
-                +'</tr>';
-        }).join('');
-    })
-    .catch(function(e){console.warn('KB load failed:',e);});
+function closeDrawer(){
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
 }
 
-window.kbUpload=function(){
-    var name=document.getElementById('kbDocName').value.trim();
-    var category=document.getElementById('kbCategory').value;
-    var desc=document.getElementById('kbDescription').value.trim();
-    var fileEl=document.getElementById('kbFile');
-    if(!name||!fileEl.files.length){kbAlert('Please fill in the document name and select a file.','warning');return;}
-    var allowed=['.pdf','.docx','.txt','.xlsx'];
-    var filename=fileEl.files[0].name.toLowerCase();
-    if(!allowed.some(function(ext){return filename.endsWith(ext);})){kbAlert('Invalid file type. Allowed: PDF, DOCX, TXT, XLSX','danger');return;}
-    var formData=new FormData();
-    formData.append('name',name);
-    formData.append('category',category);
-    formData.append('description',desc);
-    formData.append('file',fileEl.files[0]);
-    var csrf=document.querySelector('input[name="csrf_token"]');
-    if(csrf)formData.append('csrf_token',csrf.value);
-    var btn=document.getElementById('kbUploadBtn');
-    if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Processing...';}
-    fetch('/customer_support/knowledge/upload',{method:'POST',credentials:'same-origin',body:formData})
-    .then(function(){
-        kbAlert('Document uploaded and processed successfully! &#x2705;','success');
-        document.getElementById('kbDocName').value='';
-        document.getElementById('kbDescription').value='';
-        document.getElementById('kbFile').value='';
-        kbLoadDocs();
-    })
-    .catch(function(){kbAlert('Upload failed. Please try again.','danger');})
-    .finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="bi bi-upload me-2"></i>Upload &amp; Process';}});
-};
+if(hamburger) hamburger.addEventListener('click', openDrawer);
+if(closeBtn)  closeBtn.addEventListener('click', closeDrawer);
+if(overlay)   overlay.addEventListener('click', closeDrawer);
 
-window.kbDelete=function(id,name){
-    if(!confirm('Delete "'+name+'"?\nThe AI will no longer use this document.'))return;
-    var formData=new FormData();
-    var csrf=document.querySelector('input[name="csrf_token"]');
-    if(csrf)formData.append('csrf_token',csrf.value);
-    fetch('/customer_support/knowledge/delete/'+id,{method:'POST',credentials:'same-origin',body:formData})
-    .then(function(){kbAlert('Document deleted.','success');kbLoadDocs();})
-    .catch(function(){kbAlert('Delete failed.','danger');});
-};
+if(drawer){
+    drawer.querySelectorAll('.mobile-nav-item').forEach(function(item){
+        item.addEventListener('click', function(){
+            var target = this.getAttribute('data-bs-target');
 
-document.addEventListener('DOMContentLoaded',function(){
-    var modal=document.getElementById('knowledgeBaseModal');
-    if(modal)modal.addEventListener('shown.bs.modal',function(){kbLoadDocs();});
-});
+            // Update active state in drawer
+            drawer.querySelectorAll('.mobile-nav-item')
+                  .forEach(function(i){ i.classList.remove('active'); });
+            this.classList.add('active');
+
+            // Try switching via the hidden desktop tab button first
+            var tabBtn = document.querySelector(
+                '.header-left button[data-bs-target="' + target + '"]'
+            );
+            if(tabBtn){
+                new bootstrap.Tab(tabBtn).show();
+            } else {
+                // Fallback: manually activate the pane
+                document.querySelectorAll('.tab-pane')
+                        .forEach(function(p){ p.classList.remove('show','active'); });
+                var pane = document.querySelector(target);
+                if(pane) pane.classList.add('show','active');
+            }
+
+            closeDrawer();
+        });
+    });
+}
 })();
 //]]>
             </script>

@@ -100,10 +100,11 @@
 
                     /* ── DAY FILTER BUTTONS ── */
                     .day-btn {
-                    background: #ffffff !important; border: 1px solid rgba(12,74,110,0.2)
-                    !important;
-                    color: #475569 !important; border-radius: 8px !important; font-weight: 600
-                    !important;
+                    background: #ffffff !important;
+                    border: 1px solid rgba(12,74,110,0.2) !important;
+                    color: #475569 !important;
+                    border-radius: 8px !important;
+                    font-weight: 600 !important;
                     }
                     .day-btn:hover { background: #e0f2fe !important; color: #0c4a6e !important; }
                     .day-btn.active { background: #0c4a6e !important; color: #ffffff !important;
@@ -111,9 +112,11 @@
 
                     /* ── PRINT BUTTON ── */
                     .print-btn {
-                    background: #d1fae5 !important; border: 1px solid #6ee7b7 !important;
-                    color: #065f46 !important; border-radius: 8px !important; font-weight: 600
-                    !important;
+                    background: #d1fae5 !important;
+                    border: 1px solid #6ee7b7 !important;
+                    color: #065f46 !important;
+                    border-radius: 8px !important;
+                    font-weight: 600 !important;
                     }
                     .print-btn:hover { background: #a7f3d0 !important; }
 
@@ -145,10 +148,127 @@
                     rgba(12,74,110,0.08) !important; }
                     .notif-footer a { color: #0284c7 !important; }
                     .notif-footer a:hover { color: #0c4a6e !important; }
+
+                    /* ── BACK BUTTON WARNING MODAL ── */
+                    #logoutWarningModal {
+                    display: none;
+                    position: fixed;
+                    top: 0; left: 0;
+                    width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 99999;
+                    align-items: center;
+                    justify-content: center;
+                    backdrop-filter: blur(4px);
+                    }
+                    #logoutWarningModal.show {
+                    display: flex !important;
+                    }
+                    .logout-modal-box {
+                    background: #ffffff;
+                    border-radius: 20px;
+                    padding: 2.5rem 2rem;
+                    max-width: 420px;
+                    width: 90%;
+                    box-shadow: 0 24px 60px rgba(12,74,110,0.25);
+                    text-align: center;
+                    animation: modalPop 0.25s ease;
+                    }
+                    @keyframes modalPop {
+                    from { transform: scale(0.88); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                    }
+                    .logout-modal-icon {
+                    width: 68px; height: 68px;
+                    background: #fef3c7;
+                    border-radius: 50%;
+                    display: flex; align-items: center; justify-content: center;
+                    margin: 0 auto 1.25rem;
+                    border: 3px solid #fde68a;
+                    }
+                    .logout-modal-icon i {
+                    font-size: 1.9rem;
+                    color: #d97706;
+                    }
+                    .logout-modal-box h5 {
+                    color: #0c4a6e;
+                    font-weight: 700;
+                    font-size: 1.2rem;
+                    margin-bottom: 0.6rem;
+                    }
+                    .logout-modal-box p {
+                    color: #475569;
+                    font-size: 0.92rem;
+                    line-height: 1.6;
+                    margin-bottom: 1.75rem;
+                    }
+                    .logout-modal-box p strong {
+                    color: #0c4a6e;
+                    }
+                    .logout-modal-btns {
+                    display: flex;
+                    gap: 0.85rem;
+                    justify-content: center;
+                    }
+                    .btn-stay {
+                    padding: 0.6rem 1.4rem;
+                    border-radius: 10px;
+                    border: 1.5px solid rgba(12,74,110,0.2);
+                    background: #f0f9ff;
+                    color: #0c4a6e;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: background 0.2s, border-color 0.2s;
+                    }
+                    .btn-stay:hover {
+                    background: #e0f2fe;
+                    border-color: #0c4a6e;
+                    }
+                    .btn-logout-now {
+                    padding: 0.6rem 1.4rem;
+                    border-radius: 10px;
+                    border: none;
+                    background: #0c4a6e;
+                    color: #ffffff;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    transition: background 0.2s;
+                    }
+                    .btn-logout-now:hover {
+                    background: #075985;
+                    }
                 </style>
             </t>
 
             <div class="dashboard-wrapper">
+
+                <!-- ═══════════════════════════════════════════════════════════
+                     BACK BUTTON WARNING MODAL
+                     Shown when user presses browser back button.
+                     Forces proper logout instead of silent navigation away.
+                     ═══════════════════════════════════════════════════════════ -->
+                <div id="logoutWarningModal" role="dialog" aria-modal="true"
+                    aria-labelledby="logoutModalTitle">
+                    <div class="logout-modal-box">
+                        <div class="logout-modal-icon">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                        <h5 id="logoutModalTitle">Hold On!</h5>
+                        <p> Please use the <strong>Logout</strong> button to exit safely.<br />
+                            Pressing the back button may leave your session unsecured and expose
+                            your account to unauthorised access. </p>
+                        <div class="logout-modal-btns">
+                            <button class="btn-stay" id="modalStayBtn">
+                                <i class="bi bi-arrow-left-circle me-1"></i> Stay on Page </button>
+                            <button class="btn-logout-now" id="modalLogoutBtn">
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout Properly </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- /logoutWarningModal -->
+
                 <header class="dashboard-header">
                     <div class="header-content">
                         <div class="header-nav">
@@ -181,7 +301,6 @@
                                     </button>
                                     <div class="notif-dropdown" id="portalNotifDropdown">
                                         <div class="notif-header">
-                                            <!-- FIX: #4f8ef7 (dark theme) → #0284c7 (light theme) -->
                                             <h6><i class="bi bi-bell me-2" style="color:#0284c7;"></i>
                                                 Notifications</h6>
                                             <button class="notif-mark-read" id="portalMarkRead">Mark
@@ -536,13 +655,10 @@
 
                 <!-- ═══ KANBAN PAGE ═══ -->
                 <div class="dashboard-content" id="portal-kanban-page" style="display:none;">
-                    <!-- FIX: color:#e8eaf0 (invisible on light bg) → #0c4a6e -->
                     <div
                         style="padding:1rem 2rem 0.5rem;display:flex;align-items:center;justify-content:space-between;">
                         <h5 style="color:#0c4a6e;font-weight:700;margin:0;">
-                            <!-- FIX: color:#4f8ef7 (dark theme) → #0284c7 -->
-                            <i
-                                class="bi bi-grid-3x3-gap-fill me-2" style="color:#0284c7;"></i>My
+                            <i class="bi bi-grid-3x3-gap-fill me-2" style="color:#0284c7;"></i>My
                             Tickets &#8212; Kanban View </h5>
                         <div class="view-toggle">
                             <button class="view-btn" id="portalListBtn">
@@ -697,14 +813,11 @@
                 <!-- ═══ REPORTING PAGE ═══ -->
                 <div class="dashboard-content reporting-page" id="portal-reporting-page"
                     style="display:none;">
-
                     <div class="print-header">
                         <h3><i class="bi bi-graph-up me-2"></i>My Ticket Report</h3>
                         <p id="reportPrintSubtitle">Generated on <span id="reportPrintDate"></span></p>
                     </div>
-
                     <div class="reporting-header">
-                        <!-- FIX: icon color #4f8ef7 (dark theme) → #0284c7 -->
                         <h5 class="reporting-title">
                             <i class="bi bi-graph-up me-2" style="color:#0284c7;"></i>My Ticket
                             Report </h5>
@@ -718,12 +831,10 @@
                                 <i class="bi bi-printer-fill"></i> Print / PDF </button>
                         </div>
                     </div>
-
                     <div id="reportLoading" class="report-loading">
                         <div class="spinner"></div>
                         <span>Loading your report...</span>
                     </div>
-
                     <div id="reportContent" style="display:none;">
                         <div class="report-kpi-strip">
                             <div class="report-kpi">
@@ -747,7 +858,6 @@
                                 <div class="report-kpi-label">Avg Resolution (hrs)</div>
                             </div>
                         </div>
-
                         <div class="report-charts-grid">
                             <div class="report-chart-card">
                                 <div class="report-chart-title"><i class="bi bi-calendar3"></i>
@@ -764,7 +874,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <div class="report-charts-grid">
                             <div class="report-chart-card">
                                 <div class="report-chart-title"><i class="bi bi-bar-chart-fill"></i>
@@ -783,7 +892,6 @@
                         </div>
                     </div>
                     <!-- /reportContent -->
-
                 </div>
                 <!-- /portal-reporting-page -->
 
@@ -852,7 +960,7 @@
     }
     document.addEventListener('DOMContentLoaded', function () { run(); setInterval(run, INTERVAL); });
 })();
-        //]]>
+                //]]>
             </script>
 
             <!-- ═══ PORTAL NAVIGATION + BELL + KANBAN + REPORTING ═══ -->
@@ -860,12 +968,14 @@
                 //<![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
 
+    // ── AUTO-DISMISS ALERTS ───────────────────────────────────────────────
     setTimeout(function () {
         document.querySelectorAll('.alert').forEach(function (a) {
             try { new bootstrap.Alert(a).close(); } catch (e) { a.style.display = 'none'; }
         });
     }, 5000);
 
+    // ── KANBAN COUNTS ─────────────────────────────────────────────────────
     function updatePortalCounts() {
         ['new', 'in_progress', 'resolved', 'closed'].forEach(function (state) {
             var col = document.getElementById('portal-col-' + state);
@@ -875,6 +985,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     updatePortalCounts();
 
+    // ── PAGE SWITCHING ────────────────────────────────────────────────────
     var pages = {
         overview:  document.getElementById('portal-overview-page'),
         kanban:    document.getElementById('portal-kanban-page'),
@@ -891,11 +1002,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (el) el.classList.add('active');
         if (kanbanBtn) kanbanBtn.classList.toggle('active', !!isKanban);
     }
-    function showOverview() { hideAllPages(); pages.overview.style.display = 'block'; setActiveNav('portalOverviewNav', false); }
-    function showKanban()   { hideAllPages(); pages.kanban.style.display = 'block'; setActiveNav('portalTicketsNav', true); updatePortalCounts(); }
-
-    var reportFetchInFlight = false;
-
+    function showOverview()  { hideAllPages(); pages.overview.style.display = 'block';   setActiveNav('portalOverviewNav', false); }
+    function showKanban()    { hideAllPages(); pages.kanban.style.display = 'block';     setActiveNav('portalTicketsNav', true);  updatePortalCounts(); }
     function showReporting() {
         hideAllPages(); pages.reporting.style.display = 'block';
         setActiveNav('portalReportingNav', false);
@@ -996,6 +1104,7 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(loadNotifications, 30000);
 
     // ── REPORTING ─────────────────────────────────────────────────────────
+    var reportFetchInFlight = false;
     var currentDays    = 30;
     var chartInstances = {};
 
@@ -1055,10 +1164,6 @@ document.addEventListener('DOMContentLoaded', function () {
         rateEl.textContent = rate + '%';
         rateEl.className   = 'report-kpi-value ' + (rate >= 80 ? 'green' : rate >= 50 ? 'amber' : 'red');
 
-        /* FIX: all chart tick colors #8892a4 → #475569 (readable on white)
-                all chart grid colors rgba(255,255,255,0.06) → rgba(12,74,110,0.08) */
-
-        // ── Timeline ──────────────────────────────────────────────────────
         destroyChart('chartTimeline');
         var tl = data.timeline || [];
         chartInstances['chartTimeline'] = new Chart(document.getElementById('chartTimeline').getContext('2d'), {
@@ -1077,7 +1182,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // ── Status donut ──────────────────────────────────────────────────
         destroyChart('chartStatus');
         var st = data.status_breakdown || {};
         var stLabels = Object.keys(st);
@@ -1090,7 +1194,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 plugins: { legend: { position: 'bottom', labels: { color: '#475569', font: { size: 11 }, padding: 16 } } } }
         });
 
-        // ── Priority bar ──────────────────────────────────────────────────
         destroyChart('chartPriority');
         var pr = data.priority_breakdown || {};
         var prLabels = ['Low', 'Medium', 'High', 'Urgent'];
@@ -1106,7 +1209,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // ── Resolve rate trend ────────────────────────────────────────────
         destroyChart('chartResolveTrend');
         var rt = data.resolve_trend || [];
         chartInstances['chartResolveTrend'] = new Chart(document.getElementById('chartResolveTrend').getContext('2d'), {
@@ -1127,8 +1229,60 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // ════════════════════════════════════════════════════════════════════════
+    // BACK BUTTON TRAP
+    // Intercepts browser back navigation and shows a warning modal
+    // instead of silently navigating away to the login page.
+    // ════════════════════════════════════════════════════════════════════════
+    var logoutModal  = document.getElementById('logoutWarningModal');
+    var modalStayBtn = document.getElementById('modalStayBtn');
+    var modalLogoutBtn = document.getElementById('modalLogoutBtn');
+
+    // Push an extra history entry so pressing back triggers popstate
+    // instead of actually leaving the page
+    history.pushState(null, null, window.location.href);
+
+    window.addEventListener('popstate', function () {
+        // Cancel the navigation by pushing forward again
+        history.pushState(null, null, window.location.href);
+        // Show the warning modal
+        if (logoutModal) logoutModal.classList.add('show');
+    });
+
+    // Handle bfcache (back-forward cache in Chrome / Firefox)
+    // If browser restores page from cache, push state again to re-arm the trap
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            history.pushState(null, null, window.location.href);
+        }
+    });
+
+    // "Stay on Page" button — just close the modal
+    if (modalStayBtn) {
+        modalStayBtn.addEventListener('click', function () {
+            if (logoutModal) logoutModal.classList.remove('show');
+        });
+    }
+
+    // "Logout Properly" button — go to proper logout route
+    if (modalLogoutBtn) {
+        modalLogoutBtn.addEventListener('click', function () {
+            window.location.href = '/customer_support/logout_manual';
+        });
+    }
+
+    // Also close modal if user clicks the dark backdrop
+    if (logoutModal) {
+        logoutModal.addEventListener('click', function (e) {
+            if (e.target === logoutModal) {
+                logoutModal.classList.remove('show');
+            }
+        });
+    }
+    // ── END BACK BUTTON TRAP ──────────────────────────────────────────────
+
 });
-        //]]>
+                //]]>
             </script>
         </t>
     </template>
