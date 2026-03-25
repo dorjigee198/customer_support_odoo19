@@ -1,47 +1,109 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. SELECT ELEMENTS
+
+    // ── 1. SELECT ELEMENTS ───────────────────────────────────
     const chatBox = document.getElementById("chat-box");
     const userInput = document.getElementById("user-input");
     const sendBtn = document.getElementById("send-msg-btn");
-    const clearBtn = document.getElementById("clear-chat-btn");
 
-    // 2. THE SAFETY GUARD (Prevents the Login Crash)
+    // ── 2. SAFETY GUARD ──────────────────────────────────────
     if (!chatBox || !userInput) {
-        console.log("Chatbot elements not found - probably not on chatbot page");
-        return; // Exit quietly if elements aren't on this page
+        console.log("Chatbot elements not found — not on chatbot page");
+        return;
     }
 
-    // 3. INTERNAL FUNCTIONS
-    function appendMessage(text, className) {
-        const msg = document.createElement("div");
-        msg.className = "message " + className;
-        msg.innerText = text;
-        chatBox.appendChild(msg);
+    // ── 3. HELPERS ───────────────────────────────────────────
+
+    // Returns current time as "2:14 PM"
+    function now() {
+        return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Escape HTML to prevent XSS
+    function escapeHTML(str) {
+        return str
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    // ── 4. APPEND USER MESSAGE (right side, dark bubble) ─────
+    function appendUserMessage(text) {
+        const row = document.createElement("div");
+        row.className = "message-row user-row";
+        row.innerHTML = `
+            <div class="message-content-wrap">
+                <span class="msg-sender">You</span>
+                <div class="message-bubble user-bubble">${escapeHTML(text)}</div>
+                <span class="msg-timestamp">${now()}</span>
+            </div>
+        `;
+        chatBox.appendChild(row);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        // Add to sidebar history on first user message
+        if (typeof window.addChatToHistory === 'function') {
+            window.addChatToHistory(text);
+        }
+    }
+
+    // ── 5. APPEND BOT MESSAGE (left side, white bubble + avatar) ──
+    function appendBotMessage(text) {
+        const logoHTML = window._logoSrc
+            ? `<img src="${window._logoSrc}" alt="Dragon Coders"/>`
+            : '🐉';
+
+        const row = document.createElement("div");
+        row.className = "message-row bot-row";
+        row.innerHTML = `
+            <div class="msg-avatar">${logoHTML}</div>
+            <div class="message-content-wrap">
+                <span class="msg-sender">Dragon Chat</span>
+                <div class="message-bubble bot-bubble">${escapeHTML(text)}</div>
+                <span class="msg-timestamp">${now()}</span>
+            </div>
+        `;
+        chatBox.appendChild(row);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function showLoading() {
-        if (document.getElementById("loading-indicator")) return;
-        const loader = document.createElement("div");
-        loader.className = "message bot loading";
-        loader.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
-        loader.id = "loading-indicator";
-        chatBox.appendChild(loader);
+    // ── 6. TYPING INDICATOR ──────────────────────────────────
+    function showTyping() {
+        if (document.getElementById("typing-indicator")) return;
+
+        const logoHTML = window._logoSrc
+            ? `<img src="${window._logoSrc}" alt="Dragon Coders"/>`
+            : '🐉';
+
+        const row = document.createElement("div");
+        row.className = "typing-row";
+        row.id = "typing-indicator";
+        row.innerHTML = `
+            <div class="msg-avatar">${logoHTML}</div>
+            <div class="typing-bubble">
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+                <span class="typing-dot"></span>
+            </div>
+        `;
+        chatBox.appendChild(row);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function hideLoading() {
-        const loader = document.getElementById("loading-indicator");
-        if (loader) loader.remove();
+    function hideTyping() {
+        const indicator = document.getElementById("typing-indicator");
+        if (indicator) indicator.remove();
     }
 
+    // ── 7. SEND MESSAGE ──────────────────────────────────────
     async function sendMessage(manualMsg = null) {
         const message = manualMsg || userInput.value.trim();
         if (!message) return;
 
-        appendMessage(message, "user");
-        if (!manualMsg) userInput.value = ""; // Only clear input if user typed it
-        showLoading();
+        appendUserMessage(message);
+        if (!manualMsg) userInput.value = "";
+
+        showTyping();
 
         try {
             const res = await fetch("/customer_support/chatbot/message", {
@@ -54,59 +116,59 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
 
-            hideLoading();
+            hideTyping();
             const data = await res.json();
 
             if (data.result) {
                 if (data.result.reply) {
-                    appendMessage(data.result.reply, "bot");
+                    appendBotMessage(data.result.reply);
                 } else if (data.result.error) {
-                    appendMessage("Error: " + data.result.error, "err");
+                    appendBotMessage("Sorry, something went wrong: " + data.result.error);
                 } else {
-                    appendMessage("Error: Unexpected response format", "err");
+                    appendBotMessage("Sorry, I received an unexpected response.");
                 }
             } else if (data.error) {
-                appendMessage("Error: " + data.error.message, "err");
+                appendBotMessage("Error: " + data.error.message);
             } else {
-                appendMessage("Error: Could not get response", "err");
+                appendBotMessage("Sorry, I couldn't get a response. Please try again.");
             }
+
         } catch (err) {
-            hideLoading();
-            appendMessage("Error: " + err.message, "err");
+            hideTyping();
+            appendBotMessage("Connection error: " + err.message);
             console.error("Chat error:", err);
         }
     }
 
-    // 4. ATTACH LISTENERS (Instead of using onclick="" in XML)
+    // ── 8. RESET (called by New Chat button in XML) ──────────
+    window.resetChat = function () {
+        chatBox.innerHTML = "";
+        appendBotMessage("Hello! I'm Dragon Chat. How can I assist you today?");
+    };
+
+    // ── 9. EVENT LISTENERS ───────────────────────────────────
+
+    // Send button
     if (sendBtn) {
         sendBtn.addEventListener("click", () => sendMessage());
     }
 
-    if (userInput) {
-        userInput.addEventListener("keypress", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-    }
+    // Enter key
+    userInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
 
-    if (clearBtn) {
-        clearBtn.addEventListener("click", () => {
-            if (confirm("Clear chat history?")) {
-                chatBox.innerHTML = "";
-                appendMessage("Chat cleared. How can I help you?", "bot");
-            }
-        });
-    }
-
-    // Delegate Quick Replies
-    document.querySelectorAll(".quick-reply").forEach(btn => {
+    // Quick reply buttons
+    document.querySelectorAll(".quick-reply-btn").forEach(btn => {
         btn.addEventListener("click", () => {
-            sendMessage(btn.getAttribute('data-msg'));
+            sendMessage(btn.getAttribute("data-msg"));
         });
     });
 
-    // 5. WELCOME MESSAGE
-    appendMessage("Hello! I'm Dragon Chat. How can I assist you today?", "bot");
+    // ── 10. WELCOME MESSAGE ──────────────────────────────────
+    appendBotMessage("Hello! I'm Dragon Chat. How can I assist you today?");
+
 });

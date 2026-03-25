@@ -516,228 +516,269 @@
                             </div>
                         </div>
                     </div>
-
-
-                    <!-- ═══ TICKETS PAGE — LIST + KANBAN ═══ -->
-                    <div class="page-content dashboard-content" id="tickets-page"
-                        style="display: none;">
-
-                        <div class="tickets-header">
-                            <div class="search-container">
-                                <i class="bi bi-search"></i>
-                                <input type="text" class="search-input"
-                                    placeholder="Search tickets..."></input>
-                            </div>
-                            <div class="view-toggle">
-                                <button class="view-btn active" id="listViewBtn" title="List view">
-                                    <i class="bi bi-list"></i>
-                                </button>
-                                <button class="view-btn" id="kanbanViewBtn" title="Kanban view">
-                                    <i class="bi bi-grid-3x3-gap"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- ★ MOBILE VIEW PILL TOGGLE (shown only on mobile via CSS) ★ -->
-                        <div class="mobile-view-pill" id="mobileViewPill">
-                            <button class="mobile-view-pill-btn active" id="mobilePillList"
-                                data-target="list">
-                                <i class="bi bi-list-ul me-1"></i>List </button>
-                            <button class="mobile-view-pill-btn" id="mobilePillKanban"
-                                data-target="kanban">
-                                <i class="bi bi-grid-3x3-gap me-1"></i>Kanban </button>
-                        </div>
-
-                        <!-- ── LIST VIEW ── -->
-                        <div id="listView">
-                            <div class="ticket-table-wrapper">
-                                <table class="ticket-table" id="ticketTable" style="display:none;">
-                                    <thead>
-                                        <tr>
-                                            <th>TICKET</th>
-                                            <th>CUSTOMER</th>
-                                            <th>STATUS</th>
-                                            <th>PRIORITY</th>
-                                            <th>CREATED</th>
-                                            <th>PROJECT</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="ticketTableBody">
-                                        <!-- Populated by JS polling -->
-                                    </tbody>
-                                </table>
-                                <div class="tickets-empty-state" id="ticketsEmptyState"
-                                    style="display:none;">
-                                    <i class="bi bi-inbox"></i>
-                                    <h3>No tickets assigned to you yet.</h3>
-                                    <p>When you have tickets assigned, they will appear here.</p>
+                    <div class="quick-actions">
+                        <div class="actions-grid">
+                            <a href="#" class="action-card">
+                                <div class="action-icon">
+                                    <i class="bi bi-plus-circle-fill"></i>
                                 </div>
-                                <div class="tickets-empty-state" id="ticketsLoadingState">
-                                    <i class="bi bi-arrow-repeat"
-                                        style="animation: spin 1s linear infinite; display:inline-block;"></i>
-                                    <h3>Loading tickets...</h3>
+                                <div class="action-content">
+                                    <h4>Create New Ticket</h4>
+                                    <p>Submit a new support request</p>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- ── KANBAN VIEW ── -->
-                        <div id="kanbanView" style="display:none;">
-                            <div class="kanban-board" id="kanbanBoard">
-
-                                <!-- New / Assigned column -->
-                                <div class="kanban-col" data-state="new">
-                                    <div class="kanban-col-header" data-col-toggle="new">
-                                        <span class="kanban-col-title"><i class="bi bi-circle"></i>
-                                            New</span>
-                                        <div class="kanban-col-header-right">
-                                            <span class="kanban-col-count" id="count-new">0</span>
-                                            <!-- ★ Mobile collapse chevron ★ -->
-                                            <i
-                                                class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
-                                        </div>
-                                    </div>
-                                    <div class="kanban-cards" id="col-new"></div>
-                                    <div class="kanban-drop-zone">Drop here</div>
+                            </a>
+                            <a href="#" class="action-card" data-view="tickets">
+                                <div class="action-icon">
+                                    <i class="bi bi-list-task"></i>
                                 </div>
-
-                                <!-- In Progress column -->
-                                <div class="kanban-col" data-state="in_progress">
-                                    <div class="kanban-col-header" data-col-toggle="in_progress">
-                                        <span class="kanban-col-title"><i class="bi bi-arrow-repeat"></i>
-                                            In Progress</span>
-                                        <div class="kanban-col-header-right">
-                                            <span class="kanban-col-count" id="count-in_progress">0</span>
-                                            <i
-                                                class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
-                                        </div>
-                                    </div>
-                                    <div class="kanban-cards" id="col-in_progress"></div>
-                                    <div class="kanban-drop-zone">Drop here</div>
+                                <div class="action-content">
+                                    <h4>View All Tickets</h4>
+                                    <p>See all your support tickets</p>
                                 </div>
-
-                                <!-- Resolved column -->
-                                <div class="kanban-col" data-state="resolved">
-                                    <div class="kanban-col-header" data-col-toggle="resolved">
-                                        <span class="kanban-col-title"><i class="bi bi-check-circle"></i>
-                                            Resolved</span>
-                                        <div class="kanban-col-header-right">
-                                            <span class="kanban-col-count" id="count-resolved">0</span>
-                                            <i
-                                                class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
-                                        </div>
-                                    </div>
-                                    <div class="kanban-cards" id="col-resolved"></div>
-                                    <div class="kanban-drop-zone">Drop here</div>
+                            </a>
+                            <a href="#" class="action-card">
+                                <div class="action-icon">
+                                    <i class="bi bi-file-earmark-text"></i>
                                 </div>
-
-                                <!-- Closed column -->
-                                <div class="kanban-col" data-state="closed">
-                                    <div class="kanban-col-header" data-col-toggle="closed">
-                                        <span class="kanban-col-title"><i class="bi bi-x-circle"></i>
-                                            Closed</span>
-                                        <div class="kanban-col-header-right">
-                                            <span class="kanban-col-count" id="count-closed">0</span>
-                                            <i
-                                                class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
-                                        </div>
-                                    </div>
-                                    <div class="kanban-cards" id="col-closed"></div>
-                                    <div class="kanban-drop-zone">Drop here</div>
+                                <div class="action-content">
+                                    <h4>Generate Report</h4>
+                                    <p>Download performance report</p>
                                 </div>
-
-                            </div>
+                            </a>
+                            <a href="#" class="action-card" data-view="faq">
+                                <div class="action-icon">
+                                    <i class="bi bi-question-circle-fill"></i>
+                                </div>
+                                <div class="action-content">
+                                    <h4>Help Center</h4>
+                                    <p>Browse FAQ and guides</p>
+                                </div>
+                            </a>
                         </div>
                     </div>
+                </div>
+                <!-- ═══ END OVERVIEW PAGE ═══ -->
 
-                    <!-- ═══ FAQ PAGE ═══ -->
-                    <div class="page-content dashboard-content" id="faq-page" style="display: none;">
-                        <div class="dashboard-card">
-                            <div class="card-header">
-                                <h2 class="card-title"><i class="bi bi-question-circle"></i>Manage
-                                    FAQ</h2>
-                            </div>
-                            <p class="text-muted">FAQ Management interface coming soon...</p>
+                <!-- ═══ TICKETS PAGE — LIST + KANBAN ═══ -->
+                <div class="page-content dashboard-content" id="tickets-page" style="display: none;">
+
+                    <div class="tickets-header">
+                        <div class="search-container">
+                            <i class="bi bi-search"></i>
+                            <input type="text" class="search-input"
+                                placeholder="Search tickets..."></input>
                         </div>
-                    </div>
-
-                    <!-- ★ MOBILE NAV OVERLAY ★ -->
-                    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
-
-                    <!-- ★ MOBILE NAV DRAWER ★ -->
-                    <div class="mobile-nav-drawer" id="mobileNavDrawer">
-                        <div class="mobile-nav-drawer-header">
-                            <div class="drawer-brand-icon">
-                                <i class="bi bi-headset"></i>
-                            </div>
-                            <div class="drawer-brand-text">
-                                <strong>Customer Support</strong>
-                                <span>Agent Panel</span>
-                            </div>
-                            <button class="mobile-nav-drawer-close" id="mobileNavClose">
-                                <i class="bi bi-x-lg"></i>
+                        <div class="view-toggle">
+                            <button class="view-btn active" id="listViewBtn" title="List view">
+                                <i class="bi bi-list"></i>
+                            </button>
+                            <button class="view-btn" id="kanbanViewBtn" title="Kanban view">
+                                <i class="bi bi-grid-3x3-gap"></i>
                             </button>
                         </div>
+                    </div>
 
-                        <div class="mobile-nav-section-label">Navigation</div>
+                    <!-- ★ MOBILE VIEW PILL TOGGLE (shown only on mobile via CSS) ★ -->
+                    <div class="mobile-view-pill" id="mobileViewPill">
+                        <button class="mobile-view-pill-btn active" id="mobilePillList"
+                            data-target="list">
+                            <i class="bi bi-list-ul me-1"></i>List </button>
+                        <button class="mobile-view-pill-btn" id="mobilePillKanban"
+                            data-target="kanban">
+                            <i class="bi bi-grid-3x3-gap me-1"></i>Kanban </button>
+                    </div>
 
-                        <ul class="mobile-nav-list">
-                            <li>
-                                <a class="mobile-nav-item active" data-view="overview">
-                                    <div class="mobile-nav-item-icon">
-                                        <i class="bi bi-speedometer2"></i>
-                                    </div>
-                                    <div class="mobile-nav-item-text">
-                                        <strong>Overview</strong>
-                                        <span>Dashboard summary</span>
-                                    </div>
-                                    <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="mobile-nav-item" data-view="tickets">
-                                    <div class="mobile-nav-item-icon">
-                                        <i class="bi bi-ticket-detailed"></i>
-                                    </div>
-                                    <div class="mobile-nav-item-text">
-                                        <strong>Tickets</strong>
-                                        <span>View &amp; manage tickets</span>
-                                    </div>
-                                    <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
-                                </a>
-                            </li>
-                            <li>
-                                <a class="mobile-nav-item" data-view="faq">
-                                    <div class="mobile-nav-item-icon">
-                                        <i class="bi bi-question-circle"></i>
-                                    </div>
-                                    <div class="mobile-nav-item-text">
-                                        <strong>FAQ</strong>
-                                        <span>Browse help &amp; guides</span>
-                                    </div>
-                                    <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
-                                </a>
-                            </li>
-                        </ul>
-
-                        <div class="mobile-nav-drawer-footer">
-                            <p>Customer Support System &#169; 2025</p>
+                    <!-- ── LIST VIEW ── -->
+                    <div id="listView">
+                        <div class="ticket-table-wrapper">
+                            <table class="ticket-table" id="ticketTable" style="display:none;">
+                                <thead>
+                                    <tr>
+                                        <th>TICKET</th>
+                                        <th>CUSTOMER</th>
+                                        <th>STATUS</th>
+                                        <th>PRIORITY</th>
+                                        <th>CREATED</th>
+                                        <th>PROJECT</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ticketTableBody">
+                                    <!-- Populated by JS polling -->
+                                </tbody>
+                            </table>
+                            <div class="tickets-empty-state" id="ticketsEmptyState"
+                                style="display:none;">
+                                <i class="bi bi-inbox"></i>
+                                <h3>No tickets assigned to you yet.</h3>
+                                <p>When you have tickets assigned, they will appear here.</p>
+                            </div>
+                            <div class="tickets-empty-state" id="ticketsLoadingState">
+                                <i class="bi bi-arrow-repeat"
+                                    style="animation: spin 1s linear infinite; display:inline-block;"></i>
+                                <h3>Loading tickets...</h3>
+                            </div>
                         </div>
                     </div>
-                    <!-- ★ END MOBILE NAV DRAWER ★ -->
 
-                </div><!--/.dashboard-wrapper -->
+                    <!-- ── KANBAN VIEW ── -->
+                    <div id="kanbanView" style="display:none;">
+                        <div class="kanban-board" id="kanbanBoard">
 
-                <!-- Save feedback toast -->
-                <div id="kanbanToast"></div>
+                            <!-- New / Assigned column -->
+                            <div class="kanban-col" data-state="new">
+                                <div class="kanban-col-header" data-col-toggle="new">
+                                    <span class="kanban-col-title"><i class="bi bi-circle"></i> New</span>
+                                    <div class="kanban-col-header-right">
+                                        <span class="kanban-col-count" id="count-new">0</span>
+                                        <!-- ★ Mobile collapse chevron ★ -->
+                                        <i
+                                            class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                    </div>
+                                </div>
+                                <div class="kanban-cards" id="col-new"></div>
+                                <div class="kanban-drop-zone">Drop here</div>
+                            </div>
 
-                <script
-                    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                            <!-- In Progress column -->
+                            <div class="kanban-col" data-state="in_progress">
+                                <div class="kanban-col-header" data-col-toggle="in_progress">
+                                    <span class="kanban-col-title"><i class="bi bi-arrow-repeat"></i>
+                                        In Progress</span>
+                                    <div class="kanban-col-header-right">
+                                        <span class="kanban-col-count" id="count-in_progress">0</span>
+                                        <i
+                                            class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                    </div>
+                                </div>
+                                <div class="kanban-cards" id="col-in_progress"></div>
+                                <div class="kanban-drop-zone">Drop here</div>
+                            </div>
 
-                <!-- ═══════════════════════════════════════════════════════════
+                            <!-- Resolved column -->
+                            <div class="kanban-col" data-state="resolved">
+                                <div class="kanban-col-header" data-col-toggle="resolved">
+                                    <span class="kanban-col-title"><i class="bi bi-check-circle"></i>
+                                        Resolved</span>
+                                    <div class="kanban-col-header-right">
+                                        <span class="kanban-col-count" id="count-resolved">0</span>
+                                        <i
+                                            class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                    </div>
+                                </div>
+                                <div class="kanban-cards" id="col-resolved"></div>
+                                <div class="kanban-drop-zone">Drop here</div>
+                            </div>
+
+                            <!-- Closed column -->
+                            <div class="kanban-col" data-state="closed">
+                                <div class="kanban-col-header" data-col-toggle="closed">
+                                    <span class="kanban-col-title"><i class="bi bi-x-circle"></i>
+                                        Closed</span>
+                                    <div class="kanban-col-header-right">
+                                        <span class="kanban-col-count" id="count-closed">0</span>
+                                        <i
+                                            class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                    </div>
+                                </div>
+                                <div class="kanban-cards" id="col-closed"></div>
+                                <div class="kanban-drop-zone">Drop here</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <!-- ═══ END TICKETS PAGE ═══ -->
+
+                <!-- ═══ FAQ PAGE ═══ -->
+                <div class="page-content dashboard-content" id="faq-page" style="display: none;">
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="bi bi-question-circle"></i>Manage FAQ</h2>
+                        </div>
+                        <p class="text-muted">FAQ Management interface coming soon...</p>
+                    </div>
+                </div>
+                <!-- ═══ END FAQ PAGE ═══ -->
+
+                <!-- ★ MOBILE NAV OVERLAY ★ -->
+                <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+
+                <!-- ★ MOBILE NAV DRAWER ★ -->
+                <div class="mobile-nav-drawer" id="mobileNavDrawer">
+                    <div class="mobile-nav-drawer-header">
+                        <div class="drawer-brand-icon">
+                            <i class="bi bi-headset"></i>
+                        </div>
+                        <div class="drawer-brand-text">
+                            <strong>Customer Support</strong>
+                            <span>Agent Panel</span>
+                        </div>
+                        <button class="mobile-nav-drawer-close" id="mobileNavClose">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <div class="mobile-nav-section-label">Navigation</div>
+
+                    <ul class="mobile-nav-list">
+                        <li>
+                            <a class="mobile-nav-item active" data-view="overview">
+                                <div class="mobile-nav-item-icon">
+                                    <i class="bi bi-speedometer2"></i>
+                                </div>
+                                <div class="mobile-nav-item-text">
+                                    <strong>Overview</strong>
+                                    <span>Dashboard summary</span>
+                                </div>
+                                <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="mobile-nav-item" data-view="tickets">
+                                <div class="mobile-nav-item-icon">
+                                    <i class="bi bi-ticket-detailed"></i>
+                                </div>
+                                <div class="mobile-nav-item-text">
+                                    <strong>Tickets</strong>
+                                    <span>View &amp; manage tickets</span>
+                                </div>
+                                <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="mobile-nav-item" data-view="faq">
+                                <div class="mobile-nav-item-icon">
+                                    <i class="bi bi-question-circle"></i>
+                                </div>
+                                <div class="mobile-nav-item-text">
+                                    <strong>FAQ</strong>
+                                    <span>Browse help &amp; guides</span>
+                                </div>
+                                <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="mobile-nav-drawer-footer">
+                        <p>Customer Support System &#169; 2025</p>
+                    </div>
+                </div>
+                <!-- ★ END MOBILE NAV DRAWER ★ -->
+
+            </div><!--
+            /.dashboard-wrapper -->
+
+            <!-- Save feedback toast -->
+            <div id="kanbanToast"></div>
+
+            <script
+                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+            <!-- ═══════════════════════════════════════════════════════════
                  1.  BELL / SLA ALERTS  — polls every 30 s
             ═══════════════════════════════════════════════════════════ -->
-                <script type="text/javascript">
-                    //<![CDATA[
+            <script type="text/javascript">
+                //<![CDATA[
 (function () {
     'use strict';
     var bell     = document.getElementById('notifBell');
@@ -804,11 +845,11 @@
 //]]>
             </script>
 
-                <!-- ═══════════════════════════════════════════════════════════
+            <!-- ═══════════════════════════════════════════════════════════
                  2.  LIVE ANALYTICS + PERFORMANCE  — polls every 15 s
             ═══════════════════════════════════════════════════════════ -->
-                <script type="text/javascript">
-                    //<![CDATA[
+            <script type="text/javascript">
+                //<![CDATA[
 (function () {
     'use strict';
     var INTERVAL = 15000;
@@ -874,11 +915,11 @@
 //]]>
             </script>
 
-                <!-- ═══════════════════════════════════════════════════════════
+            <!-- ═══════════════════════════════════════════════════════════
                  3.  DASHBOARD NAV + TICKET POLLING + KANBAN ENGINE
             ═══════════════════════════════════════════════════════════ -->
-                <script type="text/javascript">
-                    //<![CDATA[
+            <script type="text/javascript">
+                //<![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
 
     // ── Auto-hide flash alerts ────────────────────────────────────────────
@@ -1216,11 +1257,11 @@ document.addEventListener('DOMContentLoaded', function () {
 //]]>
             </script>
 
-                <!-- ═══════════════════════════════════════════════════════════
+            <!-- ═══════════════════════════════════════════════════════════
                  4.  MOBILE HAMBURGER DRAWER JS
             ═══════════════════════════════════════════════════════════ -->
-                <script type="text/javascript">
-                    //<![CDATA[
+            <script type="text/javascript">
+                //<![CDATA[
 (function () {
     'use strict';
     var hamburger = document.getElementById('mobileHamburgerBtn');
@@ -1263,7 +1304,6 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 //]]>
             </script>
-            </div>
 
         </t>
     </template>
