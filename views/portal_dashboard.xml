@@ -3,6 +3,7 @@
     <template id="portal_dashboard" name="Customer Support Dashboard">
         <t t-call="web.layout">
             <t t-set="head">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
                     rel="stylesheet" />
                 <link
@@ -11,13 +12,10 @@
                 <!-- ?v=3 busts Odoo asset cache — increment whenever you update the CSS -->
                 <link rel="stylesheet"
                     href="/customer_support/static/src/css/portal_dashboard.css?v=3" />
+                <!-- Mobile nav drawer CSS (shared with all portal pages) -->
+                <link rel="stylesheet"
+                    href="/customer_support/static/src/css/portal_dashboard_mobile.css?v=4" />
 
-                <!-- ═══════════════════════════════════════════════════════════
-                     INLINE STYLE BLOCK
-                     Embedded directly in the page — never affected by Odoo's
-                     external-asset cache. Uses !important to override any
-                     stale cached version of portal_dashboard.css.
-                     ═══════════════════════════════════════════════════════════ -->
                 <style>
                     /* ── PAGE ── */
                     .dashboard-wrapper { background: #e0f2fe !important; }
@@ -239,6 +237,7 @@
                     .btn-logout-now:hover {
                     background: #075985;
                     }
+
                 </style>
             </t>
 
@@ -246,8 +245,6 @@
 
                 <!-- ═══════════════════════════════════════════════════════════
                      BACK BUTTON WARNING MODAL
-                     Shown when user presses browser back button.
-                     Forces proper logout instead of silent navigation away.
                      ═══════════════════════════════════════════════════════════ -->
                 <div id="logoutWarningModal" role="dialog" aria-modal="true"
                     aria-labelledby="logoutModalTitle">
@@ -267,14 +264,29 @@
                         </div>
                     </div>
                 </div>
-                <!-- /logoutWarningModal -->
 
+                <!-- ═══════════════════════════════════════════════════════════
+                     HEADER
+                     The mobile nav component is called as the FIRST child of
+                     .header-content. It renders:
+                       • the hamburger <button> (inline, visible mobile-only)
+                       • the overlay <div>  (fixed, invisible until opened)
+                       • the drawer <div>   (fixed, off-screen until opened)
+                       • the drawer <script> (self-contained IIFE)
+                     Pass mobile_active_page so the drawer highlights Overview.
+                     ═══════════════════════════════════════════════════════════ -->
                 <header class="dashboard-header">
                     <div class="header-content">
+
+                        <!-- ↓ MOBILE NAV COMPONENT (hamburger + drawer) -->
+                        <t t-set="mobile_active_page" t-value="'overview'" />
+                        <t t-call="customer_support.portal_mobile_nav_component" />
+
                         <div class="header-nav">
                             <a href="#" class="nav-link active" id="portalOverviewNav">
                                 <i class="bi bi-speedometer2 me-2"></i>Overview </a>
-                            <a href="#" class="nav-link" id="portalTicketsNav">
+                            <a href="/customer_support/tickets" class="nav-link"
+                                id="portalTicketsNav">
                                 <i class="bi bi-ticket-detailed me-2"></i>Tickets </a>
                             <a href="#" class="nav-link" id="portalReportingNav">
                                 <i class="bi bi-graph-up me-2"></i>Reporting </a>
@@ -287,10 +299,10 @@
                                     <i class="bi bi-plus-circle me-2"></i>New Ticket </a>
                             </div>
                             <div class="user-profile dropdown">
-                                <button class="view-toggle-btn me-2" id="portalKanbanBtn"
-                                    title="Toggle Kanban View">
-                                    <i class="bi bi-grid-3x3-gap-fill"></i>
-                                </button>
+
+                                <!-- 9-DOT GRID ICON -->
+                                <i class="bi bi-grid-3x3-gap-fill text-white me-2"
+                                    style="font-size: 1.2rem; cursor: pointer;"></i>
 
                                 <!-- NOTIFICATION BELL -->
                                 <div class="notif-wrap me-3">
@@ -536,78 +548,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="performance-card">
-                            <div class="card-header">
-                                <h2 class="card-title"><i class="bi bi-graph-up-arrow me-2"></i>My
-                                    Performance</h2>
-                                <div class="card-actions">
-                                    <span class="performance-score" data-key="sample_performance">
-                                        <span class="score-badge"><t
-                                                t-esc="performance.get('sample_performance', 85)" />
-                                        %</span> Overall Score </span>
-                                </div>
-                            </div>
-                            <div class="performance-grid">
-                                <div class="performance-stat" data-key="today_closed">
-                                    <div class="performance-icon">
-                                        <i class="bi bi-calendar-check"></i>
-                                    </div>
-                                    <div class="performance-content">
-                                        <div class="performance-label">Today Closed</div>
-                                        <div class="performance-value">
-                                            <t t-esc="performance.get('today_closed', 0)" />
-                                        </div>
-                                        <div class="performance-subtitle">Tickets Closed Today</div>
-                                    </div>
-                                </div>
-                                <div class="performance-stat" data-key="avg_resolve_rate">
-                                    <div class="performance-icon">
-                                        <i class="bi bi-calendar-week"></i>
-                                    </div>
-                                    <div class="performance-content">
-                                        <div class="performance-label">Avg Last 7 Days</div>
-                                        <div class="performance-value"><t
-                                                t-esc="performance.get('avg_resolve_rate', 0)" />%</div>
-                                        <div class="performance-subtitle">Resolve Rate</div>
-                                    </div>
-                                </div>
-                                <div class="performance-stat" data-key="daily_target">
-                                    <div class="performance-icon">
-                                        <i class="bi bi-target"></i>
-                                    </div>
-                                    <div class="performance-content">
-                                        <div class="performance-label">Daily Target</div>
-                                        <div class="performance-value"><t
-                                                t-esc="performance.get('daily_target', 80)" />%</div>
-                                        <div class="performance-subtitle">Target Achievement</div>
-                                    </div>
-                                </div>
-                                <div class="performance-stat" data-key="achievement">
-                                    <div class="performance-icon">
-                                        <i class="bi bi-trophy"></i>
-                                    </div>
-                                    <div class="performance-content">
-                                        <div class="performance-label">Current Achievement</div>
-                                        <div class="performance-value"><t
-                                                t-esc="performance.get('achievement', 0)" />%</div>
-                                        <div class="performance-subtitle">Target Progress</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="performance-progress mt-4">
-                                <div class="progress-label">
-                                    <span>Daily Goal Progress</span>
-                                    <span><t t-esc="performance.get('achievement', 0) or 0" />%</span>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar" role="progressbar"
-                                        t-att-style="'width: ' + str(performance.get('achievement', 0) or 0) + '%;'"
-                                        t-att-class="'bg-success' if (performance.get('achievement', 0) or 0) >= 80 else 'bg-warning'">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="quick-actions mt-4">
@@ -652,163 +592,6 @@
                     </div>
                 </div>
                 <!-- /portal-overview-page -->
-
-                <!-- ═══ KANBAN PAGE ═══ -->
-                <div class="dashboard-content" id="portal-kanban-page" style="display:none;">
-                    <div
-                        style="padding:1rem 2rem 0.5rem;display:flex;align-items:center;justify-content:space-between;">
-                        <h5 style="color:#0c4a6e;font-weight:700;margin:0;">
-                            <i class="bi bi-grid-3x3-gap-fill me-2" style="color:#0284c7;"></i>My
-                            Tickets &#8212; Kanban View </h5>
-                        <div class="view-toggle">
-                            <button class="view-btn" id="portalListBtn">
-                                <i class="bi bi-list me-1"></i>List </button>
-                            <button class="view-btn active" id="portalKanbanActiveBtn">
-                                <i class="bi bi-grid-3x3-gap me-1"></i>Kanban </button>
-                        </div>
-                    </div>
-                    <div class="kanban-board">
-                        <!-- New -->
-                        <div class="kanban-col" data-state="new">
-                            <div class="kanban-col-header">
-                                <span class="kanban-col-title"><i class="bi bi-circle"></i> New</span>
-                                <span class="kanban-col-count" id="portal-count-new">0</span>
-                            </div>
-                            <div class="kanban-cards" id="portal-col-new">
-                                <t t-foreach="tickets" t-as="ticket">
-                                    <t t-if="ticket.state == 'new'">
-                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
-                                            <div class="kanban-card-id">
-                                                <t t-esc="ticket.name" />
-                                            </div>
-                                            <div class="kanban-card-subject">
-                                                <t t-esc="ticket.subject" />
-                                            </div>
-                                            <div class="kanban-card-footer">
-                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                <span t-att-class="'kanban-priority priority-' + kp">
-                                                    <t t-esc="kp.title()" />
-                                                </span>
-                                            </div>
-                                            <div class="kanban-card-focal">
-                                                <i class="bi bi-person-fill"></i>
-                                                <span>
-                                                    <t
-                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </t>
-                                </t>
-                            </div>
-                        </div>
-                        <!-- In Progress -->
-                        <div class="kanban-col" data-state="in_progress">
-                            <div class="kanban-col-header">
-                                <span class="kanban-col-title"><i class="bi bi-arrow-repeat"></i> In
-                                    Progress</span>
-                                <span class="kanban-col-count" id="portal-count-in_progress">0</span>
-                            </div>
-                            <div class="kanban-cards" id="portal-col-in_progress">
-                                <t t-foreach="tickets" t-as="ticket">
-                                    <t t-if="ticket.state == 'in_progress'">
-                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
-                                            <div class="kanban-card-id">
-                                                <t t-esc="ticket.name" />
-                                            </div>
-                                            <div class="kanban-card-subject">
-                                                <t t-esc="ticket.subject" />
-                                            </div>
-                                            <div class="kanban-card-footer">
-                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                <span t-att-class="'kanban-priority priority-' + kp">
-                                                    <t t-esc="kp.title()" />
-                                                </span>
-                                            </div>
-                                            <div class="kanban-card-focal">
-                                                <i class="bi bi-person-fill"></i>
-                                                <span>
-                                                    <t
-                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </t>
-                                </t>
-                            </div>
-                        </div>
-                        <!-- Resolved -->
-                        <div class="kanban-col" data-state="resolved">
-                            <div class="kanban-col-header">
-                                <span class="kanban-col-title"><i class="bi bi-check-circle"></i>
-                                    Resolved</span>
-                                <span class="kanban-col-count" id="portal-count-resolved">0</span>
-                            </div>
-                            <div class="kanban-cards" id="portal-col-resolved">
-                                <t t-foreach="tickets" t-as="ticket">
-                                    <t t-if="ticket.state == 'resolved'">
-                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
-                                            <div class="kanban-card-id">
-                                                <t t-esc="ticket.name" />
-                                            </div>
-                                            <div class="kanban-card-subject">
-                                                <t t-esc="ticket.subject" />
-                                            </div>
-                                            <div class="kanban-card-footer">
-                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                <span t-att-class="'kanban-priority priority-' + kp">
-                                                    <t t-esc="kp.title()" />
-                                                </span>
-                                            </div>
-                                            <div class="kanban-card-focal">
-                                                <i class="bi bi-person-fill"></i>
-                                                <span>
-                                                    <t
-                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </t>
-                                </t>
-                            </div>
-                        </div>
-                        <!-- Closed -->
-                        <div class="kanban-col" data-state="closed">
-                            <div class="kanban-col-header">
-                                <span class="kanban-col-title"><i class="bi bi-x-circle"></i> Closed</span>
-                                <span class="kanban-col-count" id="portal-count-closed">0</span>
-                            </div>
-                            <div class="kanban-cards" id="portal-col-closed">
-                                <t t-foreach="tickets" t-as="ticket">
-                                    <t t-if="ticket.state == 'closed'">
-                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
-                                            <div class="kanban-card-id">
-                                                <t t-esc="ticket.name" />
-                                            </div>
-                                            <div class="kanban-card-subject">
-                                                <t t-esc="ticket.subject" />
-                                            </div>
-                                            <div class="kanban-card-footer">
-                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                <span t-att-class="'kanban-priority priority-' + kp">
-                                                    <t t-esc="kp.title()" />
-                                                </span>
-                                            </div>
-                                            <div class="kanban-card-focal">
-                                                <i class="bi bi-person-fill"></i>
-                                                <span>
-                                                    <t
-                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </t>
-                                </t>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- /portal-kanban-page -->
 
                 <!-- ═══ REPORTING PAGE ═══ -->
                 <div class="dashboard-content reporting-page" id="portal-reporting-page"
@@ -963,7 +746,7 @@
                 //]]>
             </script>
 
-            <!-- ═══ PORTAL NAVIGATION + BELL + KANBAN + REPORTING ═══ -->
+            <!-- ═══ PORTAL NAVIGATION + BELL + REPORTING ═══ -->
             <script type="text/javascript">
                 //<![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
@@ -1014,10 +797,12 @@ document.addEventListener('DOMContentLoaded', function () {
     var overviewNav = document.getElementById('portalOverviewNav');
     if (overviewNav) overviewNav.addEventListener('click', function (e) { e.preventDefault(); showOverview(); });
     var ticketsNav = document.getElementById('portalTicketsNav');
-    if (ticketsNav) ticketsNav.addEventListener('click', function (e) { e.preventDefault(); showKanban(); });
+    if (ticketsNav) ticketsNav.addEventListener('click', function (e) {
+        e.preventDefault();
+        window.location.href = '/customer_support/tickets';
+    });
     var reportingNav = document.getElementById('portalReportingNav');
     if (reportingNav) reportingNav.addEventListener('click', function (e) { e.preventDefault(); showReporting(); });
-    if (kanbanBtn) kanbanBtn.addEventListener('click', function () { showKanban(); });
     var reportActionCard = document.getElementById('portalReportActionCard');
     if (reportActionCard) reportActionCard.addEventListener('click', function (e) { e.preventDefault(); showReporting(); });
     var listBtn = document.getElementById('portalListBtn');
@@ -1229,58 +1014,39 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // BACK BUTTON TRAP
-    // Intercepts browser back navigation and shows a warning modal
-    // instead of silently navigating away to the login page.
-    // ════════════════════════════════════════════════════════════════════════
-    var logoutModal  = document.getElementById('logoutWarningModal');
-    var modalStayBtn = document.getElementById('modalStayBtn');
+    // ── BACK BUTTON TRAP ──────────────────────────────────────────────────
+    var logoutModal    = document.getElementById('logoutWarningModal');
+    var modalStayBtn   = document.getElementById('modalStayBtn');
     var modalLogoutBtn = document.getElementById('modalLogoutBtn');
 
-    // Push an extra history entry so pressing back triggers popstate
-    // instead of actually leaving the page
-    history.pushState(null, null, window.location.href);
-
-    window.addEventListener('popstate', function () {
-        // Cancel the navigation by pushing forward again
+    var initParams = new URLSearchParams(window.location.search);
+    if (!initParams.get('view')) {
         history.pushState(null, null, window.location.href);
-        // Show the warning modal
+    }
+    window.addEventListener('popstate', function () {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('view')) return;
+        history.pushState(null, null, window.location.href);
         if (logoutModal) logoutModal.classList.add('show');
     });
-
-    // Handle bfcache (back-forward cache in Chrome / Firefox)
-    // If browser restores page from cache, push state again to re-arm the trap
     window.addEventListener('pageshow', function (e) {
         if (e.persisted) {
-            history.pushState(null, null, window.location.href);
+            var showParams = new URLSearchParams(window.location.search);
+            if (!showParams.get('view')) history.pushState(null, null, window.location.href);
         }
     });
+    if (modalStayBtn)   modalStayBtn.addEventListener('click',   function () { if (logoutModal) logoutModal.classList.remove('show'); });
+    if (modalLogoutBtn) modalLogoutBtn.addEventListener('click', function () { window.location.href = '/customer_support/logout_manual'; });
+    if (logoutModal)    logoutModal.addEventListener('click',    function (e) { if (e.target === logoutModal) logoutModal.classList.remove('show'); });
 
-    // "Stay on Page" button — just close the modal
-    if (modalStayBtn) {
-        modalStayBtn.addEventListener('click', function () {
-            if (logoutModal) logoutModal.classList.remove('show');
-        });
+    // ── AUTO SWITCH VIEW FROM URL HASH ────────────────────────────────────
+    if (window.location.hash === '#reporting') {
+        showReporting();
+        history.replaceState(null, null, window.location.pathname);
+    } else if (window.location.hash === '#kanban') {
+        showKanban();
+        history.replaceState(null, null, window.location.pathname);
     }
-
-    // "Logout Properly" button — go to proper logout route
-    if (modalLogoutBtn) {
-        modalLogoutBtn.addEventListener('click', function () {
-            window.location.href = '/customer_support/logout_manual';
-        });
-    }
-
-    // Also close modal if user clicks the dark backdrop
-    if (logoutModal) {
-        logoutModal.addEventListener('click', function (e) {
-            if (e.target === logoutModal) {
-                logoutModal.classList.remove('show');
-            }
-        });
-    }
-    // ── END BACK BUTTON TRAP ──────────────────────────────────────────────
-
 });
                 //]]>
             </script>

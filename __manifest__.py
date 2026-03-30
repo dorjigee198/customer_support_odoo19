@@ -33,6 +33,9 @@
         "views/system_configuration.xml",
         "views/report_templates.xml",
         "views/templates/ticket_detail.xml",
+        "views/templates/customer_ticket_detail.xml",
+        "views/portal_ticket_kanban.xml",
+        "views/portal_mobile_nav_component.xml",
     ],
     "assets": {
         "web.assets_backend": [
@@ -49,6 +52,9 @@
             "customer_support/static/src/css/ticket_details.css",
             "customer_support/static/src/css/project_configuration.css",
             "customer_support/static/src/js/project_configuration.js",
+            "customer_support/static/src/css/ticket_details.css",
+            "customer_support/static/src/js/ticket_details.js",
+            "customer_support/static/src/css/portal_dashboard_mobile.css",
         ],
     },
     "installable": True,
