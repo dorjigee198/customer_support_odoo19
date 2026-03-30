@@ -7,222 +7,779 @@
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet"/>
                 <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css"/>
                 <link rel="stylesheet" href="/customer_support/static/src/css/ticket_details.css"/>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet"/>
 
-                <style>
-                    .message-actions { opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease; }
-                    .message-item:hover .message-actions { opacity: 1; visibility: visible; }
-                    .message-action-btn { background: none; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.2s ease; margin-left: 4px; }
-                    .edit-message-btn   { color: #6c757d; }
-                    .edit-message-btn:hover   { background-color: #0d6efd; color: white; }
-                    .delete-message-btn { color: #6c757d; }
-                    .delete-message-btn:hover { background-color: #dc3545; color: white; }
-                    .message-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-                    .message-time  { margin-left: auto; white-space: nowrap; }
-                    .message-actions { display: flex; align-items: center; margin-left: 8px; }
-
-                    .sla-timer-card { border-radius: 16px; padding: 1.25rem; margin-bottom: 1.25rem; position: relative; overflow: hidden; transition: border-color 0.3s, background 0.3s; }
-                    .sla-timer-card.on-track { border: 1px solid rgba(34,197,94,0.35); background: linear-gradient(145deg, rgba(34,197,94,0.07), #161b27); }
-                    .sla-timer-card.at-risk  { border: 1px solid rgba(245,158,11,0.45); background: linear-gradient(145deg, rgba(245,158,11,0.08), #161b27); }
-                    .sla-timer-card.breached { border: 1px solid rgba(239,68,68,0.5);   background: linear-gradient(145deg, rgba(239,68,68,0.1), #161b27); animation: sla-pulse 2.5s infinite; }
-                    .sla-timer-card.no-sla   { border: 1px solid rgba(255,255,255,0.07); background: #161b27; }
-                    @keyframes sla-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.25); } 50% { box-shadow: 0 0 0 10px rgba(239,68,68,0); } }
-
-                    .sla-card-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.9rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.07); }
-                    .sla-card-icon { font-size: 1rem; }
-                    .sla-timer-card.on-track .sla-card-icon { color: #22c55e; }
-                    .sla-timer-card.at-risk   .sla-card-icon { color: #f59e0b; }
-                    .sla-timer-card.breached  .sla-card-icon { color: #ef4444; }
-                    .sla-timer-card.no-sla    .sla-card-icon { color: #8892a4; }
-                    .sla-card-title { font-size: 0.875rem; font-weight: 600; color: #e8eaf0; flex: 1; }
-                    .sla-policy-chip { font-size: 0.68rem; color: #8892a4; background: #1e2535; border: 1px solid rgba(255,255,255,0.07); padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
-                    .sla-countdown-wrap { text-align: center; padding: 1rem 0 0.6rem; }
-                    .sla-big-number { font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 2.4rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
-                    .sla-timer-card.on-track .sla-big-number { color: #22c55e; }
-                    .sla-timer-card.at-risk   .sla-big-number { color: #f59e0b; }
-                    .sla-timer-card.breached  .sla-big-number { color: #ef4444; }
-                    .sla-timer-card.no-sla    .sla-big-number { color: #8892a4; }
-                    .sla-big-label { font-size: 0.72rem; color: #8892a4; margin-top: 0.35rem; text-transform: uppercase; letter-spacing: 0.05em; }
-                    .sla-progress-section { margin-top: 0.9rem; }
-                    .sla-prog-meta { display: flex; justify-content: space-between; font-size: 0.7rem; color: #8892a4; margin-bottom: 0.35rem; }
-                    .sla-prog-track { background: rgba(255,255,255,0.07); border-radius: 999px; height: 6px; overflow: hidden; }
-                    .sla-prog-fill  { height: 6px; border-radius: 999px; transition: width 0.8s ease; }
-                    .sla-timer-card.on-track .sla-prog-fill { background: linear-gradient(90deg,#16a34a,#22c55e); }
-                    .sla-timer-card.at-risk   .sla-prog-fill { background: linear-gradient(90deg,#d97706,#f59e0b); }
-                    .sla-timer-card.breached  .sla-prog-fill { background: linear-gradient(90deg,#b91c1c,#ef4444); }
-                    .sla-deadline-row { display: flex; justify-content: space-between; align-items: center; margin-top: 0.9rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.07); font-size: 0.75rem; }
-                    .sla-deadline-label { color: #8892a4; }
-                    .sla-deadline-val   { color: #e8eaf0; font-weight: 500; }
-                </style>
             </t>
 
-            <div class="dashboard-wrapper">
-                <header class="dashboard-header">
-                    <div class="header-content">
-                        <div class="header-nav">
-                            <a href="/customer_support/support_dashboard" class="nav-link">
-                                <i class="bi bi-speedometer2"></i><span>Overview</span>
-                            </a>
-                            <a href="/customer_support/support_dashboard?view=tickets" class="nav-link active">
-                                <i class="bi bi-ticket-detailed"></i><span>Tickets</span>
-                            </a>
-                            <a href="/customer_support/support_dashboard?view=faq" class="nav-link">
-                                <i class="bi bi-question-circle"></i><span>FAQ</span>
-                            </a>
-                        </div>
-                        <div class="header-right">
-                            <i class="bi bi-grid-3x3-gap-fill text-white me-3" style="font-size: 1.2rem; cursor: pointer;"></i>
-                            <i class="bi bi-bell-fill text-white me-3" style="font-size: 1.2rem; cursor: pointer;"></i>
-                            <div class="user-profile dropdown">
-                                <a class="d-flex align-items-center text-white dropdown-toggle"
-                                    href="#" id="userProfileDropdown" data-bs-toggle="dropdown"
-                                    aria-expanded="false" style="text-decoration: none;">
-                                    <span class="user-name me-3"><t t-esc="user.name" /></span>
-                                    <img t-att-src="'/web/image/res.users/%s/avatar_128' % user.id"
-                                        alt="User Avatar" class="user-avatar"
-                                        onerror="this.src='/web/static/img/avatar_gray.svg'" />
-                                </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userProfileDropdown">
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-person me-2"></i>Edit Profile</a></li>
-                                    <li><hr class="dropdown-divider" /></li>
-                                    <li><a class="dropdown-item text-danger" href="/customer_support/logout_manual"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                                </ul>
-                            </div>
-                        </div>
+            <div class="shell">
+
+                <!-- ═══ SIDEBAR ═══ -->
+                <aside class="sidebar" id="mainSidebar">
+                    <div class="sidebar-topbar">
+                        <a href="/customer_support/support_dashboard" class="sidebar-back">
+                            <i class="bi bi-arrow-left"></i>
+                            <span class="sidebar-back-text">All Tickets</span>
+                        </a>
+                        <button class="sidebar-collapse-btn" id="sidebarCollapseBtn" title="Toggle sidebar">
+                            <i class="bi bi-chevron-left collapse-icon"></i>
+                        </button>
                     </div>
-                </header>
 
-                <div class="page-content ticket-detail-content">
-                    <div class="ticket-detail-container">
+                    <div class="sidebar-scroll">
+                        <div class="sidebar-ticket-strip">
+                            <div class="sidebar-ticket-id"><t t-esc="ticket.name"/></div>
+                            <div class="sidebar-ticket-name"><t t-esc="ticket.subject"/></div>
+                        </div>
+                        <nav class="sidebar-nav">
+                            <div class="sidebar-nav-label">Navigation</div>
 
-                        <div class="ticket-main-column">
-                            <div class="mb-3">
-                                <a href="/customer_support/support_dashboard" class="btn btn-outline-primary">
-                                    <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
-                                </a>
-                            </div>
-
-                            <div class="info-banner">
-                                <i class="bi bi-lock-fill"></i>
-                                <div class="info-text">
-                                    <strong>Ticket Information Locked</strong>
-                                    <p>This ticket's details are read-only and cannot be edited once created. You can only add comments in the Communication section below.</p>
+                            <button class="sidebar-item active" data-panel="panel-ticket-info" data-tooltip="Ticket Info">
+                                <div class="sidebar-item-icon"><i class="bi bi-file-text-fill"></i></div>
+                                <div class="sidebar-item-text">
+                                    <div class="sidebar-item-label">Ticket Info</div>
+                                    <div class="sidebar-item-sub">Details, properties &amp; SLA</div>
                                 </div>
-                            </div>
+                                <span class="kbd-hint">1</span>
+                            </button>
 
-                            <div class="alert alert-success alert-dismissible fade show notification-alert" t-if="success">
+                            <button class="sidebar-item" data-panel="panel-activity" data-tooltip="Activity">
+                                <div class="sidebar-item-icon"><i class="bi bi-clock-history"></i></div>
+                                <div class="sidebar-item-text">
+                                    <div class="sidebar-item-label">Activity &amp; History</div>
+                                    <div class="sidebar-item-sub">Timeline of all events</div>
+                                </div>
+                                <span class="kbd-hint">2</span>
+                            </button>
+
+                            <button class="sidebar-item" data-panel="panel-forward" data-tooltip="Forward">
+                                <div class="sidebar-item-icon"><i class="bi bi-forward-fill"></i></div>
+                                <div class="sidebar-item-text">
+                                    <div class="sidebar-item-label">Forward / Escalate</div>
+                                    <div class="sidebar-item-sub">Route to team or person</div>
+                                </div>
+                                <span class="kbd-hint">3</span>
+                            </button>
+
+                            <button class="sidebar-item" data-panel="panel-docs" data-tooltip="Ref Docs">
+                                <div class="sidebar-item-icon"><i class="bi bi-book-fill"></i></div>
+                                <div class="sidebar-item-text">
+                                    <div class="sidebar-item-label">Reference Docs</div>
+                                    <div class="sidebar-item-sub">SOPs, guides &amp; templates</div>
+                                </div>
+                                <span class="kbd-hint">4</span>
+                            </button>
+
+                            <button class="sidebar-item" data-panel="panel-interactions" data-tooltip="Interactions">
+                                <div class="sidebar-item-icon"><i class="bi bi-headset"></i></div>
+                                <div class="sidebar-item-text">
+                                    <div class="sidebar-item-label">Interactions</div>
+                                    <div class="sidebar-item-sub">Messages, customer &amp; projects</div>
+                                </div>
+                                <span class="kbd-hint">5</span>
+                            </button>
+
+                        </nav>
+                    </div>
+                </aside>
+
+                <!-- ═══ MAIN ═══ -->
+                <main class="main-area">
+                    <div class="main-inner">
+
+                        <t t-if="success">
+                            <div class="alert-strip success" id="alertSuccess">
                                 <i class="bi bi-check-circle-fill"></i>
                                 <strong>Success!</strong> <t t-esc="success"/>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                <button class="alert-close-btn" onclick="this.parentElement.remove()"><i class="bi bi-x-lg"></i></button>
                             </div>
-                            <div class="alert alert-danger alert-dismissible fade show notification-alert" t-if="error">
+                        </t>
+                        <t t-if="error">
+                            <div class="alert-strip danger" id="alertDanger">
                                 <i class="bi bi-exclamation-triangle-fill"></i>
                                 <strong>Error!</strong> <t t-esc="error"/>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                <button class="alert-close-btn" onclick="this.parentElement.remove()"><i class="bi bi-x-lg"></i></button>
+                            </div>
+                        </t>
+
+                        <!-- ══════════════════════════════════════
+                             PANEL 1 — TICKET INFO
+                        ══════════════════════════════════════ -->
+                        <div class="tab-panel active" id="panel-ticket-info">
+                            <div class="panel-title-row">
+                                <h1><t t-esc="ticket.subject"/></h1>
+                                <div class="badge-row">
+                                    <span class="chip chip-id"><t t-esc="ticket.name"/></span>
+                                    <t t-set="p" t-value="ticket.priority or 'low'"/>
+                                    <span t-att-class="'chip chip-' + p"><t t-esc="p.title()"/></span>
+                                    <t t-set="s" t-value="ticket.state or 'new'"/>
+                                    <span t-att-class="'chip chip-' + s"><t t-esc="s.replace('_',' ').title()"/></span>
+                                </div>
                             </div>
 
-                            <div class="ticket-header-card">
-                                <div class="ticket-id-badges">
-                                    <span class="ticket-id-badge"><t t-esc="ticket.name"/></span>
-
-                                    <t t-set="priority_class" t-value="''" />
-                                    <t t-if="ticket.priority == 'low'"><t t-set="priority_class" t-value="'priority-low'" /></t>
-                                    <t t-elif="ticket.priority == 'medium'"><t t-set="priority_class" t-value="'priority-medium'" /></t>
-                                    <t t-elif="ticket.priority == 'high'"><t t-set="priority_class" t-value="'priority-high'" /></t>
-                                    <t t-elif="ticket.priority == 'urgent'"><t t-set="priority_class" t-value="'priority-urgent'" /></t>
-                                    <span t-att-class="'priority-badge ' + priority_class">
-                                        <t t-esc="ticket.priority.title() if ticket.priority else 'Low'" />
-                                    </span>
-
-                                    <t t-set="state_class" t-value="''" />
-                                    <t t-if="ticket.state == 'new'"><t t-set="state_class" t-value="'state-new'" /></t>
-                                    <t t-elif="ticket.state == 'in_progress'"><t t-set="state_class" t-value="'state-progress'" /></t>
-                                    <t t-elif="ticket.state == 'resolved'"><t t-set="state_class" t-value="'state-resolved'" /></t>
-                                    <t t-elif="ticket.state == 'closed'"><t t-set="state_class" t-value="'state-closed'" /></t>
-                                    <span t-att-class="'state-badge ' + state_class">
-                                        <t t-esc="ticket.state.replace('_', ' ').title()" />
-                                    </span>
+                            <!-- Ticket Detail -->
+                            <div class="section-divider">
+                                <span class="section-divider-label">Ticket Detail</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+                            <div class="lock-notice">
+                                <i class="bi bi-lock-fill"></i>
+                                Ticket details are read-only and cannot be edited after creation.
+                            </div>
+                            <div class="info-card" style="margin-bottom:1.5rem;">
+                                <div class="info-card-header">
+                                    <div class="info-card-header-icon"><i class="bi bi-card-text"></i></div>
+                                    <h3>Description</h3>
                                 </div>
-
-                                <h1 class="ticket-title"><t t-esc="ticket.subject"/></h1>
-
-                                <div class="ticket-meta-info">
-                                    <span class="meta-item">
+                                <div class="info-card-body">
+                                    <div class="ticket-desc">
+                                        <t t-if="ticket.description"><t t-esc="ticket.description"/></t>
+                                        <t t-else=""><em style="color:var(--text-soft);">No description provided.</em></t>
+                                    </div>
+                                    <div class="meta-row">
                                         <i class="bi bi-person"></i>
-                                        Created by <t t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'" />
-                                    </span>
-                                    <span class="meta-divider">•</span>
-                                    <span class="meta-item">
-                                        <i class="bi bi-calendar"></i>
+                                        <t t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown'"/>
+                                        <span class="meta-sep">•</span>
+                                        <i class="bi bi-calendar3"></i>
                                         <t t-esc="ticket.create_date.strftime('%B %d, %Y at %I:%M %p') if ticket.create_date else 'N/A'"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Attachments / Files -->
+                            <div class="section-divider">
+                                <span class="section-divider-label">Attachments</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+                            <div class="info-card" style="margin-bottom:1.5rem;">
+                                <div class="info-card-header">
+                                    <div class="info-card-header-icon"><i class="bi bi-paperclip"></i></div>
+                                    <h3>Files &amp; Attachments</h3>
+                                    <span style="margin-left:auto;font-size:0.67rem;color:var(--text-soft);">
+                                        <t t-esc="len(attachments) if attachments else 0"/>
+                                        file<t t-if="not attachments or len(attachments) != 1">s</t>
                                     </span>
                                 </div>
-
-                                <div class="ticket-description">
-                                    <t t-if="ticket.description">
-                                        <t t-esc="ticket.description" />
+                                <div class="info-card-body">
+                                    <t t-if="attachments and len(attachments) > 0">
+                                        <div class="files-toolbar">
+                                            <button class="files-filter-btn active" data-file-filter="all">All</button>
+                                            <button class="files-filter-btn" data-file-filter="pdf">PDF</button>
+                                            <button class="files-filter-btn" data-file-filter="img">Images</button>
+                                            <button class="files-filter-btn" data-file-filter="doc">Docs</button>
+                                            <button class="files-filter-btn" data-file-filter="zip">Archives</button>
+                                        </div>
+                                        <div class="files-grid" id="filesGrid">
+                                            <t t-foreach="attachments" t-as="att">
+                                                <t t-set="mime"  t-value="att.mimetype or ''"/>
+                                                <t t-set="ftype" t-value="'pdf' if 'pdf' in mime else ('img' if mime.startswith('image') else ('doc' if ('word' in mime or 'document' in mime or 'text' in mime) else ('zip' if ('zip' in mime or 'tar' in mime or 'compressed' in mime) else 'other')))"/>
+                                                <t t-set="icon"  t-value="'bi-file-earmark-pdf-fill' if ftype == 'pdf' else ('bi-file-earmark-image-fill' if ftype == 'img' else ('bi-file-earmark-word-fill' if ftype == 'doc' else ('bi-file-zip-fill' if ftype == 'zip' else 'bi-file-earmark-fill')))"/>
+                                                <t t-set="kb"    t-value="(att.file_size // 1024) if att.file_size else 0"/>
+                                                <t t-set="size"  t-value="(str(kb // 1024) + ' MB') if kb >= 1024 else (str(kb) + ' KB')"/>
+                                                <div class="file-card" t-att-data-file-type="ftype">
+                                                    <a t-attf-href="/web/content/#{att.id}?download=true"
+                                                       class="file-card-dl" title="Download" target="_blank">
+                                                        <i class="bi bi-download"></i>
+                                                    </a>
+                                                    <div t-att-class="'file-card-icon ' + ftype">
+                                                        <i t-att-class="'bi ' + icon"></i>
+                                                    </div>
+                                                    <div class="file-card-name"><t t-esc="att.name"/></div>
+                                                    <div class="file-card-meta">
+                                                        <t t-esc="size"/>
+                                                        <t t-if="att.create_date"> · <t t-esc="att.create_date.strftime('%b %d, %Y')"/></t>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
                                     </t>
                                     <t t-else="">
-                                        <p class="text-muted">No description provided.</p>
+                                        <div class="empty-state">
+                                            <i class="bi bi-paperclip"></i>
+                                            <p>No attachments on this ticket.</p>
+                                        </div>
                                     </t>
                                 </div>
                             </div>
 
-                            <div class="communication-section">
-                                <div class="section-header">
-                                    <i class="bi bi-chat-left-text-fill"></i>
-                                    <h3>Communication</h3>
+                            <!-- Properties -->
+                            <div class="section-divider">
+                                <span class="section-divider-label">Properties</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+                            <div class="info-card" style="margin-bottom:1.5rem;">
+                                <div class="info-card-header">
+                                    <div class="info-card-header-icon"><i class="bi bi-sliders"></i></div>
+                                    <h3>Ticket Properties</h3>
                                 </div>
+                                <div class="info-card-body">
+                                    <div class="prop-grid">
+                                        <div class="prop-field">
+                                            <div class="prop-label">Status</div>
+                                            <form t-attf-action="/customer_support/ticket/{{ticket.id}}/update_status" method="post">
+                                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                                <select class="status-select" name="status" onchange="this.form.submit()">
+                                                    <option value="new"         t-att-selected="'selected' if ticket.state == 'new' else None">New</option>
+                                                    <option value="in_progress" t-att-selected="'selected' if ticket.state == 'in_progress' else None">In Progress</option>
+                                                    <option value="resolved"    t-att-selected="'selected' if ticket.state == 'resolved' else None">Resolved</option>
+                                                    <option value="closed"      t-att-selected="'selected' if ticket.state == 'closed' else None">Closed</option>
+                                                </select>
+                                            </form>
+                                        </div>
+                                        <div class="prop-field">
+                                            <div class="prop-label">Priority</div>
+                                            <div style="padding-top:0.2rem;">
+                                                <t t-set="p" t-value="ticket.priority or 'low'"/>
+                                                <span t-att-class="'chip chip-' + p"><t t-esc="p.title()"/></span>
+                                            </div>
+                                        </div>
+                                        <div class="prop-field" style="grid-column:1/-1;">
+                                            <div class="prop-label">Assignee</div>
+                                            <div class="assignee-row" style="margin-top:0.4rem;">
+                                                <img t-att-src="'/web/image/res.users/%s/avatar_128' % (ticket.assigned_to.id if ticket.assigned_to else request.env.user.id)"
+                                                    alt="Assignee" class="assignee-avatar"
+                                                    onerror="this.src='/web/static/img/avatar_gray.svg'" />
+                                                <div>
+                                                    <div class="assignee-name">
+                                                        <t t-if="ticket.assigned_to"><t t-esc="ticket.assigned_to.name"/></t>
+                                                        <t t-else="">Not assigned</t>
+                                                    </div>
+                                                    <div class="assignee-email">
+                                                        <t t-if="ticket.assigned_to and ticket.assigned_to.email"><t t-esc="ticket.assigned_to.email"/></t>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-                                <div class="communication-messages" id="communicationMessages">
+                            <!-- SLA Timer -->
+                            <div class="section-divider">
+                                <span class="section-divider-label">SLA Timer</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+
+                            <t t-if="ticket.sla_policy_id and ticket.sla_deadline and ticket.state not in ['resolved','closed']">
+                                <div class="sla-card on-track" id="slaTimerCard"
+                                    t-att-data-deadline="ticket.sla_deadline.isoformat()"
+                                    t-att-data-duration="ticket.sla_policy_id.response_time * 3600 if ticket.sla_policy_id.time_unit == 'hours' else (ticket.sla_policy_id.response_time * 604800 if ticket.sla_policy_id.time_unit == 'weeks' else ticket.sla_policy_id.response_time * 86400)">
+                                    <div class="sla-card-top">
+                                        <div class="sla-card-top-left">
+                                            <div class="sla-status-icon" id="slaIcon"><i class="bi bi-clock-fill"></i></div>
+                                            <span class="sla-card-title" id="slaCardTitle">SLA On Track</span>
+                                        </div>
+                                        <span class="sla-policy-tag"><t t-esc="ticket.sla_policy_id.name"/></span>
+                                    </div>
+                                    <div class="sla-card-body">
+                                        <div class="sla-time" id="slaBigNumber">00:00:00</div>
+                                        <div class="sla-sublabel" id="slaBigLabel">remaining</div>
+                                        <div class="sla-track"><div class="sla-fill" id="slaProgFill" style="width:0%"></div></div>
+                                        <div class="sla-track-meta">
+                                            <span>Time elapsed</span>
+                                            <span id="slaProgPct">0%</span>
+                                        </div>
+                                        <div class="sla-deadline-bar">
+                                            <span class="sla-deadline-label">Deadline</span>
+                                            <span class="sla-deadline-val">
+                                                <t t-esc="ticket.sla_deadline.strftime('%b %d, %I:%M %p') if ticket.sla_deadline else '—'"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-elif="ticket.sla_policy_id and ticket.state in ['resolved','closed']">
+                                <div class="sla-card no-sla">
+                                    <div class="sla-card-top">
+                                        <div class="sla-card-top-left">
+                                            <t t-if="ticket.sla_status == 'breached'">
+                                                <div class="sla-status-icon" style="background:var(--red-bg);color:var(--red);"><i class="bi bi-x-octagon-fill"></i></div>
+                                                <span class="sla-card-title" style="color:var(--red);">SLA Breached</span>
+                                            </t>
+                                            <t t-else="">
+                                                <div class="sla-status-icon" style="background:var(--green-bg);color:var(--green);"><i class="bi bi-check-circle-fill"></i></div>
+                                                <span class="sla-card-title" style="color:var(--green);">SLA Met</span>
+                                            </t>
+                                        </div>
+                                        <span class="sla-policy-tag"><t t-esc="ticket.sla_policy_id.name"/></span>
+                                    </div>
+                                    <div class="sla-card-body">
+                                        <div class="sla-time" style="font-size:1.1rem;color:var(--text-soft);">Ticket Closed</div>
+                                        <div class="sla-sublabel">No active timer</div>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="sla-card no-sla">
+                                    <div class="sla-card-top">
+                                        <div class="sla-card-top-left">
+                                            <div class="sla-status-icon"><i class="bi bi-clock"></i></div>
+                                            <span class="sla-card-title">No SLA Assigned</span>
+                                        </div>
+                                    </div>
+                                    <div class="sla-card-body">
+                                        <div class="sla-time">—</div>
+                                        <div class="sla-sublabel">No policy attached to this ticket</div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div><!-- /panel-ticket-info -->
+
+
+                        <!-- ══════════════════════════════════════
+                             PANEL 2 — ACTIVITY AND HISTORY
+                        ══════════════════════════════════════ -->
+                        <div class="tab-panel" id="panel-activity">
+                            <div class="panel-title-row">
+                                <h1>Activity &amp; History</h1>
+                            </div>
+
+                            <div class="section-divider">
+                                <span class="section-divider-label">Timeline</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+
+                            <div class="info-card">
+                                <div class="info-card-header">
+                                    <div class="info-card-header-icon"><i class="bi bi-clock-history"></i></div>
+                                    <h3>Event Timeline</h3>
+                                </div>
+                                <div class="info-card-body">
+                                    <div class="activity-filters">
+                                        <button class="act-filter-btn active" data-act-filter="all">All Events</button>
+                                        <button class="act-filter-btn" data-act-filter="status">Status</button>
+                                        <button class="act-filter-btn" data-act-filter="assign">Assignments</button>
+                                        <button class="act-filter-btn" data-act-filter="message">Messages</button>
+                                        <button class="act-filter-btn" data-act-filter="sla">SLA</button>
+                                    </div>
+
+                                    <div class="activity-timeline">
+ 
+    <t t-if="ticket_logs and len(ticket_logs) > 0">
+        <t t-foreach="ticket_logs" t-as="log">
+ 
+            <!-- dot class maps to event_type -->
+            <t t-set="dot_class"
+               t-value="'status'  if log.event_type == 'status'  else
+                         'assign'  if log.event_type == 'assign'  else
+                         'sla'     if log.event_type == 'sla'     else
+                         'created'"/>
+ 
+            <!-- icon maps to event_type -->
+            <t t-set="dot_icon"
+               t-value="'bi-arrow-repeat'          if log.event_type == 'status'  else
+                         'bi-person-fill'           if log.event_type == 'assign'  else
+                         'bi-exclamation-triangle-fill' if log.event_type == 'sla' else
+                         'bi-plus-lg'"/>
+ 
+            <div class="act-item" t-att-data-act-type="log.event_type">
+                <div t-att-class="'act-dot ' + dot_class">
+                    <i t-att-class="'bi ' + dot_icon"></i>
+                </div>
+                <div class="act-content">
+                    <div class="act-header">
+                        <span class="act-title"><t t-esc="log.summary"/></span>
+                        <span class="act-time">
+                            <t t-esc="log.timestamp.strftime('%b %d, %Y · %I:%M %p') if log.timestamp else ''"/>
+                        </span>
+                    </div>
+ 
+                    <!-- Status change: show old → new badges -->
+                    <t t-if="log.event_type == 'status' and log.old_value and log.new_value">
+                        <div class="act-body" style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                            <span class="act-badge from"><t t-esc="log.old_value"/></span>
+                            <i class="bi bi-arrow-right act-arrow"></i>
+                            <span class="act-badge to"><t t-esc="log.new_value"/></span>
+                        </div>
+                        <t t-if="log.detail">
+                            <div class="act-body" style="margin-top:0.35rem;">
+                                <t t-esc="log.detail"/>
+                            </div>
+                        </t>
+                    </t>
+ 
+                    <!-- All other event types: just show detail text -->
+                    <t t-else="">
+                        <t t-if="log.detail">
+                            <div class="act-body"><t t-esc="log.detail"/></div>
+                        </t>
+                    </t>
+ 
+                    <!-- Actor name (small, below body) -->
+                    <t t-if="log.actor_id">
+                        <div style="margin-top:0.35rem;font-size:0.66rem;color:var(--text-soft);">
+                            by <t t-esc="log.actor_id.name"/>
+                        </div>
+                    </t>
+                </div>
+            </div>
+ 
+        </t>
+    </t>
+ 
+    <!-- Empty state if no logs yet -->
+    <t t-else="">
+        <div class="empty-state">
+            <i class="bi bi-clock-history"></i>
+            <p>No activity recorded yet for this ticket.</p>
+        </div>
+    </t>
+ 
+</div><!-- /activity-timeline -->
+                                </div>
+                            </div>
+                        </div><!-- /panel-activity -->
+
+
+                        <!-- ══════════════════════════════════════
+                             PANEL 3 — FORWARD / ESCALATE
+                        ══════════════════════════════════════ -->
+                        <div class="tab-panel" id="panel-forward">
+                            <div class="panel-title-row">
+                                <h1>Forward / Escalate</h1>
+                            </div>
+
+                            <div class="section-divider">
+                                <span class="section-divider-label">Route Ticket</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+
+                            <div class="info-card" style="margin-bottom:1.25rem;">
+                                <div class="info-card-header">
+                                    <div class="info-card-header-icon"><i class="bi bi-diagram-3-fill"></i></div>
+                                    <h3>Select Department</h3>
+                                </div>
+                                <div class="info-card-body">
+                                    <div class="forward-dept-tabs" id="deptTabs">
+                                        <button class="dept-tab active" data-dept="frontend">Frontend</button>
+                                        <button class="dept-tab" data-dept="backend">Backend</button>
+                                        <button class="dept-tab" data-dept="devops">DevOps</button>
+                                        <button class="dept-tab" data-dept="billing">Billing</button>
+                                        <button class="dept-tab" data-dept="management">Management</button>
+                                    </div>
+                                    <div class="form-label" style="margin-bottom:0.5rem;">Select Person</div>
+                                    <div class="person-grid" id="personGrid">
+                                        <div class="person-card" data-dept="frontend" data-person="ravi">
+                                            <div class="person-avatar-sm">RK</div>
+                                            <div><div class="person-name">Ravi Kumar</div><div class="person-role">Frontend Dev</div></div>
+                                        </div>
+                                        <div class="person-card" data-dept="frontend" data-person="priya">
+                                            <div class="person-avatar-sm">PS</div>
+                                            <div><div class="person-name">Priya Singh</div><div class="person-role">UI Engineer</div></div>
+                                        </div>
+                                        <div class="person-card" data-dept="frontend" data-person="alex">
+                                            <div class="person-avatar-sm">AT</div>
+                                            <div><div class="person-name">Alex Turner</div><div class="person-role">Frontend Lead</div></div>
+                                        </div>
+                                        <div class="person-card" data-dept="backend" data-person="james" style="display:none;">
+                                            <div class="person-avatar-sm">JM</div>
+                                            <div><div class="person-name">James Miller</div><div class="person-role">Backend Dev</div></div>
+                                        </div>
+                                        <div class="person-card" data-dept="backend" data-person="nina" style="display:none;">
+                                            <div class="person-avatar-sm">NP</div>
+                                            <div><div class="person-name">Nina Patel</div><div class="person-role">API Engineer</div></div>
+                                        </div>
+                                        <div class="person-card" data-dept="devops" data-person="omar" style="display:none;">
+                                            <div class="person-avatar-sm">OA</div>
+                                            <div><div class="person-name">Omar Ali</div><div class="person-role">DevOps Engineer</div></div>
+                                        </div>
+                                        <div class="person-card" data-dept="devops" data-person="chen" style="display:none;">
+                                            <div class="person-avatar-sm">LC</div>
+                                            <div><div class="person-name">Li Chen</div><div class="person-role">SRE</div></div>
+                                        </div>
+                                        <div class="person-card" data-dept="billing" data-person="sara" style="display:none;">
+                                            <div class="person-avatar-sm">SA</div>
+                                            <div><div class="person-name">Sara Ahmed</div><div class="person-role">Billing Analyst</div></div>
+                                        </div>
+                                        <div class="person-card" data-dept="management" data-person="ceo" style="display:none;">
+                                            <div class="person-avatar-sm">DW</div>
+                                            <div><div class="person-name">David Wong</div><div class="person-role">Engineering Manager</div></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="info-card" style="margin-bottom:1.25rem;">
+                                <div class="info-card-header">
+                                    <div class="info-card-header-icon"><i class="bi bi-chat-left-dots-fill"></i></div>
+                                    <h3>Forwarding Details</h3>
+                                </div>
+                                <div class="info-card-body">
+                                    <div class="forward-form">
+                                        <div class="priority-row">
+                                            <div class="form-field">
+                                                <label class="form-label">Priority Override</label>
+                                                <select class="form-select">
+                                                    <option value="">Keep Current</option>
+                                                    <option value="low">Low</option>
+                                                    <option value="medium">Medium</option>
+                                                    <option value="high">High</option>
+                                                    <option value="urgent">Urgent</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-field">
+                                                <label class="form-label">Escalation Level</label>
+                                                <select class="form-select">
+                                                    <option>L1 — Support</option>
+                                                    <option>L2 — Technical</option>
+                                                    <option>L3 — Engineering</option>
+                                                    <option>L4 — Management</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-field">
+                                            <label class="form-label">Note to Recipient</label>
+                                            <textarea class="form-textarea" placeholder="Add context for the person receiving this ticket…"></textarea>
+                                        </div>
+                                        <div style="display:flex;gap:0.6rem;align-items:center;">
+                                            <button class="btn-primary" id="forwardBtn">
+                                                <i class="bi bi-forward-fill"></i> Forward Ticket
+                                            </button>
+                                            <button class="btn-secondary">
+                                                <i class="bi bi-x"></i> Clear
+                                            </button>
+                                            <span id="forwardSelection" style="font-size:0.75rem;color:var(--text-soft);margin-left:0.25rem;">No person selected</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- /panel-forward -->
+
+
+                        <!-- ══════════════════════════════════════
+                             PANEL 4 — REFERENCE DOCS
+                        ══════════════════════════════════════ -->
+                        <div class="tab-panel" id="panel-docs">
+                            <div class="panel-title-row">
+                                <h1>Reference Docs</h1>
+                            </div>
+
+                            <div class="section-divider">
+                                <span class="section-divider-label">Project Documents</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+
+                            <div class="info-card">
+                                <div class="info-card-header">
+                                    <div class="info-card-header-icon"><i class="bi bi-book-fill"></i></div>
+                                    <h3>Knowledge Base &amp; Guidelines</h3>
+                                </div>
+                                <div class="info-card-body">
+                                    <div class="docs-toolbar">
+                                        <div class="docs-search-wrap">
+                                            <i class="bi bi-search docs-search-icon"></i>
+                                            <input type="text" class="docs-search" id="docsSearch" placeholder="Search documents…"/>
+                                        </div>
+                                    </div>
+                                    <div class="docs-cat-tabs">
+                                        <button class="docs-cat-btn active" data-doc-cat="all">All</button>
+                                        <button class="docs-cat-btn" data-doc-cat="sop">SOPs</button>
+                                        <button class="docs-cat-btn" data-doc-cat="guide">Guides</button>
+                                        <button class="docs-cat-btn" data-doc-cat="template">Templates</button>
+                                        <button class="docs-cat-btn" data-doc-cat="general">General</button>
+                                    </div>
+
+                                    <div class="doc-list" id="docList">
+
+                                        <div class="doc-item" data-doc-cat="sop" data-doc-title="Frontend Bug Triage SOP">
+                                            <div class="doc-item-header">
+                                                <div class="doc-icon sop"><i class="bi bi-clipboard2-check-fill"></i></div>
+                                                <div class="doc-meta">
+                                                    <div class="doc-title">Frontend Bug Triage SOP</div>
+                                                    <div class="doc-sub">Updated Mar 1, 2025 · 8 min read</div>
+                                                </div>
+                                                <span class="doc-category sop">SOP</span>
+                                                <i class="bi bi-chevron-right doc-chevron"></i>
+                                            </div>
+                                            <div class="doc-preview">
+                                                <p>This SOP outlines the standard procedure for triaging frontend-related bugs reported by customers. Steps include: (1) Reproduce the issue in staging, (2) Check browser console for errors, (3) Identify whether CSS, JS, or API is the root cause, (4) Assign severity label, (5) Escalate if P0 or P1.</p>
+                                                <div class="doc-preview-actions">
+                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="doc-item" data-doc-cat="guide" data-doc-title="Customer Communication Guide">
+                                            <div class="doc-item-header">
+                                                <div class="doc-icon guide"><i class="bi bi-chat-quote-fill"></i></div>
+                                                <div class="doc-meta">
+                                                    <div class="doc-title">Customer Communication Guide</div>
+                                                    <div class="doc-sub">Updated Feb 15, 2025 · 5 min read</div>
+                                                </div>
+                                                <span class="doc-category guide">Guide</span>
+                                                <i class="bi bi-chevron-right doc-chevron"></i>
+                                            </div>
+                                            <div class="doc-preview">
+                                                <p>Best practices for communicating with customers during a ticket lifecycle. Always acknowledge within 1 hour. Use empathetic language. Avoid technical jargon in customer-facing messages. For delays, proactively update the customer with a revised ETA.</p>
+                                                <div class="doc-preview-actions">
+                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="doc-item" data-doc-cat="template" data-doc-title="Escalation Email Template">
+                                            <div class="doc-item-header">
+                                                <div class="doc-icon template"><i class="bi bi-envelope-fill"></i></div>
+                                                <div class="doc-meta">
+                                                    <div class="doc-title">Escalation Email Template</div>
+                                                    <div class="doc-sub">Updated Jan 20, 2025 · 2 min read</div>
+                                                </div>
+                                                <span class="doc-category template">Template</span>
+                                                <i class="bi bi-chevron-right doc-chevron"></i>
+                                            </div>
+                                            <div class="doc-preview">
+                                                <p>Use this template when escalating a ticket to a senior team or management. Subject: [ESCALATION] Ticket #[ID] — [Subject]. Body should include: current status, what has been tried, customer impact level, and urgency.</p>
+                                                <div class="doc-preview-actions">
+                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="doc-item" data-doc-cat="sop" data-doc-title="SLA Breach Response SOP">
+                                            <div class="doc-item-header">
+                                                <div class="doc-icon sop"><i class="bi bi-clipboard2-check-fill"></i></div>
+                                                <div class="doc-meta">
+                                                    <div class="doc-title">SLA Breach Response SOP</div>
+                                                    <div class="doc-sub">Updated Mar 5, 2025 · 4 min read</div>
+                                                </div>
+                                                <span class="doc-category sop">SOP</span>
+                                                <i class="bi bi-chevron-right doc-chevron"></i>
+                                            </div>
+                                            <div class="doc-preview">
+                                                <p>When an SLA breach is detected: (1) Immediately notify the assigned agent and team lead, (2) Update ticket priority to Urgent, (3) Send a proactive update to the customer, (4) Log breach reason in the internal notes, (5) Conduct a post-mortem within 48 hours.</p>
+                                                <div class="doc-preview-actions">
+                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="doc-item" data-doc-cat="general" data-doc-title="Onboarding Checklist for New Agents">
+                                            <div class="doc-item-header">
+                                                <div class="doc-icon general"><i class="bi bi-list-check"></i></div>
+                                                <div class="doc-meta">
+                                                    <div class="doc-title">Onboarding Checklist for New Agents</div>
+                                                    <div class="doc-sub">Updated Dec 10, 2024 · 10 min read</div>
+                                                </div>
+                                                <span class="doc-category general">General</span>
+                                                <i class="bi bi-chevron-right doc-chevron"></i>
+                                            </div>
+                                            <div class="doc-preview">
+                                                <p>This checklist is for new support agents joining the team. Covers system access setup, tool walkthroughs, shadowing sessions, and the first 30-day milestone goals. Complete all items within the first week.</p>
+                                                <div class="doc-preview-actions">
+                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="doc-item" data-doc-cat="guide" data-doc-title="API Integration Troubleshooting Guide">
+                                            <div class="doc-item-header">
+                                                <div class="doc-icon guide"><i class="bi bi-gear-wide-connected"></i></div>
+                                                <div class="doc-meta">
+                                                    <div class="doc-title">API Integration Troubleshooting Guide</div>
+                                                    <div class="doc-sub">Updated Feb 28, 2025 · 12 min read</div>
+                                                </div>
+                                                <span class="doc-category guide">Guide</span>
+                                                <i class="bi bi-chevron-right doc-chevron"></i>
+                                            </div>
+                                            <div class="doc-preview">
+                                                <p>Step-by-step guide for debugging common API issues: authentication failures, rate limit errors, malformed requests, and timeout handling. Includes curl examples and error code reference table.</p>
+                                                <div class="doc-preview-actions">
+                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div><!-- /doc-list -->
+                                </div>
+                            </div>
+                        </div><!-- /panel-docs -->
+
+
+                        <!-- ══════════════════════════════════════
+                             PANEL 5 — INTERACTIONS
+                        ══════════════════════════════════════ -->
+                        <div class="tab-panel" id="panel-interactions">
+
+                            <!-- Customer -->
+                            <div class="section-divider">
+                                <span class="section-divider-label">Customer</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+                            <div class="info-card" style="margin-bottom:1.5rem;">
+                                <div class="info-card-header">
+                                    <div class="info-card-header-icon"><i class="bi bi-person-circle"></i></div>
+                                    <h3>Customer Information</h3>
+                                </div>
+                                <div class="info-card-body">
+                                    <div class="customer-row">
+                                        <img t-att-src="'/web/image/res.partner/%s/avatar_128' % (ticket.customer_id.id if ticket.customer_id else 1)"
+                                            alt="Customer" class="customer-avatar"
+                                            onerror="this.src='/web/static/img/avatar_gray.svg'" />
+                                        <div>
+                                            <div class="customer-name">
+                                                <t t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown Customer'"/>
+                                            </div>
+                                            <div class="customer-email">
+                                                <t t-if="ticket.customer_id and ticket.customer_id.email"><t t-esc="ticket.customer_id.email"/></t>
+                                                <t t-else="">No email on file</t>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Communication -->
+                            <div class="section-divider">
+                                <span class="section-divider-label">Communication</span>
+                                <div class="section-divider-line"></div>
+                            </div>
+                            <div class="info-card" style="margin-bottom:1.5rem;">
+                                <div class="info-card-header">
+                                    <div class="info-card-header-icon"><i class="bi bi-chat-left-text-fill"></i></div>
+                                    <h3>Messages</h3>
+                                </div>
+                                <div class="message-list" id="communicationMessages">
                                     <t t-if="activities and len(activities) > 0">
                                         <t t-foreach="activities" t-as="activity">
-                                            <t t-set="is_author" t-value="activity.author_id.id == request.env.user.partner_id.id if activity.author_id else False" />
-                                            <t t-set="is_admin" t-value="request.env.user.has_group('base.group_system')" />
+                                            <t t-set="is_author" t-value="activity.author_id.id == request.env.user.partner_id.id if activity.author_id else False"/>
+                                            <t t-set="is_admin"  t-value="request.env.user.has_group('base.group_system')"/>
                                             <div class="message-item" t-att-data-message-id="activity.id">
-                                                <t t-set="author_id" t-value="activity.author_id.id if activity.author_id else request.env.user.partner_id.id" />
+                                                <t t-set="author_id" t-value="activity.author_id.id if activity.author_id else request.env.user.partner_id.id"/>
                                                 <img t-att-src="'/web/image/res.partner/%s/avatar_128' % author_id"
-                                                    alt="Avatar" class="message-avatar"
+                                                    alt="Avatar" class="msg-avatar"
                                                     onerror="this.src='/web/static/img/avatar_gray.svg'" />
-                                                <div class="message-content">
-                                                    <div class="message-header">
-                                                        <strong><t t-esc="activity.author_id.name if activity.author_id else 'System'" /></strong>
-                                                        <span class="message-time">
-                                                            <t t-if="activity.date">
-                                                                <t t-esc="activity.date.strftime('%B %d, %Y at %I:%M %p')" />
-                                                            </t>
+                                                <div class="msg-right">
+                                                    <div class="msg-header">
+                                                        <span class="msg-author"><t t-esc="activity.author_id.name if activity.author_id else 'System'"/></span>
+                                                        <span class="msg-time">
+                                                            <t t-if="activity.date"><t t-esc="activity.date.strftime('%b %d, %Y %I:%M %p')"/></t>
                                                             <t t-else="">Recently</t>
                                                         </span>
-                                                        <div class="message-actions">
+                                                        <div class="msg-actions">
                                                             <t t-if="is_author">
-                                                                <button class="message-action-btn edit-message-btn"
-                                                                    t-att-data-message-id="activity.id" title="Edit message">
-                                                                    <i class="bi bi-pencil"></i>
-                                                                </button>
+                                                                <button class="msg-action-btn edit" t-att-data-message-id="activity.id" title="Edit"><i class="bi bi-pencil"></i></button>
                                                             </t>
                                                             <t t-if="is_author or is_admin">
-                                                                <button class="message-action-btn delete-message-btn"
-                                                                    t-att-data-message-id="activity.id" title="Delete message">
-                                                                    <i class="bi bi-trash"></i>
-                                                                </button>
+                                                                <button class="msg-action-btn delete" t-att-data-message-id="activity.id" title="Delete"><i class="bi bi-trash"></i></button>
                                                             </t>
                                                         </div>
                                                     </div>
-                                                    <div class="message-body" t-att-data-message-id="activity.id">
-                                                        <t t-if="activity.body"><t t-raw="activity.body" /></t>
-                                                        <t t-else=""><em class="text-muted">[Empty message]</em></t>
+                                                    <div class="msg-body" t-att-data-message-id="activity.id">
+                                                        <t t-if="activity.body"><t t-raw="activity.body"/></t>
+                                                        <t t-else=""><em style="color:var(--text-soft);">[Empty message]</em></t>
                                                     </div>
-                                                    <div class="message-edit-form" t-att-data-message-id="activity.id" style="display: none;">
-                                                        <textarea class="form-control edit-message-textarea" rows="3"
-                                                            t-att-data-original-body="activity.body">
-                                                            <t t-esc="activity.body" />
+                                                    <div class="msg-edit-form" t-att-data-message-id="activity.id">
+                                                        <textarea class="msg-edit-textarea" rows="3" t-att-data-original-body="activity.body">
+                                                            <t t-esc="activity.body"/>
                                                         </textarea>
-                                                        <div class="edit-form-actions mt-2">
-                                                            <button class="btn btn-sm btn-primary save-edit-btn" t-att-data-message-id="activity.id">
-                                                                <i class="bi bi-check"></i> Save
-                                                            </button>
-                                                            <button class="btn btn-sm btn-secondary cancel-edit-btn" t-att-data-message-id="activity.id">
-                                                                <i class="bi bi-x"></i> Cancel
-                                                            </button>
+                                                        <div class="msg-edit-actions">
+                                                            <button class="btn-primary save-edit-btn" t-att-data-message-id="activity.id"><i class="bi bi-check"></i> Save</button>
+                                                            <button class="btn-secondary cancel-edit-btn" t-att-data-message-id="activity.id"><i class="bi bi-x"></i> Cancel</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -232,213 +789,77 @@
                                     <t t-else="">
                                         <div class="empty-state">
                                             <i class="bi bi-chat-left-text"></i>
-                                            <p>No messages yet.</p>
+                                            <p>No messages yet. Start the conversation below.</p>
                                         </div>
                                     </t>
                                 </div>
-
-                                <div class="message-input-section">
-                                    <form t-attf-action="/customer_support/ticket/{{ticket.id}}/post_message" method="post" id="communicationForm">
+                                <div class="msg-compose">
+                                    <form t-attf-action="/customer_support/ticket/{{ticket.id}}/post_message" method="post">
                                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                        <textarea class="form-control message-textarea" name="message" id="messageTextarea"
-                                            rows="3" placeholder="Type your message..." required="required"></textarea>
-                                        <button type="submit" class="btn btn-send">
-                                            <i class="bi bi-send-fill"></i> Send
+                                        <textarea class="msg-compose-textarea" name="message" rows="3" placeholder="Write a message…" required="required"></textarea>
+                                        <button type="submit" class="btn-primary">
+                                            <i class="bi bi-send-fill"></i> Send Message
                                         </button>
                                     </form>
                                 </div>
                             </div>
-                        </div>
 
-                        <!-- ── Right Sidebar ── -->
-                        <div class="ticket-sidebar-column">
-
-                            <!-- ══ SLA TIMER CARD — active ticket with policy + deadline ══ -->
-                            <t t-if="ticket.sla_policy_id and ticket.sla_deadline and ticket.state not in ['resolved','closed']">
-                                <div class="sla-timer-card on-track" id="slaTimerCard"
-                                    t-att-data-deadline="ticket.sla_deadline.isoformat()"
-                                    t-att-data-policy="ticket.sla_policy_id.name"
-                                    t-att-data-duration="ticket.sla_policy_id.response_time * 3600 if ticket.sla_policy_id.time_unit == 'hours' else (ticket.sla_policy_id.response_time * 604800 if ticket.sla_policy_id.time_unit == 'weeks' else ticket.sla_policy_id.response_time * 86400)">
-
-                                    <div class="sla-card-header">
-                                        <i class="bi bi-clock-fill sla-card-icon" id="slaIcon"></i>
-                                        <span class="sla-card-title" id="slaCardTitle">SLA On Track</span>
-                                        <span class="sla-policy-chip"><t t-esc="ticket.sla_policy_id.name" /></span>
-                                    </div>
-
-                                    <div class="sla-countdown-wrap">
-                                        <div class="sla-big-number" id="slaBigNumber">00:00:00</div>
-                                        <div class="sla-big-label" id="slaBigLabel">remaining</div>
-                                    </div>
-
-                                    <div class="sla-progress-section">
-                                        <div class="sla-prog-meta">
-                                            <span>Time elapsed</span>
-                                            <span id="slaProgPct">0%</span>
-                                        </div>
-                                        <div class="sla-prog-track">
-                                            <div class="sla-prog-fill" id="slaProgFill" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="sla-deadline-row">
-                                        <span class="sla-deadline-label">Deadline</span>
-                                        <span class="sla-deadline-val" id="slaDeadlineVal">
-                                            <t t-esc="ticket.sla_deadline.strftime('%b %d, %I:%M %p') if ticket.sla_deadline else '—'" />
-                                        </span>
-                                    </div>
-                                </div>
-                            </t>
-
-                            <!-- ══ SLA RESULT — resolved/closed ticket ══ -->
-                            <t t-elif="ticket.sla_policy_id and ticket.state in ['resolved','closed']">
-                                <div class="sla-timer-card no-sla">
-                                    <div class="sla-card-header">
-                                        <t t-if="ticket.sla_status == 'breached'">
-                                            <i class="bi bi-x-octagon-fill sla-card-icon" style="color:#ef4444;"></i>
-                                            <span class="sla-card-title" style="color:#ef4444;">SLA Breached</span>
-                                        </t>
-                                        <t t-else="">
-                                            <i class="bi bi-check-circle-fill sla-card-icon" style="color:#22c55e;"></i>
-                                            <span class="sla-card-title" style="color:#22c55e;">SLA Met</span>
-                                        </t>
-                                        <span class="sla-policy-chip"><t t-esc="ticket.sla_policy_id.name" /></span>
-                                    </div>
-                                    <div class="sla-countdown-wrap">
-                                        <div class="sla-big-number" style="font-size:1.2rem;color:#8892a4;">Ticket Closed</div>
-                                        <div class="sla-big-label">No active timer</div>
-                                    </div>
-                                </div>
-                            </t>
-
-                            <!-- ══ NO SLA — no policy assigned ══ -->
-                            <t t-else="">
-                                <div class="sla-timer-card no-sla">
-                                    <div class="sla-card-header">
-                                        <i class="bi bi-clock sla-card-icon"></i>
-                                        <span class="sla-card-title">No SLA Assigned</span>
-                                    </div>
-                                    <div class="sla-countdown-wrap">
-                                        <div class="sla-big-number" style="font-size:1.1rem;color:#8892a4;">—</div>
-                                        <div class="sla-big-label">No policy attached</div>
-                                    </div>
-                                </div>
-                            </t>
-
-                            <!-- Properties Card -->
-                            <div class="properties-card">
-                                <div class="card-header-custom">
-                                    <i class="bi bi-gear-fill"></i>
-                                    <h3>Properties</h3>
-                                </div>
-                                <div class="property-item">
-                                    <label class="property-label">Status</label>
-                                    <form t-attf-action="/customer_support/ticket/{{ticket.id}}/update_status" method="post" class="status-form">
-                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                                        <select class="form-select status-select" name="status" onchange="this.form.submit()">
-                                            <option value="new"         t-att-selected="'selected' if ticket.state == 'new' else None">New</option>
-                                            <option value="in_progress" t-att-selected="'selected' if ticket.state == 'in_progress' else None">In Progress</option>
-                                            <option value="resolved"    t-att-selected="'selected' if ticket.state == 'resolved' else None">Resolved</option>
-                                            <option value="closed"      t-att-selected="'selected' if ticket.state == 'closed' else None">Closed</option>
-                                        </select>
-                                    </form>
-                                </div>
-                                <div class="property-item">
-                                    <label class="property-label">Priority</label>
-                                    <button t-att-class="'priority-button ' + priority_class" disabled="disabled">
-                                        <t t-esc="ticket.priority.title() if ticket.priority else 'Low'" />
-                                    </button>
-                                </div>
-                                <div class="property-item">
-                                    <label class="property-label">Assignee</label>
-                                    <div class="assignee-info">
-                                        <img t-att-src="'/web/image/res.users/%s/avatar_128' % (ticket.assigned_to.id if ticket.assigned_to else request.env.user.id)"
-                                            alt="Assignee Avatar" class="assignee-avatar"
-                                            onerror="this.src='/web/static/img/avatar_gray.svg'" />
-                                        <div class="assignee-details">
-                                            <strong>
-                                                <t t-if="ticket.assigned_to"><t t-esc="ticket.assigned_to.name" /></t>
-                                                <t t-else="">Not assigned</t>
-                                            </strong>
-                                            <span class="assignee-email">
-                                                <t t-if="ticket.assigned_to and ticket.assigned_to.email">
-                                                    <t t-esc="ticket.assigned_to.email" />
-                                                </t>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
+                            <!-- Projects -->
+                            <div class="section-divider">
+                                <span class="section-divider-label">Projects</span>
+                                <div class="section-divider-line"></div>
                             </div>
-
-                            <!-- Customer Information Card -->
                             <div class="info-card">
-                                <div class="card-header-custom"><h3>Customer Information</h3></div>
-                                <div class="customer-info">
-                                    <img t-att-src="'/web/image/res.partner/%s/avatar_128' % (ticket.customer_id.id if ticket.customer_id else 1)"
-                                        alt="Customer Avatar" class="customer-avatar"
-                                        onerror="this.src='/web/static/img/avatar_gray.svg'" />
-                                    <div class="customer-details">
-                                        <strong><t t-esc="ticket.customer_id.name if ticket.customer_id else 'Unknown Customer'" /></strong>
-                                        <span class="customer-email">
-                                            <t t-if="ticket.customer_id and ticket.customer_id.email">
-                                                <t t-esc="ticket.customer_id.email" />
-                                            </t>
-                                            <t t-else="">No email</t>
-                                        </span>
+                                <div class="info-card-header">
+                                    <div class="info-card-header-icon"><i class="bi bi-kanban-fill"></i></div>
+                                    <h3>Related Projects</h3>
+                                </div>
+                                <div class="info-card-body">
+                                    <div class="project-row">
+                                        <div>
+                                            <div class="project-name">E-Commerce Platform</div>
+                                            <div class="project-id">PRJ-001</div>
+                                        </div>
+                                        <span class="proj-active">Active</span>
+                                    </div>
+                                    <div class="project-row">
+                                        <div>
+                                            <div class="project-name">Mobile App Redesign</div>
+                                            <div class="project-id">PRJ-002</div>
+                                        </div>
+                                        <span class="proj-inactive">Inactive</span>
+                                    </div>
+                                    <div class="project-row">
+                                        <div>
+                                            <div class="project-name">Analytics Dashboard</div>
+                                            <div class="project-id">PRJ-003</div>
+                                        </div>
+                                        <span class="proj-inactive">Inactive</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Projects Card -->
-                            <div class="info-card">
-                                <div class="card-header-custom"><h3>Projects</h3></div>
-                                <div class="projects-list">
-                                    <div class="project-item active">
-                                        <div class="project-info">
-                                            <strong>E-Commerce Platform</strong>
-                                            <span class="project-id">Project ID: PRJ-001</span>
-                                        </div>
-                                        <span class="project-status active-status">Active</span>
-                                    </div>
-                                    <div class="project-item">
-                                        <div class="project-info">
-                                            <strong>Mobile App Redesign</strong>
-                                            <span class="project-id">Project ID: PRJ-002</span>
-                                        </div>
-                                        <span class="project-status inactive-status">Inactive</span>
-                                    </div>
-                                    <div class="project-item">
-                                        <div class="project-info">
-                                            <strong>Analytics Dashboard</strong>
-                                            <span class="project-id">Project ID: PRJ-003</span>
-                                        </div>
-                                        <span class="project-status inactive-status">Inactive</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        </div><!-- /panel-interactions -->
 
-            <!-- Delete Modal -->
+                    </div><!-- /main-inner -->
+                </main>
+            </div><!-- /shell -->
+
+            <!-- Toast Container -->
+            <div class="toast-container" id="toastContainer"></div>
+
+            <!-- DELETE MODAL -->
             <div class="modal fade" id="deleteMessageModal" tabindex="-1">
-                <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-dialog modal-dialog-centered" style="max-width:380px;">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">
-                                <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Confirm Delete
-                            </h5>
+                            <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>Confirm Delete</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
-                        <div class="modal-body">
-                            <p>Are you sure you want to delete this message? This action cannot be undone.</p>
-                        </div>
+                        <div class="modal-body"><p>Are you sure you want to delete this message? This cannot be undone.</p></div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                                <i class="bi bi-trash"></i> Delete Message
-                            </button>
+                            <button type="button" class="btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn-primary danger" id="confirmDeleteBtn"><i class="bi bi-trash"></i> Delete</button>
                         </div>
                     </div>
                 </div>
@@ -446,88 +867,194 @@
 
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+            <!-- SLA TIMER -->
             <script type="text/javascript">
 //<![CDATA[
 (function () {
     'use strict';
     var card = document.getElementById('slaTimerCard');
     if (!card) return;
-
-    var deadlineStr = card.getAttribute('data-deadline');
-    var duration    = parseInt(card.getAttribute('data-duration'), 10) * 1000;
-    var deadline    = new Date(deadlineStr).getTime();
-
-    var iconEl  = document.getElementById('slaIcon');
-    var titleEl = document.getElementById('slaCardTitle');
-    var numEl   = document.getElementById('slaBigNumber');
-    var lblEl   = document.getElementById('slaBigLabel');
-    var fillEl  = document.getElementById('slaProgFill');
-    var pctEl   = document.getElementById('slaProgPct');
-
-    var ICON  = { 'on-track': 'bi-clock-fill', 'at-risk': 'bi-exclamation-triangle-fill', 'breached': 'bi-x-octagon-fill' };
-    var TITLE = { 'on-track': 'SLA On Track',  'at-risk': 'SLA At Risk ⚠️',               'breached': 'SLA Breached!'     };
-
+    var deadline = new Date(card.getAttribute('data-deadline')).getTime();
+    var duration = parseInt(card.getAttribute('data-duration'), 10) * 1000;
+    var iconEl   = document.getElementById('slaIcon');
+    var titleEl  = document.getElementById('slaCardTitle');
+    var numEl    = document.getElementById('slaBigNumber');
+    var lblEl    = document.getElementById('slaBigLabel');
+    var fillEl   = document.getElementById('slaProgFill');
+    var pctEl    = document.getElementById('slaProgPct');
+    var ICON_HTML  = { 'on-track': '<i class="bi bi-clock-fill"></i>', 'at-risk': '<i class="bi bi-exclamation-triangle-fill"></i>', 'breached': '<i class="bi bi-x-octagon-fill"></i>' };
+    var ICON_STYLE = { 'on-track': 'background:var(--green-bg);color:var(--green)', 'at-risk': 'background:var(--amber-bg);color:var(--amber)', 'breached': 'background:var(--red-bg);color:var(--red)' };
+    var TITLES     = { 'on-track': 'SLA On Track', 'at-risk': 'SLA At Risk \u26a0\ufe0f', 'breached': 'SLA Breached!' };
     function pad(n) { return String(n).padStart(2, '0'); }
-
-    function getSlaClass(rem) {
-        if (rem <= 0)           return 'breached';
-        if (rem <= 2 * 3600000) return 'at-risk';
-        return 'on-track';
-    }
-
+    function getState(rem) { if (rem <= 0) return 'breached'; if (rem <= 7200000) return 'at-risk'; return 'on-track'; }
     function tick() {
-        var now = Date.now();
-        var rem = deadline - now;
-        var cls = getSlaClass(rem);
-
-        card.className = 'sla-timer-card ' + cls;
-        iconEl.className   = 'bi ' + ICON[cls] + ' sla-card-icon';
-        titleEl.textContent = TITLE[cls];
-
+        var now = Date.now(); var rem = deadline - now; var st = getState(rem);
+        card.className = 'sla-card ' + st;
+        iconEl.setAttribute('style', ICON_STYLE[st]); iconEl.innerHTML = ICON_HTML[st];
+        titleEl.textContent = TITLES[st];
         if (rem <= 0) {
             var over = Math.abs(rem);
-            var oh = Math.floor(over / 3600000);
-            var om = Math.floor((over % 3600000) / 60000);
-            var os = Math.floor((over % 60000) / 1000);
-            numEl.textContent = (oh > 0 ? pad(oh) + ':' : '') + pad(om) + ':' + pad(os);
+            numEl.textContent = (Math.floor(over/3600000) > 0 ? pad(Math.floor(over/3600000)) + ':' : '') + pad(Math.floor((over%3600000)/60000)) + ':' + pad(Math.floor((over%60000)/1000));
             lblEl.textContent = 'past deadline';
         } else {
-            var h = Math.floor(rem / 3600000);
-            var m = Math.floor((rem % 3600000) / 60000);
-            var s = Math.floor((rem % 60000) / 1000);
-            numEl.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+            numEl.textContent = pad(Math.floor(rem/3600000)) + ':' + pad(Math.floor((rem%3600000)/60000)) + ':' + pad(Math.floor((rem%60000)/1000));
             lblEl.textContent = 'remaining';
         }
-
-        var elapsed = duration - rem;
-        var pct = Math.min(100, Math.max(0, Math.round(elapsed / duration * 100)));
-        fillEl.style.width = pct + '%';
-        pctEl.textContent  = pct + '%';
+        var pct = Math.min(100, Math.max(0, Math.round((duration - rem) / duration * 100)));
+        fillEl.style.width = pct + '%'; pctEl.textContent = pct + '%';
     }
-
-    tick();
-    setInterval(tick, 1000);
+    tick(); setInterval(tick, 1000);
 })();
 //]]>
             </script>
 
+            <!-- MAIN JS -->
             <script type="text/javascript">
 //<![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
+
+    function showToast(msg, type) {
+        type = type || 'success';
+        var icons = { success: 'bi-check-circle-fill', info: 'bi-info-circle-fill', warning: 'bi-exclamation-triangle-fill' };
+        var tc = document.getElementById('toastContainer');
+        var t  = document.createElement('div');
+        t.className = 'toast-item ' + type;
+        t.innerHTML = '<i class="bi ' + (icons[type] || icons.success) + '"></i>' + msg;
+        tc.appendChild(t);
+        setTimeout(function () { t.style.opacity = '0'; t.style.transform = 'translateY(8px)'; t.style.transition = '0.3s'; setTimeout(function(){ t.remove(); }, 300); }, 3200);
+    }
+
+    var sidebar     = document.getElementById('mainSidebar');
+    var collapseBtn = document.getElementById('sidebarCollapseBtn');
+    var STORAGE_KEY = 'sd_sidebar_collapsed';
+    if (localStorage.getItem(STORAGE_KEY) === 'true') {
+        sidebar.style.transition = 'none';
+        sidebar.classList.add('collapsed');
+        requestAnimationFrame(function () { requestAnimationFrame(function () { sidebar.style.transition = ''; }); });
+    }
+    collapseBtn.addEventListener('click', function () {
+        var isNowCollapsed = sidebar.classList.toggle('collapsed');
+        localStorage.setItem(STORAGE_KEY, isNowCollapsed ? 'true' : 'false');
+    });
+
     setTimeout(function () {
-        document.querySelectorAll('.alert').forEach(function (a) { new bootstrap.Alert(a).close(); });
+        ['alertSuccess','alertDanger'].forEach(function (id) { var el = document.getElementById(id); if (el) el.remove(); });
     }, 5000);
 
-    var messageIdToDelete = null;
-    var deleteModal = new bootstrap.Modal(document.getElementById('deleteMessageModal'));
+    var panels   = document.querySelectorAll('.tab-panel');
+    var navItems = document.querySelectorAll('.sidebar-item[data-panel]');
+    var panelIds = Array.from(navItems).map(function(n){ return n.getAttribute('data-panel'); });
 
-    document.querySelectorAll('.delete-message-btn').forEach(function (btn) {
+    function showPanel(panelId) {
+        panels.forEach(function (p)   { p.classList.remove('active'); });
+        navItems.forEach(function (n) { n.classList.remove('active'); });
+        var target = document.getElementById(panelId);
+        if (target) target.classList.add('active');
+        var btn = document.querySelector('.sidebar-item[data-panel="' + panelId + '"]');
+        if (btn) btn.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    navItems.forEach(function (btn) {
+        btn.addEventListener('click', function () { showPanel(this.getAttribute('data-panel')); });
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+        var idx = parseInt(e.key, 10) - 1;
+        if (idx >= 0 && idx < panelIds.length) showPanel(panelIds[idx]);
+    });
+
+    var fileFilterBtns = document.querySelectorAll('.files-filter-btn');
+    fileFilterBtns.forEach(function (btn) {
         btn.addEventListener('click', function () {
-            messageIdToDelete = this.getAttribute('data-message-id');
-            deleteModal.show();
+            fileFilterBtns.forEach(function(b){ b.classList.remove('active'); });
+            this.classList.add('active');
+            var filter = this.getAttribute('data-file-filter');
+            document.querySelectorAll('#filesGrid .file-card').forEach(function (card) {
+                card.style.display = (filter === 'all' || card.getAttribute('data-file-type') === filter) ? '' : 'none';
+            });
         });
     });
 
+    var actFilterBtns = document.querySelectorAll('.act-filter-btn');
+    actFilterBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            actFilterBtns.forEach(function(b){ b.classList.remove('active'); });
+            this.classList.add('active');
+            var filter = this.getAttribute('data-act-filter');
+            document.querySelectorAll('.act-item').forEach(function (item) {
+                item.classList.toggle('hidden', filter !== 'all' && item.getAttribute('data-act-type') !== filter);
+            });
+        });
+    });
+
+    var deptTabs    = document.querySelectorAll('.dept-tab');
+    var personCards = document.querySelectorAll('.person-card');
+    var selectedPerson = null;
+
+    deptTabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            deptTabs.forEach(function(t){ t.classList.remove('active'); });
+            this.classList.add('active');
+            var dept = this.getAttribute('data-dept');
+            selectedPerson = null;
+            document.getElementById('forwardSelection').textContent = 'No person selected';
+            personCards.forEach(function (card) {
+                card.classList.remove('selected');
+                card.style.display = card.getAttribute('data-dept') === dept ? '' : 'none';
+            });
+        });
+    });
+
+    personCards.forEach(function (card) {
+        card.addEventListener('click', function () {
+            personCards.forEach(function(c){ c.classList.remove('selected'); });
+            this.classList.add('selected');
+            selectedPerson = this.querySelector('.person-name').textContent;
+            document.getElementById('forwardSelection').textContent = 'Selected: ' + selectedPerson;
+        });
+    });
+
+    document.getElementById('forwardBtn').addEventListener('click', function () {
+        if (!selectedPerson) { showToast('Please select a person to forward to.', 'warning'); return; }
+        showToast('Ticket forwarded to <strong>' + selectedPerson + '</strong>.', 'success');
+    });
+
+    document.querySelectorAll('.doc-item-header').forEach(function (header) {
+        header.addEventListener('click', function () {
+            var item = this.closest('.doc-item');
+            item.classList.toggle('expanded');
+        });
+    });
+
+    var docCatBtns = document.querySelectorAll('.docs-cat-btn');
+    docCatBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            docCatBtns.forEach(function(b){ b.classList.remove('active'); });
+            this.classList.add('active');
+            var cat = this.getAttribute('data-doc-cat');
+            filterDocs(cat, document.getElementById('docsSearch').value.trim().toLowerCase());
+        });
+    });
+
+    document.getElementById('docsSearch').addEventListener('input', function () {
+        var activeCat = document.querySelector('.docs-cat-btn.active').getAttribute('data-doc-cat');
+        filterDocs(activeCat, this.value.trim().toLowerCase());
+    });
+
+    function filterDocs(cat, search) {
+        document.querySelectorAll('.doc-item').forEach(function (item) {
+            var matchCat    = cat === 'all' || item.getAttribute('data-doc-cat') === cat;
+            var matchSearch = !search || item.getAttribute('data-doc-title').toLowerCase().includes(search);
+            item.classList.toggle('hidden', !(matchCat && matchSearch));
+        });
+    }
+
+    var messageIdToDelete = null;
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteMessageModal'));
+    document.querySelectorAll('.msg-action-btn.delete').forEach(function (btn) {
+        btn.addEventListener('click', function () { messageIdToDelete = this.getAttribute('data-message-id'); deleteModal.show(); });
+    });
     document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
         if (!messageIdToDelete) return;
         fetch('/customer_support/ticket/message/' + messageIdToDelete + '/delete', { method: 'POST', body: new FormData() })
@@ -537,51 +1064,51 @@ document.addEventListener('DOMContentLoaded', function () {
                 var el = document.querySelector('.message-item[data-message-id="' + messageIdToDelete + '"]');
                 if (el) el.remove();
                 deleteModal.hide();
+                showToast('Message deleted successfully.', 'info');
             } else { alert('Error: ' + (data.error || 'Failed to delete message')); }
         });
     });
 
-    document.querySelectorAll('.edit-message-btn').forEach(function (btn) {
+    document.querySelectorAll('.msg-action-btn.edit').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var mid  = this.getAttribute('data-message-id');
-            var body = document.querySelector('.message-body[data-message-id="' + mid + '"]');
-            var form = document.querySelector('.message-edit-form[data-message-id="' + mid + '"]');
-            var ta   = form.querySelector('.edit-message-textarea');
-            var tmp  = document.createElement('div'); tmp.innerHTML = body.innerHTML;
+            var body = document.querySelector('.msg-body[data-message-id="' + mid + '"]');
+            var form = document.querySelector('.msg-edit-form[data-message-id="' + mid + '"]');
+            var ta   = form.querySelector('.msg-edit-textarea');
+            var tmp  = document.createElement('div');
+            tmp.innerHTML = body.innerHTML;
             ta.value = (tmp.textContent || tmp.innerText || '').trim();
-            body.style.display = 'none';
-            form.style.display = 'block';
-            ta.focus();
+            body.style.display = 'none'; form.style.display = 'block'; ta.focus();
         });
     });
-
     document.querySelectorAll('.cancel-edit-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var mid = this.getAttribute('data-message-id');
-            document.querySelector('.message-body[data-message-id="' + mid + '"]').style.display = 'block';
-            document.querySelector('.message-edit-form[data-message-id="' + mid + '"]').style.display = 'none';
+            document.querySelector('.msg-body[data-message-id="' + mid + '"]').style.display = '';
+            document.querySelector('.msg-edit-form[data-message-id="' + mid + '"]').style.display = 'none';
         });
     });
-
     document.querySelectorAll('.save-edit-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var mid     = this.getAttribute('data-message-id');
-            var form    = document.querySelector('.message-edit-form[data-message-id="' + mid + '"]');
-            var newBody = form.querySelector('.edit-message-textarea').value.trim();
+            var form    = document.querySelector('.msg-edit-form[data-message-id="' + mid + '"]');
+            var newBody = form.querySelector('.msg-edit-textarea').value.trim();
             if (!newBody) { alert('Message cannot be empty'); return; }
-            var fd = new FormData(); fd.append('new_body', newBody);
+            var fd = new FormData();
+            fd.append('new_body', newBody);
             fetch('/customer_support/ticket/message/' + mid + '/edit', { method: 'POST', body: fd })
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (data.success) {
-                    var body = document.querySelector('.message-body[data-message-id="' + mid + '"]');
-                    body.innerHTML = newBody;
-                    body.style.display = 'block';
-                    document.querySelector('.message-edit-form[data-message-id="' + mid + '"]').style.display = 'none';
+                    var body = document.querySelector('.msg-body[data-message-id="' + mid + '"]');
+                    body.innerHTML = newBody; body.style.display = '';
+                    document.querySelector('.msg-edit-form[data-message-id="' + mid + '"]').style.display = 'none';
+                    showToast('Message updated.', 'success');
                 } else { alert('Error: ' + (data.error || 'Failed to update')); }
             });
         });
     });
+
 });
 //]]>
             </script>

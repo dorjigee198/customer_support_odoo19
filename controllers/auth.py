@@ -50,16 +50,14 @@ class CustomerSupportAuth(http.Controller):
         Login Page - Renders the custom login form
         Working: Shows login form with email/password fields
         Access: Public (no login required)
-
-        Accepts an optional `next` query param so that after a successful
-        login the user is taken directly to the page they originally
-        requested (e.g. a specific ticket URL from an email link).
         """
         return request.render(
             "customer_support.portal_login_page",
             {
                 "error": kw.get("error", ""),
-                "next": kw.get("next", ""),  # ← pass next to the template
+                "redirect": kw.get(
+                    "redirect", ""
+                ),  # ← ADDED: pass redirect URL to template
             },
         )
 
@@ -76,24 +74,21 @@ class CustomerSupportAuth(http.Controller):
         Authentication Handler - Processes login form submission
         Working: Validates credentials, creates session, redirects to the
                  correct dashboard based on the user's role.
+                 If a redirect param is present (e.g. from an email link),
+                 portal users are sent there instead of the default dashboard.
         Access: Public (no login required)
 
-        Redirect targets (in priority order):
-          1. `next` param if present and safe  → that URL
-          2. System Admin                       → /customer_support/admin_dashboard
-          3. Portal User                        → /customer_support/dashboard
-          4. Internal User                      → /customer_support/support_dashboard
+        Redirect targets:
+          - System Admin  → /customer_support/admin_dashboard
+          - Portal User   → redirect param OR /customer_support/dashboard
+          - Internal User → /customer_support/support_dashboard
         """
         try:
             email = post.get("email", "").strip()
             password = post.get("password", "")
 
-            # Read the next param forwarded by the hidden form field
-            next_url = post.get("next", "").strip()
-
-            # Safety check: only allow relative URLs to prevent open-redirect attacks
-            if next_url and not next_url.startswith("/"):
-                next_url = ""
+            # ← ADDED: read the redirect URL submitted as a hidden form field
+            redirect_url = post.get("redirect", "").strip()
 
             _logger.info(f"Login attempt for email/login: {email}")
 
@@ -142,24 +137,19 @@ class CustomerSupportAuth(http.Controller):
                         "/customer_support/login?error=Your account is inactive"
                     )
 
-                # If a safe next URL was provided, go there regardless of role
-                if next_url:
-                    request.session["customer_support_login"] = True
-                    _logger.info(
-                        f"Redirecting authenticated user to next_url: {next_url}"
-                    )
-                    return werkzeug.utils.redirect(next_url)
-
                 # Route to the correct dashboard based on the user's role
                 if user.has_group("base.group_system"):
-                    # System administrator → admin dashboard
+                    # System administrator → admin dashboard (ignore redirect)
                     request.session["customer_support_login"] = True
                     return werkzeug.utils.redirect("/customer_support/admin_dashboard")
 
                 elif user.has_group("base.group_portal"):
-                    # Portal user (customer) → customer dashboard
+                    # Portal user (customer) → redirect param if present, else dashboard
                     request.session["customer_support_login"] = True
-                    return werkzeug.utils.redirect("/customer_support/dashboard")
+                    destination = (
+                        redirect_url if redirect_url else "/customer_support/dashboard"
+                    )  # ← FIXED
+                    return werkzeug.utils.redirect(destination)
 
                 elif user.has_group("base.group_user"):
                     # Internal user (focal person / support agent) → agent dashboard

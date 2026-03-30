@@ -10,7 +10,6 @@
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
                 <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css" />
-                <!-- ★ MOBILE STYLES ★ -->
                 <link rel="stylesheet"
                     href="/customer_support/static/src/css/support_dashboard_mobile.css" />
                 <style>
@@ -27,139 +26,147 @@
                     1; }
                     .notif-badge.d-none { display: none !important; }
                     .notif-dropdown { position: absolute; top: calc(100% + 12px); right: 0; width:
-                    360px; background: #161b27; border: 1px solid rgba(255,255,255,0.07);
-                    border-radius: 16px; box-shadow: 0 24px 60px rgba(0,0,0,0.55); z-index: 300;
+                    360px; background: #ffffff; border: 1px solid rgba(12,74,110,0.15);
+                    border-radius: 14px; box-shadow: 0 16px 48px rgba(12,74,110,0.18); z-index: 300;
                     overflow: hidden; opacity: 0; pointer-events: none; transform: translateY(-8px);
                     transition: opacity 0.18s ease, transform 0.18s ease; }
                     .notif-dropdown.open { opacity: 1; pointer-events: all; transform:
                     translateY(0); }
                     .notif-header { padding: 0.9rem 1.25rem; border-bottom: 1px solid
-                    rgba(255,255,255,0.07); display: flex; justify-content: space-between;
-                    align-items: center; }
+                    rgba(12,74,110,0.08); display: flex; justify-content: space-between;
+                    align-items: center; background: #f0f9ff; }
                     .notif-header h6 { font-size: 0.875rem; font-weight: 600; margin: 0; color:
-                    #e8eaf0; }
-                    .notif-mark-read { font-size: 0.75rem; color: #4f8ef7; cursor: pointer;
-                    background: none; border: none; padding: 0; }
+                    #0c4a6e; }
+                    .notif-mark-read { font-size: 0.75rem; color: #1e5a8e; cursor: pointer;
+                    background: none; border: none; padding: 0; font-weight: 500; }
                     .notif-list { max-height: 360px; overflow-y: auto; }
                     .notif-list::-webkit-scrollbar { width: 4px; }
-                    .notif-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1);
+                    .notif-list::-webkit-scrollbar-thumb { background: rgba(12,74,110,0.1);
                     border-radius: 4px; }
                     .notif-item { display: flex; align-items: flex-start; gap: 0.85rem; padding:
-                    0.9rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.07); cursor:
-                    pointer; transition: background 0.15s; text-decoration: none; }
+                    0.9rem 1.25rem; border-bottom: 1px solid rgba(12,74,110,0.06); cursor: pointer;
+                    transition: background 0.15s; text-decoration: none; }
                     .notif-item:last-child { border-bottom: none; }
-                    .notif-item:hover { background: #1e2535; }
-                    .notif-item.unread { background: rgba(79,142,247,0.04); }
+                    .notif-item:hover { background: #f0f9ff; }
+                    .notif-item.unread { background: rgba(30,90,142,0.04); }
                     .notif-icon-wrap { width: 36px; height: 36px; border-radius: 10px; flex-shrink:
                     0; display: flex; align-items: center; justify-content: center; font-size: 1rem;
                     }
-                    .notif-icon-wrap.breached { background: rgba(239,68,68,0.15); color: #ef4444; }
-                    .notif-icon-wrap.at-risk { background: rgba(245,158,11,0.15); color: #f59e0b; }
+                    .notif-icon-wrap.breached { background: rgba(239,68,68,0.1); color: #ef4444; }
+                    .notif-icon-wrap.at-risk { background: rgba(245,158,11,0.1); color: #f59e0b; }
                     .notif-body { flex: 1; min-width: 0; }
                     .notif-title { font-size: 0.825rem; font-weight: 600; margin-bottom: 2px; color:
-                    #e8eaf0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                    .notif-sub { font-size: 0.75rem; color: #8892a4; }
-                    .notif-time-text { font-size: 0.7rem; color: #8892a4; margin-top: 3px; }
+                    #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                    .notif-sub { font-size: 0.75rem; color: #64748b; }
+                    .notif-time-text { font-size: 0.7rem; color: #94a3b8; margin-top: 3px; }
                     .notif-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
                     margin-top: 6px; }
                     .notif-dot.breached { background: #ef4444; }
                     .notif-dot.at-risk { background: #f59e0b; }
-                    .notif-empty { padding: 2rem; text-align: center; color: #8892a4; font-size:
+                    .notif-empty { padding: 2rem; text-align: center; color: #64748b; font-size:
                     0.85rem; }
                     .notif-footer { padding: 0.75rem 1.25rem; border-top: 1px solid
-                    rgba(255,255,255,0.07); text-align: center; }
-                    .notif-footer a { font-size: 0.8rem; color: #4f8ef7; text-decoration: none; }
+                    rgba(12,74,110,0.08); text-align: center; background: #f8fafc; }
+                    .notif-footer a { font-size: 0.8rem; color: #1e5a8e; text-decoration: none;
+                    font-weight: 500; }
 
-                    /* ── KANBAN BOARD ── */
+                    /* ── KANBAN ── */
                     .kanban-board { display: flex; gap: 1rem; padding: 1.5rem 2rem; overflow-x:
                     auto; min-height: calc(100vh - 160px); align-items: flex-start; }
                     .kanban-board::-webkit-scrollbar { height: 6px; }
-                    .kanban-board::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1);
+                    .kanban-board::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1);
                     border-radius: 4px; }
-                    .kanban-col { flex: 0 0 270px; background: #161b27; border-radius: 16px; border:
-                    1px solid rgba(255,255,255,0.07); display: flex; flex-direction: column;
-                    max-height: calc(100vh - 180px); }
+                    .kanban-col { flex: 0 0 270px; background: #f8fafc; border-radius: 12px; border:
+                    1px solid #e5e7eb; display: flex; flex-direction: column; max-height: calc(100vh
+                    - 180px); }
                     .kanban-col-header { padding: 1rem 1rem 0.75rem; border-bottom: 1px solid
-                    rgba(255,255,255,0.07); display: flex; align-items: center; justify-content:
-                    space-between; flex-shrink: 0; }
+                    #e5e7eb; display: flex; align-items: center; justify-content: space-between;
+                    flex-shrink: 0; }
                     .kanban-col-title { font-size: 0.8rem; font-weight: 700; text-transform:
                     uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap:
                     0.5rem; }
-                    .kanban-col-count { font-size: 0.72rem; background: rgba(255,255,255,0.08);
-                    color: #8892a4; border-radius: 999px; padding: 2px 8px; font-weight: 600; }
-                    .kanban-col[data-state="new"] .kanban-col-title { color: #60a5fa; }
-                    .kanban-col[data-state="in_progress"] .kanban-col-title { color: #f59e0b; }
-                    .kanban-col[data-state="resolved"] .kanban-col-title { color: #22c55e; }
-                    .kanban-col[data-state="closed"] .kanban-col-title { color: #8892a4; }
-                    .kanban-col[data-state="new"] { border-top: 3px solid #60a5fa; }
+                    .kanban-col-count { font-size: 0.72rem; background: rgba(0,0,0,0.06); color:
+                    #6b7280; border-radius: 999px; padding: 2px 8px; font-weight: 600; }
+                    .kanban-col[data-state="new"] { border-top: 3px solid #3b82f6; }
                     .kanban-col[data-state="in_progress"] { border-top: 3px solid #f59e0b; }
-                    .kanban-col[data-state="resolved"] { border-top: 3px solid #22c55e; }
+                    .kanban-col[data-state="resolved"] { border-top: 3px solid #10b981; }
                     .kanban-col[data-state="closed"] { border-top: 3px solid #6b7280; }
+                    .kanban-col[data-state="new"] .kanban-col-title { color: #1d4ed8; }
+                    .kanban-col[data-state="in_progress"] .kanban-col-title { color: #d97706; }
+                    .kanban-col[data-state="resolved"] .kanban-col-title { color: #059669; }
+                    .kanban-col[data-state="closed"] .kanban-col-title { color: #6b7280; }
                     .kanban-cards { padding: 0.75rem; display: flex; flex-direction: column; gap:
                     0.65rem; overflow-y: auto; flex: 1; min-height: 80px; }
                     .kanban-cards::-webkit-scrollbar { width: 4px; }
-                    .kanban-cards::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08);
+                    .kanban-cards::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08);
                     border-radius: 4px; }
-                    .kanban-card { background: #1e2535; border: 1px solid rgba(255,255,255,0.07);
-                    border-radius: 12px; padding: 0.9rem; cursor: grab; transition: all 0.2s;
-                    user-select: none; }
-                    .kanban-card:hover { border-color: rgba(79,142,247,0.35); transform:
-                    translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+                    .kanban-card { background: white; border: 1px solid #e5e7eb; border-radius: 8px;
+                    padding: 0.9rem; cursor: grab; transition: all 0.2s; user-select: none;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+                    .kanban-card:hover { border-color: rgba(12,74,110,0.3); transform:
+                    translateY(-2px); box-shadow: 0 6px 15px rgba(12,74,110,0.1); }
                     .kanban-card.dragging { opacity: 0.5; transform: rotate(2deg) scale(1.02);
                     cursor: grabbing; }
-                    .kanban-card-id { font-size: 0.68rem; color: #4f8ef7; font-weight: 700;
+                    .kanban-card-id { font-size: 0.68rem; color: #0c4a6e; font-weight: 700;
                     font-family: monospace; margin-bottom: 0.4rem; }
-                    .kanban-card-subject { font-size: 0.82rem; font-weight: 600; color: #e8eaf0;
+                    .kanban-card-subject { font-size: 0.82rem; font-weight: 600; color: #1f2937;
                     margin-bottom: 0.6rem; line-height: 1.3; display: -webkit-box;
                     -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
                     .kanban-card-footer { display: flex; align-items: center; justify-content:
                     space-between; gap: 0.5rem; }
                     .kanban-card-customer { display: flex; align-items: center; gap: 0.4rem;
-                    font-size: 0.72rem; color: #8892a4; }
+                    font-size: 0.72rem; color: #6b7280; }
                     .kanban-card-customer img { width: 20px; height: 20px; border-radius: 50%;
                     object-fit: cover; }
                     .kanban-priority { font-size: 0.65rem; font-weight: 700; padding: 2px 7px;
                     border-radius: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
-                    .kanban-priority.priority-low { background: rgba(34,197,94,0.15); color:
-                    #22c55e; }
-                    .kanban-priority.priority-medium { background: rgba(96,165,250,0.15); color:
-                    #60a5fa; }
-                    .kanban-priority.priority-high { background: rgba(251,146,60,0.15); color:
-                    #fb923c; }
-                    .kanban-priority.priority-urgent { background: rgba(239,68,68,0.15); color:
-                    #ef4444; }
-                    .kanban-drop-zone { border: 2px dashed rgba(79,142,247,0.4); border-radius:
-                    10px; padding: 1rem; text-align: center; font-size: 0.75rem; color: #4f8ef7;
-                    display: none; margin-top: 0.5rem; }
+                    .kanban-priority.priority-low { background: #d1fae5; color: #065f46; }
+                    .kanban-priority.priority-medium { background: #dbeafe; color: #1e40af; }
+                    .kanban-priority.priority-high { background: #fee2e2; color: #991b1b; }
+                    .kanban-priority.priority-urgent { background: #fef3c7; color: #92400e; }
+                    .kanban-drop-zone { border: 2px dashed rgba(12,74,110,0.3); border-radius: 8px;
+                    padding: 1rem; text-align: center; font-size: 0.75rem; color: #0c4a6e; display:
+                    none; margin-top: 0.5rem; }
                     .kanban-col.drag-over .kanban-drop-zone { display: block; }
-                    .kanban-col.drag-over { background: rgba(79,142,247,0.04); }
+                    .kanban-col.drag-over { background: rgba(12,74,110,0.03); }
 
-                    /* ── VIEW TOGGLE BUTTON ── */
+                    /* ── VIEW TOGGLE ── */
                     .view-toggle-btn { background: none; border: none; color:
                     rgba(255,255,255,0.75); font-size: 1.2rem; cursor: pointer; padding: 6px 8px;
                     border-radius: 8px; transition: all 0.2s; }
                     .view-toggle-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
-                    .view-toggle-btn.active { background: rgba(79,142,247,0.15); color: #4f8ef7; }
+                    .view-toggle-btn.active { background: rgba(255,255,255,0.15); color: #fff; }
 
-                    /* ── SAVE FEEDBACK TOAST ── */
+                    /* ── TOAST ── */
                     #kanbanToast { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
-                    background: #1e2535; border: 1px solid rgba(255,255,255,0.1); border-radius:
-                    12px; padding: 0.75rem 1.25rem; font-size: 0.82rem; color: #e8eaf0; display:
-                    flex;
-                    align-items: center; gap: 0.6rem; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-                    transform: translateY(80px); opacity: 0; transition: all 0.3s ease; }
+                    background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding:
+                    0.75rem 1.25rem; font-size: 0.82rem; color: #1f2937; display: flex; align-items:
+                    center; gap: 0.6rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); transform:
+                    translateY(80px); opacity: 0; transition: all 0.3s ease; }
                     #kanbanToast.show { transform: translateY(0); opacity: 1; }
-                    #kanbanToast.success { border-color: rgba(34,197,94,0.4); }
+                    #kanbanToast.success { border-color: rgba(16,185,129,0.4); }
                     #kanbanToast.error { border-color: rgba(239,68,68,0.4); }
 
-                    /* ── NEW TICKET FLASH ANIMATION ── */
+                    /* ── NEW TICKET FLASH ── */
                     @keyframes ticketNewFlash {
-                    0% { border-color: #4f8ef7; box-shadow: 0 0 0 0 rgba(79,142,247,0.5); }
-                    50% { border-color: #60a5fa; box-shadow: 0 0 0 6px rgba(79,142,247,0); }
-                    100% { border-color: rgba(255,255,255,0.07); box-shadow: none; }
+                    0% { border-color: #0c4a6e; box-shadow: 0 0 0 0 rgba(12,74,110,0.4); }
+                    50% { border-color: #0284c7; box-shadow: 0 0 0 6px rgba(12,74,110,0); }
+                    100% { border-color: #e5e7eb; box-shadow: none; }
                     }
                     .kanban-card.ticket-new-flash { animation: ticketNewFlash 1.2s ease-out
                     forwards; }
+
+                    /* ── MOBILE VIEW PILL ── */
+                    .mobile-view-pill { display: none; }
+                    @media (max-width: 768px) {
+                    .mobile-view-pill { display: flex; background: #f1f5f9; border-radius: 999px;
+                    padding: 3px; gap: 2px; margin-bottom: 1rem; width: fit-content; }
+                    .mobile-view-pill-btn { border: none; background: transparent; border-radius:
+                    999px; padding: 0.4rem 1.1rem; font-size: 0.82rem; font-weight: 500; color:
+                    #64748b; cursor: pointer; transition: all 0.18s; }
+                    .mobile-view-pill-btn.active { background: white; color: #0c4a6e; font-weight:
+                    600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+                    }
                 </style>
             </t>
 
@@ -167,7 +174,6 @@
                 <header class="dashboard-header">
                     <div class="header-content">
 
-                        <!-- ★ HAMBURGER BUTTON (mobile only — hidden on desktop via CSS) ★ -->
                         <button class="mobile-hamburger-btn" id="mobileHamburgerBtn"
                             aria-label="Open navigation">
                             <i class="bi bi-list"></i>
@@ -189,13 +195,10 @@
                         </div>
 
                         <div class="header-right">
-                            <!-- Grid/Kanban toggle button -->
                             <button class="view-toggle-btn me-2" id="kanbanToggleBtn"
                                 title="Toggle Kanban View">
                                 <i class="bi bi-grid-3x3-gap-fill"></i>
                             </button>
-
-                            <!-- Bell notification -->
                             <div class="notif-wrap me-3">
                                 <button class="notif-btn" id="notifBell" title="SLA Alerts">
                                     <i class="bi bi-bell-fill"></i>
@@ -203,20 +206,19 @@
                                 </button>
                                 <div class="notif-dropdown" id="notifDropdown">
                                     <div class="notif-header">
-                                        <h6><i class="bi bi-bell me-2" style="color: #4f8ef7;"></i>SLA
-                                            Alerts</h6>
+                                        <h6><i class="bi bi-bell me-2"></i>SLA Alerts</h6>
                                         <button class="notif-mark-read" id="markAllRead">Mark all
                                             read</button>
                                     </div>
                                     <div class="notif-list" id="notifList">
                                         <div class="notif-empty">
                                             <i class="bi bi-arrow-repeat"
-                                                style="font-size: 1.5rem; display: block; margin-bottom: 0.5rem;"></i>
+                                                style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>
                                             Loading alerts... </div>
                                     </div>
                                     <div class="notif-footer">
                                         <a href="#" data-view="tickets" class="notif-nav-link">View
-                                            all tickets →</a>
+                                            all tickets &#x2192;</a>
                                     </div>
                                 </div>
                             </div>
@@ -224,7 +226,7 @@
                             <div class="user-profile dropdown">
                                 <a class="d-flex align-items-center text-white dropdown-toggle"
                                     href="#" id="userProfileDropdown" data-bs-toggle="dropdown"
-                                    aria-expanded="false" style="text-decoration: none;">
+                                    aria-expanded="false" style="text-decoration:none;">
                                     <span class="user-name me-3">
                                         <t t-esc="user.name" />
                                     </span>
@@ -235,16 +237,16 @@
                                 <ul class="dropdown-menu dropdown-menu-end"
                                     aria-labelledby="userProfileDropdown">
                                     <li>
-                                        <a class="dropdown-item" href="/customer_support/profile">
-                                            <i class="bi bi-person me-2"></i>Edit Profile </a>
+                                        <a class="dropdown-item" href="/customer_support/profile"><i
+                                                class="bi bi-person me-2"></i>Edit Profile</a>
                                     </li>
                                     <li>
                                         <hr class="dropdown-divider" />
                                     </li>
                                     <li>
                                         <a class="dropdown-item text-danger"
-                                            href="/customer_support/logout_manual">
-                                            <i class="bi bi-box-arrow-right me-2"></i>Logout </a>
+                                            href="/customer_support/logout_manual"><i
+                                                class="bi bi-box-arrow-right me-2"></i>Logout</a>
                                     </li>
                                 </ul>
                             </div>
@@ -255,7 +257,7 @@
                 <!-- Alerts -->
                 <t
                     t-if="request.params.get('success') or request.params.get('error') or request.params.get('created')">
-                    <div class="container-fluid" style="max-width: 1600px; padding: 1rem 2rem 0;">
+                    <div class="container-fluid" style="max-width:1600px;padding:1rem 2rem 0;">
                         <t t-if="request.params.get('success')">
                             <div class="alert alert-success alert-dismissible fade show"
                                 role="alert">
@@ -302,7 +304,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">Open Tickets</div>
                                         <div class="stat-value">
-                                            <t t-esc="analytics.get('open_tickets', 0)" />
+                                            <t t-esc="analytics.get('open_tickets',0)" />
                                         </div>
                                         <div class="stat-subtitle">Active Tickets</div>
                                     </div>
@@ -314,7 +316,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">Total Tickets</div>
                                         <div class="stat-value">
-                                            <t t-esc="analytics.get('total_tickets', 0)" />
+                                            <t t-esc="analytics.get('total_tickets',0)" />
                                         </div>
                                         <div class="stat-subtitle">All Tickets</div>
                                     </div>
@@ -326,7 +328,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">High Priority</div>
                                         <div class="stat-value">
-                                            <t t-esc="analytics.get('high_priority', 0)" />
+                                            <t t-esc="analytics.get('high_priority',0)" />
                                         </div>
                                         <div class="stat-subtitle">High Priority</div>
                                     </div>
@@ -338,7 +340,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">Urgent</div>
                                         <div class="stat-value">
-                                            <t t-esc="analytics.get('urgent', 0)" />
+                                            <t t-esc="analytics.get('urgent',0)" />
                                         </div>
                                         <div class="stat-subtitle">Urgent Priority</div>
                                     </div>
@@ -352,7 +354,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">Avg Open Hours</div>
                                         <div class="stat-value">
-                                            <t t-esc="analytics.get('avg_open_hours', 0)" />
+                                            <t t-esc="analytics.get('avg_open_hours',0)" />
                                         </div>
                                         <div class="stat-subtitle">Hours</div>
                                     </div>
@@ -364,7 +366,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">Total Hours</div>
                                         <div class="stat-value">
-                                            <t t-esc="analytics.get('total_hours', 0)" />
+                                            <t t-esc="analytics.get('total_hours',0)" />
                                         </div>
                                         <div class="stat-subtitle">Hours Open</div>
                                     </div>
@@ -376,7 +378,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">Avg High Priority Hours</div>
                                         <div class="stat-value">
-                                            <t t-esc="analytics.get('avg_high_hours', 0)" />
+                                            <t t-esc="analytics.get('avg_high_hours',0)" />
                                         </div>
                                         <div class="stat-subtitle">Hours</div>
                                     </div>
@@ -388,7 +390,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">Avg Urgent Hours</div>
                                         <div class="stat-value">
-                                            <t t-esc="analytics.get('avg_urgent_hours', 0)" />
+                                            <t t-esc="analytics.get('avg_urgent_hours',0)" />
                                         </div>
                                         <div class="stat-subtitle">Hours</div>
                                     </div>
@@ -402,7 +404,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">Resolved Tickets</div>
                                         <div class="stat-value">
-                                            <t t-esc="analytics.get('resolved_tickets', 0)" />
+                                            <t t-esc="analytics.get('resolved_tickets',0)" />
                                         </div>
                                         <div class="stat-subtitle">Fixed Tickets</div>
                                     </div>
@@ -414,7 +416,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">Solve Rate</div>
                                         <div class="stat-value"><t
-                                                t-esc="analytics.get('solve_rate', 0)" />%</div>
+                                                t-esc="analytics.get('solve_rate',0)" />%</div>
                                         <div class="stat-subtitle">Success Rate</div>
                                     </div>
                                 </div>
@@ -425,7 +427,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">High Priority Resolved</div>
                                         <div class="stat-value">
-                                            <t t-esc="analytics.get('high_resolved', 0)" />
+                                            <t t-esc="analytics.get('high_resolved',0)" />
                                         </div>
                                         <div class="stat-subtitle">High Fixed</div>
                                     </div>
@@ -437,7 +439,7 @@
                                     <div class="stat-content">
                                         <div class="stat-label">Urgent Resolved</div>
                                         <div class="stat-value">
-                                            <t t-esc="analytics.get('urgent_resolved', 0)" />
+                                            <t t-esc="analytics.get('urgent_resolved',0)" />
                                         </div>
                                         <div class="stat-subtitle">Urgent Fixed</div>
                                     </div>
@@ -450,9 +452,9 @@
                                     Performance</h2>
                                 <div class="card-actions">
                                     <span class="performance-score" data-key="sample_performance">
-                                        <span class="score-badge">
-                                            <t t-esc="performance.get('sample_performance', 85)" />
-                                        % </span> Overall Score </span>
+                                        <span class="score-badge"><t
+                                                t-esc="performance.get('sample_performance',85)" />%</span>
+                                        Overall Score </span>
                                 </div>
                             </div>
                             <div class="performance-grid">
@@ -463,7 +465,7 @@
                                     <div class="performance-content">
                                         <div class="performance-label">Today Closed</div>
                                         <div class="performance-value">
-                                            <t t-esc="performance.get('today_closed', 0)" />
+                                            <t t-esc="performance.get('today_closed',0)" />
                                         </div>
                                         <div class="performance-subtitle">Tickets Closed Today</div>
                                     </div>
@@ -475,7 +477,7 @@
                                     <div class="performance-content">
                                         <div class="performance-label">Avg Last 7 Days</div>
                                         <div class="performance-value"><t
-                                                t-esc="performance.get('avg_resolve_rate', 0)" />%</div>
+                                                t-esc="performance.get('avg_resolve_rate',0)" />%</div>
                                         <div class="performance-subtitle">Resolve Rate</div>
                                     </div>
                                 </div>
@@ -486,7 +488,7 @@
                                     <div class="performance-content">
                                         <div class="performance-label">Daily Target</div>
                                         <div class="performance-value"><t
-                                                t-esc="performance.get('daily_target', 80)" />%</div>
+                                                t-esc="performance.get('daily_target',80)" />%</div>
                                         <div class="performance-subtitle">Target Achievement</div>
                                     </div>
                                 </div>
@@ -497,7 +499,7 @@
                                     <div class="performance-content">
                                         <div class="performance-label">Current Achievement</div>
                                         <div class="performance-value"><t
-                                                t-esc="performance.get('achievement', 0)" />%</div>
+                                                t-esc="performance.get('achievement',0)" />%</div>
                                         <div class="performance-subtitle">Target Progress</div>
                                     </div>
                                 </div>
@@ -505,12 +507,12 @@
                             <div class="performance-progress">
                                 <div class="progress-label">
                                     <span>Daily Goal Progress</span>
-                                    <span><t t-esc="performance.get('achievement', 0)" />%</span>
+                                    <span><t t-esc="performance.get('achievement',0)" />%</span>
                                 </div>
                                 <div class="progress">
                                     <div class="progress-bar" role="progressbar"
-                                        t-att-style="'width: ' + str(performance.get('achievement', 0)) + '%;'"
-                                        t-att-class="'bg-success' if performance.get('achievement', 0) >= 80 else 'bg-warning'">
+                                        t-att-style="'width: ' + str(performance.get('achievement',0)) + '%;'"
+                                        t-att-class="'bg-success' if performance.get('achievement',0) >= 80 else 'bg-warning'">
                                     </div>
                                 </div>
                             </div>
@@ -557,16 +559,17 @@
                         </div>
                     </div>
                 </div>
-                <!-- ═══ END OVERVIEW PAGE ═══ -->
+                <!-- ═══ END OVERVIEW ═══ -->
 
-                <!-- ═══ TICKETS PAGE — LIST + KANBAN ═══ -->
-                <div class="page-content dashboard-content" id="tickets-page" style="display: none;">
+                <!-- ═══ TICKETS PAGE ═══ -->
+                <div class="page-content dashboard-content" id="tickets-page" style="display:none;">
 
+                    <!-- Header row: search + view toggle -->
                     <div class="tickets-header">
                         <div class="search-container">
                             <i class="bi bi-search"></i>
-                            <input type="text" class="search-input"
-                                placeholder="Search tickets..."></input>
+                            <input type="text" class="search-input" id="ticketSearchInput"
+                                placeholder="Search tickets, customers..." />
                         </div>
                         <div class="view-toggle">
                             <button class="view-btn active" id="listViewBtn" title="List view">
@@ -578,43 +581,80 @@
                         </div>
                     </div>
 
-                    <!-- ★ MOBILE VIEW PILL TOGGLE (shown only on mobile via CSS) ★ -->
+                    <!-- Mobile pill -->
                     <div class="mobile-view-pill" id="mobileViewPill">
                         <button class="mobile-view-pill-btn active" id="mobilePillList"
-                            data-target="list">
-                            <i class="bi bi-list-ul me-1"></i>List </button>
+                            data-target="list"><i class="bi bi-list-ul me-1"></i>List</button>
                         <button class="mobile-view-pill-btn" id="mobilePillKanban"
-                            data-target="kanban">
-                            <i class="bi bi-grid-3x3-gap me-1"></i>Kanban </button>
+                            data-target="kanban"><i class="bi bi-grid-3x3-gap me-1"></i>Kanban</button>
                     </div>
 
                     <!-- ── LIST VIEW ── -->
                     <div id="listView">
+
+                        <!-- Filter bar -->
+                        <div class="ticket-filter-bar" id="ticketFilterBar">
+                            <span class="filter-label">Status</span>
+                            <div class="filter-pill-group" id="statusFilters">
+                                <button class="filter-pill active" data-filter-type="status"
+                                    data-filter-val="all">All</button>
+                                <button class="filter-pill" data-filter-type="status"
+                                    data-filter-val="new">New</button>
+                                <button class="filter-pill" data-filter-type="status"
+                                    data-filter-val="in_progress">In Progress</button>
+                                <button class="filter-pill" data-filter-type="status"
+                                    data-filter-val="resolved">Resolved</button>
+                                <button class="filter-pill" data-filter-type="status"
+                                    data-filter-val="closed">Closed</button>
+                            </div>
+                            <div class="filter-divider"></div>
+                            <span class="filter-label">Priority</span>
+                            <div class="filter-pill-group" id="priorityFilters">
+                                <button class="filter-pill active" data-filter-type="priority"
+                                    data-filter-val="all">All</button>
+                                <button class="filter-pill prio-urgent" data-filter-type="priority"
+                                    data-filter-val="urgent">Urgent</button>
+                                <button class="filter-pill prio-high" data-filter-type="priority"
+                                    data-filter-val="high">High</button>
+                                <button class="filter-pill prio-medium" data-filter-type="priority"
+                                    data-filter-val="medium">Medium</button>
+                                <button class="filter-pill prio-low" data-filter-type="priority"
+                                    data-filter-val="low">Low</button>
+                            </div>
+                            <span class="filter-count" id="filterCount"></span>
+                        </div>
+
                         <div class="ticket-table-wrapper">
                             <table class="ticket-table" id="ticketTable" style="display:none;">
                                 <thead>
                                     <tr>
-                                        <th>TICKET</th>
-                                        <th>CUSTOMER</th>
-                                        <th>STATUS</th>
-                                        <th>PRIORITY</th>
-                                        <th>CREATED</th>
-                                        <th>PROJECT</th>
+                                        <th class="col-ticket th-sortable" data-sort="name"> Ticket <span
+                                                class="sort-icon bi bi-chevron-expand"></span>
+                                        </th>
+                                        <th class="col-customer">Customer</th>
+                                        <th class="col-status th-sortable" data-sort="state"> Status <span
+                                                class="sort-icon bi bi-chevron-expand"></span>
+                                        </th>
+                                        <th class="col-priority th-sortable" data-sort="priority">
+                                            Priority <span class="sort-icon bi bi-chevron-expand"></span>
+                                        </th>
+                                        <th class="col-created th-sortable" data-sort="create_date">
+                                            Created <span class="sort-icon bi bi-chevron-expand"></span>
+                                        </th>
+                                        <th class="col-project">Project</th>
                                     </tr>
                                 </thead>
-                                <tbody id="ticketTableBody">
-                                    <!-- Populated by JS polling -->
-                                </tbody>
+                                <tbody id="ticketTableBody"></tbody>
                             </table>
                             <div class="tickets-empty-state" id="ticketsEmptyState"
                                 style="display:none;">
                                 <i class="bi bi-inbox"></i>
-                                <h3>No tickets assigned to you yet.</h3>
-                                <p>When you have tickets assigned, they will appear here.</p>
+                                <h3>No tickets found.</h3>
+                                <p>Try adjusting your filters or search term.</p>
                             </div>
                             <div class="tickets-empty-state" id="ticketsLoadingState">
                                 <i class="bi bi-arrow-repeat"
-                                    style="animation: spin 1s linear infinite; display:inline-block;"></i>
+                                    style="animation:spin 1s linear infinite;display:inline-block;"></i>
                                 <h3>Loading tickets...</h3>
                             </div>
                         </div>
@@ -623,74 +663,60 @@
                     <!-- ── KANBAN VIEW ── -->
                     <div id="kanbanView" style="display:none;">
                         <div class="kanban-board" id="kanbanBoard">
-
-                            <!-- New / Assigned column -->
                             <div class="kanban-col" data-state="new">
                                 <div class="kanban-col-header" data-col-toggle="new">
                                     <span class="kanban-col-title"><i class="bi bi-circle"></i> New</span>
                                     <div class="kanban-col-header-right">
                                         <span class="kanban-col-count" id="count-new">0</span>
-                                        <!-- ★ Mobile collapse chevron ★ -->
-                                        <i
-                                            class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                        <i class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
                                     </div>
                                 </div>
                                 <div class="kanban-cards" id="col-new"></div>
                                 <div class="kanban-drop-zone">Drop here</div>
                             </div>
-
-                            <!-- In Progress column -->
                             <div class="kanban-col" data-state="in_progress">
                                 <div class="kanban-col-header" data-col-toggle="in_progress">
                                     <span class="kanban-col-title"><i class="bi bi-arrow-repeat"></i>
                                         In Progress</span>
                                     <div class="kanban-col-header-right">
                                         <span class="kanban-col-count" id="count-in_progress">0</span>
-                                        <i
-                                            class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                        <i class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
                                     </div>
                                 </div>
                                 <div class="kanban-cards" id="col-in_progress"></div>
                                 <div class="kanban-drop-zone">Drop here</div>
                             </div>
-
-                            <!-- Resolved column -->
                             <div class="kanban-col" data-state="resolved">
                                 <div class="kanban-col-header" data-col-toggle="resolved">
                                     <span class="kanban-col-title"><i class="bi bi-check-circle"></i>
                                         Resolved</span>
                                     <div class="kanban-col-header-right">
                                         <span class="kanban-col-count" id="count-resolved">0</span>
-                                        <i
-                                            class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                        <i class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
                                     </div>
                                 </div>
                                 <div class="kanban-cards" id="col-resolved"></div>
                                 <div class="kanban-drop-zone">Drop here</div>
                             </div>
-
-                            <!-- Closed column -->
                             <div class="kanban-col" data-state="closed">
                                 <div class="kanban-col-header" data-col-toggle="closed">
                                     <span class="kanban-col-title"><i class="bi bi-x-circle"></i>
                                         Closed</span>
                                     <div class="kanban-col-header-right">
                                         <span class="kanban-col-count" id="count-closed">0</span>
-                                        <i
-                                            class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
+                                        <i class="bi bi-chevron-down kanban-col-chevron mobile-only"></i>
                                     </div>
                                 </div>
                                 <div class="kanban-cards" id="col-closed"></div>
                                 <div class="kanban-drop-zone">Drop here</div>
                             </div>
-
                         </div>
                     </div>
                 </div>
                 <!-- ═══ END TICKETS PAGE ═══ -->
 
                 <!-- ═══ FAQ PAGE ═══ -->
-                <div class="page-content dashboard-content" id="faq-page" style="display: none;">
+                <div class="page-content dashboard-content" id="faq-page" style="display:none;">
                     <div class="dashboard-card">
                         <div class="card-header">
                             <h2 class="card-title"><i class="bi bi-question-circle"></i>Manage FAQ</h2>
@@ -700,10 +726,11 @@
                 </div>
                 <!-- ═══ END FAQ PAGE ═══ -->
 
-                <!-- ★ MOBILE NAV OVERLAY ★ -->
-                <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+                <!-- Hover tooltip (single shared instance) -->
+                <div class="ticket-tooltip" id="ticketTooltip"></div>
 
-                <!-- ★ MOBILE NAV DRAWER ★ -->
+                <!-- Mobile nav overlay + drawer -->
+                <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
                 <div class="mobile-nav-drawer" id="mobileNavDrawer">
                     <div class="mobile-nav-drawer-header">
                         <div class="drawer-brand-icon">
@@ -717,9 +744,7 @@
                             <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
-
                     <div class="mobile-nav-section-label">Navigation</div>
-
                     <ul class="mobile-nav-list">
                         <li>
                             <a class="mobile-nav-item active" data-view="overview">
@@ -758,549 +783,568 @@
                             </a>
                         </li>
                     </ul>
-
                     <div class="mobile-nav-drawer-footer">
                         <p>Customer Support System &#169; 2025</p>
                     </div>
                 </div>
-                <!-- ★ END MOBILE NAV DRAWER ★ -->
+            </div>
 
-            </div><!--
-            /.dashboard-wrapper -->
-
-            <!-- Save feedback toast -->
             <div id="kanbanToast"></div>
 
             <script
                 src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-            <!-- ═══════════════════════════════════════════════════════════
-                 1.  BELL / SLA ALERTS  — polls every 30 s
-            ═══════════════════════════════════════════════════════════ -->
+            <!-- ═══ 1. BELL / SLA ALERTS ═══ -->
             <script type="text/javascript">
                 //<![CDATA[
-(function () {
-    'use strict';
-    var bell     = document.getElementById('notifBell');
-    var dropdown = document.getElementById('notifDropdown');
-
-    bell.addEventListener('click', function (e) {
-        e.stopPropagation();
-        dropdown.classList.toggle('open');
+(function(){
+'use strict';
+var bell=document.getElementById('notifBell');
+var dropdown=document.getElementById('notifDropdown');
+bell.addEventListener('click',function(e){e.stopPropagation();dropdown.classList.toggle('open');});
+document.addEventListener('click',function(){dropdown.classList.remove('open');});
+dropdown.addEventListener('click',function(e){e.stopPropagation();});
+document.getElementById('markAllRead').addEventListener('click',function(){
+    document.querySelectorAll('.notif-item').forEach(function(i){i.classList.remove('unread');});
+    document.getElementById('notifBadge').classList.add('d-none');
+});
+document.querySelectorAll('.notif-nav-link').forEach(function(a){
+    a.addEventListener('click',function(e){
+        e.preventDefault();
+        window.switchView(this.getAttribute('data-view'));
+        dropdown.classList.remove('open');
     });
-    document.addEventListener('click', function () { dropdown.classList.remove('open'); });
-    dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
-
-    document.getElementById('markAllRead').addEventListener('click', function () {
-        document.querySelectorAll('.notif-item').forEach(function (i) { i.classList.remove('unread'); });
-        document.getElementById('notifBadge').classList.add('d-none');
-    });
-
-    document.querySelectorAll('.notif-nav-link').forEach(function (a) {
-        a.addEventListener('click', function (e) {
-            e.preventDefault();
-            window.switchView(this.getAttribute('data-view'));
-            dropdown.classList.remove('open');
-        });
-    });
-
-    function loadSlaAlerts() {
-        fetch('/customer_support/dashboard/sla_alerts', {
-            method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' }
-        })
-        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then(function (data) { renderAlerts(data.alerts || []); })
-        .catch(function () { renderAlerts([]); });
+});
+function loadSlaAlerts(){
+    fetch('/customer_support/dashboard/sla_alerts',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(data){renderAlerts(data.alerts||[]);})
+    .catch(function(){renderAlerts([]);});
+}
+function renderAlerts(alerts){
+    var list=document.getElementById('notifList');
+    var badge=document.getElementById('notifBadge');
+    if(!alerts.length){
+        list.innerHTML='<div class="notif-empty"><i class="bi bi-check-circle-fill" style="font-size:2rem;color:#10b981;display:block;margin-bottom:.5rem;"></i>All tickets are on track!</div>';
+        badge.classList.add('d-none');
+        return;
     }
-
-    function renderAlerts(alerts) {
-        var list  = document.getElementById('notifList');
-        var badge = document.getElementById('notifBadge');
-        if (!alerts.length) {
-            list.innerHTML = '<div class="notif-empty"><i class="bi bi-check-circle-fill" style="font-size:2rem;color:#22c55e;display:block;margin-bottom:.5rem;"></i>All tickets are on track!</div>';
-            badge.classList.add('d-none');
-            return;
-        }
-        badge.textContent = alerts.length;
-        badge.classList.remove('d-none');
-        list.innerHTML = alerts.map(function (a) {
-            var cls   = a.sla_status === 'breached' ? 'breached' : 'at-risk';
-            var icon  = cls === 'breached' ? 'bi-x-octagon-fill' : 'bi-exclamation-triangle-fill';
-            var label = cls === 'breached' ? 'SLA Breached' : 'At Risk';
-            return '<a class="notif-item unread" href="/customer_support/ticket/' + a.ticket_id + '">'
-                + '<div class="notif-icon-wrap ' + cls + '"><i class="bi ' + icon + '"></i></div>'
-                + '<div class="notif-body">'
-                + '<div class="notif-title">' + a.ticket_name + ' \u2014 ' + a.subject + '</div>'
-                + '<div class="notif-sub">' + label + ' \u00b7 ' + a.time_display + '</div>'
-                + '<div class="notif-time-text">Policy: ' + (a.policy_name || 'None') + '</div>'
-                + '</div><div class="notif-dot ' + cls + '"></div></a>';
-        }).join('');
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        loadSlaAlerts();
-        setInterval(loadSlaAlerts, 30000);
-    });
+    badge.textContent=alerts.length;
+    badge.classList.remove('d-none');
+    list.innerHTML=alerts.map(function(a){
+        var cls=a.sla_status==='breached'?'breached':'at-risk';
+        var icon=cls==='breached'?'bi-x-octagon-fill':'bi-exclamation-triangle-fill';
+        var label=cls==='breached'?'SLA Breached':'At Risk';
+        return '<a class="notif-item unread" href="/customer_support/ticket/'+a.ticket_id+'">'
+            +'<div class="notif-icon-wrap '+cls+'"><i class="bi '+icon+'"></i></div>'
+            +'<div class="notif-body">'
+            +'<div class="notif-title">'+a.ticket_name+' \u2014 '+a.subject+'</div>'
+            +'<div class="notif-sub">'+label+' \u00b7 '+a.time_display+'</div>'
+            +'<div class="notif-time-text">Policy: '+(a.policy_name||'None')+'</div>'
+            +'</div><div class="notif-dot '+cls+'"></div></a>';
+    }).join('');
+}
+document.addEventListener('DOMContentLoaded',function(){loadSlaAlerts();setInterval(loadSlaAlerts,30000);});
 })();
 //]]>
             </script>
 
-            <!-- ═══════════════════════════════════════════════════════════
-                 2.  LIVE ANALYTICS + PERFORMANCE  — polls every 15 s
-            ═══════════════════════════════════════════════════════════ -->
+            <!-- ═══ 2. LIVE ANALYTICS ═══ -->
             <script type="text/javascript">
                 //<![CDATA[
-(function () {
-    'use strict';
-    var INTERVAL = 15000;
-    var A = [
-        { key: 'open_tickets',    sel: '[data-key="open_tickets"] .stat-value' },
-        { key: 'total_tickets',   sel: '[data-key="total_tickets"] .stat-value' },
-        { key: 'high_priority',   sel: '[data-key="high_priority"] .stat-value' },
-        { key: 'urgent',          sel: '[data-key="urgent"] .stat-value' },
-        { key: 'avg_open_hours',  sel: '[data-key="avg_open_hours"] .stat-value' },
-        { key: 'total_hours',     sel: '[data-key="total_hours"] .stat-value' },
-        { key: 'avg_high_hours',  sel: '[data-key="avg_high_hours"] .stat-value' },
-        { key: 'avg_urgent_hours',sel: '[data-key="avg_urgent_hours"] .stat-value' },
-        { key: 'resolved_tickets',sel: '[data-key="resolved_tickets"] .stat-value' },
-        { key: 'solve_rate',      sel: '[data-key="solve_rate"] .stat-value', sfx: '%' },
-        { key: 'high_resolved',   sel: '[data-key="high_resolved"] .stat-value' },
-        { key: 'urgent_resolved', sel: '[data-key="urgent_resolved"] .stat-value' }
-    ];
-    var P = [
-        { key: 'today_closed',      sel: '[data-key="today_closed"] .performance-value' },
-        { key: 'avg_resolve_rate',  sel: '[data-key="avg_resolve_rate"] .performance-value', sfx: '%' },
-        { key: 'daily_target',      sel: '[data-key="daily_target"] .performance-value', sfx: '%' },
-        { key: 'achievement',       sel: '[data-key="achievement"] .performance-value', sfx: '%' },
-        { key: 'sample_performance',sel: '[data-key="sample_performance"] .score-badge', sfx: '%' }
-    ];
-
-    function upd(sel, val, sfx) { var el = document.querySelector(sel); if (el) el.textContent = val + (sfx || ''); }
-    function flash(sel) {
-        var el = document.querySelector(sel);
-        if (el) { el.style.transition = 'color 0.3s'; el.style.color = '#1e88c7'; setTimeout(function () { el.style.color = ''; }, 600); }
-    }
-    function updBar(v) {
-        var b = document.querySelector('.progress-bar');
-        if (b) { b.style.width = v + '%'; b.className = 'progress-bar ' + (v >= 80 ? 'bg-success' : 'bg-warning'); }
-    }
-    function updBarLabel(v) {
-        var ls = document.querySelectorAll('.progress-label span');
-        if (ls.length >= 2) ls[1].textContent = v + '%';
-    }
-    function updTime() {
-        var t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        document.querySelectorAll('.last-updated').forEach(function (el) {
-            el.innerHTML = '<i class="bi bi-clock me-1"></i>Updated at ' + t;
-        });
-    }
-
-    function run() {
-        fetch('/customer_support/dashboard/analytics', {
-            method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' }
-        })
-        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then(function (d) {
-            var a = d.analytics || {}, p = d.performance || {};
-            A.forEach(function (i) { var v = a[i.key]; if (v !== undefined) { upd(i.sel, v, i.sfx || ''); flash(i.sel); } });
-            P.forEach(function (i) { var v = p[i.key]; if (v !== undefined) upd(i.sel, v, i.sfx || ''); });
-            if (p.achievement !== undefined) { updBar(p.achievement); updBarLabel(p.achievement); }
-            updTime();
-        })
-        .catch(function (e) { console.warn('Analytics refresh failed:', e); });
-    }
-
-    document.addEventListener('DOMContentLoaded', function () { run(); setInterval(run, INTERVAL); });
+(function(){
+'use strict';
+var INTERVAL=15000;
+var A=[
+    {key:'open_tickets',sel:'[data-key="open_tickets"] .stat-value'},
+    {key:'total_tickets',sel:'[data-key="total_tickets"] .stat-value'},
+    {key:'high_priority',sel:'[data-key="high_priority"] .stat-value'},
+    {key:'urgent',sel:'[data-key="urgent"] .stat-value'},
+    {key:'avg_open_hours',sel:'[data-key="avg_open_hours"] .stat-value'},
+    {key:'total_hours',sel:'[data-key="total_hours"] .stat-value'},
+    {key:'avg_high_hours',sel:'[data-key="avg_high_hours"] .stat-value'},
+    {key:'avg_urgent_hours',sel:'[data-key="avg_urgent_hours"] .stat-value'},
+    {key:'resolved_tickets',sel:'[data-key="resolved_tickets"] .stat-value'},
+    {key:'solve_rate',sel:'[data-key="solve_rate"] .stat-value',sfx:'%'},
+    {key:'high_resolved',sel:'[data-key="high_resolved"] .stat-value'},
+    {key:'urgent_resolved',sel:'[data-key="urgent_resolved"] .stat-value'}
+];
+var P=[
+    {key:'today_closed',sel:'[data-key="today_closed"] .performance-value'},
+    {key:'avg_resolve_rate',sel:'[data-key="avg_resolve_rate"] .performance-value',sfx:'%'},
+    {key:'daily_target',sel:'[data-key="daily_target"] .performance-value',sfx:'%'},
+    {key:'achievement',sel:'[data-key="achievement"] .performance-value',sfx:'%'},
+    {key:'sample_performance',sel:'[data-key="sample_performance"] .score-badge',sfx:'%'}
+];
+function upd(sel,val,sfx){var el=document.querySelector(sel);if(el)el.textContent=val+(sfx||'');}
+function flash(sel){var el=document.querySelector(sel);if(el){el.style.transition='color 0.3s';el.style.color='#0284c7';setTimeout(function(){el.style.color='';},600);}}
+function updBar(v){var b=document.querySelector('.progress-bar');if(b){b.style.width=v+'%';b.className='progress-bar '+(v>=80?'bg-success':'bg-warning');}}
+function updBarLabel(v){var ls=document.querySelectorAll('.progress-label span');if(ls.length>=2)ls[1].textContent=v+'%';}
+function updTime(){var t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});document.querySelectorAll('.last-updated').forEach(function(el){el.innerHTML='<i class="bi bi-clock me-1"></i>Updated at '+t;});}
+function run(){
+    fetch('/customer_support/dashboard/analytics',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(d){
+        var a=d.analytics||{},p=d.performance||{};
+        A.forEach(function(i){var v=a[i.key];if(v!==undefined){upd(i.sel,v,i.sfx||'');flash(i.sel);}});
+        P.forEach(function(i){var v=p[i.key];if(v!==undefined)upd(i.sel,v,i.sfx||'');});
+        if(p.achievement!==undefined){updBar(p.achievement);updBarLabel(p.achievement);}
+        updTime();
+    })
+    .catch(function(e){console.warn('Analytics refresh failed:',e);});
+}
+document.addEventListener('DOMContentLoaded',function(){run();setInterval(run,INTERVAL);});
 })();
 //]]>
             </script>
 
-            <!-- ═══════════════════════════════════════════════════════════
-                 3.  DASHBOARD NAV + TICKET POLLING + KANBAN ENGINE
-            ═══════════════════════════════════════════════════════════ -->
+            <!-- ═══ 3. NAV + TICKET POLLING + KANBAN + FILTERS + TOOLTIP ═══ -->
             <script type="text/javascript">
                 //<![CDATA[
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded',function(){
 
-    // ── Auto-hide flash alerts ────────────────────────────────────────────
-    setTimeout(function () {
-        document.querySelectorAll('.alert').forEach(function (a) { new bootstrap.Alert(a).close(); });
-    }, 5000);
-
-    // ── Spinner keyframe (added once) ────────────────────────────────────
-    var spinStyle = document.createElement('style');
-    spinStyle.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+    /* ── Spinner ── */
+    var spinStyle=document.createElement('style');
+    spinStyle.textContent='@keyframes spin{to{transform:rotate(360deg);}}';
     document.head.appendChild(spinStyle);
 
-    // ── Toast helper ─────────────────────────────────────────────────────
-    var toastEl = document.getElementById('kanbanToast');
+    /* ── Alerts auto-close ── */
+    setTimeout(function(){document.querySelectorAll('.alert').forEach(function(a){new bootstrap.Alert(a).close();});},5000);
+
+    /* ── Toast ── */
+    var toastEl=document.getElementById('kanbanToast');
     var toastTimer;
-    function showToast(msg, type) {
-        toastEl.textContent = msg;
-        toastEl.className   = 'show ' + (type || '');
+    function showToast(msg,type){
+        toastEl.textContent=msg;
+        toastEl.className='show '+(type||'');
         clearTimeout(toastTimer);
-        toastTimer = setTimeout(function () { toastEl.className = ''; }, 3000);
+        toastTimer=setTimeout(function(){toastEl.className='';},3000);
     }
 
-    // ── Page switching ────────────────────────────────────────────────────
-    window.switchView = function (viewId) {
-        // Desktop nav links
-        document.querySelectorAll('.header-nav .nav-link').forEach(function (l) { l.classList.remove('active'); });
-        var nl = document.querySelector('.header-nav .nav-link[data-view="' + viewId + '"]');
-        if (nl) nl.classList.add('active');
-
-        // Mobile drawer items — keep in sync
-        document.querySelectorAll('.mobile-nav-item').forEach(function (i) { i.classList.remove('active'); });
-        var mni = document.querySelector('.mobile-nav-item[data-view="' + viewId + '"]');
-        if (mni) mni.classList.add('active');
-
-        // Pages
-        document.querySelectorAll('.page-content').forEach(function (p) { p.style.display = 'none'; });
-        var target = document.getElementById(viewId + '-page');
-        if (target) target.style.display = 'block';
+    /* ── Page switching ── */
+    window.switchView=function(viewId){
+        document.querySelectorAll('.header-nav .nav-link').forEach(function(l){l.classList.remove('active');});
+        var nl=document.querySelector('.header-nav .nav-link[data-view="'+viewId+'"]');
+        if(nl)nl.classList.add('active');
+        document.querySelectorAll('.mobile-nav-item').forEach(function(i){i.classList.remove('active');});
+        var mni=document.querySelector('.mobile-nav-item[data-view="'+viewId+'"]');
+        if(mni)mni.classList.add('active');
+        document.querySelectorAll('.page-content').forEach(function(p){p.style.display='none';});
+        var target=document.getElementById(viewId+'-page');
+        if(target)target.style.display='block';
     };
-
-    document.querySelectorAll('.header-nav .nav-link').forEach(function (link) {
-        link.addEventListener('click', function (e) { e.preventDefault(); window.switchView(this.getAttribute('data-view')); });
+    document.querySelectorAll('.header-nav .nav-link').forEach(function(link){
+        link.addEventListener('click',function(e){e.preventDefault();window.switchView(this.getAttribute('data-view'));});
     });
-    document.querySelectorAll('.action-card[data-view]').forEach(function (card) {
-        card.addEventListener('click', function (e) { e.preventDefault(); window.switchView(this.getAttribute('data-view')); });
+    document.querySelectorAll('.action-card[data-view]').forEach(function(card){
+        card.addEventListener('click',function(e){e.preventDefault();window.switchView(this.getAttribute('data-view'));});
     });
 
-    // ── List / Kanban view toggle (desktop buttons) ───────────────────────
-    var listViewBtn   = document.getElementById('listViewBtn');
-    var kanbanViewBtn = document.getElementById('kanbanViewBtn');
-    var listView      = document.getElementById('listView');
-    var kanbanView    = document.getElementById('kanbanView');
+    /* ── List / Kanban toggle ── */
+    var listViewBtn=document.getElementById('listViewBtn');
+    var kanbanViewBtn=document.getElementById('kanbanViewBtn');
+    var listView=document.getElementById('listView');
+    var kanbanView=document.getElementById('kanbanView');
 
-    function showList() {
-        listView.style.display   = 'block';
-        kanbanView.style.display = 'none';
-        listViewBtn.classList.add('active');
-        kanbanViewBtn.classList.remove('active');
-        // Sync mobile pill
+    function showList(){
+        listView.style.display='block';kanbanView.style.display='none';
+        listViewBtn.classList.add('active');kanbanViewBtn.classList.remove('active');
         document.getElementById('mobilePillList').classList.add('active');
         document.getElementById('mobilePillKanban').classList.remove('active');
     }
-    function showKanban() {
-        listView.style.display   = 'none';
-        kanbanView.style.display = 'block';
-        listViewBtn.classList.remove('active');
-        kanbanViewBtn.classList.add('active');
-        // Sync mobile pill
+    function showKanban(){
+        listView.style.display='none';kanbanView.style.display='block';
+        listViewBtn.classList.remove('active');kanbanViewBtn.classList.add('active');
         document.getElementById('mobilePillList').classList.remove('active');
         document.getElementById('mobilePillKanban').classList.add('active');
         updateCounts();
     }
-    listViewBtn.addEventListener('click', showList);
-    kanbanViewBtn.addEventListener('click', showKanban);
-
-    // ── Mobile pill toggle ────────────────────────────────────────────────
-    document.getElementById('mobilePillList').addEventListener('click', function () {
-        showList();
-    });
-    document.getElementById('mobilePillKanban').addEventListener('click', function () {
-        showKanban();
+    listViewBtn.addEventListener('click',showList);
+    kanbanViewBtn.addEventListener('click',showKanban);
+    document.getElementById('mobilePillList').addEventListener('click',showList);
+    document.getElementById('mobilePillKanban').addEventListener('click',showKanban);
+    document.getElementById('kanbanToggleBtn').addEventListener('click',function(){
+        window.switchView('tickets');showKanban();this.classList.toggle('active');
     });
 
-    // ── Header kanban shortcut ───────────────────────────────────────────
-    document.getElementById('kanbanToggleBtn').addEventListener('click', function () {
-        window.switchView('tickets');
-        showKanban();
-        this.classList.toggle('active');
-    });
-
-    // ── Column counts ─────────────────────────────────────────────────────
-    function updateCounts() {
-        ['new', 'in_progress', 'resolved', 'closed'].forEach(function (s) {
-            var col = document.getElementById('col-' + s);
-            var cnt = document.getElementById('count-' + s);
-            if (col && cnt) cnt.textContent = col.querySelectorAll('.kanban-card').length;
+    /* ── Column counts ── */
+    function updateCounts(){
+        ['new','in_progress','resolved','closed'].forEach(function(s){
+            var col=document.getElementById('col-'+s);
+            var cnt=document.getElementById('count-'+s);
+            if(col&&cnt)cnt.textContent=col.querySelectorAll('.kanban-card').length;
         });
     }
 
-    // ── Mobile kanban column collapse ─────────────────────────────────────
-    document.querySelectorAll('.kanban-col-header[data-col-toggle]').forEach(function (header) {
-        header.addEventListener('click', function () {
-            // Only collapse on mobile — guard with CSS class check
-            if (window.innerWidth > 768) return;
-            var col = this.closest('.kanban-col');
+    /* ── Mobile kanban collapse ── */
+    document.querySelectorAll('.kanban-col-header[data-col-toggle]').forEach(function(header){
+        header.addEventListener('click',function(){
+            if(window.innerWidth>768)return;
+            var col=this.closest('.kanban-col');
             col.classList.toggle('collapsed');
-            var chevron = this.querySelector('.kanban-col-chevron');
-            if (chevron) {
-                chevron.classList.toggle('bi-chevron-down');
-                chevron.classList.toggle('bi-chevron-up');
-            }
+            var chevron=this.querySelector('.kanban-col-chevron');
+            if(chevron){chevron.classList.toggle('bi-chevron-down');chevron.classList.toggle('bi-chevron-up');}
         });
     });
 
-    // ── Search ────────────────────────────────────────────────────────────
-    var searchInput = document.querySelector('.search-input');
-    function applySearch() {
-        if (!searchInput) return;
-        var term = searchInput.value.toLowerCase();
-        document.querySelectorAll('.ticket-row').forEach(function (r) {
-            r.style.display = r.textContent.toLowerCase().includes(term) ? '' : 'none';
+    /* ── Filter state ── */
+    var activeStatus='all';
+    var activePriority='all';
+
+    document.querySelectorAll('[data-filter-type="status"]').forEach(function(btn){
+        btn.addEventListener('click',function(){
+            document.querySelectorAll('[data-filter-type="status"]').forEach(function(b){b.classList.remove('active');});
+            this.classList.add('active');
+            activeStatus=this.getAttribute('data-filter-val');
+            applyFilters();
         });
-        document.querySelectorAll('.kanban-card').forEach(function (c) {
-            c.style.display = c.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+    document.querySelectorAll('[data-filter-type="priority"]').forEach(function(btn){
+        btn.addEventListener('click',function(){
+            document.querySelectorAll('[data-filter-type="priority"]').forEach(function(b){b.classList.remove('active');});
+            this.classList.add('active');
+            activePriority=this.getAttribute('data-filter-val');
+            applyFilters();
         });
+    });
+
+    /* ── Search ── */
+    var searchInput=document.getElementById('ticketSearchInput');
+    if(searchInput)searchInput.addEventListener('input',applyFilters);
+
+    function applyFilters(){
+        var term=searchInput?searchInput.value.toLowerCase():'';
+        var rows=document.querySelectorAll('.ticket-row');
+        var visible=0;
+        rows.forEach(function(r){
+            var rowState=r.getAttribute('data-state')||'';
+            var rowPrio=r.getAttribute('data-priority')||'';
+            var rowText=r.textContent.toLowerCase();
+            var stateMatch=activeStatus==='all'||(activeStatus==='new'&&(rowState==='new'||rowState==='assigned'))||rowState===activeStatus;
+            var prioMatch=activePriority==='all'||rowPrio===activePriority;
+            var textMatch=!term||rowText.includes(term);
+            var show=stateMatch&&prioMatch&&textMatch;
+            r.style.display=show?'':'none';
+            if(show)visible++;
+        });
+        /* Kanban search */
+        document.querySelectorAll('.kanban-card').forEach(function(c){
+            c.style.display=c.textContent.toLowerCase().includes(term)?'':'none';
+        });
+        /* Update count label */
+        var countEl=document.getElementById('filterCount');
+        if(countEl)countEl.textContent=visible+' ticket'+(visible!==1?'s':'');
+        /* Show/hide empty state */
+        var table=document.getElementById('ticketTable');
+        var emptyState=document.getElementById('ticketsEmptyState');
+        if(table&&table.style.display!=='none'){
+            if(emptyState){
+                if(visible===0&&rows.length>0){emptyState.style.display='block';}
+                else{emptyState.style.display='none';}
+            }
+        }
     }
-    if (searchInput) searchInput.addEventListener('input', applySearch);
 
-    // ════════════════════════════════════════════════════════════════════
-    //  TICKET POLLING ENGINE
-    // ════════════════════════════════════════════════════════════════════
-    var _renderedIds = {};
-    var _firstLoad   = true;
+    /* ── Helpers ── */
+    function escHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-    function toColState(state) {
-        if (state === 'assigned' || state === 'new') return 'new';
-        if (state === 'in_progress') return 'in_progress';
-        if (state === 'resolved')    return 'resolved';
-        if (state === 'closed')      return 'closed';
+    function toColState(state){
+        if(state==='assigned'||state==='new')return 'new';
+        if(state==='in_progress')return 'in_progress';
+        if(state==='resolved')return 'resolved';
+        if(state==='closed')return 'closed';
         return 'new';
     }
-
-    function stateLabel(state) {
-        var map = { new:'New', assigned:'Assigned', in_progress:'In Progress', resolved:'Resolved', closed:'Closed' };
-        return map[state] || state.replace(/_/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    function stateLabel(state){
+        var map={new:'New',assigned:'Assigned',in_progress:'In Progress',resolved:'Resolved',closed:'Closed'};
+        return map[state]||state.replace(/_/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
     }
-
-    function stateCssClass(state) {
-        if (state === 'new' || state === 'assigned') return 'status-new';
-        if (state === 'in_progress') return 'status-in-progress';
-        if (state === 'resolved')    return 'status-resolved';
-        if (state === 'closed')      return 'status-closed';
+    function stateCssClass(state){
+        if(state==='new'||state==='assigned')return 'status-new';
+        if(state==='in_progress')return 'status-in-progress';
+        if(state==='resolved')return 'status-resolved';
+        if(state==='closed')return 'status-closed';
         return 'status-new';
     }
+    function prioClass(p){return 'priority-'+(p||'low');}
+    function prioLabel(p){return(p||'low').charAt(0).toUpperCase()+(p||'low').slice(1);}
 
-    function buildListRow(t) {
-        var av  = t.customer_id ? '/web/image/res.partner/' + t.customer_id + '/avatar_128' : '/web/static/img/avatar_gray.svg';
-        var sc  = stateCssClass(t.state);
-        var sd  = stateLabel(t.state);
-        var pc  = 'priority-' + (t.priority || 'low');
-        var pl  = (t.priority || 'low').charAt(0).toUpperCase() + (t.priority || 'low').slice(1);
-        return '<tr class="ticket-row" data-ticket-id="' + t.id + '" style="cursor:pointer;">'
-            + '<td class="ticket-info-col"><div class="ticket-id-badge">' + escHtml(t.name) + '</div><div class="ticket-description">' + escHtml(t.subject || 'No description') + '</div></td>'
-            + '<td class="customer-col"><div class="customer-info"><img src="' + av + '" class="customer-avatar" onerror="this.src=\'/web/static/img/avatar_gray.svg\'" /><span class="customer-name">' + escHtml(t.customer_name) + '</span></div></td>'
-            + '<td class="status-col"><span class="table-status-badge ' + sc + '">' + sd + '</span></td>'
-            + '<td class="priority-col"><span class="table-priority-badge ' + pc + '">' + pl + '</span></td>'
-            + '<td class="created-col">' + escHtml(t.create_date) + '</td>'
-            + '<td class="project-col"><i class="bi bi-folder2"></i> <span>Support</span></td>'
-            + '</tr>';
+    /* Age helper */
+    function ticketAge(createDate){
+        if(!createDate)return '';
+        var d=new Date(createDate);
+        if(isNaN(d))return createDate;
+        var diffMs=Date.now()-d.getTime();
+        var diffMins=Math.floor(diffMs/60000);
+        if(diffMins<60)return diffMins+'m ago';
+        var diffHrs=Math.floor(diffMins/60);
+        if(diffHrs<24)return diffHrs+'h ago';
+        return Math.floor(diffHrs/24)+'d ago';
     }
 
-    function buildKanbanCard(t) {
-        var av = t.customer_id ? '/web/image/res.partner/' + t.customer_id + '/avatar_128' : '/web/static/img/avatar_gray.svg';
-        var pc = 'priority-' + (t.priority || 'low');
-        var pl = (t.priority || 'low').charAt(0).toUpperCase() + (t.priority || 'low').slice(1);
-        return '<div class="kanban-card" data-ticket-id="' + t.id + '" data-state="' + toColState(t.state) + '" draggable="true">'
-            + '<div class="kanban-card-id">' + escHtml(t.name) + '</div>'
-            + '<div class="kanban-card-subject">' + escHtml(t.subject || '') + '</div>'
-            + '<div class="kanban-card-footer"><div class="kanban-card-customer"><img src="' + av + '" onerror="this.src=\'/web/static/img/avatar_gray.svg\'" /><span>' + escHtml(t.customer_name) + '</span></div>'
-            + '<span class="kanban-priority ' + pc + '">' + pl + '</span></div></div>';
+    /* Initials from name */
+    function initials(name){
+        if(!name)return '?';
+        var parts=name.trim().split(' ');
+        return(parts[0][0]+(parts.length>1?parts[parts.length-1][0]:'')).toUpperCase();
     }
 
-    function escHtml(str) {
-        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    /* Avatar colours keyed by first char */
+    var AVATAR_COLORS=['#0c4a6e','#1e5a8e','#185fa5','#0f6e56','#854f0b','#712b13','#534ab7','#3b6d11'];
+    function avatarColor(name){
+        var c=(name||'?').charCodeAt(0)%AVATAR_COLORS.length;
+        return AVATAR_COLORS[c];
     }
 
-    function renderTickets(tickets) {
-        var newIds = {};
-        tickets.forEach(function (t) { newIds[t.id] = true; });
-        var addedIds = [];
-        if (!_firstLoad) {
-            tickets.forEach(function (t) { if (!_renderedIds[t.id]) addedIds.push(t.id); });
-        }
-        _renderedIds = newIds;
-        _firstLoad   = false;
+    /* ── Build list row ── */
+    function buildListRow(t){
+        var sc=stateCssClass(t.state);
+        var sd=stateLabel(t.state);
+        var pc=prioClass(t.priority);
+        var pl=prioLabel(t.priority);
+        var prioAccent='tr-'+(t.priority||'low');
+        var av=t.customer_id?'/web/image/res.partner/'+t.customer_id+'/avatar_128':'';
+        var initStr=initials(t.customer_name);
+        var bgColor=avatarColor(t.customer_name);
 
-        var tbody      = document.getElementById('ticketTableBody');
-        var table      = document.getElementById('ticketTable');
-        var emptyState = document.getElementById('ticketsEmptyState');
-        var loading    = document.getElementById('ticketsLoadingState');
-        loading.style.display = 'none';
-        if (tickets.length === 0) {
-            table.style.display      = 'none';
-            emptyState.style.display = 'block';
-        } else {
-            emptyState.style.display = 'none';
-            table.style.display      = '';
-            tbody.innerHTML          = tickets.map(buildListRow).join('');
-            bindRowClicks();
-        }
+        /* Split date into date + time parts if possible */
+        var dateParts=String(t.create_date||'').split(' ');
+        var datePart=dateParts[0]||'';
+        var timePart=dateParts[1]?dateParts[1].substring(0,5):'';
 
-        var cols = { new: [], in_progress: [], resolved: [], closed: [] };
-        tickets.forEach(function (t) { cols[toColState(t.state)].push(t); });
+        var avatarHtml=av
+            ?'<img class="cust-img" src="'+escHtml(av)+'" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\';" /><div class="cust-initials" style="display:none;background:'+bgColor+';">'+escHtml(initStr)+'</div>'
+            :'<div class="cust-initials" style="background:'+bgColor+';">'+escHtml(initStr)+'</div>';
 
-        ['new', 'in_progress', 'resolved', 'closed'].forEach(function (state) {
-            var colEl = document.getElementById('col-' + state);
-            if (!colEl) return;
-            var existingIds = {};
-            colEl.querySelectorAll('.kanban-card').forEach(function (card) {
-                existingIds[card.getAttribute('data-ticket-id')] = card;
+        return '<tr class="ticket-row '+prioAccent+'" data-ticket-id="'+t.id+'" data-state="'+escHtml(t.state)+'" data-priority="'+escHtml(t.priority||'low')+'"'
+            +' data-subject="'+escHtml(t.subject||'')+'" data-customer="'+escHtml(t.customer_name||'')+'" data-date="'+escHtml(t.create_date||'')+'">'
+            +'<td class="col-ticket"><div class="tkt-ref">'+escHtml(t.name)+'</div><div class="tkt-subject">'+escHtml(t.subject||'No description')+'</div></td>'
+            +'<td class="col-customer"><div class="cust-cell">'+avatarHtml+'<span class="cust-name-text">'+escHtml(t.customer_name)+'</span></div></td>'
+            +'<td class="col-status"><span class="table-status-badge '+sc+'">'+sd+'</span></td>'
+            +'<td class="col-priority"><span class="table-priority-badge '+pc+'">'+pl+'</span></td>'
+            +'<td class="col-created"><div class="created-date-main">'+escHtml(datePart)+'</div><div class="created-date-time">'+escHtml(timePart)+'</div></td>'
+            +'<td class="col-project"><span class="project-tag"><i class="bi bi-folder2"></i> Support</span></td>'
+            +'</tr>';
+    }
+
+    /* ── Build kanban card ── */
+    function buildKanbanCard(t){
+        var av=t.customer_id?'/web/image/res.partner/'+t.customer_id+'/avatar_128':'/web/static/img/avatar_gray.svg';
+        var pc=prioClass(t.priority);
+        var pl=prioLabel(t.priority);
+        return '<div class="kanban-card" data-ticket-id="'+t.id+'" data-state="'+toColState(t.state)+'" draggable="true">'
+            +'<div class="kanban-card-id">'+escHtml(t.name)+'</div>'
+            +'<div class="kanban-card-subject">'+escHtml(t.subject||'')+'</div>'
+            +'<div class="kanban-card-footer"><div class="kanban-card-customer"><img src="'+escHtml(av)+'" onerror="this.src=\'/web/static/img/avatar_gray.svg\'"/><span>'+escHtml(t.customer_name)+'</span></div>'
+            +'<span class="kanban-priority '+pc+'">'+pl+'</span></div></div>';
+    }
+
+    /* ── Tooltip ── */
+    var tooltip=document.getElementById('ticketTooltip');
+    var tooltipTimer;
+
+    function showTooltip(row,e){
+        var subject=row.getAttribute('data-subject')||'';
+        var customer=row.getAttribute('data-customer')||'';
+        var state=row.getAttribute('data-state')||'';
+        var priority=row.getAttribute('data-priority')||'';
+        var date=row.getAttribute('data-date')||'';
+        var ref=row.querySelector('.tkt-ref');
+        var refTxt=ref?ref.textContent:'';
+        tooltip.innerHTML=
+            '<div class="tt-ref">'+escHtml(refTxt)+'</div>'
+            +'<div class="tt-subject">'+escHtml(subject)+'</div>'
+            +'<div class="tt-row"><span class="tt-key">Customer</span><span class="tt-val">'+escHtml(customer)+'</span></div>'
+            +'<div class="tt-row"><span class="tt-key">Status</span><span class="tt-val">'+escHtml(stateLabel(state))+'</span></div>'
+            +'<div class="tt-row"><span class="tt-key">Priority</span><span class="tt-val">'+escHtml(prioLabel(priority))+'</span></div>'
+            +'<div class="tt-row"><span class="tt-key">Age</span><span class="tt-val">'+escHtml(ticketAge(date))+'</span></div>';
+
+        var rect=row.getBoundingClientRect();
+        var tipTop=rect.top+window.scrollY+(rect.height/2)-60;
+        var tipLeft=rect.right+12;
+        if(tipLeft+270>window.innerWidth)tipLeft=rect.left-282;
+        tooltip.style.top=tipTop+'px';
+        tooltip.style.left=tipLeft+'px';
+        tooltip.classList.add('visible');
+    }
+
+    function hideTooltip(){tooltip.classList.remove('visible');}
+
+    function bindRowEvents(){
+        document.querySelectorAll('.ticket-row').forEach(function(row){
+            row.addEventListener('click',function(){
+                var id=this.getAttribute('data-ticket-id');
+                if(id)window.location.href='/customer_support/ticket/'+id;
             });
-            cols[state].forEach(function (t) {
-                var tid = String(t.id);
-                if (!existingIds[tid]) {
-                    var tmp = document.createElement('div');
-                    tmp.innerHTML = buildKanbanCard(t);
-                    var newCard = tmp.firstChild;
+            row.addEventListener('mouseenter',function(e){
+                clearTimeout(tooltipTimer);
+                var r=this;
+                tooltipTimer=setTimeout(function(){showTooltip(r,e);},320);
+            });
+            row.addEventListener('mouseleave',function(){
+                clearTimeout(tooltipTimer);
+                hideTooltip();
+            });
+        });
+    }
+
+    /* ── Ticket polling ── */
+    var _renderedIds={};
+    var _firstLoad=true;
+
+    function renderTickets(tickets){
+        var newIds={};
+        tickets.forEach(function(t){newIds[t.id]=true;});
+        var addedIds=[];
+        if(!_firstLoad){tickets.forEach(function(t){if(!_renderedIds[t.id])addedIds.push(t.id);});}
+        _renderedIds=newIds;
+        _firstLoad=false;
+
+        var tbody=document.getElementById('ticketTableBody');
+        var table=document.getElementById('ticketTable');
+        var emptyState=document.getElementById('ticketsEmptyState');
+        var loading=document.getElementById('ticketsLoadingState');
+        loading.style.display='none';
+
+        if(tickets.length===0){
+            table.style.display='none';
+            emptyState.style.display='block';
+        } else {
+            emptyState.style.display='none';
+            table.style.display='';
+            tbody.innerHTML=tickets.map(buildListRow).join('');
+            bindRowEvents();
+        }
+
+        /* Kanban */
+        var cols={new:[],in_progress:[],resolved:[],closed:[]};
+        tickets.forEach(function(t){var s=toColState(t.state);if(cols[s])cols[s].push(t);});
+        ['new','in_progress','resolved','closed'].forEach(function(state){
+            var colEl=document.getElementById('col-'+state);
+            if(!colEl)return;
+            var existingIds={};
+            colEl.querySelectorAll('.kanban-card').forEach(function(card){existingIds[card.getAttribute('data-ticket-id')]=card;});
+            cols[state].forEach(function(t){
+                var tid=String(t.id);
+                if(!existingIds[tid]){
+                    var tmp=document.createElement('div');
+                    tmp.innerHTML=buildKanbanCard(t);
+                    var newCard=tmp.firstChild;
                     colEl.appendChild(newCard);
-                    if (addedIds.indexOf(t.id) !== -1) {
+                    if(addedIds.indexOf(t.id)!==-1){
                         newCard.classList.add('ticket-new-flash');
-                        showToast('\uD83D\uDCCB New ticket assigned: ' + t.name, 'success');
+                        showToast('\uD83D\uDCCB New ticket assigned: '+t.name,'success');
                     }
                 }
             });
-            var incomingIds = {};
-            cols[state].forEach(function (t) { incomingIds[String(t.id)] = true; });
-            Object.keys(existingIds).forEach(function (tid) {
-                if (!incomingIds[tid]) existingIds[tid].remove();
-            });
+            var incomingIds={};
+            cols[state].forEach(function(t){incomingIds[String(t.id)]=true;});
+            Object.keys(existingIds).forEach(function(tid){if(!incomingIds[tid])existingIds[tid].remove();});
         });
 
         updateCounts();
-        applySearch();
+        applyFilters();
         bindDragDrop();
     }
 
-    function loadTickets() {
-        fetch('/customer_support/dashboard/tickets', {
-            method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' }
-        })
-        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
-        .then(function (data) { renderTickets(data.tickets || []); })
-        .catch(function (e) { console.warn('Ticket refresh failed:', e); });
+    function loadTickets(){
+        fetch('/customer_support/dashboard/tickets',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}})
+        .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+        .then(function(data){renderTickets(data.tickets||[]);})
+        .catch(function(e){console.warn('Ticket refresh failed:',e);});
     }
 
     loadTickets();
-    setInterval(loadTickets, 20000);
+    setInterval(loadTickets,20000);
 
-    function bindRowClicks() {
-        document.querySelectorAll('.ticket-row').forEach(function (row) {
-            row.addEventListener('click', function () {
-                var id = this.getAttribute('data-ticket-id');
-                if (id) window.location.href = '/customer_support/ticket/' + id;
-            });
-        });
-    }
+    /* ── Drag and drop ── */
+    var draggedCard=null;
+    function bindDragDrop(){}
 
-    var draggedCard = null;
-    function bindDragDrop() {}
-
-    document.addEventListener('dragstart', function (e) {
-        var card = e.target.closest('.kanban-card');
-        if (!card) return;
-        draggedCard = card;
+    document.addEventListener('dragstart',function(e){
+        var card=e.target.closest('.kanban-card');
+        if(!card)return;
+        draggedCard=card;
         card.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', card.getAttribute('data-ticket-id'));
+        e.dataTransfer.effectAllowed='move';
+        e.dataTransfer.setData('text/plain',card.getAttribute('data-ticket-id'));
     });
-
-    document.addEventListener('dragend', function (e) {
-        var card = e.target.closest('.kanban-card');
-        if (card) card.classList.remove('dragging');
-        document.querySelectorAll('.kanban-col').forEach(function (col) { col.classList.remove('drag-over'); });
-        draggedCard = null;
+    document.addEventListener('dragend',function(e){
+        var card=e.target.closest('.kanban-card');
+        if(card)card.classList.remove('dragging');
+        document.querySelectorAll('.kanban-col').forEach(function(col){col.classList.remove('drag-over');});
+        draggedCard=null;
     });
-
-    document.querySelectorAll('.kanban-col').forEach(function (col) {
-        col.addEventListener('dragover', function (e) {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            this.classList.add('drag-over');
-        });
-        col.addEventListener('dragleave', function (e) {
-            if (!this.contains(e.relatedTarget)) this.classList.remove('drag-over');
-        });
-        col.addEventListener('drop', function (e) {
-            e.preventDefault();
-            this.classList.remove('drag-over');
-            if (!draggedCard) return;
-            var newState = this.getAttribute('data-state');
-            var ticketId = draggedCard.getAttribute('data-ticket-id');
-            var oldState = draggedCard.getAttribute('data-state');
-            if (oldState === newState) return;
-            var cardsContainer = this.querySelector('.kanban-cards');
-            cardsContainer.appendChild(draggedCard);
-            draggedCard.setAttribute('data-state', newState);
-            _renderedIds[ticketId] = true;
+    document.querySelectorAll('.kanban-col').forEach(function(col){
+        col.addEventListener('dragover',function(e){e.preventDefault();e.dataTransfer.dropEffect='move';this.classList.add('drag-over');});
+        col.addEventListener('dragleave',function(e){if(!this.contains(e.relatedTarget))this.classList.remove('drag-over');});
+        col.addEventListener('drop',function(e){
+            e.preventDefault();this.classList.remove('drag-over');
+            if(!draggedCard)return;
+            var newState=this.getAttribute('data-state');
+            var ticketId=draggedCard.getAttribute('data-ticket-id');
+            var oldState=draggedCard.getAttribute('data-state');
+            if(oldState===newState)return;
+            this.querySelector('.kanban-cards').appendChild(draggedCard);
+            draggedCard.setAttribute('data-state',newState);
+            _renderedIds[ticketId]=true;
             updateCounts();
-            saveTicketStatus(ticketId, newState);
+            saveTicketStatus(ticketId,newState);
         });
     });
 
-    function saveTicketStatus(ticketId, newState) {
-        var fd = new FormData();
-        fd.append('status', newState);
-        fetch('/customer_support/ticket/' + ticketId + '/update_status', {
-            method: 'POST', body: fd, credentials: 'same-origin', headers: { 'Accept': 'application/json' }
+    function saveTicketStatus(ticketId,newState){
+        var fd=new FormData();
+        fd.append('status',newState);
+        fetch('/customer_support/ticket/'+ticketId+'/update_status',{method:'POST',body:fd,credentials:'same-origin',headers:{'Accept':'application/json'}})
+        .then(function(r){return r.json();})
+        .then(function(data){
+            if(data.success)showToast('\u2713 Saved \u2014 '+newState.replace(/_/g,' '),'success');
+            else showToast('\u2717 '+(data.error||'Save failed'),'error');
         })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) { showToast('\u2713 Saved \u2014 ' + newState.replace(/_/g, ' '), 'success'); }
-            else { showToast('\u2717 ' + (data.error || 'Save failed'), 'error'); }
-        })
-        .catch(function (e) { console.warn('Status update error:', e); showToast('\u2717 Network error', 'error'); });
+        .catch(function(e){console.warn('Status update error:',e);showToast('\u2717 Network error','error');});
     }
 
-    document.addEventListener('click', function (e) {
-        var card = e.target.closest('.kanban-card');
-        if (!card || card.classList.contains('dragging')) return;
-        var id = card.getAttribute('data-ticket-id');
-        if (id) window.location.href = '/customer_support/ticket/' + id;
+    /* Kanban card click to open */
+    document.addEventListener('click',function(e){
+        var card=e.target.closest('.kanban-card');
+        if(!card||card.classList.contains('dragging'))return;
+        var id=card.getAttribute('data-ticket-id');
+        if(id)window.location.href='/customer_support/ticket/'+id;
     });
+
+    /* Hide tooltip on scroll */
+    document.addEventListener('scroll',hideTooltip,true);
 
 });
 //]]>
             </script>
 
-            <!-- ═══════════════════════════════════════════════════════════
-                 4.  MOBILE HAMBURGER DRAWER JS
-            ═══════════════════════════════════════════════════════════ -->
+            <!-- ═══ 4. MOBILE HAMBURGER DRAWER ═══ -->
             <script type="text/javascript">
                 //<![CDATA[
-(function () {
-    'use strict';
-    var hamburger = document.getElementById('mobileHamburgerBtn');
-    var overlay   = document.getElementById('mobileNavOverlay');
-    var drawer    = document.getElementById('mobileNavDrawer');
-    var closeBtn  = document.getElementById('mobileNavClose');
-
-    function openDrawer() {
-        drawer.classList.add('open');
-        overlay.classList.add('open');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeDrawer() {
-        drawer.classList.remove('open');
-        overlay.classList.remove('open');
-        document.body.style.overflow = '';
-    }
-
-    if (hamburger) hamburger.addEventListener('click', openDrawer);
-    if (closeBtn)  closeBtn.addEventListener('click', closeDrawer);
-    if (overlay)   overlay.addEventListener('click', closeDrawer);
-
-    if (drawer) {
-        drawer.querySelectorAll('.mobile-nav-item').forEach(function (item) {
-            item.addEventListener('click', function () {
-                var viewId = this.getAttribute('data-view');
-
-                // Update active state in drawer
-                drawer.querySelectorAll('.mobile-nav-item').forEach(function (i) { i.classList.remove('active'); });
-                this.classList.add('active');
-
-                // Switch the page view
-                if (window.switchView) window.switchView(viewId);
-
-                closeDrawer();
-            });
+(function(){
+'use strict';
+var hamburger=document.getElementById('mobileHamburgerBtn');
+var overlay=document.getElementById('mobileNavOverlay');
+var drawer=document.getElementById('mobileNavDrawer');
+var closeBtn=document.getElementById('mobileNavClose');
+function openDrawer(){drawer.classList.add('open');overlay.classList.add('open');document.body.style.overflow='hidden';}
+function closeDrawer(){drawer.classList.remove('open');overlay.classList.remove('open');document.body.style.overflow='';}
+if(hamburger)hamburger.addEventListener('click',openDrawer);
+if(closeBtn)closeBtn.addEventListener('click',closeDrawer);
+if(overlay)overlay.addEventListener('click',closeDrawer);
+if(drawer){
+    drawer.querySelectorAll('.mobile-nav-item').forEach(function(item){
+        item.addEventListener('click',function(){
+            var viewId=this.getAttribute('data-view');
+            drawer.querySelectorAll('.mobile-nav-item').forEach(function(i){i.classList.remove('active');});
+            this.classList.add('active');
+            if(window.switchView)window.switchView(viewId);
+            closeDrawer();
         });
-    }
+    });
+}
 })();
 //]]>
             </script>

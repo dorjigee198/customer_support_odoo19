@@ -1,18 +1,29 @@
 # -*- coding: utf-8 -*-
 """
-Customer Support Ticket Model (updated with SLA fields)
-=======================================================
-Added fields:
-  - sla_policy_id   → the SLA policy attached at assignment time
-  - sla_deadline    → auto-calculated when sla_policy_id or assigned_date is set
-  - sla_status      → computed: on_track / at_risk / breached
+Customer Support Ticket Model (updated with Activity Log)
+=========================================================
+Changes from original:
+  1. create()               → logs 'created' event
+  2. write()                → logs 'status' and 'assign' events
+                              (captures old values BEFORE the write)
+  3. _cron_check_sla_breaches() → logs 'sla' warning and breach events
+  Everything else is identical to the original.
 """
 
 from odoo import models, fields, api
-from datetime import datetime, timedelta
+from datetime import timedelta
 import logging
 
 _logger = logging.getLogger(__name__)
+
+STATUS_LABELS = {
+    "new": "New",
+    "assigned": "Assigned",
+    "in_progress": "In Progress",
+    "pending": "Pending",
+    "resolved": "Resolved",
+    "closed": "Closed",
+}
 
 
 class CustomerSupport(models.Model):
@@ -129,11 +140,7 @@ class CustomerSupport(models.Model):
 
     @api.depends("sla_deadline", "state", "resolved_date", "closed_date")
     def _compute_sla_status(self):
-        """
-        Compute SLA status based on deadline vs now.
-        """
         now = fields.Datetime.now()
-
         for record in self:
             if not record.sla_deadline:
                 record.sla_status = "none"
@@ -162,10 +169,11 @@ class CustomerSupport(models.Model):
     def _compute_days_open(self):
         for record in self:
             if record.create_date:
-                if record.closed_date:
-                    delta = record.closed_date - record.create_date
-                else:
-                    delta = fields.Datetime.now() - record.create_date
+                delta = (
+                    record.closed_date - record.create_date
+                    if record.closed_date
+                    else fields.Datetime.now() - record.create_date
+                )
                 record.days_open = delta.days
             else:
                 record.days_open = 0
@@ -173,19 +181,15 @@ class CustomerSupport(models.Model):
     @api.depends("state", "days_open")
     def _compute_is_overdue(self):
         for record in self:
-            if record.state not in ["resolved", "closed"]:
-                record.is_overdue = record.days_open > 7
-            else:
-                record.is_overdue = False
+            record.is_overdue = (
+                record.days_open > 7
+                if record.state not in ["resolved", "closed"]
+                else False
+            )
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
     def _calculate_sla_deadline(self, policy, start_time):
-        """
-        Given an SLA policy and a start datetime, return the deadline datetime.
-        Supports time_unit: 'hours', 'days', 'weeks'.
-        Uses policy.response_time (the correct field name on customer.support.sla.policy).
-        """
         if not policy or not start_time:
             return False
         try:
@@ -193,11 +197,40 @@ class CustomerSupport(models.Model):
                 return start_time + timedelta(hours=policy.response_time)
             elif policy.time_unit == "weeks":
                 return start_time + timedelta(weeks=policy.response_time)
-            else:  # days
+            else:
                 return start_time + timedelta(days=policy.response_time)
         except Exception as e:
             _logger.error(f"SLA deadline calculation failed: {e}")
             return False
+
+    def _create_log(
+        self,
+        ticket_id,
+        event_type,
+        summary,
+        detail=None,
+        old_value=None,
+        new_value=None,
+        actor_id=None,
+    ):
+        """
+        Safe helper — creates a customer.support.ticket.log record.
+        Wrapped in try/except so a log failure never breaks the main operation.
+        """
+        try:
+            self.env["customer.support.ticket.log"].sudo().create(
+                {
+                    "ticket_id": ticket_id,
+                    "event_type": event_type,
+                    "summary": summary,
+                    "detail": detail,
+                    "old_value": old_value,
+                    "new_value": new_value,
+                    "actor_id": actor_id or self.env.user.id,
+                }
+            )
+        except Exception as e:
+            _logger.warning(f"Ticket log creation failed [{event_type}]: {e}")
 
     # ── CRUD ──────────────────────────────────────────────────────────────────
 
@@ -205,16 +238,18 @@ class CustomerSupport(models.Model):
     def create(self, vals_list):
         if not isinstance(vals_list, list):
             vals_list = [vals_list]
+
         for vals in vals_list:
             if vals.get("name", "New") == "New":
                 vals["name"] = (
                     self.env["ir.sequence"].sudo().next_by_code("customer.support")
                     or "New"
                 )
+
         records = super(CustomerSupport, self).create(vals_list)
 
-        # Auto-calculate deadline if policy is set at creation time
         for record in records:
+            # SLA deadline at creation (original logic — unchanged)
             if record.sla_policy_id and not record.sla_deadline:
                 start = record.assigned_date or record.create_date
                 deadline = record._calculate_sla_deadline(record.sla_policy_id, start)
@@ -224,12 +259,30 @@ class CustomerSupport(models.Model):
                         f"SLA deadline set at creation for {record.name}: {deadline}"
                     )
 
+            # ── Log: ticket created ───────────────────────────────────────
+            self._create_log(
+                ticket_id=record.id,
+                event_type="created",
+                summary="Ticket Created",
+                detail=(
+                    f"Ticket {record.name} was submitted by "
+                    f"{record.customer_id.name if record.customer_id else 'Unknown'}."
+                ),
+                actor_id=self.env.user.id,
+            )
+            # ─────────────────────────────────────────────────────────────
+
         return records
 
     def write(self, vals):
+        # ── Capture old values BEFORE the write ──────────────────────────
+        old_states = {r.id: r.state for r in self}
+        old_assignees = {r.id: r.assigned_to for r in self}
+        # ─────────────────────────────────────────────────────────────────
+
         result = super(CustomerSupport, self).write(vals)
 
-        # Recalculate sla_deadline whenever sla_policy_id or assigned_date changes
+        # SLA deadline recalc (original logic — unchanged)
         if "sla_policy_id" in vals or "assigned_date" in vals:
             for record in self:
                 if record.sla_policy_id:
@@ -238,20 +291,54 @@ class CustomerSupport(models.Model):
                         record.sla_policy_id, start
                     )
                     if deadline:
-                        # Use super().write to avoid recursion
                         super(CustomerSupport, record).write({"sla_deadline": deadline})
                         _logger.info(
                             f"SLA deadline recalculated for {record.name}: {deadline} "
                             f"(policy: {record.sla_policy_id.name}, start: {start})"
                         )
                 else:
-                    # Policy removed — clear the deadline too
                     super(CustomerSupport, record).write({"sla_deadline": False})
                     _logger.info(f"SLA deadline cleared for {record.name} (no policy)")
 
+        # ── Log: status change ────────────────────────────────────────────
+        if "state" in vals:
+            for record in self:
+                old_state = old_states.get(record.id)
+                new_state = vals["state"]
+                if old_state and old_state != new_state:
+                    self._create_log(
+                        ticket_id=record.id,
+                        event_type="status",
+                        summary="Status Changed",
+                        detail=f"Status updated by {self.env.user.name}.",
+                        old_value=STATUS_LABELS.get(old_state, old_state),
+                        new_value=STATUS_LABELS.get(new_state, new_state),
+                    )
+
+        # ── Log: assignment change ────────────────────────────────────────
+        if "assigned_to" in vals and vals["assigned_to"]:
+            for record in self:
+                new_user = self.env["res.users"].browse(vals["assigned_to"])
+                old_user = old_assignees.get(record.id)
+                if old_user and old_user.id != vals["assigned_to"]:
+                    summary = "Reassigned"
+                    detail = f"Reassigned from {old_user.name} to {new_user.name}."
+                else:
+                    summary = "Ticket Assigned"
+                    detail = f"Assigned to {new_user.name} by {self.env.user.name}."
+                self._create_log(
+                    ticket_id=record.id,
+                    event_type="assign",
+                    summary=summary,
+                    detail=detail,
+                    old_value=old_user.name if old_user else None,
+                    new_value=new_user.name,
+                )
+        # ─────────────────────────────────────────────────────────────────
+
         return result
 
-    # ── Action Methods ────────────────────────────────────────────────────────
+    # ── Action Methods (all unchanged from original) ──────────────────────────
 
     def action_assign(self):
         self.ensure_one()
@@ -262,8 +349,6 @@ class CustomerSupport(models.Model):
                 "assigned_by": self.env.user.id,
                 "assigned_date": now,
             }
-
-            # If a policy is already set, calculate the deadline right now
             if self.sla_policy_id:
                 deadline = self._calculate_sla_deadline(self.sla_policy_id, now)
                 if deadline:
@@ -272,7 +357,6 @@ class CustomerSupport(models.Model):
                         f"SLA deadline set on assign for {self.name}: {deadline} "
                         f"(policy: {self.sla_policy_id.name})"
                     )
-
             self.write(write_vals)
             self.message_post(
                 body=f"Ticket assigned to {self.assigned_to.name}",
@@ -305,7 +389,8 @@ class CustomerSupport(models.Model):
         self.ensure_one()
         self.write({"state": "closed", "closed_date": fields.Datetime.now()})
         self.message_post(
-            body=f"Ticket closed by {self.env.user.name}", subject="Ticket Closed"
+            body=f"Ticket closed by {self.env.user.name}",
+            subject="Ticket Closed",
         )
         return True
 
@@ -315,7 +400,8 @@ class CustomerSupport(models.Model):
             {"state": "in_progress", "resolved_date": False, "closed_date": False}
         )
         self.message_post(
-            body=f"Ticket reopened by {self.env.user.name}", subject="Ticket Reopened"
+            body=f"Ticket reopened by {self.env.user.name}",
+            subject="Ticket Reopened",
         )
         return True
 
@@ -348,9 +434,11 @@ class CustomerSupport(models.Model):
     def _cron_check_sla_breaches(self):
         """
         Cron job: notify assigned agents when SLA is at risk or breached.
-        Run this every hour via a scheduled action.
+        Run every hour via a scheduled action.
         """
         now = fields.Datetime.now()
+
+        # ── At-risk tickets ───────────────────────────────────────────────
         at_risk = self.search(
             [
                 ("state", "not in", ["resolved", "closed"]),
@@ -366,7 +454,21 @@ class CustomerSupport(models.Model):
                     subject="SLA At Risk",
                     partner_ids=[ticket.assigned_to.partner_id.id],
                 )
+                # ── Log: SLA warning ──────────────────────────────────────
+                self._create_log(
+                    ticket_id=ticket.id,
+                    event_type="sla",
+                    summary=f"SLA Warning — {remaining:.1f}h Remaining",
+                    detail=(
+                        f"Ticket is approaching SLA deadline. "
+                        f"Resolution required before "
+                        f"{ticket.sla_deadline.strftime('%b %d, %I:%M %p')}."
+                    ),
+                    actor_id=self.env.ref("base.user_root").id,
+                )
+                # ─────────────────────────────────────────────────────────
 
+        # ── Breached tickets ──────────────────────────────────────────────
         breached = self.search(
             [
                 ("state", "not in", ["resolved", "closed"]),
@@ -380,4 +482,17 @@ class CustomerSupport(models.Model):
                     subject="SLA Breached",
                     partner_ids=[ticket.assigned_to.partner_id.id],
                 )
+                # ── Log: SLA breach ───────────────────────────────────────
+                self._create_log(
+                    ticket_id=ticket.id,
+                    event_type="sla",
+                    summary="SLA Breached",
+                    detail=(
+                        f"Ticket passed its SLA deadline on "
+                        f"{ticket.sla_deadline.strftime('%b %d, %Y at %I:%M %p')}."
+                    ),
+                    actor_id=self.env.ref("base.user_root").id,
+                )
+                # ─────────────────────────────────────────────────────────
+
         return True

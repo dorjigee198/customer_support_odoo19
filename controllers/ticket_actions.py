@@ -41,19 +41,17 @@ class CustomerSupportTicketActions(http.Controller):
     @http.route(
         "/customer_support/ticket/<int:ticket_id>",
         type="http",
-        auth="public",  # Changed to public so we control the redirect ourselves
+        auth="public",  # changed from "user" → supports public check inside
         website=True,
     )
     def view_ticket(self, ticket_id, **kw):
         try:
             user = request.env.user
 
-            # Auth guard: redirect unauthenticated (public) users to custom login
-            # with next param so they land directly on this ticket after login
-            if user._is_public():
-                next_url = f"/customer_support/ticket/{ticket_id}"
+            # Redirect unauthenticated (public) users to login, preserving destination
+            if user.id == request.env.ref("base.public_user").id:
                 return werkzeug.utils.redirect(
-                    f"/customer_support/login?next={next_url}"
+                    f"/customer_support/login?redirect=/customer_support/ticket/{ticket_id}"
                 )
 
             ticket = request.env["customer.support"].browse(ticket_id)
@@ -74,6 +72,7 @@ class CustomerSupportTicketActions(http.Controller):
                     [("active", "=", True), ("id", "!=", 1)]
                 )
 
+            # ── Fetch message thread ──────────────────────────────────────────
             activities = []
             try:
                 if hasattr(ticket, "message_ids") and ticket.message_ids:
@@ -103,6 +102,40 @@ class CustomerSupportTicketActions(http.Controller):
                 except Exception as e:
                     _logger.error(f"mail.message search failed: {str(e)}")
 
+            # ── Fetch attachments ─────────────────────────────────────────────
+            attachments = []
+            try:
+                attachments = (
+                    request.env["ir.attachment"]
+                    .sudo()
+                    .search(
+                        [
+                            ("res_model", "=", "customer.support"),
+                            ("res_id", "=", ticket_id),
+                        ]
+                    )
+                )
+            except Exception as e:
+                _logger.error(f"Attachment fetch failed: {str(e)}")
+
+            # ── Fetch activity log for timeline ───────────────────────────────
+            ticket_logs = []
+            try:
+                ticket_logs = (
+                    request.env["customer.support.ticket.log"]
+                    .sudo()
+                    .search(
+                        [("ticket_id", "=", ticket_id)],
+                        order="timestamp asc",
+                    )
+                )
+            except Exception as e:
+                _logger.error(f"Ticket log fetch failed: {str(e)}")
+
+            _logger.info(
+                f"User {user.name} viewing ticket {ticket_id}: {len(activities)} messages"
+            )
+
             return request.render(
                 "customer_support.ticket_detail",
                 {
@@ -114,6 +147,9 @@ class CustomerSupportTicketActions(http.Controller):
                     "focal_persons": focal_persons,
                     "activities": activities,
                     "activities_count": len(activities),
+                    "attachments": attachments,
+                    "ticket_logs": ticket_logs,
+                    "ticket_logs_count": len(ticket_logs),
                     "success": kw.get("success", ""),
                     "error": kw.get("error", ""),
                     "page_name": "ticket_detail",
@@ -184,9 +220,13 @@ class CustomerSupportTicketActions(http.Controller):
                         deadline = policy.get_deadline_from_now()
                         write_vals["sla_policy_id"] = policy.id
                         write_vals["sla_deadline"] = deadline
-                        sla_note = f" | SLA: {policy.name} (due {deadline.strftime('%Y-%m-%d %H:%M')})"
+                        sla_note = (
+                            f" | SLA: {policy.name} "
+                            f"(due {deadline.strftime('%Y-%m-%d %H:%M')})"
+                        )
                         _logger.info(
-                            f"SLA policy '{policy.name}' attached to ticket {ticket_id}. Deadline: {deadline}"
+                            f"SLA policy '{policy.name}' attached to ticket {ticket_id}. "
+                            f"Deadline: {deadline}"
                         )
                 except Exception as sla_err:
                     _logger.warning(
@@ -195,7 +235,8 @@ class CustomerSupportTicketActions(http.Controller):
 
             ticket.write(write_vals)
             _logger.info(
-                f"Ticket {ticket.name} assigned to {assigned_user.name} by {user.name}{sla_note}"
+                f"Ticket {ticket.name} assigned to {assigned_user.name} "
+                f"by {user.name}{sla_note}"
             )
 
             ticket.message_post(
