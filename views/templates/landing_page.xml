@@ -152,6 +152,13 @@ if (window.innerWidth > 768) {
                 `;
                 document.head.appendChild(style);
             </script>
+            <!-- bfcache guard: reload if browser restores this page while user is logged in,
+                 triggering the server-side redirect-if-authenticated check -->
+            <script>
+                window.addEventListener('pageshow', function (e) {
+                    if (e.persisted) { window.location.reload(); }
+                });
+            </script>
         </t>
     </template>
 </odoo>

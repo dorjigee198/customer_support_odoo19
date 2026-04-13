@@ -13,6 +13,7 @@ Changes from original:
 from odoo import models, fields, api
 from datetime import timedelta
 import logging
+import secrets
 
 _logger = logging.getLogger(__name__)
 
@@ -130,6 +131,20 @@ class CustomerSupport(models.Model):
     internal_notes = fields.Text(string="Internal Notes")
     resolution_notes = fields.Text(string="Resolution Notes")
 
+    # Board access token — allows team members to view the board without login
+    board_token = fields.Char(
+        string="Board Access Token",
+        copy=False,
+        index=True,
+        readonly=True,
+    )
+
+    board_bg = fields.Char(
+        string="Board Background",
+        default='',
+        help="CSS background value for the ticket board (color or gradient)",
+    )
+
     # Computed Fields
     days_open = fields.Integer(
         string="Days Open", compute="_compute_days_open", store=True
@@ -245,6 +260,8 @@ class CustomerSupport(models.Model):
                     self.env["ir.sequence"].sudo().next_by_code("customer.support")
                     or "New"
                 )
+            if not vals.get("board_token"):
+                vals["board_token"] = secrets.token_urlsafe(32)
 
         records = super(CustomerSupport, self).create(vals_list)
 

@@ -30,6 +30,54 @@
                     .view-btn:hover { background: rgba(255,255,255,0.85); border-color:
                     rgba(12,74,110,0.35); }
                     .view-btn.active { background: #0c4a6e; color: #ffffff; border-color: #0c4a6e; }
+
+                    /* ── Board Progress Bar ───────────────────────────────── */
+                    .kc-progress-wrap {
+                        margin: 8px 0 4px;
+                    }
+                    .kc-progress-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 4px;
+                    }
+                    .kc-progress-label {
+                        font-size: 10px;
+                        font-weight: 600;
+                        color: #64748b;
+                        letter-spacing: 0.03em;
+                        text-transform: uppercase;
+                    }
+                    .kc-progress-pct {
+                        font-size: 11px;
+                        font-weight: 700;
+                        color: #0c4a6e;
+                    }
+                    .kc-progress-bar-bg {
+                        height: 5px;
+                        background: #e2e8f0;
+                        border-radius: 99px;
+                        overflow: hidden;
+                    }
+                    .kc-progress-bar-fill {
+                        height: 100%;
+                        border-radius: 99px;
+                        background: linear-gradient(90deg, #38bdf8 0%, #0ea5e9 100%);
+                        transition: width 0.4s ease;
+                    }
+                    .kc-progress-bar-fill.is-done {
+                        background: linear-gradient(90deg, #34d399 0%, #10b981 100%);
+                    }
+                    .kc-no-tasks {
+                        font-size: 10px;
+                        color: #94a3b8;
+                        margin: 6px 0 2px;
+                        font-style: italic;
+                    }
+                    .kc-task-counts {
+                        font-size: 10px;
+                        color: #64748b;
+                    }
                 </style>
             </t>
 
@@ -95,28 +143,26 @@
                     <div class="page-header">
                         <h1 class="page-title">
                             <i class="bi bi-grid-3x3-gap-fill me-2"></i>My Tickets </h1>
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="page-stats">
-                                <span class="stat-badge">
-                                    <i class="bi bi-stack me-1"></i>
-                                    <t
-                                        t-esc="ticket_counts.get('total', 0)" /> Total </span>
-                                <span class="stat-badge">
-                                    <i class="bi bi-clock-history me-1"></i>
-                                    <t
-                                        t-esc="ticket_counts.get('new', 0) + ticket_counts.get('in_progress', 0)" />
-                                    Open </span>
-                                <span class="stat-badge">
-                                    <i class="bi bi-check-circle me-1"></i>
-                                    <t
-                                        t-esc="ticket_counts.get('resolved', 0)" /> Resolved </span>
-                            </div>
-                            <div class="view-toggle">
-                                <button class="view-btn" id="listViewBtn">
-                                    <i class="bi bi-list me-1"></i>List </button>
-                                <button class="view-btn active" id="kanbanViewBtn">
-                                    <i class="bi bi-grid-3x3-gap me-1"></i>Kanban </button>
-                            </div>
+                        <div class="page-stats">
+                            <span class="stat-badge">
+                                <i class="bi bi-stack me-1"></i>
+                                <t
+                                    t-esc="ticket_counts.get('total', 0)" /> Total </span>
+                            <span class="stat-badge">
+                                <i class="bi bi-clock-history me-1"></i>
+                                <t
+                                    t-esc="ticket_counts.get('new', 0) + ticket_counts.get('in_progress', 0) + ticket_counts.get('assigned', 0) + ticket_counts.get('pending', 0)" />
+                                Open </span>
+                            <span class="stat-badge">
+                                <i class="bi bi-check-circle me-1"></i>
+                                <t
+                                    t-esc="ticket_counts.get('resolved', 0)" /> Resolved </span>
+                        </div>
+                        <div class="view-toggle">
+                            <button class="view-btn" id="listViewBtn">
+                                <i class="bi bi-list me-1"></i>List </button>
+                            <button class="view-btn active" id="kanbanViewBtn">
+                                <i class="bi bi-grid-3x3-gap me-1"></i>Kanban </button>
                         </div>
                     </div>
 
@@ -132,27 +178,7 @@
                             <div class="kanban-cards" id="col-new">
                                 <t t-foreach="tickets" t-as="ticket">
                                     <t t-if="ticket.state == 'new'">
-                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
-                                            <div class="kanban-card-id">
-                                                <t t-esc="ticket.name" />
-                                            </div>
-                                            <div class="kanban-card-subject">
-                                                <t t-esc="ticket.subject" />
-                                            </div>
-                                            <div class="kanban-card-footer">
-                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                <span t-att-class="'kanban-priority priority-' + kp">
-                                                    <t t-esc="kp.title()" />
-                                                </span>
-                                            </div>
-                                            <div class="kanban-card-focal">
-                                                <i class="bi bi-person-fill"></i>
-                                                <span>
-                                                    <t
-                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
-                                                </span>
-                                            </div>
-                                        </div>
+                                        <t t-call="customer_support.kanban_card_inner" />
                                     </t>
                                 </t>
                             </div>
@@ -166,28 +192,8 @@
                             </div>
                             <div class="kanban-cards" id="col-in_progress">
                                 <t t-foreach="tickets" t-as="ticket">
-                                    <t t-if="ticket.state == 'in_progress'">
-                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
-                                            <div class="kanban-card-id">
-                                                <t t-esc="ticket.name" />
-                                            </div>
-                                            <div class="kanban-card-subject">
-                                                <t t-esc="ticket.subject" />
-                                            </div>
-                                            <div class="kanban-card-footer">
-                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                <span t-att-class="'kanban-priority priority-' + kp">
-                                                    <t t-esc="kp.title()" />
-                                                </span>
-                                            </div>
-                                            <div class="kanban-card-focal">
-                                                <i class="bi bi-person-fill"></i>
-                                                <span>
-                                                    <t
-                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
-                                                </span>
-                                            </div>
-                                        </div>
+                                    <t t-if="ticket.state in ['in_progress', 'assigned', 'pending']">
+                                        <t t-call="customer_support.kanban_card_inner" />
                                     </t>
                                 </t>
                             </div>
@@ -202,27 +208,7 @@
                             <div class="kanban-cards" id="col-resolved">
                                 <t t-foreach="tickets" t-as="ticket">
                                     <t t-if="ticket.state == 'resolved'">
-                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
-                                            <div class="kanban-card-id">
-                                                <t t-esc="ticket.name" />
-                                            </div>
-                                            <div class="kanban-card-subject">
-                                                <t t-esc="ticket.subject" />
-                                            </div>
-                                            <div class="kanban-card-footer">
-                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                <span t-att-class="'kanban-priority priority-' + kp">
-                                                    <t t-esc="kp.title()" />
-                                                </span>
-                                            </div>
-                                            <div class="kanban-card-focal">
-                                                <i class="bi bi-person-fill"></i>
-                                                <span>
-                                                    <t
-                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
-                                                </span>
-                                            </div>
-                                        </div>
+                                        <t t-call="customer_support.kanban_card_inner" />
                                     </t>
                                 </t>
                             </div>
@@ -237,33 +223,27 @@
                             <div class="kanban-cards" id="col-closed">
                                 <t t-foreach="tickets" t-as="ticket">
                                     <t t-if="ticket.state == 'closed'">
-                                        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
-                                            <div class="kanban-card-id">
-                                                <t t-esc="ticket.name" />
-                                            </div>
-                                            <div class="kanban-card-subject">
-                                                <t t-esc="ticket.subject" />
-                                            </div>
-                                            <div class="kanban-card-footer">
-                                                <t t-set="kp" t-value="ticket.priority or 'low'" />
-                                                <span t-att-class="'kanban-priority priority-' + kp">
-                                                    <t t-esc="kp.title()" />
-                                                </span>
-                                            </div>
-                                            <div class="kanban-card-focal">
-                                                <i class="bi bi-person-fill"></i>
-                                                <span>
-                                                    <t
-                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
-                                                </span>
-                                            </div>
-                                        </div>
+                                        <t t-call="customer_support.kanban_card_inner" />
                                     </t>
                                 </t>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- ── POLL TOAST ───────────────────────────────────────────── -->
+            <div id="kpToast" style="
+                position:fixed; bottom:24px; right:24px; z-index:9999;
+                background:#0c4a6e; color:#fff; border-radius:12px;
+                padding:12px 18px; font-size:13px; font-weight:600;
+                display:flex; align-items:center; gap:10px;
+                box-shadow:0 8px 32px rgba(10,40,70,.35);
+                transform:translateY(80px); opacity:0;
+                transition:transform 0.35s cubic-bezier(.22,1,.36,1), opacity 0.3s;
+                pointer-events:none;">
+                <span style="font-size:18px;">🔄</span>
+                <span id="kpToastMsg">Ticket status updated</span>
             </div>
 
             <script
@@ -273,35 +253,581 @@
                 document.addEventListener('DOMContentLoaded', function () {
 
                     // ── COLUMN COUNTS ─────────────────────────────────────
-                    ['new', 'in_progress', 'resolved', 'closed'].forEach(function (state) {
-                        var col     = document.getElementById('col-' + state);
-                        var countEl = document.getElementById('count-' + state);
-                        if (col && countEl) {
-                            countEl.textContent = col.querySelectorAll('.kanban-card').length;
-                        }
-                    });
-
-                    // ── CARD CLICKS ───────────────────────────────────────
-                    document.querySelectorAll('.kanban-card').forEach(function (card) {
-                        card.addEventListener('click', function () {
-                            var id = this.getAttribute('data-ticket-id');
-                            if (id) window.location.href = '/customer_support/ticket/' + id;
+                    function refreshCounts() {
+                        ['new', 'in_progress', 'resolved', 'closed'].forEach(function (state) {
+                            var col     = document.getElementById('col-' + state);
+                            var countEl = document.getElementById('count-' + state);
+                            if (col && countEl) {
+                                countEl.textContent = col.querySelectorAll('.kanban-card').length;
+                            }
                         });
-                    });
+                    }
+                    refreshCounts();
+
+                    // ── CARD CLICKS → open modal ─────────────────────────
+                    function bindCardClicks() {
+                        document.querySelectorAll('.kanban-card').forEach(function (card) {
+                            if (card._clickBound) return;
+                            card._clickBound = true;
+                            card.addEventListener('click', function () {
+                                var id = this.getAttribute('data-ticket-id');
+                                if (id) openTicketModal(id);
+                            });
+                        });
+                    }
+                    bindCardClicks();
 
                     // ── TOGGLE BUTTONS ────────────────────────────────────
                     document.getElementById('listViewBtn').addEventListener('click', function () {
-                        window.location.href = '/customer_support/tickets';
+                        window.location.href = '/customer_support/tickets/list';
                     });
-
-                    // kanbanViewBtn is already active — no action needed
                     document.getElementById('kanbanViewBtn').addEventListener('click', function () {
                         window.location.href = '/customer_support/tickets/kanban';
                     });
 
+                    // ── COLUMN MAP: which DOM column each state belongs to ─
+                    var STATE_COL = {
+                        'new':         'col-new',
+                        'assigned':    'col-in_progress',
+                        'in_progress': 'col-in_progress',
+                        'pending':     'col-in_progress',
+                        'resolved':    'col-resolved',
+                        'closed':      'col-closed',
+                    };
+
+                    // ── TOAST helper ──────────────────────────────────────
+                    var _toastTimer = null;
+                    function showToast(msg) {
+                        var t = document.getElementById('kpToast');
+                        document.getElementById('kpToastMsg').textContent = msg;
+                        t.style.transform = 'translateY(0)';
+                        t.style.opacity   = '1';
+                        clearTimeout(_toastTimer);
+                        _toastTimer = setTimeout(function () {
+                            t.style.transform = 'translateY(80px)';
+                            t.style.opacity   = '0';
+                        }, 4000);
+                    }
+
+                    // ── POLLING ───────────────────────────────────────────
+                    function pollStates() {
+                        fetch('/customer_support/tickets/states', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ jsonrpc:'2.0', method:'call', id:1, params:{} })
+                        })
+                        .then(function(r) { return r.json(); })
+                        .then(function(resp) {
+                            var data = (resp.result || {});
+                            if (!data.success) return;
+                            var states = data.states || {};
+                            var changed = 0;
+
+                            Object.keys(states).forEach(function(ticketId) {
+                                var newState = states[ticketId].state;
+                                var label    = states[ticketId].label;
+                                var card     = document.querySelector('.kanban-card[data-ticket-id="' + ticketId + '"]');
+                                if (!card) return;
+
+                                var targetColId = STATE_COL[newState];
+                                var targetCol   = targetColId ? document.getElementById(targetColId) : null;
+                                if (!targetCol) return;
+
+                                // Check if card is already in the right column
+                                if (targetCol.contains(card)) return;
+
+                                // Animate out, move, animate in
+                                card.style.transition = 'opacity 0.3s, transform 0.3s';
+                                card.style.opacity    = '0';
+                                card.style.transform  = 'scale(0.92)';
+                                setTimeout(function () {
+                                    targetCol.appendChild(card);
+                                    card.style.opacity   = '1';
+                                    card.style.transform = 'scale(1)';
+                                    setTimeout(function() {
+                                        card.style.transition = '';
+                                        card.style.transform  = '';
+                                    }, 350);
+                                    // Update state badge inside modal if it's open for this ticket
+                                    var sb = document.getElementById('tdmStateBadge');
+                                    var tn = document.getElementById('tdmTicketNum');
+                                    if (sb && tn && tn.textContent) {
+                                        // Find current open ticket id from modal
+                                        var openCard = document.querySelector('.kanban-card._modal-open');
+                                        if (openCard && openCard.getAttribute('data-ticket-id') === ticketId) {
+                                            sb.textContent = label;
+                                            sb.className   = 'tdm-state-badge tdm-state-' + newState;
+                                        }
+                                    }
+                                    refreshCounts();
+                                    bindCardClicks();
+                                }, 320);
+                                changed++;
+                            });
+
+                            if (changed > 0) {
+                                showToast(changed === 1
+                                    ? '1 ticket status was updated'
+                                    : changed + ' ticket statuses were updated');
+                            }
+                        })
+                        .catch(function() { /* silent fail */ });
+                    }
+
+                    // Poll every 30 seconds
+                    setInterval(pollStates, 30000);
+
                 });
                 //]]>
             </script>
+
+            <!-- ── TICKET DETAIL MODAL ───────────────────────────────────── -->
+            <div id="ticketModal" class="tdm-overlay" style="display:none;" role="dialog" aria-modal="true">
+                <div class="tdm-panel">
+                    <!-- Header -->
+                    <div class="tdm-header">
+                        <div class="tdm-header-left">
+                            <span class="tdm-ticket-num" id="tdmTicketNum"></span>
+                            <span class="tdm-state-badge" id="tdmStateBadge"></span>
+                            <span class="tdm-pri-badge" id="tdmPriBadge"></span>
+                        </div>
+                        <button class="tdm-close" id="tdmClose" aria-label="Close">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+
+                    <!-- Scrollable body -->
+                    <div class="tdm-body" id="tdmBody">
+                        <!-- Loading state -->
+                        <div class="tdm-loading" id="tdmLoading">
+                            <div class="tdm-spinner"></div>
+                            <span>Loading ticket…</span>
+                        </div>
+
+                        <!-- Content (hidden until loaded) -->
+                        <div id="tdmContent" style="display:none;">
+                            <h2 class="tdm-subject" id="tdmSubject"></h2>
+
+                            <!-- Meta row -->
+                            <div class="tdm-meta-row">
+                                <div class="tdm-meta-item">
+                                    <i class="bi bi-person-circle"></i>
+                                    <span id="tdmAssigned"></span>
+                                </div>
+                                <div class="tdm-meta-item">
+                                    <i class="bi bi-calendar3"></i>
+                                    <span id="tdmCreated"></span>
+                                </div>
+                                <div class="tdm-meta-item tdm-sla-wrap" id="tdmSlaWrap" style="display:none;">
+                                    <i class="bi bi-clock-fill"></i>
+                                    <span id="tdmSla"></span>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="tdm-section">
+                                <div class="tdm-section-title">
+                                    <i class="bi bi-file-text me-1"></i>Description
+                                </div>
+                                <div class="tdm-description" id="tdmDescription"></div>
+                            </div>
+
+                            <!-- Board progress -->
+                            <div class="tdm-section" id="tdmBoardSection">
+                                <div class="tdm-section-title">
+                                    <i class="bi bi-kanban me-1"></i>
+                                    Work Progress
+                                    <span class="tdm-progress-pct" id="tdmProgressPct"></span>
+                                </div>
+                                <div class="tdm-progress-bg">
+                                    <div class="tdm-progress-fill" id="tdmProgressFill"></div>
+                                </div>
+                                <div class="tdm-cols-row" id="tdmCols"></div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="tdm-footer">
+                        <button class="tdm-close-btn" id="tdmCloseBtn">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+            /* ── TICKET DETAIL MODAL ── */
+            .tdm-overlay {
+                position: fixed; inset: 0; z-index: 9000;
+                background: rgba(10,25,47,0.55);
+                backdrop-filter: blur(3px);
+                display: flex; align-items: center; justify-content: center;
+                padding: 1rem;
+                animation: tdmFadeIn 0.2s ease;
+            }
+            @keyframes tdmFadeIn { from { opacity:0 } to { opacity:1 } }
+
+            .tdm-panel {
+                background: #ffffff;
+                border-radius: 16px;
+                box-shadow: 0 24px 80px rgba(10,25,47,0.35);
+                width: 100%; max-width: 720px;
+                max-height: 88vh;
+                display: flex; flex-direction: column;
+                animation: tdmSlideUp 0.22s ease;
+                overflow: hidden;
+            }
+            @keyframes tdmSlideUp { from { transform:translateY(20px); opacity:0 } to { transform:translateY(0); opacity:1 } }
+
+            /* Header */
+            .tdm-header {
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 1rem 1.4rem 0.85rem;
+                border-bottom: 1px solid #e2e8f0;
+                background: #f8fafc;
+                flex-shrink: 0;
+                gap: 0.75rem;
+            }
+            .tdm-header-left { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; min-width: 0; }
+
+            .tdm-ticket-num {
+                font-family: 'Courier New', monospace;
+                font-size: 0.78rem; font-weight: 700;
+                color: #0284c7; background: #e0f2fe;
+                padding: 0.18rem 0.6rem; border-radius: 6px;
+                white-space: nowrap;
+            }
+            .tdm-state-badge {
+                font-size: 0.72rem; font-weight: 700; padding: 0.18rem 0.6rem;
+                border-radius: 999px; white-space: nowrap;
+            }
+            .tdm-state-new        { background:#dbeafe; color:#1d4ed8; }
+            .tdm-state-assigned   { background:#ede9fe; color:#6d28d9; }
+            .tdm-state-in_progress{ background:#fef3c7; color:#b45309; }
+            .tdm-state-pending    { background:#fee2e2; color:#b91c1c; }
+            .tdm-state-resolved   { background:#dcfce7; color:#15803d; }
+            .tdm-state-closed     { background:#f1f5f9; color:#475569; }
+
+            .tdm-pri-badge {
+                font-size: 0.72rem; font-weight: 700; padding: 0.18rem 0.6rem;
+                border-radius: 999px; white-space: nowrap;
+            }
+            .tdm-pri-low    { background:#f0fdf4; color:#166534; }
+            .tdm-pri-medium { background:#eff6ff; color:#1e40af; }
+            .tdm-pri-high   { background:#fff7ed; color:#9a3412; }
+            .tdm-pri-urgent { background:#fef2f2; color:#991b1b; }
+
+            .tdm-close {
+                width: 32px; height: 32px; border-radius: 8px;
+                background: transparent; border: 1px solid #e2e8f0;
+                color: #64748b; font-size: 0.85rem; cursor: pointer;
+                display: flex; align-items: center; justify-content: center;
+                flex-shrink: 0; transition: all 0.15s;
+            }
+            .tdm-close:hover { background: #fee2e2; border-color: #fca5a5; color: #dc2626; }
+
+            /* Scrollable body */
+            .tdm-body {
+                flex: 1; overflow-y: auto; padding: 1.4rem;
+                scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;
+            }
+
+            /* Loading */
+            .tdm-loading {
+                display: flex; flex-direction: column; align-items: center;
+                justify-content: center; gap: 0.85rem; padding: 3rem 1rem;
+                color: #64748b; font-size: 0.9rem;
+            }
+            .tdm-spinner {
+                width: 32px; height: 32px; border-radius: 50%;
+                border: 3px solid #e2e8f0; border-top-color: #0284c7;
+                animation: tdmSpin 0.7s linear infinite;
+            }
+            @keyframes tdmSpin { to { transform: rotate(360deg); } }
+
+            /* Subject */
+            .tdm-subject {
+                font-size: 1.15rem; font-weight: 700; color: #0c4a6e;
+                margin: 0 0 0.85rem; line-height: 1.35;
+            }
+
+            /* Meta row */
+            .tdm-meta-row {
+                display: flex; flex-wrap: wrap; gap: 1rem;
+                margin-bottom: 1.2rem; padding-bottom: 1rem;
+                border-bottom: 1px solid #f1f5f9;
+            }
+            .tdm-meta-item {
+                display: flex; align-items: center; gap: 0.35rem;
+                font-size: 0.8rem; color: #475569;
+            }
+            .tdm-meta-item i { color: #94a3b8; font-size: 0.85rem; }
+            .tdm-sla-on_track { color: #15803d !important; }
+            .tdm-sla-at_risk  { color: #b45309 !important; }
+            .tdm-sla-breached { color: #b91c1c !important; }
+
+            /* Sections */
+            .tdm-section { margin-bottom: 1.4rem; }
+            .tdm-section:last-child { margin-bottom: 0; }
+
+            .tdm-section-title {
+                display: flex; align-items: center;
+                font-size: 0.78rem; font-weight: 700; color: #0c4a6e;
+                text-transform: uppercase; letter-spacing: 0.06em;
+                margin-bottom: 0.65rem;
+            }
+            .tdm-progress-pct {
+                margin-left: auto;
+                font-size: 0.8rem; font-weight: 700; color: #0284c7;
+            }
+
+            /* Description */
+            .tdm-description {
+                font-size: 0.875rem; color: #334155;
+                line-height: 1.65;
+                background: #f8fafc; border: 1px solid #e2e8f0;
+                border-radius: 10px; padding: 0.85rem 1rem;
+                white-space: pre-wrap; word-break: break-word;
+            }
+
+            /* Progress bar */
+            .tdm-progress-bg {
+                height: 7px; background: #e2e8f0;
+                border-radius: 999px; overflow: hidden; margin-bottom: 1rem;
+            }
+            .tdm-progress-fill {
+                height: 100%; border-radius: 999px;
+                background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+                transition: width 0.5s ease;
+            }
+            .tdm-progress-fill.done { background: linear-gradient(90deg,#34d399,#10b981); }
+
+            /* Board columns */
+            .tdm-cols-row {
+                display: flex; gap: 0.65rem; overflow-x: auto; padding-bottom: 0.25rem;
+                scrollbar-width: thin;
+            }
+            .tdm-col {
+                flex: 0 0 auto; min-width: 160px; max-width: 200px;
+                background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+                overflow: hidden;
+            }
+            .tdm-col-head {
+                padding: 0.4rem 0.65rem;
+                display: flex; justify-content: space-between; align-items: center;
+                background: #f1f5f9; border-bottom: 1px solid #e2e8f0;
+            }
+            .tdm-col-name { font-size: 0.75rem; font-weight: 700; color: #334155; }
+            .tdm-col-count { font-size: 0.7rem; color: #94a3b8; }
+            .tdm-col-tasks { padding: 0.35rem 0.5rem; display: flex; flex-direction: column; gap: 0.25rem; }
+            .tdm-task {
+                display: flex; align-items: flex-start; gap: 0.4rem;
+                padding: 0.3rem 0.35rem; border-radius: 6px; font-size: 0.77rem;
+            }
+            .tdm-task-done { opacity: 0.6; }
+            .tdm-task-done .tdm-task-name { text-decoration: line-through; color: #94a3b8; }
+            .tdm-task i { font-size: 0.8rem; flex-shrink: 0; margin-top: 1px; }
+            .tdm-task .bi-check-circle-fill { color: #10b981; }
+            .tdm-task .bi-circle { color: #cbd5e1; }
+            .tdm-task-name { color: #475569; line-height: 1.3; }
+            .tdm-col-empty { padding: 0.5rem 0.65rem; font-size: 0.75rem; color: #94a3b8; font-style: italic; }
+
+            /* Footer */
+            .tdm-footer {
+                display: flex; align-items: center; justify-content: flex-end;
+                padding: 0.85rem 1.4rem;
+                border-top: 1px solid #e2e8f0; background: #f8fafc;
+                flex-shrink: 0;
+            }
+            .tdm-close-btn {
+                padding: 0.45rem 1.2rem; border-radius: 8px;
+                background: #0c4a6e; border: none; color: #fff;
+                font-size: 0.82rem; font-weight: 600; cursor: pointer;
+                transition: background 0.15s;
+            }
+            .tdm-close-btn:hover { background: #075985; }
+            </style>
+
+            <script type="text/javascript">
+            //<![CDATA[
+            (function () {
+                var overlay  = document.getElementById('ticketModal');
+                var panel    = overlay ? overlay.querySelector('.tdm-panel') : null;
+                var loading  = document.getElementById('tdmLoading');
+                var content  = document.getElementById('tdmContent');
+                var csrf     = (document.cookie.match(/\bsession_id=([^;]+)/) || [])[1] || '';
+
+                function escHtml(s) {
+                    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                }
+
+                function openTicketModal(ticketId) {
+                    overlay.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                    loading.style.display = 'flex';
+                    content.style.display = 'none';
+
+                    fetch('/customer_support/customer/ticket/' + ticketId + '/data', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ jsonrpc:'2.0', method:'call', id:1, params:{} })
+                    })
+                    .then(function(r){ return r.json(); })
+                    .then(function(resp) {
+                        var data = resp.result || {};
+                        if (!data.success) {
+                            loading.innerHTML = '<i class="bi bi-exclamation-circle" style="font-size:1.5rem;color:#ef4444"></i><span>' + escHtml(data.error||'Failed to load') + '</span>';
+                            return;
+                        }
+                        fillModal(data);
+                        loading.style.display = 'none';
+                        content.style.display = '';
+                    })
+                    .catch(function(e) {
+                        loading.innerHTML = '<i class="bi bi-wifi-off" style="font-size:1.5rem;color:#ef4444"></i><span>Network error</span>';
+                    });
+                }
+
+                function fillModal(data) {
+                    var t = data.ticket;
+                    document.getElementById('tdmTicketNum').textContent = t.name;
+                    var sb = document.getElementById('tdmStateBadge');
+                    sb.textContent = t.state_label;
+                    sb.className = 'tdm-state-badge tdm-state-' + t.state;
+                    var pb = document.getElementById('tdmPriBadge');
+                    pb.textContent = t.priority.charAt(0).toUpperCase() + t.priority.slice(1);
+                    pb.className = 'tdm-pri-badge tdm-pri-' + t.priority;
+
+                    document.getElementById('tdmSubject').textContent = t.subject;
+                    document.getElementById('tdmAssigned').textContent = t.assigned_to;
+                    document.getElementById('tdmCreated').textContent = t.created;
+
+                    var slaWrap = document.getElementById('tdmSlaWrap');
+                    if (t.sla_deadline) {
+                        slaWrap.style.display = 'flex';
+                        slaWrap.className = 'tdm-meta-item tdm-sla-' + t.sla_status;
+                        document.getElementById('tdmSla').textContent = 'SLA: ' + t.sla_deadline;
+                    } else {
+                        slaWrap.style.display = 'none';
+                    }
+
+                    document.getElementById('tdmDescription').textContent = t.description || 'No description provided.';
+
+                    // Board progress
+                    var boardSec = document.getElementById('tdmBoardSection');
+                    if (data.board_total > 0) {
+                        boardSec.style.display = '';
+                        var pct = data.board_progress;
+                        document.getElementById('tdmProgressPct').textContent = data.board_done + '/' + data.board_total + ' · ' + pct + '%';
+                        var fill = document.getElementById('tdmProgressFill');
+                        fill.style.width = pct + '%';
+                        fill.className = 'tdm-progress-fill' + (pct === 100 ? ' done' : '');
+
+                        var colsHtml = '';
+                        (data.board_columns || []).forEach(function(col) {
+                            colsHtml += '<div class="tdm-col">';
+                            colsHtml += '<div class="tdm-col-head" style="border-left:3px solid ' + escHtml(col.color) + '">';
+                            colsHtml += '<span class="tdm-col-name">' + escHtml(col.name) + '</span>';
+                            colsHtml += '<span class="tdm-col-count">' + col.done_count + '/' + col.task_count + '</span>';
+                            colsHtml += '</div>';
+                            if (col.tasks && col.tasks.length) {
+                                colsHtml += '<div class="tdm-col-tasks">';
+                                col.tasks.forEach(function(task) {
+                                    var done = task.is_done;
+                                    colsHtml += '<div class="tdm-task' + (done ? ' tdm-task-done' : '') + '">';
+                                    colsHtml += '<i class="bi ' + (done ? 'bi-check-circle-fill' : 'bi-circle') + '"></i>';
+                                    colsHtml += '<span class="tdm-task-name">' + escHtml(task.name) + '</span>';
+                                    colsHtml += '</div>';
+                                });
+                                colsHtml += '</div>';
+                            } else {
+                                colsHtml += '<div class="tdm-col-empty">No tasks</div>';
+                            }
+                            colsHtml += '</div>';
+                        });
+                        document.getElementById('tdmCols').innerHTML = colsHtml;
+                    } else {
+                        boardSec.style.display = 'none';
+                    }
+                }
+
+                function closeModal() {
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+
+                // Expose globally for inline handlers
+                window.openTicketModal = openTicketModal;
+
+                document.getElementById('tdmClose').addEventListener('click', closeModal);
+                document.getElementById('tdmCloseBtn').addEventListener('click', closeModal);
+                overlay.addEventListener('click', function(e) {
+                    if (e.target === overlay) closeModal();
+                });
+                document.addEventListener('keydown', function(e) {
+                    if (e.key === 'Escape') closeModal();
+                });
+            })();
+            // bfcache guard
+            window.addEventListener('pageshow', function (e) {
+                if (e.persisted) { window.location.reload(); }
+            });
+            // popstate guard: if back/forward navigates outside the portal, redirect to dashboard
+            window.addEventListener('popstate', function () {
+                if (!window.location.pathname.startsWith('/customer_support/')) {
+                    window.location.replace('/customer_support/dashboard');
+                }
+            });
+            //]]>
+            </script>
         </t>
+    </template>
+
+    <!-- ── Reusable kanban card (used in all 4 columns) ────────────────────── -->
+    <template id="kanban_card_inner" name="Kanban Card Inner">
+        <div class="kanban-card" t-att-data-ticket-id="ticket.id">
+            <div class="kanban-card-id">
+                <t t-esc="ticket.name" />
+            </div>
+            <div class="kanban-card-subject">
+                <t t-esc="ticket.subject" />
+            </div>
+
+            <!-- Board task progress -->
+            <t t-if="ticket.board_task_total > 0">
+                <t t-set="pct" t-value="ticket.board_progress" />
+                <div class="kc-progress-wrap">
+                    <div class="kc-progress-header">
+                        <span class="kc-progress-label">
+                            <i class="bi bi-kanban me-1"></i>Board tasks
+                        </span>
+                        <span class="kc-progress-pct">
+                            <t t-esc="ticket.board_task_done" />/<t t-esc="ticket.board_task_total" />
+                            &amp;nbsp;·&amp;nbsp;<t t-esc="pct" />%
+                        </span>
+                    </div>
+                    <div class="kc-progress-bar-bg">
+                        <div t-attf-class="kc-progress-bar-fill{{ ' is-done' if pct == 100 else '' }}"
+                             t-attf-style="width: {{ pct }}%;" />
+                    </div>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="kc-no-tasks">No board tasks yet</div>
+            </t>
+
+            <div class="kanban-card-footer">
+                <t t-set="kp" t-value="ticket.priority or 'low'" />
+                <span t-att-class="'kanban-priority priority-' + kp">
+                    <t t-esc="kp.title()" />
+                </span>
+            </div>
+            <div class="kanban-card-focal">
+                <i class="bi bi-person-fill"></i>
+                <span>
+                    <t t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
+                </span>
+            </div>
+        </div>
     </template>
 </odoo>

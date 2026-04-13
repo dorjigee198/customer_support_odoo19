@@ -105,8 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showTyping();
 
+        // Use the public endpoint — works for guests and logged-in users alike
+        const chatEndpoint = "/dragon-chat/message";
+
         try {
-            const res = await fetch("/customer_support/chatbot/message", {
+            const res = await fetch(chatEndpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

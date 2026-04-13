@@ -36,6 +36,9 @@
         "views/templates/customer_ticket_detail.xml",
         "views/portal_ticket_kanban.xml",
         "views/portal_mobile_nav_component.xml",
+        "views/focal_projects.xml",
+        "views/focal_project_tickets.xml",
+        "views/ticket_board.xml",
     ],
     "assets": {
         "web.assets_backend": [
@@ -55,6 +58,9 @@
             "customer_support/static/src/css/ticket_details.css",
             "customer_support/static/src/js/ticket_details.js",
             "customer_support/static/src/css/portal_dashboard_mobile.css",
+            "customer_support/static/src/css/focal_projects.css",
+            # ticket_board.css and ticket_board.js are loaded directly
+            # in ticket_board.xml <head> to avoid double-loading from the bundle
         ],
     },
     "installable": True,

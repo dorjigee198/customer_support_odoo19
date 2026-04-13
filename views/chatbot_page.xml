@@ -32,7 +32,7 @@
                         <div class="header-nav">
                             <a href="/customer_support/dashboard" class="nav-link">
                                 <i class="bi bi-speedometer2 me-2"></i>Overview </a>
-                            <a href="/customer_support/tickets" class="nav-link">
+                            <a href="/customer_support/tickets/list" class="nav-link">
                                 <i class="bi bi-ticket-detailed me-2"></i>Tickets </a>
                             <a href="/customer_support/dashboard?tab=reporting" class="nav-link">
                                 <i class="bi bi-graph-up me-2"></i>Reporting </a>

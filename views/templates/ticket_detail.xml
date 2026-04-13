@@ -1110,6 +1110,16 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 });
+// bfcache guard
+window.addEventListener('pageshow', function (e) {
+    if (e.persisted) { window.location.reload(); }
+});
+// popstate guard: redirect to dashboard if back/forward leaves the portal
+window.addEventListener('popstate', function () {
+    if (!window.location.pathname.startsWith('/customer_support/')) {
+        window.location.replace('/customer_support/dashboard');
+    }
+});
 //]]>
             </script>
         </t>

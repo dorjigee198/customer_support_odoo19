@@ -36,7 +36,7 @@ class CustomerSupportCustomer(http.Controller):
                 "closed": len(tickets.filtered(lambda t: t.state == "closed")),
                 "total": len(tickets),
             }
-            return request.render(
+            response = request.render(
                 "customer_support.portal_dashboard",
                 {
                     "user": user,
@@ -47,6 +47,8 @@ class CustomerSupportCustomer(http.Controller):
                     "page_name": "dashboard",
                 },
             )
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            return response
         except Exception as e:
             _logger.error(f"Dashboard error: {str(e)}")
             return werkzeug.utils.redirect(
@@ -68,7 +70,7 @@ class CustomerSupportCustomer(http.Controller):
                 .sudo()
                 .search([("active", "=", True)])
             )
-            return request.render(
+            response = request.render(
                 "customer_support.create_ticket_form",
                 {
                     "user": user,
@@ -77,6 +79,8 @@ class CustomerSupportCustomer(http.Controller):
                     "page_name": "create_ticket",
                 },
             )
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            return response
         except Exception as e:
             _logger.error(f"Create ticket form error: {str(e)}")
             return werkzeug.utils.redirect("/customer_support/dashboard")

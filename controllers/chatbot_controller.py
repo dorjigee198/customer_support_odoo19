@@ -84,12 +84,12 @@ class CustomerSupportChatbot(http.Controller):
 
     # ── GENERAL / FAQ CHATBOT (uses your existing landing_chat interface) ─────
 
-    @http.route("/dragon-chat", type="http", auth="public", website=True)
+    @http.route("/dragon-chat", type="http", auth="public")
     def faq_chat_page(self, **kw):
         """Public general / FAQ chat page – loads your landing_chat template"""
         return request.render("customer_support.landing_chat")
 
-    @http.route("/dragon-chat/message", type="json", auth="public")
+    @http.route("/dragon-chat/message", type="json", auth="public", website=True, csrf=False)
     def faq_chat_message(self, message, **kw):
         if not message or not message.strip():
             return {"reply": "Please type a question."}
@@ -152,10 +152,12 @@ class CustomerSupportChatbot(http.Controller):
         name = kw.get("name", "").strip()
         category = kw.get("category", "other")
         description = kw.get("description", "").strip()
+        project_id_raw = kw.get("project_id", "")
+        redirect_to = kw.get("redirect_to", "/customer_support/knowledge")
 
         if not uploaded_file or not name:
             return request.redirect(
-                "/customer_support/knowledge?error=Please+fill+all+required+fields"
+                f"{redirect_to}?error=Please+fill+all+required+fields"
             )
 
         filename = uploaded_file.filename
@@ -163,32 +165,33 @@ class CustomerSupportChatbot(http.Controller):
 
         if not any(filename.lower().endswith(ext) for ext in allowed):
             return request.redirect(
-                "/customer_support/knowledge?error=Invalid+file+type.+Allowed:+PDF,+DOCX,+TXT,+XLSX"
+                f"{redirect_to}?error=Invalid+file+type.+Allowed:+PDF,+DOCX,+TXT,+XLSX"
             )
 
         try:
             file_data = uploaded_file.read()
 
-            doc = (
-                request.env["dc.knowledge.document"]
-                .sudo()
-                .create(
-                    {
-                        "name": name,
-                        "description": description,
-                        "file": base64.b64encode(file_data),
-                        "filename": filename,
-                        "category": category,
-                    }
-                )
-            )
+            vals = {
+                "name": name,
+                "description": description,
+                "file": base64.b64encode(file_data),
+                "filename": filename,
+                "category": category,
+            }
+            if project_id_raw:
+                try:
+                    vals["project_id"] = int(project_id_raw)
+                except (ValueError, TypeError):
+                    pass
+
+            doc = request.env["dc.knowledge.document"].sudo().create(vals)
 
             doc.action_process()
 
-            return request.redirect("/customer_support/knowledge?success=1")
+            return request.redirect(f"{redirect_to}?success=1")
 
         except Exception as e:
-            return request.redirect(f"/customer_support/knowledge?error={str(e)[:100]}")
+            return request.redirect(f"{redirect_to}?error={str(e)[:100]}")
 
     @http.route(
         "/customer_support/knowledge/delete/<int:doc_id>",

@@ -13,3 +13,4 @@ from . import messaging
 from . import user_profile  # Renamed from profile
 from . import analytics_api
 from . import sla_controller
+from . import focal_board

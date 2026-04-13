@@ -760,17 +760,10 @@ body {
 }
 
 /* ========================================
-   DASHBOARD GRID LAYOUT
+   DASHBOARD CARD (full-width, no performance card)
    ======================================== */
-.dashboard-grid {
-    display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1.5rem;
-    box-sizing: border-box;
-}
-
 .dashboard-card {
-    flex: 2 1 0;
+    width: 100%;
     min-width: 0;
     background: #f0f9ff;
     border-radius: 12px;
@@ -779,6 +772,7 @@ body {
     border: 1px solid rgba(12, 74, 110, 0.1);
     transition: var(--transition);
     box-sizing: border-box;
+    margin-bottom: 1.5rem;
 }
 
 .dashboard-card:hover {

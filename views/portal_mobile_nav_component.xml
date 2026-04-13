@@ -68,7 +68,7 @@
                 </li>
 
                 <li>
-                    <a href="/customer_support/tickets"
+                    <a href="/customer_support/tickets/list"
                         class="portal-nav-item"
                         id="drawerTicketsLink"
                         t-att-class="'portal-nav-item' + (' active' if mobile_active_page == 'tickets' else '')">

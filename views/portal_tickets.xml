@@ -165,75 +165,69 @@
                     <!-- Tickets List -->
                     <div class="tickets-container">
                         <t t-if="tickets">
+                            <!-- Table header -->
+                            <div class="tl-header-row">
+                                <span class="tl-col-id">Ticket</span>
+                                <span class="tl-col-subject">Subject</span>
+                                <span class="tl-col-status">Status</span>
+                                <span class="tl-col-priority">Priority</span>
+                                <span class="tl-col-assigned">Assigned To</span>
+                                <span class="tl-col-date">Date</span>
+                            </div>
                             <div class="tickets-list" id="tickets-list">
                                 <t t-foreach="tickets" t-as="ticket">
-                                    <div class="ticket-card" t-att-data-ticket-id="ticket.id">
-                                        <!-- Ticket Header -->
-                                        <div class="ticket-header">
-                                            <div class="ticket-id-container">
-                                                <span class="ticket-id">
-                                                    <t t-esc="ticket.name" />
-                                                </span>
-                                                <span
-                                                    t-att-class="'ticket-status-badge status-' + ticket.state">
-                                                    <t
-                                                        t-esc="ticket.state.replace('_', ' ').title()" />
-                                                </span>
-                                                <t t-if="ticket.is_overdue">
-                                                    <span class="badge bg-danger ms-2">Overdue</span>
-                                                </t>
-                                            </div>
-                                            <span
-                                                t-att-class="'priority-badge priority-' + ticket.priority">
+                                    <div class="ticket-card" t-att-data-ticket-id="ticket.id"
+                                        t-att-data-state="ticket.state"
+                                        t-att-data-priority="ticket.priority">
+                                        <!-- ID + overdue indicator -->
+                                        <div class="tl-col-id">
+                                            <span class="tl-ticket-id"><t t-esc="ticket.name" /></span>
+                                            <t t-if="ticket.is_overdue">
+                                                <span class="tl-overdue-dot" title="Overdue"></span>
+                                            </t>
+                                        </div>
+                                        <!-- Subject -->
+                                        <div class="tl-col-subject">
+                                            <span class="tl-subject"><t t-esc="ticket.subject" /></span>
+                                        </div>
+                                        <!-- Status -->
+                                        <div class="tl-col-status">
+                                            <span t-att-class="'tl-status-badge status-' + ticket.state">
+                                                <t t-esc="ticket.state.replace('_', ' ').title()" />
+                                            </span>
+                                        </div>
+                                        <!-- Priority -->
+                                        <div class="tl-col-priority">
+                                            <span t-att-class="'tl-pri-badge priority-' + ticket.priority">
                                                 <t t-esc="ticket.priority.title()" />
                                             </span>
                                         </div>
-
-                                        <!-- Ticket Title -->
-                                        <h5 class="ticket-title">
-                                            <t t-esc="ticket.subject" />
-                                        </h5>
-
-                                        <!-- Ticket Description -->
-                                        <p class="ticket-description">
-                                            <t t-esc="ticket.description[:150]" />
-                                            <t t-if="len(ticket.description) > 150">...</t>
-                                        </p>
-
-                                        <!-- Ticket Footer -->
-                                        <div class="ticket-footer">
-                                            <div class="assigned-info">
-                                                <span class="assigned-to"> Assigned to <t
-                                                        t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
+                                        <!-- Assigned to -->
+                                        <div class="tl-col-assigned">
+                                            <span class="tl-assigned">
+                                                <t t-esc="ticket.assigned_to.name if ticket.assigned_to else 'Unassigned'" />
+                                            </span>
+                                        </div>
+                                        <!-- Date -->
+                                        <div class="tl-col-date">
+                                            <t t-if="ticket.state in ['resolved', 'closed']">
+                                                <span class="tl-date tl-date-closed">
+                                                    <i class="bi bi-check-circle me-1"></i>
+                                                    <t t-if="ticket.closed_date">
+                                                        <t t-esc="ticket.closed_date.strftime('%b %d, %Y')" />
+                                                    </t>
+                                                    <t t-else="">Recently</t>
                                                 </span>
-                                                <span class="project-info">
-                                                    <t t-esc="ticket.priority.title()" /> Priority </span>
-                                            </div>
-                                            <div class="date-info">
-                                                <span class="closed-date">
-                                                    <i class="bi bi-calendar-check"></i>
-                                                    <span>
-                                                        <t
-                                                            t-if="ticket.state in ['resolved', 'closed']">
-                                                            <t t-if="ticket.closed_date"> Closed <t
-                                                                    t-esc="ticket.closed_date.strftime('%b %d, %Y %I:%M %p')" />
-                                                            </t>
-                                                            <t t-else="">
-                                                                Closed Recently
-                                                            </t>
-                                                        </t>
-                                                        <t t-else=""> Created <t
-                                                                t-esc="ticket.create_date.strftime('%b %d, %Y') if ticket.create_date else 'N/A'" />
-                                                        </t>
-                                                    </span>
+                                            </t>
+                                            <t t-else="">
+                                                <span class="tl-date">
+                                                    <i class="bi bi-calendar3 me-1"></i>
+                                                    <t t-esc="ticket.create_date.strftime('%b %d, %Y') if ticket.create_date else 'N/A'" />
                                                 </span>
-                                                <span class="update-time">
-                                                    <i class="bi bi-clock-history"></i>
-                                                    <t t-esc="ticket.days_open" />
-                                                    <t t-if="ticket.days_open == 1">day open</t>
-                                                    <t t-else="">days open</t>
+                                                <span class="tl-days-open">
+                                                    <t t-esc="ticket.days_open" />d open
                                                 </span>
-                                            </div>
+                                            </t>
                                         </div>
                                     </div>
                                 </t>
@@ -245,10 +239,10 @@
                                     <i class="bi bi-ticket"></i>
                                 </div>
                                 <h3 class="mb-3">No Tickets Yet</h3>
-                                <p class="text-muted mb-4">You haven't created any support tickets
-                                    yet.</p>
+                                <p class="text-muted mb-4">You haven't created any support tickets yet.</p>
                                 <a href="/customer_support/create_ticket" class="btn btn-primary">
-                                    <i class="bi bi-plus-circle me-2"></i>Create Your First Ticket </a>
+                                    <i class="bi bi-plus-circle me-2"></i>Create Your First Ticket
+                                </a>
                             </div>
                         </t>
                     </div>
@@ -285,26 +279,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (ticketsList) {
             const ticketCards = ticketsList.querySelectorAll('.ticket-card');
-            
+
             ticketCards.forEach(card => {
-                const title = card.querySelector('.ticket-title').textContent.toLowerCase();
-                const description = card.querySelector('.ticket-description').textContent.toLowerCase();
-                const statusBadge = card.querySelector('.ticket-status-badge');
-                const priorityBadge = card.querySelector('.priority-badge');
+                const subjectEl = card.querySelector('.tl-subject');
+                const title = subjectEl ? subjectEl.textContent.toLowerCase() : '';
+                const ticketState = card.getAttribute('data-state') || '';
+                const ticketPriority = card.getAttribute('data-priority') || '';
 
-                let statusClass = '';
-                if (statusBadge) {
-                    statusClass = statusBadge.className;
-                }
-
-                let priorityClass = '';
-                if (priorityBadge) {
-                    priorityClass = priorityBadge.className;
-                }
-
-                const matchesSearch = searchTerm === '' || title.includes(searchTerm) || description.includes(searchTerm);
-                const matchesStatus = statusValue === '' || statusClass.includes('status-' + statusValue);
-                const matchesPriority = priorityValue === '' || priorityClass.includes('priority-' + priorityValue);
+                const matchesSearch = searchTerm === '' || title.includes(searchTerm);
+                const matchesStatus = statusValue === '' || ticketState === statusValue;
+                const matchesPriority = priorityValue === '' || ticketPriority === priorityValue;
 
                 if (matchesSearch && matchesStatus && matchesPriority) {
                     card.style.display = 'block';
@@ -359,21 +343,159 @@ document.addEventListener('DOMContentLoaded', function() {
         filterTickets();
     });
 
-    // Make ticket cards clickable
+    // Make ticket cards open modal
     document.querySelectorAll('.ticket-card').forEach(card => {
         card.addEventListener('click', function(e) {
-            // Don't trigger if clicking on a link or button inside
             if (!e.target.closest('a') && !e.target.closest('button')) {
                 const ticketId = this.getAttribute('data-ticket-id');
-                if (ticketId) {
-                    window.location = '/customer_support/ticket/' + ticketId;
-                }
+                if (ticketId) openTicketModal(ticketId);
             }
         });
     });
 
 });
 //]]>
+            </script>
+
+            <!-- Shared modal markup (same as kanban view) -->
+            <div id="ticketModal" class="tdm-overlay" style="display:none;" role="dialog" aria-modal="true">
+                <div class="tdm-panel">
+                    <div class="tdm-header">
+                        <div class="tdm-header-left">
+                            <span class="tdm-ticket-num" id="tdmTicketNum"></span>
+                            <span class="tdm-state-badge" id="tdmStateBadge"></span>
+                            <span class="tdm-pri-badge" id="tdmPriBadge"></span>
+                        </div>
+                        <button class="tdm-close" id="tdmClose" aria-label="Close">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    <div class="tdm-body" id="tdmBody">
+                        <div class="tdm-loading" id="tdmLoading">
+                            <div class="tdm-spinner"></div>
+                            <span>Loading ticket…</span>
+                        </div>
+                        <div id="tdmContent" style="display:none;">
+                            <h2 class="tdm-subject" id="tdmSubject"></h2>
+                            <div class="tdm-meta-row">
+                                <div class="tdm-meta-item"><i class="bi bi-person-circle"></i><span id="tdmAssigned"></span></div>
+                                <div class="tdm-meta-item"><i class="bi bi-calendar3"></i><span id="tdmCreated"></span></div>
+                                <div class="tdm-meta-item tdm-sla-wrap" id="tdmSlaWrap" style="display:none;"><i class="bi bi-clock-fill"></i><span id="tdmSla"></span></div>
+                            </div>
+                            <div class="tdm-section">
+                                <div class="tdm-section-title"><i class="bi bi-file-text me-1"></i>Description</div>
+                                <div class="tdm-description" id="tdmDescription"></div>
+                            </div>
+                            <div class="tdm-section" id="tdmBoardSection">
+                                <div class="tdm-section-title"><i class="bi bi-kanban me-1"></i>Work Progress<span class="tdm-progress-pct" id="tdmProgressPct"></span></div>
+                                <div class="tdm-progress-bg"><div class="tdm-progress-fill" id="tdmProgressFill"></div></div>
+                                <div class="tdm-cols-row" id="tdmCols"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tdm-footer">
+                        <button class="tdm-close-btn" id="tdmCloseBtn">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+            .tdm-overlay{position:fixed;inset:0;z-index:9000;background:rgba(10,25,47,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:tdmFadeIn .2s ease}
+            @keyframes tdmFadeIn{from{opacity:0}to{opacity:1}}
+            .tdm-panel{background:#fff;border-radius:16px;box-shadow:0 24px 80px rgba(10,25,47,.35);width:100%;max-width:720px;max-height:88vh;display:flex;flex-direction:column;animation:tdmSlideUp .22s ease;overflow:hidden}
+            @keyframes tdmSlideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+            .tdm-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.4rem .85rem;border-bottom:1px solid #e2e8f0;background:#f8fafc;flex-shrink:0;gap:.75rem}
+            .tdm-header-left{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;min-width:0}
+            .tdm-ticket-num{font-family:'Courier New',monospace;font-size:.78rem;font-weight:700;color:#0284c7;background:#e0f2fe;padding:.18rem .6rem;border-radius:6px;white-space:nowrap}
+            .tdm-state-badge,.tdm-pri-badge{font-size:.72rem;font-weight:700;padding:.18rem .6rem;border-radius:999px;white-space:nowrap}
+            .tdm-state-new{background:#dbeafe;color:#1d4ed8}.tdm-state-assigned{background:#ede9fe;color:#6d28d9}.tdm-state-in_progress{background:#fef3c7;color:#b45309}.tdm-state-pending{background:#fee2e2;color:#b91c1c}.tdm-state-resolved{background:#dcfce7;color:#15803d}.tdm-state-closed{background:#f1f5f9;color:#475569}
+            .tdm-pri-low{background:#f0fdf4;color:#166534}.tdm-pri-medium{background:#eff6ff;color:#1e40af}.tdm-pri-high{background:#fff7ed;color:#9a3412}.tdm-pri-urgent{background:#fef2f2;color:#991b1b}
+            .tdm-close{width:32px;height:32px;border-radius:8px;background:transparent;border:1px solid #e2e8f0;color:#64748b;font-size:.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+            .tdm-close:hover{background:#fee2e2;border-color:#fca5a5;color:#dc2626}
+            .tdm-body{flex:1;overflow-y:auto;padding:1.4rem;scrollbar-width:thin;scrollbar-color:#cbd5e1 transparent}
+            .tdm-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.85rem;padding:3rem 1rem;color:#64748b;font-size:.9rem}
+            .tdm-spinner{width:32px;height:32px;border-radius:50%;border:3px solid #e2e8f0;border-top-color:#0284c7;animation:tdmSpin .7s linear infinite}
+            @keyframes tdmSpin{to{transform:rotate(360deg)}}
+            .tdm-subject{font-size:1.15rem;font-weight:700;color:#0c4a6e;margin:0 0 .85rem;line-height:1.35}
+            .tdm-meta-row{display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1.2rem;padding-bottom:1rem;border-bottom:1px solid #f1f5f9}
+            .tdm-meta-item{display:flex;align-items:center;gap:.35rem;font-size:.8rem;color:#475569}
+            .tdm-meta-item i{color:#94a3b8;font-size:.85rem}
+            .tdm-sla-on_track{color:#15803d!important}.tdm-sla-at_risk{color:#b45309!important}.tdm-sla-breached{color:#b91c1c!important}
+            .tdm-section{margin-bottom:1.4rem}.tdm-section:last-child{margin-bottom:0}
+            .tdm-section-title{display:flex;align-items:center;font-size:.78rem;font-weight:700;color:#0c4a6e;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.65rem}
+            .tdm-progress-pct{margin-left:auto;font-size:.8rem;font-weight:700;color:#0284c7}
+            .tdm-description{font-size:.875rem;color:#334155;line-height:1.65;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:.85rem 1rem;white-space:pre-wrap;word-break:break-word}
+            .tdm-progress-bg{height:7px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin-bottom:1rem}
+            .tdm-progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#38bdf8,#0ea5e9);transition:width .5s ease}
+            .tdm-progress-fill.done{background:linear-gradient(90deg,#34d399,#10b981)}
+            .tdm-cols-row{display:flex;gap:.65rem;overflow-x:auto;padding-bottom:.25rem;scrollbar-width:thin}
+            .tdm-col{flex:0 0 auto;min-width:160px;max-width:200px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden}
+            .tdm-col-head{padding:.4rem .65rem;display:flex;justify-content:space-between;align-items:center;background:#f1f5f9;border-bottom:1px solid #e2e8f0}
+            .tdm-col-name{font-size:.75rem;font-weight:700;color:#334155}.tdm-col-count{font-size:.7rem;color:#94a3b8}
+            .tdm-col-tasks{padding:.35rem .5rem;display:flex;flex-direction:column;gap:.25rem}
+            .tdm-task{display:flex;align-items:flex-start;gap:.4rem;padding:.3rem .35rem;border-radius:6px;font-size:.77rem}
+            .tdm-task-done{opacity:.6}.tdm-task-done .tdm-task-name{text-decoration:line-through;color:#94a3b8}
+            .tdm-task i{font-size:.8rem;flex-shrink:0;margin-top:1px}
+            .tdm-task .bi-check-circle-fill{color:#10b981}.tdm-task .bi-circle{color:#cbd5e1}
+            .tdm-task-name{color:#475569;line-height:1.3}
+            .tdm-col-empty{padding:.5rem .65rem;font-size:.75rem;color:#94a3b8;font-style:italic}
+            .tdm-footer{display:flex;align-items:center;justify-content:flex-end;padding:.85rem 1.4rem;border-top:1px solid #e2e8f0;background:#f8fafc;flex-shrink:0}
+            .tdm-close-btn{padding:.45rem 1.2rem;border-radius:8px;background:#0c4a6e;border:none;color:#fff;font-size:.82rem;font-weight:600;cursor:pointer;transition:background .15s}
+            .tdm-close-btn:hover{background:#075985}
+            </style>
+
+            <script type="text/javascript">
+            //<![CDATA[
+            (function () {
+                var overlay = document.getElementById('ticketModal');
+                var loading = document.getElementById('tdmLoading');
+                var content = document.getElementById('tdmContent');
+                function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+                function closeModal(){overlay.style.display='none';document.body.style.overflow='';}
+                function fillModal(data){
+                    var t=data.ticket;
+                    document.getElementById('tdmTicketNum').textContent=t.name;
+                    var sb=document.getElementById('tdmStateBadge');sb.textContent=t.state_label;sb.className='tdm-state-badge tdm-state-'+t.state;
+                    var pb=document.getElementById('tdmPriBadge');pb.textContent=t.priority.charAt(0).toUpperCase()+t.priority.slice(1);pb.className='tdm-pri-badge tdm-pri-'+t.priority;
+                    document.getElementById('tdmSubject').textContent=t.subject;
+                    document.getElementById('tdmAssigned').textContent=t.assigned_to;
+                    document.getElementById('tdmCreated').textContent=t.created;
+                    var sw=document.getElementById('tdmSlaWrap');
+                    if(t.sla_deadline){sw.style.display='flex';sw.className='tdm-meta-item tdm-sla-'+t.sla_status;document.getElementById('tdmSla').textContent='SLA: '+t.sla_deadline;}else{sw.style.display='none';}
+                    document.getElementById('tdmDescription').textContent=t.description||'No description provided.';
+                    var bs=document.getElementById('tdmBoardSection');
+                    if(data.board_total>0){
+                        bs.style.display='';
+                        var pct=data.board_progress;
+                        document.getElementById('tdmProgressPct').textContent=data.board_done+'/'+data.board_total+' · '+pct+'%';
+                        var fill=document.getElementById('tdmProgressFill');fill.style.width=pct+'%';fill.className='tdm-progress-fill'+(pct===100?' done':'');
+                        var ch='';
+                        (data.board_columns||[]).forEach(function(col){
+                            ch+='<div class="tdm-col"><div class="tdm-col-head" style="border-left:3px solid '+escHtml(col.color)+'">';
+                            ch+='<span class="tdm-col-name">'+escHtml(col.name)+'</span><span class="tdm-col-count">'+col.done_count+'/'+col.task_count+'</span></div>';
+                            if(col.tasks&&col.tasks.length){ch+='<div class="tdm-col-tasks">';col.tasks.forEach(function(task){ch+='<div class="tdm-task'+(task.is_done?' tdm-task-done':'')+'"><i class="bi '+(task.is_done?'bi-check-circle-fill':'bi-circle')+'"></i><span class="tdm-task-name">'+escHtml(task.name)+'</span></div>';});ch+='</div>';}
+                            else{ch+='<div class="tdm-col-empty">No tasks</div>';}
+                            ch+='</div>';
+                        });
+                        document.getElementById('tdmCols').innerHTML=ch;
+                    }else{bs.style.display='none';}
+                }
+                window.openTicketModal=function(ticketId){
+                    overlay.style.display='flex';document.body.style.overflow='hidden';
+                    loading.style.display='flex';content.style.display='none';
+                    fetch('/customer_support/customer/ticket/'+ticketId+'/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',method:'call',id:1,params:{}})})
+                    .then(function(r){return r.json();}).then(function(resp){
+                        var d=resp.result||{};
+                        if(!d.success){loading.innerHTML='<i class="bi bi-exclamation-circle" style="font-size:1.5rem;color:#ef4444"></i><span>'+escHtml(d.error||'Failed to load')+'</span>';return;}
+                        fillModal(d);loading.style.display='none';content.style.display='';
+                    }).catch(function(){loading.innerHTML='<i class="bi bi-wifi-off" style="font-size:1.5rem;color:#ef4444"></i><span>Network error</span>';});
+                };
+                document.getElementById('tdmClose').addEventListener('click',closeModal);
+                document.getElementById('tdmCloseBtn').addEventListener('click',closeModal);
+                overlay.addEventListener('click',function(e){if(e.target===overlay)closeModal();});
+                document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal();});
+            })();
+            //]]>
             </script>
         </t>
     </template>

@@ -3,6 +3,7 @@
     <template id="system_configuration_template" name="System Configuration">
         <t t-call="web.layout">
             <t t-set="head">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
                     rel="stylesheet" />
                 <link rel="stylesheet"
@@ -14,337 +15,871 @@
                     href="/customer_support/static/src/css/project_configuration.css" />
             </t>
 
-            <div id="wrap" class="oe_structure">
-                <div class="pc-page">
+            <div class="pcs-layout">
 
-                    <!-- Page Header -->
-                    <div class="pc-header">
-                        <div class="pc-header-icon">
-                            <i class="bi bi-grid-1x2-fill"></i>
+                <!-- ════════════════════════════════════════════════
+                     SIDEBAR
+                ════════════════════════════════════════════════ -->
+                <aside class="pcs-sidebar">
+
+                    <!-- Brand -->
+                    <div class="pcs-brand">
+                        <div class="pcs-brand-icon">
+                            <i class="bi bi-gear-fill"></i>
                         </div>
-                        <div>
-                            <h1 class="pc-title">Project Configuration</h1>
-                            <p class="pc-subtitle">Define project details, tech stack, and warranty
-                                coverage</p>
+                        <div class="pcs-brand-text">
+                            <span class="pcs-brand-name">Project Config</span>
+                            <span class="pcs-brand-sub">Admin Panel</span>
                         </div>
                     </div>
 
-                    <!-- Alerts -->
-                    <t t-if="request.params.get('project_created')">
-                        <div class="pc-alert pc-alert-success">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Project created successfully.</span>
-                            <button class="pc-alert-close" onclick="this.parentElement.remove()">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </div>
-                    </t>
-                    <t t-if="request.params.get('project_updated')">
-                        <div class="pc-alert pc-alert-success">
-                            <i class="bi bi-check-circle-fill"></i>
-                            <span>Project updated successfully.</span>
-                            <button class="pc-alert-close" onclick="this.parentElement.remove()">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </div>
-                    </t>
-                    <t t-if="request.params.get('error')">
-                        <div class="pc-alert pc-alert-danger">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                            <span>
-                                <t t-esc="request.params.get('error_msg', 'An error occurred.')" />
-                            </span>
-                            <button class="pc-alert-close" onclick="this.parentElement.remove()">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        </div>
-                    </t>
+                    <!-- Navigation -->
+                    <nav class="pcs-nav" role="navigation">
 
-                    <!-- Main Form Card -->
-                    <div class="pc-card">
-                        <div class="pc-card-header">
-                            <i class="bi bi-folder-plus"></i>
+                        <button class="pcs-nav-item pcs-nav-active" data-panel="project"
+                            data-title="New Project"
+                            data-desc="Define project details, technology stack, and warranty coverage">
+                            <div class="pcs-nav-icon-wrap">
+                                <i class="bi bi-folder-fill"></i>
+                            </div>
+                            <div class="pcs-nav-text">
+                                <span class="pcs-nav-label">Project</span>
+                                <span class="pcs-nav-desc">Create &amp; configure</span>
+                            </div>
+                        </button>
+
+                        <button class="pcs-nav-item" data-panel="team"
+                            data-title="Team Management"
+                            data-desc="Assign a focal person and manage team members per project">
+                            <div class="pcs-nav-icon-wrap">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="pcs-nav-text">
+                                <span class="pcs-nav-label">Team</span>
+                                <span class="pcs-nav-desc">Focal &amp; members</span>
+                            </div>
+                        </button>
+
+                        <button class="pcs-nav-item" data-panel="docs"
+                            data-title="Project Documents"
+                            data-desc="Upload and manage documents linked to a project — visible on the focal board">
+                            <div class="pcs-nav-icon-wrap">
+                                <i class="bi bi-file-earmark-text-fill"></i>
+                            </div>
+                            <div class="pcs-nav-text">
+                                <span class="pcs-nav-label">Documents</span>
+                                <span class="pcs-nav-desc">Project files</span>
+                            </div>
+                            <span class="pcs-nav-badge" id="docsBadge" style="display:none"></span>
+                        </button>
+
+                    </nav>
+
+                    <!-- Footer -->
+                    <div class="pcs-sidebar-footer">
+                        <a href="/customer_support/admin_dashboard?tab=system-configuration&amp;modal=projects" class="pcs-back-link">
+                            <i class="bi bi-arrow-left"></i>
+                            <span>Back to Projects</span>
+                        </a>
+                    </div>
+
+                </aside>
+
+                <!-- ════════════════════════════════════════════════
+                     MAIN CONTENT
+                ════════════════════════════════════════════════ -->
+                <main class="pcs-main">
+
+                    <!-- Top bar -->
+                    <div class="pcs-topbar">
+                        <div class="pcs-topbar-left">
+                            <div class="pcs-topbar-step" id="pcsStep">01</div>
                             <div>
-                                <div class="pc-card-title">New Project</div>
-                                <div class="pc-card-subtitle">Fill in the details below to register
-                                    a new project</div>
+                                <h1 class="pcs-topbar-title" id="pcsTitle">New Project</h1>
+                                <p class="pcs-topbar-desc" id="pcsDesc">Define project details, technology stack, and warranty coverage</p>
+                            </div>
+                        </div>
+                        <div class="pcs-topbar-right">
+                            <div class="pcs-step-dots">
+                                <span class="pcs-dot pcs-dot-active" data-panel="project" title="Project"></span>
+                                <span class="pcs-dot" data-panel="team" title="Team"></span>
+                                <span class="pcs-dot" data-panel="docs" title="Documents"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scrollable panel area -->
+                    <div class="pcs-scroll">
+
+                        <!-- Global alerts -->
+                        <div id="pcsAlerts">
+                            <t t-if="request.params.get('project_created')">
+                                <div class="pc-alert pc-alert-success">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Project created successfully.</span>
+                                    <button class="pc-alert-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+                                </div>
+                            </t>
+                            <t t-if="request.params.get('project_updated')">
+                                <div class="pc-alert pc-alert-success">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Project updated successfully.</span>
+                                    <button class="pc-alert-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+                                </div>
+                            </t>
+                            <t t-if="request.params.get('error')">
+                                <div class="pc-alert pc-alert-danger">
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <span><t t-esc="request.params.get('error_msg', 'An error occurred.')" /></span>
+                                    <button class="pc-alert-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+                                </div>
+                            </t>
+                            <t t-if="request.params.get('success') == '1'">
+                                <div class="pc-alert pc-alert-success">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Document uploaded successfully.</span>
+                                    <button class="pc-alert-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+                                </div>
+                            </t>
+                        </div>
+
+                        <!-- ══════════════════════════════════════
+                             PANEL 1 — PROJECT
+                        ══════════════════════════════════════ -->
+                        <div class="pcs-panel" id="panel-project">
+
+                            <form id="projectConfigForm" method="post"
+                                action="/customer_support/admin_dashboard/projects/create"
+                                class="pc-form">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+
+                                <!-- Basic Information -->
+                                <div class="pc-section">
+                                    <div class="pc-section-label">
+                                        <i class="bi bi-info-circle-fill"></i> Basic Information
+                                    </div>
+                                    <div class="pc-grid-2">
+                                        <div class="pc-field pc-span-2">
+                                            <label class="pc-label" for="project_name">Project Name <span class="pc-required">*</span></label>
+                                            <input type="text" class="pc-input" id="project_name" name="project_name"
+                                                placeholder="e.g. Customer Portal v2" required="required" />
+                                        </div>
+                                        <div class="pc-field">
+                                            <label class="pc-label" for="project_key">Project Key <span class="pc-required">*</span></label>
+                                            <input type="text" class="pc-input pc-mono" id="project_key" name="project_key"
+                                                placeholder="e.g. CP-2024" pattern="[A-Za-z0-9-]+" required="required" />
+                                            <span class="pc-hint">Short unique identifier — auto-uppercased</span>
+                                        </div>
+                                        <div class="pc-field">
+                                            <label class="pc-label" for="project_type">Project Type <span class="pc-required">*</span></label>
+                                            <select class="pc-select" id="project_type" name="project_type" required="required">
+                                                <option value="">Select type...</option>
+                                                <option value="web_app">Web Application</option>
+                                                <option value="mobile">Mobile Application</option>
+                                                <option value="machine_learning">Machine Learning</option>
+                                                <option value="iot">IoT Platform</option>
+                                                <option value="api">API / Backend Service</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="pc-field pc-span-2">
+                                            <label class="pc-label" for="project_goals">Goals &amp; Objectives</label>
+                                            <textarea class="pc-input pc-textarea" id="project_goals" name="project_goals"
+                                                placeholder="Describe the project's purpose and expected outcomes..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Technology Stack -->
+                                <div class="pc-section">
+                                    <div class="pc-section-label">
+                                        <i class="bi bi-code-slash"></i> Technology Stack
+                                    </div>
+                                    <div class="pc-grid-3">
+                                        <div class="pc-field">
+                                            <label class="pc-label" for="programming_languages">Programming Language</label>
+                                            <select class="pc-select" id="programming_languages" name="programming_languages">
+                                                <option value="">Select language...</option>
+                                                <option value="python">Python</option>
+                                                <option value="javascript">JavaScript</option>
+                                                <option value="typescript">TypeScript</option>
+                                                <option value="java">Java</option>
+                                                <option value="csharp">C#</option>
+                                                <option value="cpp">C++</option>
+                                                <option value="go">Go</option>
+                                                <option value="rust">Rust</option>
+                                                <option value="php">PHP</option>
+                                                <option value="ruby">Ruby</option>
+                                                <option value="swift">Swift</option>
+                                                <option value="kotlin">Kotlin</option>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="pc-field">
+                                            <label class="pc-label" for="frameworks">Framework</label>
+                                            <select class="pc-select" id="frameworks" name="frameworks">
+                                                <option value="">Select framework...</option>
+                                                <optgroup label="Frontend">
+                                                    <option value="react">React</option>
+                                                    <option value="vue">Vue.js</option>
+                                                    <option value="angular">Angular</option>
+                                                    <option value="svelte">Svelte</option>
+                                                    <option value="nextjs">Next.js</option>
+                                                </optgroup>
+                                                <optgroup label="Backend">
+                                                    <option value="django">Django</option>
+                                                    <option value="fastapi">FastAPI</option>
+                                                    <option value="flask">Flask</option>
+                                                    <option value="spring">Spring Boot</option>
+                                                    <option value="express">Express.js</option>
+                                                    <option value="laravel">Laravel</option>
+                                                    <option value="rails">Ruby on Rails</option>
+                                                    <option value="odoo">Odoo</option>
+                                                </optgroup>
+                                                <optgroup label="Mobile">
+                                                    <option value="flutter">Flutter</option>
+                                                    <option value="react_native">React Native</option>
+                                                    <option value="xamarin">Xamarin</option>
+                                                </optgroup>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                        <div class="pc-field">
+                                            <label class="pc-label" for="databases">Database</label>
+                                            <select class="pc-select" id="databases" name="databases">
+                                                <option value="">Select database...</option>
+                                                <optgroup label="Relational">
+                                                    <option value="postgresql">PostgreSQL</option>
+                                                    <option value="mysql">MySQL</option>
+                                                    <option value="mssql">SQL Server</option>
+                                                    <option value="sqlite">SQLite</option>
+                                                    <option value="oracle">Oracle</option>
+                                                </optgroup>
+                                                <optgroup label="NoSQL">
+                                                    <option value="mongodb">MongoDB</option>
+                                                    <option value="redis">Redis</option>
+                                                    <option value="cassandra">Cassandra</option>
+                                                    <option value="firebase">Firebase</option>
+                                                    <option value="dynamodb">DynamoDB</option>
+                                                </optgroup>
+                                                <option value="other">Other</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Timeline and Warranty -->
+                                <div class="pc-section">
+                                    <div class="pc-section-label">
+                                        <i class="bi bi-calendar-range"></i> Timeline &amp; Warranty
+                                    </div>
+                                    <div class="pc-grid-3">
+                                        <div class="pc-field">
+                                            <label class="pc-label" for="start_date">Start Date <span class="pc-required">*</span></label>
+                                            <input type="date" class="pc-input" id="start_date" name="start_date" required="required" />
+                                        </div>
+                                        <div class="pc-field">
+                                            <label class="pc-label" for="end_date">Project End Date</label>
+                                            <input type="date" class="pc-input" id="end_date" name="end_date" />
+                                        </div>
+                                        <div class="pc-field">
+                                            <label class="pc-label" for="warranty_months">
+                                                Warranty Period <span class="pc-required">*</span>
+                                                <span class="pc-tooltip" title="After this period ends, support agents are not responsible for reported issues.">
+                                                    <i class="bi bi-question-circle-fill"></i>
+                                                </span>
+                                            </label>
+                                            <select class="pc-select" id="warranty_months" name="warranty_months" required="required">
+                                                <option value="">Select period...</option>
+                                                <option value="1">1 Month</option>
+                                                <option value="3">3 Months</option>
+                                                <option value="6">6 Months</option>
+                                                <option value="12">12 Months (1 Year)</option>
+                                                <option value="18">18 Months</option>
+                                                <option value="24">24 Months (2 Years)</option>
+                                                <option value="36">36 Months (3 Years)</option>
+                                            </select>
+                                            <span class="pc-hint" id="warranty_expiry_hint"></span>
+                                        </div>
+                                    </div>
+                                    <div class="pc-warranty-notice" id="warranty_notice" style="display:none">
+                                        <i class="bi bi-shield-check"></i>
+                                        <div>
+                                            <strong>Warranty Coverage Active</strong>
+                                            <span id="warranty_notice_text"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Compliance Requirements -->
+                                <div class="pc-section">
+                                    <div class="pc-section-label">
+                                        <i class="bi bi-patch-check-fill"></i> Compliance Requirements
+                                    </div>
+                                    <div class="pc-compliance-grid">
+                                        <label class="pc-compliance-item">
+                                            <input type="checkbox" name="compliance_gdpr" value="gdpr" />
+                                            <div class="pc-compliance-body">
+                                                <span class="pc-compliance-name">GDPR</span>
+                                                <span class="pc-compliance-desc">Data Protection</span>
+                                            </div>
+                                        </label>
+                                        <label class="pc-compliance-item">
+                                            <input type="checkbox" name="compliance_hipaa" value="hipaa" />
+                                            <div class="pc-compliance-body">
+                                                <span class="pc-compliance-name">HIPAA</span>
+                                                <span class="pc-compliance-desc">Healthcare</span>
+                                            </div>
+                                        </label>
+                                        <label class="pc-compliance-item">
+                                            <input type="checkbox" name="compliance_pci_dss" value="pci_dss" />
+                                            <div class="pc-compliance-body">
+                                                <span class="pc-compliance-name">PCI DSS</span>
+                                                <span class="pc-compliance-desc">Payment Security</span>
+                                            </div>
+                                        </label>
+                                        <label class="pc-compliance-item">
+                                            <input type="checkbox" name="compliance_iso27001" value="iso27001" />
+                                            <div class="pc-compliance-body">
+                                                <span class="pc-compliance-name">ISO 27001</span>
+                                                <span class="pc-compliance-desc">Security Standard</span>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="pc-actions">
+                                    <button type="reset" class="pc-btn pc-btn-secondary">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                    </button>
+                                    <button type="submit" class="pc-btn pc-btn-primary">
+                                        <i class="bi bi-check2-circle"></i> Save Project
+                                    </button>
+                                </div>
+
+                            </form>
+                        </div>
+
+                        <!-- ══════════════════════════════════════
+                             PANEL 2 — TEAM
+                        ══════════════════════════════════════ -->
+                        <div class="pcs-panel" id="panel-team" style="display:none">
+
+                            <!-- Project selector -->
+                            <div class="pc-section">
+                                <div class="pc-section-label">
+                                    <i class="bi bi-folder2-open"></i> Select Project
+                                </div>
+                                <p class="pc-section-desc">Choose a project to manage its focal person and team members.</p>
+                                <div class="pc-field" style="max-width:400px">
+                                    <select class="pc-select" id="memberProjectSelect">
+                                        <option value="">— Choose a project —</option>
+                                        <t t-foreach="projects" t-as="proj">
+                                            <option t-att-value="proj.id">
+                                                <t t-esc="proj.name" />
+                                                <t t-if="proj.code"> (<t t-esc="proj.code" />)</t>
+                                            </option>
+                                        </t>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Sub-panels (shown after project selection) -->
+                            <div id="memberPanel" style="display:none">
+
+                                <!-- Focal Person -->
+                                <div class="pc-section pc-team-section">
+                                    <div class="pc-section-label">
+                                        <i class="bi bi-person-badge-fill"></i> Focal Person
+                                    </div>
+                                    <div class="pc-focal-row">
+                                        <select class="pc-select" id="focalSelect" style="max-width:320px">
+                                            <option value="">— Select focal person —</option>
+                                        </select>
+                                        <button class="pc-btn pc-btn-primary pc-btn-sm" id="assignFocalBtn">
+                                            <i class="bi bi-person-check"></i> Assign
+                                        </button>
+                                        <button class="pc-btn pc-btn-danger-soft pc-btn-sm" id="removeFocalBtn" style="display:none">
+                                            <i class="bi bi-person-x"></i> Remove
+                                        </button>
+                                    </div>
+                                    <div id="focalCurrent" style="margin-top:.85rem"></div>
+                                    <div id="focalMsg" style="display:none;margin-top:.5rem"></div>
+                                </div>
+
+                                <!-- Add Team Member -->
+                                <div class="pc-section pc-team-section">
+                                    <div class="pc-section-label">
+                                        <i class="bi bi-person-plus-fill"></i> Add Team Member
+                                    </div>
+                                    <div class="pc-add-member-row" id="addMemberRow">
+                                        <input type="text" class="pc-input" id="memberNameInput" placeholder="Full name" />
+                                        <input type="email" class="pc-input" id="memberEmailInput" placeholder="Email address" />
+                                        <select class="pc-select pc-role-select" id="memberRoleSelect">
+                                            <option value="frontend_dev">Frontend Developer</option>
+                                            <option value="backend_dev">Backend Developer</option>
+                                            <option value="network_manager">Network Manager</option>
+                                            <option value="designer">UI/UX Designer</option>
+                                            <option value="qa_engineer">QA Engineer</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                        <button class="pc-btn pc-btn-primary pc-btn-sm" id="addMemberBtn">
+                                            <i class="bi bi-person-plus"></i> Add
+                                        </button>
+                                    </div>
+                                    <div id="memberMsg" style="display:none;margin-top:.5rem"></div>
+                                </div>
+
+                                <!-- Current Team Members -->
+                                <div class="pc-section pc-team-section pc-team-last">
+                                    <div class="pc-section-label">
+                                        <i class="bi bi-people-fill"></i> Team Members
+                                    </div>
+                                    <div id="memberListWrap">
+                                        <div class="pc-members-empty" id="memberEmpty">
+                                            <i class="bi bi-person-x"></i>
+                                            <span>No team members yet. Add members above.</span>
+                                        </div>
+                                        <div class="pc-member-list" id="memberList"></div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 
-                        <form id="projectConfigForm" method="post"
-                            action="/customer_support/admin_dashboard/projects/create"
-                            class="pc-form" novalidate="novalidate">
-                            <input type="hidden" name="csrf_token"
-                                t-att-value="request.csrf_token()" />
+                        <!-- ══════════════════════════════════════
+                             PANEL 3 — DOCUMENTS
+                        ══════════════════════════════════════ -->
+                        <div class="pcs-panel" id="panel-docs" style="display:none">
 
-                            <!-- Section 1: Basic Information -->
+                            <!-- Project selector -->
                             <div class="pc-section">
                                 <div class="pc-section-label">
-                                    <i class="bi bi-info-circle"></i> Basic Information </div>
-                                <div class="pc-grid-2">
-                                    <div class="pc-field pc-span-2">
-                                        <label class="pc-label" for="project_name">Project Name <span
-                                                class="pc-required">*</span></label>
-                                        <input type="text" class="pc-input" id="project_name"
-                                            name="project_name"
-                                            placeholder="e.g. Customer Portal v2"
-                                            required="required" />
-                                    </div>
-                                    <div class="pc-field">
-                                        <label class="pc-label" for="project_key">Project Key <span
-                                                class="pc-required">*</span></label>
-                                        <input type="text" class="pc-input pc-mono" id="project_key"
-                                            name="project_key"
-                                            placeholder="e.g. CP-2024" pattern="[A-Za-z0-9-]+"
-                                            required="required" />
-                                        <span class="pc-hint">Short unique identifier —
-                                            auto-uppercased</span>
-                                    </div>
-                                    <div class="pc-field">
-                                        <label class="pc-label" for="project_type">Project Type <span
-                                                class="pc-required">*</span></label>
-                                        <select class="pc-select" id="project_type"
-                                            name="project_type" required="required">
-                                            <option value="">Select type...</option>
-                                            <option value="web_app">Web Application</option>
-                                            <option value="mobile">Mobile Application</option>
-                                            <option value="machine_learning">Machine Learning</option>
-                                            <option value="iot">IoT Platform</option>
-                                            <option value="api">API / Backend Service</option>
-                                            <option value="other">Other</option>
-                                        </select>
-                                    </div>
-                                    <div class="pc-field pc-span-2">
-                                        <label class="pc-label" for="project_goals">Goals &amp;
-                                            Objectives</label>
-                                        <textarea class="pc-input pc-textarea" id="project_goals"
-                                            name="project_goals"
-                                            placeholder="Describe the project's purpose and expected outcomes..."></textarea>
-                                    </div>
+                                    <i class="bi bi-folder2-open"></i> Select Project
+                                </div>
+                                <p class="pc-section-desc">Choose a project to upload or manage its reference documents.</p>
+                                <div class="pc-field" style="max-width:400px">
+                                    <select class="pc-select" id="docProjectSelect">
+                                        <option value="">— Choose a project —</option>
+                                        <t t-foreach="projects" t-as="project">
+                                            <option t-att-value="project.id">
+                                                <t t-esc="project.name" />
+                                            </option>
+                                        </t>
+                                    </select>
                                 </div>
                             </div>
 
-                            <!-- Section 2: Technology Stack -->
-                            <div class="pc-section">
-                                <div class="pc-section-label">
-                                    <i class="bi bi-code-slash"></i> Technology Stack </div>
-                                <div class="pc-grid-3">
-                                    <div class="pc-field">
-                                        <label class="pc-label" for="programming_languages">Programming
-                                            Language</label>
-                                        <select class="pc-select" id="programming_languages"
-                                            name="programming_languages">
-                                            <option value="">Select language...</option>
-                                            <option value="python">Python</option>
-                                            <option value="javascript">JavaScript</option>
-                                            <option value="typescript">TypeScript</option>
-                                            <option value="java">Java</option>
-                                            <option value="csharp">C#</option>
-                                            <option value="cpp">C++</option>
-                                            <option value="go">Go</option>
-                                            <option value="rust">Rust</option>
-                                            <option value="php">PHP</option>
-                                            <option value="ruby">Ruby</option>
-                                            <option value="swift">Swift</option>
-                                            <option value="kotlin">Kotlin</option>
-                                            <option value="other">Other</option>
-                                        </select>
-                                    </div>
-                                    <div class="pc-field">
-                                        <label class="pc-label" for="frameworks">Framework</label>
-                                        <select class="pc-select" id="frameworks" name="frameworks">
-                                            <option value="">Select framework...</option>
-                                            <optgroup label="Frontend">
-                                                <option value="react">React</option>
-                                                <option value="vue">Vue.js</option>
-                                                <option value="angular">Angular</option>
-                                                <option value="svelte">Svelte</option>
-                                                <option value="nextjs">Next.js</option>
-                                            </optgroup>
-                                            <optgroup label="Backend">
-                                                <option value="django">Django</option>
-                                                <option value="fastapi">FastAPI</option>
-                                                <option value="flask">Flask</option>
-                                                <option value="spring">Spring Boot</option>
-                                                <option value="express">Express.js</option>
-                                                <option value="laravel">Laravel</option>
-                                                <option value="rails">Ruby on Rails</option>
-                                                <option value="odoo">Odoo</option>
-                                            </optgroup>
-                                            <optgroup label="Mobile">
-                                                <option value="flutter">Flutter</option>
-                                                <option value="react_native">React Native</option>
-                                                <option value="xamarin">Xamarin</option>
-                                            </optgroup>
-                                            <option value="other">Other</option>
-                                        </select>
-                                    </div>
-                                    <div class="pc-field">
-                                        <label class="pc-label" for="databases">Database</label>
-                                        <select class="pc-select" id="databases" name="databases">
-                                            <option value="">Select database...</option>
-                                            <optgroup label="Relational">
-                                                <option value="postgresql">PostgreSQL</option>
-                                                <option value="mysql">MySQL</option>
-                                                <option value="mssql">SQL Server</option>
-                                                <option value="sqlite">SQLite</option>
-                                                <option value="oracle">Oracle</option>
-                                            </optgroup>
-                                            <optgroup label="NoSQL">
-                                                <option value="mongodb">MongoDB</option>
-                                                <option value="redis">Redis</option>
-                                                <option value="cassandra">Cassandra</option>
-                                                <option value="firebase">Firebase</option>
-                                                <option value="dynamodb">DynamoDB</option>
-                                            </optgroup>
-                                            <option value="other">Other</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
+                            <!-- Upload + list (shown after project selection) -->
+                            <div id="docPanel" style="display:none">
 
-                            <!-- Section 3: Timeline and Warranty -->
-                            <div class="pc-section">
-                                <div class="pc-section-label">
-                                    <i class="bi bi-calendar-range"></i> Timeline &amp; Warranty </div>
-                                <div class="pc-grid-3">
-                                    <div class="pc-field">
-                                        <label class="pc-label" for="start_date">Start Date <span
-                                                class="pc-required">*</span></label>
-                                        <input type="date" class="pc-input" id="start_date"
-                                            name="start_date" required="required" />
+                                <!-- Upload form -->
+                                <div class="pc-section pc-team-section">
+                                    <div class="pc-section-label">
+                                        <i class="bi bi-cloud-upload-fill"></i> Upload Document
                                     </div>
-                                    <div class="pc-field">
-                                        <label class="pc-label" for="end_date">Project End Date</label>
-                                        <input type="date" class="pc-input" id="end_date"
-                                            name="end_date" />
-                                    </div>
-                                    <div class="pc-field">
-                                        <label class="pc-label" for="warranty_months"> Warranty
-                                            Period <span class="pc-required">*</span>
-                                            <span
-                                                class="pc-tooltip"
-                                                title="After this period ends, support agents are not responsible for reported issues.">
-                                                <i class="bi bi-question-circle-fill"></i>
-                                            </span>
-                                        </label>
-                                        <select class="pc-select" id="warranty_months"
-                                            name="warranty_months" required="required">
-                                            <option value="">Select period...</option>
-                                            <option value="1">1 Month</option>
-                                            <option value="3">3 Months</option>
-                                            <option value="6">6 Months</option>
-                                            <option value="12">12 Months (1 Year)</option>
-                                            <option value="18">18 Months</option>
-                                            <option value="24">24 Months (2 Years)</option>
-                                            <option value="36">36 Months (3 Years)</option>
-                                        </select>
-                                        <span class="pc-hint" id="warranty_expiry_hint"></span>
-                                    </div>
-                                </div>
-
-                                <!-- Warranty Notice — shown dynamically -->
-                                <div class="pc-warranty-notice" id="warranty_notice"
-                                    style="display:none">
-                                    <i class="bi bi-shield-check"></i>
-                                    <div>
-                                        <strong>Warranty Coverage Active</strong>
-                                        <span id="warranty_notice_text"></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Section 4: Compliance -->
-                            <div class="pc-section">
-                                <div class="pc-section-label">
-                                    <i class="bi bi-patch-check"></i> Compliance Requirements </div>
-                                <div class="pc-compliance-grid">
-                                    <label class="pc-compliance-item">
-                                        <input type="checkbox" name="compliance_gdpr" value="gdpr" />
-                                        <div class="pc-compliance-body">
-                                            <span class="pc-compliance-name">GDPR</span>
-                                            <span class="pc-compliance-desc">Data Protection</span>
+                                    <div id="docUploadMsg" style="display:none"></div>
+                                    <form id="docUploadForm"
+                                        action="/customer_support/knowledge/upload"
+                                        method="post"
+                                        enctype="multipart/form-data">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
+                                        <input type="hidden" name="redirect_to"
+                                            value="/customer_support/admin_dashboard/system_configuration" />
+                                        <input type="hidden" name="project_id" id="docProjectIdHidden" value="" />
+                                        <div class="pc-form-row">
+                                            <div class="pc-field">
+                                                <label class="pc-label" for="docNameInput">
+                                                    Document Name <span class="pc-required">*</span>
+                                                </label>
+                                                <input type="text" class="pc-input" id="docNameInput"
+                                                    name="name" placeholder="e.g. API Specification v2" required="1" />
+                                            </div>
+                                            <div class="pc-field">
+                                                <label class="pc-label" for="docCategorySelect">Category</label>
+                                                <select class="pc-select" id="docCategorySelect" name="category">
+                                                    <option value="projects">Projects</option>
+                                                    <option value="technical">Technical</option>
+                                                    <option value="services">Services</option>
+                                                    <option value="pricing">Pricing</option>
+                                                    <option value="company">Company</option>
+                                                    <option value="faq">FAQ</option>
+                                                    <option value="other">Other</option>
+                                                </select>
+                                            </div>
                                         </div>
-                                    </label>
-                                    <label class="pc-compliance-item">
-                                        <input type="checkbox" name="compliance_hipaa" value="hipaa" />
-                                        <div class="pc-compliance-body">
-                                            <span class="pc-compliance-name">HIPAA</span>
-                                            <span class="pc-compliance-desc">Healthcare</span>
+                                        <div class="pc-field" style="margin-top:.85rem">
+                                            <label class="pc-label" for="docFileInput">
+                                                File <span class="pc-required">*</span>
+                                                <span class="pc-hint">PDF, DOCX, TXT or XLSX</span>
+                                            </label>
+                                            <input type="file" class="pc-input pc-file-input" id="docFileInput"
+                                                name="file" accept=".pdf,.docx,.txt,.xlsx" required="1" />
                                         </div>
-                                    </label>
-                                    <label class="pc-compliance-item">
-                                        <input type="checkbox" name="compliance_pci_dss"
-                                            value="pci_dss" />
-                                        <div class="pc-compliance-body">
-                                            <span class="pc-compliance-name">PCI DSS</span>
-                                            <span class="pc-compliance-desc">Payment Security</span>
+                                        <div class="pc-actions" style="margin-top:1.25rem;padding-top:0;border-top:none">
+                                            <button type="submit" class="pc-btn pc-btn-primary" id="docUploadBtn">
+                                                <i class="bi bi-cloud-upload"></i> Upload Document
+                                            </button>
                                         </div>
-                                    </label>
-                                    <label class="pc-compliance-item">
-                                        <input type="checkbox" name="compliance_iso27001"
-                                            value="iso27001" />
-                                        <div class="pc-compliance-body">
-                                            <span class="pc-compliance-name">ISO 27001</span>
-                                            <span class="pc-compliance-desc">Security Standard</span>
-                                        </div>
-                                    </label>
+                                    </form>
                                 </div>
+
+                                <!-- Document list -->
+                                <div class="pc-section pc-team-section pc-team-last">
+                                    <div class="pc-section-label">
+                                        <i class="bi bi-folder2-open"></i> Uploaded Documents
+                                    </div>
+                                    <div id="docListMsg" style="display:none"></div>
+                                    <div id="docList"></div>
+                                    <div id="docEmpty" class="pc-empty-state" style="display:none">
+                                        <i class="bi bi-file-earmark-x"></i>
+                                        <span>No documents uploaded for this project yet.</span>
+                                    </div>
+                                </div>
+
                             </div>
+                        </div>
 
-                            <!-- Form Actions -->
-                            <div class="pc-actions">
-                                <button type="reset" class="pc-btn pc-btn-secondary">
-                                    <i class="bi bi-arrow-counterclockwise"></i> Reset </button>
-                                <button type="submit" class="pc-btn pc-btn-primary">
-                                    <i class="bi bi-check2-circle"></i> Save Project </button>
-                            </div>
+                    </div><!-- /pcs-scroll -->
+                </main>
+            </div><!-- /pcs-layout -->
 
-                        </form>
-                    </div>
-                </div>
-            </div>
-
+            <!-- ════════════════════════════════════════════════
+                 SCRIPTS
+            ════════════════════════════════════════════════ -->
             <script>
-                (function () {
-                // Warranty expiry calculator
-                const warrantySelect = document.getElementById('warranty_months');
-                const endDateInput = document.getElementById('end_date');
-                const hint = document.getElementById('warranty_expiry_hint');
-                const notice = document.getElementById('warranty_notice');
-                const noticeText = document.getElementById('warranty_notice_text');
+            //<![CDATA[
+            (function () {
 
-                function updateWarranty() {
-                const months = parseInt(warrantySelect.value);
-                const endVal = endDateInput.value;
-                if (!months || !endVal) {
-                hint.textContent = '';
-                notice.style.display = 'none';
-                return;
+                // ── CSRF ──────────────────────────────────────────────────
+                var _csrf = document.querySelector('input[name="csrf_token"]') ?
+                    document.querySelector('input[name="csrf_token"]').value : '';
+
+                // ── PANEL SWITCHER ────────────────────────────────────────
+                var PANELS = { project: 1, team: 2, docs: 3 };
+                var PANEL_IDS = ['project', 'team', 'docs'];
+
+                function switchPanel(name) {
+                    PANEL_IDS.forEach(function (id) {
+                        var panel = document.getElementById('panel-' + id);
+                        var btn = document.querySelector('.pcs-nav-item[data-panel="' + id + '"]');
+                        var dot = document.querySelector('.pcs-dot[data-panel="' + id + '"]');
+                        if (id === name) {
+                            if (panel) { panel.style.display = ''; panel.classList.add('pcs-panel--in'); }
+                            if (btn) btn.classList.add('pcs-nav-active');
+                            if (dot) dot.classList.add('pcs-dot-active');
+                        } else {
+                            if (panel) { panel.style.display = 'none'; panel.classList.remove('pcs-panel--in'); }
+                            if (btn) btn.classList.remove('pcs-nav-active');
+                            if (dot) dot.classList.remove('pcs-dot-active');
+                        }
+                    });
+                    var activeBtn = document.querySelector('.pcs-nav-item[data-panel="' + name + '"]');
+                    if (activeBtn) {
+                        var t = activeBtn.getAttribute('data-title') || '';
+                        var d = activeBtn.getAttribute('data-desc') || '';
+                        var stepEl = document.getElementById('pcsStep');
+                        if (stepEl) stepEl.textContent = '0' + PANELS[name];
+                        var titleEl = document.getElementById('pcsTitle');
+                        if (titleEl) titleEl.textContent = t;
+                        var descEl = document.getElementById('pcsDesc');
+                        if (descEl) descEl.textContent = d;
+                    }
+                    document.querySelector('.pcs-scroll').scrollTop = 0;
                 }
-                const base = new Date(endVal);
-                base.setMonth(base.getMonth() + months);
-                const exp = base.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day:
-                'numeric' });
-                hint.textContent = 'Coverage expires: ' + exp;
-                noticeText.textContent = ' — Support agents are responsible for issues until ' + exp
-                + '. Tickets raised after this date may be declined.';
-                notice.style.display = 'flex';
-                }
 
-                warrantySelect.addEventListener('change', updateWarranty);
-                endDateInput.addEventListener('change', updateWarranty);
-
-                // Auto-uppercase project key
-                const keyInput = document.getElementById('project_key');
-                if (keyInput) {
-                keyInput.addEventListener('input', function () {
-                const pos = this.selectionStart;
-                this.value = this.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
-                this.setSelectionRange(pos, pos);
+                document.querySelectorAll('.pcs-nav-item').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        switchPanel(this.getAttribute('data-panel'));
+                    });
                 });
+
+                document.querySelectorAll('.pcs-dot').forEach(function (dot) {
+                    dot.addEventListener('click', function () {
+                        switchPanel(this.getAttribute('data-panel'));
+                    });
+                });
+
+                // Restore panel from URL param
+                var _params = new URLSearchParams(window.location.search);
+                if (_params.get('success') === '1') { switchPanel('docs'); }
+
+                // ── SHARED JSON CALL ──────────────────────────────────────
+                function jsonCall(url, body) {
+                    return fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': _csrf },
+                        body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: body })
+                    }).then(function (r) { return r.json(); }).then(function (d) { return d.result || d; });
                 }
+
+                function showMsg(el, text, type) {
+                    el.innerHTML = '<div class="pc-alert pc-alert-' + type + '" style="margin:0 0 .5rem">' + text + '</div>';
+                    el.style.display = '';
+                    setTimeout(function () { el.style.display = 'none'; }, 3500);
+                }
+
+                function escHtml(s) {
+                    var d = document.createElement('span');
+                    d.textContent = String(s || '');
+                    return d.innerHTML;
+                }
+
+                // ── CSRF from first hidden input ──────────────────────────
+                var csrfInputs = document.querySelectorAll('input[name="csrf_token"]');
+                if (csrfInputs.length) _csrf = csrfInputs[0].value;
+
+                // ══════════════════════════════════════════════════════════
+                // TEAM PANEL
+                // ══════════════════════════════════════════════════════════
+                (function () {
+                    var projectSelect  = document.getElementById('memberProjectSelect');
+                    var memberPanel    = document.getElementById('memberPanel');
+                    var memberList     = document.getElementById('memberList');
+                    var memberEmpty    = document.getElementById('memberEmpty');
+                    var memberMsg      = document.getElementById('memberMsg');
+                    var nameInput      = document.getElementById('memberNameInput');
+                    var emailInput     = document.getElementById('memberEmailInput');
+                    var roleSelect     = document.getElementById('memberRoleSelect');
+                    var addMemberBtn   = document.getElementById('addMemberBtn');
+                    var focalSelect    = document.getElementById('focalSelect');
+                    var assignFocalBtn = document.getElementById('assignFocalBtn');
+                    var removeFocalBtn = document.getElementById('removeFocalBtn');
+                    var focalCurrent   = document.getElementById('focalCurrent');
+                    var focalMsg       = document.getElementById('focalMsg');
+                    var currentProjectId = null;
+
+                    function loadFocalPersons() {
+                        jsonCall('/customer_support/admin_dashboard/focal_persons', {}).then(function (res) {
+                            if (res.error || !res.users) return;
+                            focalSelect.innerHTML = '<option value="">— Select focal person —</option>';
+                            res.users.forEach(function (u) {
+                                var opt = document.createElement('option');
+                                opt.value = u.id;
+                                opt.textContent = u.name + (u.email ? ' (' + u.email + ')' : '');
+                                focalSelect.appendChild(opt);
+                            });
+                        });
+                    }
+
+                    function renderFocalCurrent(m) {
+                        if (!m) {
+                            focalCurrent.innerHTML = '<span class="pc-no-focal">No focal person assigned yet.</span>';
+                            removeFocalBtn.style.display = 'none';
+                            return;
+                        }
+                        focalCurrent.innerHTML =
+                            '<div class="pc-member-row pc-focal-current">' +
+                                '<div class="pc-member-avatar pc-avatar-focal">' + escHtml(m.initials) + '</div>' +
+                                '<div class="pc-member-info">' +
+                                    '<span class="pc-member-name">' + escHtml(m.name) + '</span>' +
+                                    '<span class="pc-member-email">' + escHtml(m.email || '') + '</span>' +
+                                '</div>' +
+                                '<span class="pc-member-role-tag pc-role-focal">Focal Person</span>' +
+                            '</div>';
+                        removeFocalBtn.style.display = '';
+                    }
+
+                    assignFocalBtn.addEventListener('click', function () {
+                        if (!currentProjectId) { showMsg(focalMsg, 'Select a project first.', 'danger'); return; }
+                        var uid = focalSelect.value;
+                        if (!uid) { showMsg(focalMsg, 'Please select a focal person.', 'danger'); return; }
+                        jsonCall('/customer_support/admin_dashboard/projects/' + currentProjectId + '/focal/assign', { user_id: parseInt(uid) })
+                            .then(function (res) {
+                                if (res.success) { renderFocalCurrent(res.member); showMsg(focalMsg, 'Focal person assigned.', 'success'); }
+                                else { showMsg(focalMsg, res.error || 'Failed to assign.', 'danger'); }
+                            });
+                    });
+
+                    removeFocalBtn.addEventListener('click', function () {
+                        if (!currentProjectId) return;
+                        jsonCall('/customer_support/admin_dashboard/projects/' + currentProjectId + '/focal/remove', {})
+                            .then(function (res) {
+                                if (res.success) { renderFocalCurrent(null); showMsg(focalMsg, 'Focal person removed.', 'success'); }
+                                else { showMsg(focalMsg, res.error || 'Failed to remove.', 'danger'); }
+                            });
+                    });
+
+                    function appendMemberRow(m) {
+                        memberEmpty.style.display = 'none';
+                        var row = document.createElement('div');
+                        row.className = 'pc-member-row';
+                        row.dataset.memberId = m.id;
+                        row.innerHTML =
+                            '<div class="pc-member-avatar">' + escHtml(m.initials) + '</div>' +
+                            '<div class="pc-member-info">' +
+                                '<span class="pc-member-name">' + escHtml(m.name) + '</span>' +
+                                '<span class="pc-member-email">' + escHtml(m.email || '') + '</span>' +
+                            '</div>' +
+                            '<span class="pc-member-role-tag">' + escHtml(m.role_label) + '</span>' +
+                            '<button class="pc-member-remove" data-member-id="' + m.id + '" title="Remove member"><i class="bi bi-person-dash"></i></button>';
+                        row.querySelector('.pc-member-remove').addEventListener('click', function () {
+                            var mid = this.dataset.memberId;
+                            jsonCall('/customer_support/admin_dashboard/projects/members/' + mid + '/remove', {})
+                                .then(function (res) {
+                                    if (res.success) {
+                                        row.remove();
+                                        if (!memberList.querySelector('.pc-member-row')) memberEmpty.style.display = '';
+                                        showMsg(memberMsg, 'Member removed.', 'success');
+                                    } else { showMsg(memberMsg, res.error || 'Error removing member.', 'danger'); }
+                                });
+                        });
+                        memberList.appendChild(row);
+                    }
+
+                    function loadMembers(projectId) {
+                        memberList.innerHTML = '<div class="pc-members-loading">Loading…</div>';
+                        jsonCall('/customer_support/admin_dashboard/projects/' + projectId + '/members', {})
+                            .then(function (res) {
+                                memberList.innerHTML = '';
+                                if (res.error) { showMsg(memberMsg, res.error, 'danger'); return; }
+                                renderFocalCurrent(res.focal || null);
+                                if (res.focal) focalSelect.value = res.focal.user_id || '';
+                                var members = res.members || [];
+                                memberEmpty.style.display = members.length ? 'none' : '';
+                                members.forEach(function (m) { appendMemberRow(m); });
+                            });
+                    }
+
+                    projectSelect.addEventListener('change', function () {
+                        currentProjectId = this.value || null;
+                        if (!currentProjectId) { memberPanel.style.display = 'none'; return; }
+                        memberPanel.style.display = '';
+                        memberList.innerHTML = '';
+                        nameInput.value = ''; emailInput.value = '';
+                        loadMembers(currentProjectId);
+                    });
+
+                    addMemberBtn.addEventListener('click', function () {
+                        if (!currentProjectId) { showMsg(memberMsg, 'Please select a project first.', 'danger'); return; }
+                        var name = nameInput.value.trim();
+                        if (!name) { showMsg(memberMsg, 'Name is required.', 'danger'); return; }
+                        jsonCall('/customer_support/admin_dashboard/projects/' + currentProjectId + '/members/add',
+                            { name: name, email: emailInput.value.trim(), role: roleSelect.value })
+                            .then(function (res) {
+                                if (res.success) { appendMemberRow(res.member); nameInput.value = ''; emailInput.value = ''; showMsg(memberMsg, 'Member added.', 'success'); }
+                                else { showMsg(memberMsg, res.error || 'Failed to add member.', 'danger'); }
+                            });
+                    });
+
+                    loadFocalPersons();
                 })();
+
+                // ══════════════════════════════════════════════════════════
+                // WARRANTY CALCULATOR
+                // ══════════════════════════════════════════════════════════
+                (function () {
+                    var warrantySelect = document.getElementById('warranty_months');
+                    var endDateInput = document.getElementById('end_date');
+                    var hint = document.getElementById('warranty_expiry_hint');
+                    var notice = document.getElementById('warranty_notice');
+                    var noticeText = document.getElementById('warranty_notice_text');
+
+                    function updateWarranty() {
+                        var months = parseInt(warrantySelect.value);
+                        var endVal = endDateInput.value;
+                        if (!months || !endVal) { hint.textContent = ''; notice.style.display = 'none'; return; }
+                        var base = new Date(endVal);
+                        base.setMonth(base.getMonth() + months);
+                        var exp = base.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                        hint.textContent = 'Coverage expires: ' + exp;
+                        noticeText.textContent = ' — Support agents are responsible for issues until ' + exp + '. Tickets raised after this date may be declined.';
+                        notice.style.display = 'flex';
+                    }
+
+                    warrantySelect.addEventListener('change', updateWarranty);
+                    endDateInput.addEventListener('change', updateWarranty);
+
+                    var keyInput = document.getElementById('project_key');
+                    if (keyInput) {
+                        keyInput.addEventListener('input', function () {
+                            var pos = this.selectionStart;
+                            this.value = this.value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+                            this.setSelectionRange(pos, pos);
+                        });
+                    }
+                })();
+
+                // ══════════════════════════════════════════════════════════
+                // DOCUMENTS PANEL
+                // ══════════════════════════════════════════════════════════
+                (function () {
+                    var docProjectSelect   = document.getElementById('docProjectSelect');
+                    var docPanel           = document.getElementById('docPanel');
+                    var docProjectIdHidden = document.getElementById('docProjectIdHidden');
+                    var docList            = document.getElementById('docList');
+                    var docEmpty           = document.getElementById('docEmpty');
+                    var docListMsg         = document.getElementById('docListMsg');
+                    var docsBadge          = document.getElementById('docsBadge');
+
+                    var FILE_ICONS  = { pdf: 'bi-file-earmark-pdf-fill', docx: 'bi-file-earmark-word-fill', xlsx: 'bi-file-earmark-excel-fill', txt: 'bi-file-earmark-text-fill' };
+                    var FILE_COLORS = { pdf: '#ef4444', docx: '#3b82f6', xlsx: '#16a34a', txt: '#64748b' };
+                    var STATE_LABELS = { pending: 'Pending', ready: 'Ready', error: 'Error' };
+
+                    function loadDocuments(projectId) {
+                        docList.innerHTML = '<div class="pc-members-loading"><i class="bi bi-hourglass-split me-2"></i>Loading documents…</div>';
+                        docEmpty.style.display = 'none';
+                        jsonCall('/customer_support/admin_dashboard/projects/' + projectId + '/documents', {})
+                            .then(function (res) {
+                                docList.innerHTML = '';
+                                if (res.error) { showMsg(docListMsg, res.error, 'danger'); return; }
+                                var docs = res.documents || [];
+                                if (docsBadge) {
+                                    if (docs.length) { docsBadge.textContent = docs.length; docsBadge.style.display = ''; }
+                                    else { docsBadge.style.display = 'none'; }
+                                }
+                                if (!docs.length) { docEmpty.style.display = ''; return; }
+                                docs.forEach(function (doc) { appendDocRow(doc); });
+                            });
+                    }
+
+                    function appendDocRow(doc) {
+                        docEmpty.style.display = 'none';
+                        var icon = FILE_ICONS[doc.file_type] || 'bi-file-earmark-fill';
+                        var color = FILE_COLORS[doc.file_type] || '#64748b';
+                        var stateLabel = STATE_LABELS[doc.state] || doc.state;
+                        var stateClass = doc.state === 'ready' ? 'pc-doc-state-ready' : (doc.state === 'error' ? 'pc-doc-state-error' : 'pc-doc-state-pending');
+                        var row = document.createElement('div');
+                        row.className = 'pc-doc-row';
+                        row.dataset.docId = doc.id;
+                        row.innerHTML =
+                            '<div class="pc-doc-icon" style="color:' + color + '"><i class="bi ' + icon + '"></i></div>' +
+                            '<div class="pc-doc-info">' +
+                                '<span class="pc-doc-name">' + escHtml(doc.name) + '</span>' +
+                                '<span class="pc-doc-meta">' + escHtml(doc.filename) + ' · ' + escHtml(doc.created) + '</span>' +
+                            '</div>' +
+                            '<span class="pc-doc-state ' + stateClass + '">' + stateLabel + '</span>' +
+                            '<button class="pc-doc-delete" data-doc-id="' + doc.id + '" title="Delete document"><i class="bi bi-trash3"></i></button>';
+                        row.querySelector('.pc-doc-delete').addEventListener('click', function () {
+                            if (!confirm('Delete "' + doc.name + '"? This cannot be undone.')) return;
+                            jsonCall('/customer_support/admin_dashboard/documents/' + doc.id + '/delete', {})
+                                .then(function (res) {
+                                    if (res.success) {
+                                        row.remove();
+                                        if (!docList.querySelector('.pc-doc-row')) docEmpty.style.display = '';
+                                        showMsg(docListMsg, 'Document deleted.', 'success');
+                                        if (docsBadge) {
+                                            var cnt = docList.querySelectorAll('.pc-doc-row').length;
+                                            if (cnt) { docsBadge.textContent = cnt; } else { docsBadge.style.display = 'none'; }
+                                        }
+                                    } else { showMsg(docListMsg, res.error || 'Failed to delete.', 'danger'); }
+                                });
+                        });
+                        docList.appendChild(row);
+                    }
+
+                    docProjectSelect.addEventListener('change', function () {
+                        var pid = this.value;
+                        docProjectIdHidden.value = pid;
+                        if (!pid) { docPanel.style.display = 'none'; return; }
+                        docPanel.style.display = '';
+                        loadDocuments(pid);
+                    });
+                })();
+
+            })();
+            //]]>
             </script>
 
         </t>

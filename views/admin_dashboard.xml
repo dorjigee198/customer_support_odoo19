@@ -271,8 +271,7 @@
                         <div class="tab-pane fade show active" id="overview" role="tabpanel"
                             aria-labelledby="overview-tab">
                             <div class="dashboard-content">
-                                <div class="dashboard-grid">
-                                    <div class="dashboard-card">
+                                <div class="dashboard-card">
                                         <div class="card-header">
                                             <h2 class="card-title"><i
                                                     class="bi bi-bar-chart-fill me-2"></i>Ticket
@@ -437,88 +436,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="performance-card">
-                                        <div class="card-header">
-                                            <h2 class="card-title"><i
-                                                    class="bi bi-graph-up-arrow me-2"></i>My
-                                                Performance</h2>
-                                            <div class="card-actions">
-                                                <span class="performance-score"
-                                                    data-key="sample_performance"><span
-                                                        class="score-badge"><t
-                                                            t-esc="performance.get('sample_performance',85)" />
-                                                    %</span> Overall Score</span>
-                                            </div>
-                                        </div>
-                                        <div class="performance-grid">
-                                            <div class="performance-stat" data-key="today_closed">
-                                                <div class="performance-icon">
-                                                    <i class="bi bi-calendar-check"></i>
-                                                </div>
-                                                <div class="performance-content">
-                                                    <div class="performance-label">Today Closed</div>
-                                                    <div class="performance-value">
-                                                        <t t-esc="performance.get('today_closed',0)" />
-                                                    </div>
-                                                    <div class="performance-subtitle">Tickets Closed
-                                                        Today</div>
-                                                </div>
-                                            </div>
-                                            <div class="performance-stat"
-                                                data-key="avg_resolve_rate">
-                                                <div class="performance-icon">
-                                                    <i class="bi bi-calendar-week"></i>
-                                                </div>
-                                                <div class="performance-content">
-                                                    <div class="performance-label">Avg Last 7 Days</div>
-                                                    <div class="performance-value"><t
-                                                            t-esc="performance.get('avg_resolve_rate',0)" />
-                                                        %</div>
-                                                    <div class="performance-subtitle">Resolve Rate</div>
-                                                </div>
-                                            </div>
-                                            <div class="performance-stat" data-key="daily_target">
-                                                <div class="performance-icon">
-                                                    <i class="bi bi-target"></i>
-                                                </div>
-                                                <div class="performance-content">
-                                                    <div class="performance-label">Daily Target</div>
-                                                    <div class="performance-value"><t
-                                                            t-esc="performance.get('daily_target',80)" />
-                                                        %</div>
-                                                    <div class="performance-subtitle">Target
-                                                        Achievement</div>
-                                                </div>
-                                            </div>
-                                            <div class="performance-stat" data-key="achievement">
-                                                <div class="performance-icon">
-                                                    <i class="bi bi-trophy"></i>
-                                                </div>
-                                                <div class="performance-content">
-                                                    <div class="performance-label">Current
-                                                        Achievement</div>
-                                                    <div class="performance-value"><t
-                                                            t-esc="performance.get('achievement',0)" />
-                                                        %</div>
-                                                    <div class="performance-subtitle">Target
-                                                        Progress</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="performance-progress mt-4">
-                                            <div class="progress-label">
-                                                <span>Daily Goal Progress</span>
-                                                <span><t t-esc="performance.get('achievement',0)" />
-                                                    %</span>
-                                            </div>
-                                            <div class="progress">
-                                                <div class="progress-bar" role="progressbar"
-                                                    t-att-style="'width: ' + str(performance.get('achievement',0)) + '%;'"
-                                                    t-att-class="'bg-success' if performance.get('achievement',0) >= 80 else 'bg-warning'"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div class="quick-actions mt-4">
                                     <div class="actions-grid">
                                         <a href="/customer_support/admin_dashboard/users"
@@ -746,16 +663,28 @@
                                                                             class="form-select form-select-sm mb-1"
                                                                             name="assigned_to"
                                                                             required="required">
-                                                                            <option value="">Select
-                                                                                Focal Person</option>
+                                                                            <option value="">Select Focal Person</option>
+                                                                            <t t-set="focal_group_id" t-value="request.env.ref('base.group_user').id"/>
+                                                                            <t t-set="system_group_id" t-value="request.env.ref('base.group_system').id"/>
                                                                             <t
-                                                                                t-foreach="request.env['res.users'].sudo().search([('active','=',True),('id','!=',1)])"
+                                                                                t-foreach="request.env['res.users'].sudo().search([('active','=',True),('share','=',False),('group_ids','in',[focal_group_id]),('group_ids','not in',[system_group_id])])"
                                                                                 t-as="u">
                                                                                 <option
                                                                                     t-att-value="u.id"
                                                                                     t-att-selected="'selected' if ticket.assigned_to and ticket.assigned_to.id == u.id else None">
-                                                                                    <t
-                                                                                        t-esc="u.name" />
+                                                                                    <t t-esc="u.name" />
+                                                                                </option>
+                                                                            </t>
+                                                                        </select>
+                                                                        <select
+                                                                            class="form-select form-select-sm mb-1"
+                                                                            name="project_id"
+                                                                            required="required">
+                                                                            <option value="">Select Project</option>
+                                                                            <t t-foreach="request.env['customer_support.project'].sudo().search([('active','=',True)])" t-as="proj">
+                                                                                <option t-att-value="proj.id"
+                                                                                    t-att-selected="'selected' if ticket.project_id and ticket.project_id.id == proj.id else None">
+                                                                                    <t t-esc="proj.name"/>
                                                                                 </option>
                                                                             </t>
                                                                         </select>
@@ -856,12 +785,22 @@
                                                         <select class="form-select mb-2"
                                                             name="assigned_to" required="required">
                                                             <option value="">Select Focal Person</option>
-                                                            <t
-                                                                t-foreach="request.env['res.users'].sudo().search([('active','=',True),('id','!=',1)])"
-                                                                t-as="u">
+                                                            <t t-set="focal_group_id2" t-value="request.env.ref('base.group_user').id"/>
+                                                            <t t-set="system_group_id2" t-value="request.env.ref('base.group_system').id"/>
+                                                            <t t-foreach="request.env['res.users'].sudo().search([('active','=',True),('share','=',False),('group_ids','in',[focal_group_id2]),('group_ids','not in',[system_group_id2])])" t-as="u">
                                                                 <option t-att-value="u.id"
                                                                     t-att-selected="'selected' if ticket.assigned_to and ticket.assigned_to.id == u.id else None">
                                                                     <t t-esc="u.name" />
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                        <select class="form-select mb-2"
+                                                            name="project_id" required="required">
+                                                            <option value="">Select Project</option>
+                                                            <t t-foreach="request.env['customer_support.project'].sudo().search([('active','=',True)])" t-as="proj">
+                                                                <option t-att-value="proj.id"
+                                                                    t-att-selected="'selected' if ticket.project_id and ticket.project_id.id == proj.id else None">
+                                                                    <t t-esc="proj.name"/>
                                                                 </option>
                                                             </t>
                                                         </select>
@@ -2068,6 +2007,8 @@ document.addEventListener('DOMContentLoaded',function(){run();setInterval(run,IN
 function activateTabFromURL(){var urlParams=new URLSearchParams(window.location.search);var tabParam=urlParams.get('tab');var hashParam=window.location.hash.substring(1);var targetTab=tabParam||hashParam;if(targetTab){var ts='#'+targetTab;var tb=document.querySelector('.header-left button[data-bs-target="'+ts+'"]');if(tb){document.querySelectorAll('.header-left button').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('show','active');});tb.classList.add('active');tb.setAttribute('aria-selected','true');var tp=document.querySelector(ts);if(tp)tp.classList.add('show','active');}}}
 if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',activateTabFromURL);}else{activateTabFromURL();}
 window.addEventListener('load',activateTabFromURL);window.addEventListener('hashchange',activateTabFromURL);
+function openModalFromURL(){var p=new URLSearchParams(window.location.search);if(p.get('modal')==='projects'){var m=document.getElementById('projectConfigModal');if(m){activateTabFromURL();setTimeout(function(){new bootstrap.Modal(m).show();},300);}}}
+window.addEventListener('load',openModalFromURL);
 document.addEventListener('DOMContentLoaded',function(){
   var tl=[].slice.call(document.querySelectorAll('.header-left button[data-bs-toggle="tab"]'));
   tl.forEach(function(t){t.addEventListener('click',function(e){e.preventDefault();new bootstrap.Tab(t).show();});});
@@ -2168,22 +2109,25 @@ document.addEventListener('DOMContentLoaded', function () {
     var modalStayBtn   = document.getElementById('adminModalStayBtn');
     var modalLogoutBtn = document.getElementById('adminModalLogoutBtn');
 
-    // Push an extra history entry so pressing back triggers popstate
-    // instead of actually leaving the page
-    history.pushState(null, null, window.location.href);
+    // Push 3 buffer entries so rapid back presses can't skip past the trap
+    history.pushState({ adminTrap: true }, '', window.location.href);
+    history.pushState({ adminTrap: true }, '', window.location.href);
+    history.pushState({ adminTrap: true }, '', window.location.href);
 
     window.addEventListener('popstate', function () {
-        // Cancel the navigation by pushing forward again
-        history.pushState(null, null, window.location.href);
-        // Show the warning modal
+        // Re-arm with 3 entries to rebuild the buffer
+        history.pushState({ adminTrap: true }, '', window.location.href);
+        history.pushState({ adminTrap: true }, '', window.location.href);
+        history.pushState({ adminTrap: true }, '', window.location.href);
         if (logoutModal) logoutModal.classList.add('show');
     });
 
-    // Handle bfcache (back-forward cache in Chrome / Firefox)
-    // If browser restores page from cache, push state again to re-arm the trap
+    // Re-arm after bfcache restore
     window.addEventListener('pageshow', function (e) {
         if (e.persisted) {
-            history.pushState(null, null, window.location.href);
+            history.pushState({ adminTrap: true }, '', window.location.href);
+            history.pushState({ adminTrap: true }, '', window.location.href);
+            history.pushState({ adminTrap: true }, '', window.location.href);
         }
     });
 
