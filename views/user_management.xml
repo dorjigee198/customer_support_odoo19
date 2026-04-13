@@ -314,26 +314,6 @@
                                             </div>
                                         </div>
 
-                                        <!-- NEW: Select Project Field -->
-                                        <div class="col-md-6">
-                                            <div class="form-group mb-4">
-                                                <label class="form-label">Select Project</label>
-                                                <div class="form-select-wrapper">
-                                                    <select name="project_id" class="form-select"
-                                                        required="required">
-                                                        <option value="">-- Select a Project --</option>
-                                                        <t t-foreach="projects" t-as="project">
-                                                            <option t-att-value="project.id">
-                                                                <t t-esc="project.name" />
-                                                            </option>
-                                                        </t>
-                                                    </select>
-                                                    <i class="bi bi-chevron-down form-select-icon"></i>
-                                                </div>
-                                                <div class="form-help-text">Choose the project this
-                                                    user will be assigned to</div>
-                                            </div>
-                                        </div>
                                     </div>
 
                                     <div class="row">

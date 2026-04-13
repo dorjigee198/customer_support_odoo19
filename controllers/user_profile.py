@@ -10,6 +10,7 @@ Handles user profile management:
 import logging
 from odoo import http
 from odoo.http import request
+import werkzeug
 
 _logger = logging.getLogger(__name__)
 
@@ -26,16 +27,24 @@ class UserProfile(http.Controller):
         """
         Display Profile - Shows user profile information
         Working: Displays user details and password change form
-        Access: All authenticated users
+        Access: Portal (customer) users only — redirects admins/focal persons
         """
-        return request.render(
+        user = request.env.user
+        if user.has_group("base.group_system"):
+            return werkzeug.utils.redirect("/customer_support/admin_dashboard")
+        if user.has_group("base.group_user"):
+            return werkzeug.utils.redirect("/customer_support/support_dashboard")
+
+        response = request.render(
             "customer_support.portal_profile_page",
             {
-                "user": request.env.user,
+                "user": user,
                 "error": kwargs.get("error"),
                 "success": kwargs.get("success"),
             },
         )
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        return response
 
     @http.route(
         "/customer_support/profile/update",

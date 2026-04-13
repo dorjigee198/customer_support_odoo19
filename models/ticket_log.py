@@ -29,10 +29,27 @@ class CustomerSupportTicketLog(models.Model):
 
     event_type = fields.Selection(
         [
-            ("created", "Ticket Created"),
-            ("status", "Status Changed"),
-            ("assign", "Assignment Changed"),
-            ("sla", "SLA Event"),
+            # Ticket-level events
+            ("created",  "Ticket Created"),
+            ("status",   "Status Changed"),
+            ("assign",   "Assignment Changed"),
+            ("sla",      "SLA Event"),
+            # Board events
+            ("board_col_add",      "Column Added"),
+            ("board_col_rename",   "Column Renamed"),
+            ("board_col_delete",   "Column Deleted"),
+            ("board_task_add",     "Task Added"),
+            ("board_task_done",    "Task Completed"),
+            ("board_task_undone",  "Task Reopened"),
+            ("board_task_move",    "Task Moved"),
+            ("board_task_assign",  "Task Assigned"),
+            ("board_task_edit",    "Task Edited"),
+            ("board_task_delete",  "Task Deleted"),
+            ("board_checklist_add",  "Checklist Item Added"),
+            ("board_checklist_done", "Checklist Item Done"),
+            ("board_comment",      "Internal Note Posted"),
+            ("board_reply",        "Reply Sent to Customer"),
+            ("board_invite",       "Member Invited"),
         ],
         string="Event Type",
         required=True,

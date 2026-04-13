@@ -249,7 +249,7 @@ class ChatBotBackend:
         if not odoo_env:
             return "", False
         try:
-            Chunk = odoo_env["dc.knowledge.chunk"]
+            Chunk = odoo_env["dc.knowledge.chunk"].sudo()
             chunks = Chunk.get_relevant_chunks(
                 query, limit=3, threshold=SIMILARITY_THRESHOLD
             )
@@ -445,7 +445,7 @@ class GeneralChatBackend:
         if not odoo_env:
             return "", False
         try:
-            Chunk = odoo_env["dc.knowledge.chunk"]
+            Chunk = odoo_env["dc.knowledge.chunk"].sudo()
             chunks = Chunk.get_relevant_chunks(
                 query, limit=3, threshold=SIMILARITY_THRESHOLD
             )

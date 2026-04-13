@@ -206,6 +206,38 @@ class CustomerSupportTicketActions(http.Controller):
                 "assigned_date": fields.Datetime.now(),
             }
 
+            # Set project_id from form, or auto-detect from focal person's mapping
+            project_id = post_dict.get("project_id", "").strip()
+            if project_id:
+                write_vals["project_id"] = int(project_id)
+            elif not ticket.project_id:
+                # Auto-detect: if focal has exactly one project, use it
+                member = (
+                    request.env["customer_support.project.member"]
+                    .sudo()
+                    .search([("user_id", "=", assigned_user_id), ("role", "=", "focal_person")], limit=1)
+                )
+                if member:
+                    write_vals["project_id"] = member.project_id.id
+
+            # Also create project.member record if not already mapped
+            final_project_id = write_vals.get("project_id") or (ticket.project_id.id if ticket.project_id else None)
+            if final_project_id:
+                existing = (
+                    request.env["customer_support.project.member"]
+                    .sudo()
+                    .search([
+                        ("project_id", "=", final_project_id),
+                        ("user_id", "=", assigned_user_id),
+                    ], limit=1)
+                )
+                if not existing:
+                    request.env["customer_support.project.member"].sudo().create({
+                        "project_id": final_project_id,
+                        "user_id": assigned_user_id,
+                        "role": "focal_person",
+                    })
+
             # SLA Policy
             sla_policy_id = post_dict.get("sla_policy_id", "").strip()
             sla_note = ""

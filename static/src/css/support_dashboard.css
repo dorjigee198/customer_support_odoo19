@@ -50,6 +50,15 @@ body {
 .nav-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
 .nav-link.active { background: rgba(255,255,255,0.15); color: #fff; border-bottom: 3px solid #fff; }
 .nav-link i { font-size: 0.95rem; }
+/* External nav link — same look as nav-link but not intercepted by switchView JS */
+.nav-link-external {
+    color: rgba(255,255,255,0.85); background: transparent; border: none;
+    text-decoration: none; padding: 0.75rem 1rem; font-size: 0.9rem; font-weight: 500;
+    cursor: pointer; transition: var(--transition); border-bottom: 3px solid transparent;
+    white-space: nowrap; display: flex; align-items: center; gap: 0.5rem; position: relative;
+}
+.nav-link-external:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.nav-link-external i { font-size: 0.95rem; }
 .header-right { display: flex; align-items: center; gap: 1rem; padding-right: 1.5rem; }
 .user-profile { display: flex; align-items: center; gap: 0.75rem; }
 .user-name { color: white; font-weight: 500; font-size: 0.9rem; }
@@ -79,19 +88,14 @@ body {
 .btn-close { margin-left: auto; background: transparent; border: none; opacity: 0.7; transition: opacity 0.2s; cursor: pointer; padding: 0.5rem; }
 .btn-close:hover { opacity: 1; }
 
-/* ── OVERVIEW DASHBOARD GRID ── */
-.dashboard-grid { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; width: 100%; }
+/* ── OVERVIEW DASHBOARD CARD (full-width, no performance card) ── */
 .dashboard-card {
-    flex: 2 1 0; min-width: 0; background: #f0f9ff; border-radius: 12px;
+    width: 100%; min-width: 0; background: #f0f9ff; border-radius: 12px;
     padding: 1.5rem; box-shadow: 0 4px 15px rgba(12,74,110,0.1);
     border: 1px solid rgba(12,74,110,0.1); transition: var(--transition);
+    margin-bottom: 1.5rem;
 }
 .dashboard-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(12,74,110,0.15); }
-.performance-card {
-    flex: 1 1 0; min-width: 0; background: #f0f9ff; border-radius: 12px;
-    padding: 1.5rem; box-shadow: 0 4px 15px rgba(12,74,110,0.1);
-    border: 1px solid rgba(12,74,110,0.1); transition: var(--transition);
-}
 .performance-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(12,74,110,0.15); }
 
 /* ── CARD HEADER ── */

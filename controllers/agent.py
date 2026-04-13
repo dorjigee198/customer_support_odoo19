@@ -119,7 +119,7 @@ class CustomerSupportAgent(http.Controller):
                     "sample_performance": 85.00,
                 }
 
-            return request.render(
+            response = request.render(
                 "customer_support.support_agent_dashboard",
                 {
                     "user": user,
@@ -130,6 +130,8 @@ class CustomerSupportAgent(http.Controller):
                     "page_name": "support_dashboard",
                 },
             )
+            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+            return response
 
         except Exception as e:
             _logger.error(f"Support dashboard error: {str(e)}")

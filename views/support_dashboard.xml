@@ -167,10 +167,81 @@
                     .mobile-view-pill-btn.active { background: white; color: #0c4a6e; font-weight:
                     600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
                     }
+                    /* ── BACK BUTTON WARNING MODAL ── */
+                    #focalLogoutWarningModal {
+                        display: none; position: fixed; top: 0; left: 0;
+                        width: 100%; height: 100%;
+                        background: rgba(0,0,0,0.5); z-index: 99999;
+                        align-items: center; justify-content: center;
+                        backdrop-filter: blur(4px);
+                    }
+                    #focalLogoutWarningModal.show { display: flex !important; }
+                    .focal-logout-modal-box {
+                        background: #ffffff; border-radius: 20px;
+                        padding: 2.5rem 2rem; max-width: 420px; width: 90%;
+                        box-shadow: 0 24px 60px rgba(12,74,110,0.25);
+                        text-align: center;
+                        animation: focalModalPop 0.25s ease;
+                    }
+                    @keyframes focalModalPop {
+                        from { transform: scale(0.88); opacity: 0; }
+                        to   { transform: scale(1);    opacity: 1; }
+                    }
+                    .focal-logout-modal-icon {
+                        width: 68px; height: 68px; background: #fef3c7;
+                        border-radius: 50%; display: flex; align-items: center;
+                        justify-content: center; margin: 0 auto 1.25rem;
+                        border: 3px solid #fde68a;
+                    }
+                    .focal-logout-modal-icon i { font-size: 1.9rem; color: #d97706; }
+                    .focal-logout-modal-box h5 {
+                        color: #0c4a6e; font-weight: 700; font-size: 1.2rem; margin-bottom: 0.6rem;
+                    }
+                    .focal-logout-modal-box p {
+                        color: #475569; font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.75rem;
+                    }
+                    .focal-logout-modal-box p strong { color: #0c4a6e; }
+                    .focal-logout-modal-btns { display: flex; gap: 0.85rem; justify-content: center; }
+                    .focal-btn-stay {
+                        padding: 0.6rem 1.4rem; border-radius: 10px;
+                        border: 1.5px solid rgba(12,74,110,0.2); background: #f0f9ff;
+                        color: #0c4a6e; font-weight: 600; font-size: 0.9rem;
+                        cursor: pointer; transition: background 0.2s, border-color 0.2s;
+                    }
+                    .focal-btn-stay:hover { background: #e0f2fe; border-color: #0c4a6e; }
+                    .focal-btn-logout-now {
+                        padding: 0.6rem 1.4rem; border-radius: 10px; border: none;
+                        background: #0c4a6e; color: #ffffff; font-weight: 600;
+                        font-size: 0.9rem; cursor: pointer; transition: background 0.2s;
+                    }
+                    .focal-btn-logout-now:hover { background: #075985; }
                 </style>
             </t>
 
             <div class="dashboard-wrapper">
+
+                <!-- BACK BUTTON WARNING MODAL -->
+                <div id="focalLogoutWarningModal" role="dialog" aria-modal="true"
+                     aria-labelledby="focalLogoutModalTitle">
+                    <div class="focal-logout-modal-box">
+                        <div class="focal-logout-modal-icon">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                        <h5 id="focalLogoutModalTitle">Hold On!</h5>
+                        <p>Please use the <strong>Logout</strong> button to exit safely.<br/>
+                           Pressing the back button may leave your session unsecured and expose
+                           your account to unauthorised access.</p>
+                        <div class="focal-logout-modal-btns">
+                            <button class="focal-btn-stay" id="focalModalStayBtn">
+                                <i class="bi bi-arrow-left-circle me-1"></i> Stay on Page
+                            </button>
+                            <button class="focal-btn-logout-now" id="focalModalLogoutBtn">
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout Properly
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <header class="dashboard-header">
                     <div class="header-content">
 
@@ -184,9 +255,9 @@
                                 <i class="bi bi-speedometer2"></i>
                                 <span>Overview</span>
                             </a>
-                            <a href="#" class="nav-link" data-view="tickets">
-                                <i class="bi bi-ticket-detailed"></i>
-                                <span>Tickets</span>
+                            <a href="/customer_support/my_projects" class="nav-link-external">
+                                <i class="bi bi-kanban"></i>
+                                <span>My Projects</span>
                             </a>
                             <a href="#" class="nav-link" data-view="faq">
                                 <i class="bi bi-question-circle"></i>
@@ -286,8 +357,7 @@
 
                 <!-- ═══ OVERVIEW PAGE ═══ -->
                 <div class="page-content dashboard-content" id="overview-page">
-                    <div class="dashboard-grid">
-                        <div class="dashboard-card">
+                    <div class="dashboard-card">
                             <div class="card-header">
                                 <h2 class="card-title"><i class="bi bi-bar-chart-fill"></i>Ticket
                                     Analytics</h2>
@@ -446,78 +516,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="performance-card">
-                            <div class="card-header">
-                                <h2 class="card-title"><i class="bi bi-graph-up-arrow"></i>My
-                                    Performance</h2>
-                                <div class="card-actions">
-                                    <span class="performance-score" data-key="sample_performance">
-                                        <span class="score-badge"><t
-                                                t-esc="performance.get('sample_performance',85)" />%</span>
-                                        Overall Score </span>
-                                </div>
-                            </div>
-                            <div class="performance-grid">
-                                <div class="performance-stat" data-key="today_closed">
-                                    <div class="performance-icon">
-                                        <i class="bi bi-calendar-check"></i>
-                                    </div>
-                                    <div class="performance-content">
-                                        <div class="performance-label">Today Closed</div>
-                                        <div class="performance-value">
-                                            <t t-esc="performance.get('today_closed',0)" />
-                                        </div>
-                                        <div class="performance-subtitle">Tickets Closed Today</div>
-                                    </div>
-                                </div>
-                                <div class="performance-stat" data-key="avg_resolve_rate">
-                                    <div class="performance-icon">
-                                        <i class="bi bi-calendar-week"></i>
-                                    </div>
-                                    <div class="performance-content">
-                                        <div class="performance-label">Avg Last 7 Days</div>
-                                        <div class="performance-value"><t
-                                                t-esc="performance.get('avg_resolve_rate',0)" />%</div>
-                                        <div class="performance-subtitle">Resolve Rate</div>
-                                    </div>
-                                </div>
-                                <div class="performance-stat" data-key="daily_target">
-                                    <div class="performance-icon">
-                                        <i class="bi bi-bullseye"></i>
-                                    </div>
-                                    <div class="performance-content">
-                                        <div class="performance-label">Daily Target</div>
-                                        <div class="performance-value"><t
-                                                t-esc="performance.get('daily_target',80)" />%</div>
-                                        <div class="performance-subtitle">Target Achievement</div>
-                                    </div>
-                                </div>
-                                <div class="performance-stat" data-key="achievement">
-                                    <div class="performance-icon">
-                                        <i class="bi bi-trophy-fill"></i>
-                                    </div>
-                                    <div class="performance-content">
-                                        <div class="performance-label">Current Achievement</div>
-                                        <div class="performance-value"><t
-                                                t-esc="performance.get('achievement',0)" />%</div>
-                                        <div class="performance-subtitle">Target Progress</div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="performance-progress">
-                                <div class="progress-label">
-                                    <span>Daily Goal Progress</span>
-                                    <span><t t-esc="performance.get('achievement',0)" />%</span>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar" role="progressbar"
-                                        t-att-style="'width: ' + str(performance.get('achievement',0)) + '%;'"
-                                        t-att-class="'bg-success' if performance.get('achievement',0) >= 80 else 'bg-warning'">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="quick-actions">
                         <div class="actions-grid">
                             <a href="#" class="action-card">
@@ -936,6 +934,13 @@ document.addEventListener('DOMContentLoaded',function(){
     document.querySelectorAll('.header-nav .nav-link').forEach(function(link){
         link.addEventListener('click',function(e){e.preventDefault();window.switchView(this.getAttribute('data-view'));});
     });
+
+    /* ── Handle ?view= param from external pages (e.g. My Projects → FAQ) ── */
+    (function(){
+        var p = new URLSearchParams(window.location.search);
+        var v = p.get('view');
+        if(v && document.getElementById(v+'-page')) window.switchView(v);
+    })();
     document.querySelectorAll('.action-card[data-view]').forEach(function(card){
         card.addEventListener('click',function(e){e.preventDefault();window.switchView(this.getAttribute('data-view'));});
     });
@@ -1346,6 +1351,49 @@ if(drawer){
     });
 }
 })();
+//]]>
+            </script>
+
+            <script type="text/javascript">
+            //<![CDATA[
+// ── BACK BUTTON TRAP (focal dashboard) ───────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    var modal     = document.getElementById('focalLogoutWarningModal');
+    var stayBtn   = document.getElementById('focalModalStayBtn');
+    var logoutBtn = document.getElementById('focalModalLogoutBtn');
+    if (!modal) return;
+
+    // Push 3 buffer entries so rapid back presses can't skip past the trap
+    history.pushState({ focalTrap: true }, '', window.location.href);
+    history.pushState({ focalTrap: true }, '', window.location.href);
+    history.pushState({ focalTrap: true }, '', window.location.href);
+
+    window.addEventListener('popstate', function () {
+        // Re-arm immediately — push 3 entries to rebuild the buffer
+        history.pushState({ focalTrap: true }, '', window.location.href);
+        history.pushState({ focalTrap: true }, '', window.location.href);
+        history.pushState({ focalTrap: true }, '', window.location.href);
+        modal.classList.add('show');
+    });
+
+    // Re-arm after bfcache restore (use pushState, not reload, to keep trap alive)
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            history.pushState({ focalTrap: true }, '', window.location.href);
+            history.pushState({ focalTrap: true }, '', window.location.href);
+            history.pushState({ focalTrap: true }, '', window.location.href);
+        }
+    });
+
+    stayBtn.addEventListener('click', function () { modal.classList.remove('show'); });
+    logoutBtn.addEventListener('click', function () {
+        window.location.href = '/customer_support/logout_manual';
+    });
+    // Click outside modal to dismiss
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.classList.remove('show');
+    });
+});
 //]]>
             </script>
 

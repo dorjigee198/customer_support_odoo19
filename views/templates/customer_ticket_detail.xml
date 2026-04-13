@@ -10,6 +10,7 @@
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
                 <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/ticket_details.css" />
                 <link rel="stylesheet"
                     href="/customer_support/static/src/css/customer_ticket_details.css" />
                 <link rel="stylesheet"
@@ -182,6 +183,68 @@
                                 </div>
                             </div>
                             <!-- END ticket-header-card -->
+
+                            <!-- ── BOARD TASKS SECTION ─────────────────────── -->
+                            <t t-if="board_columns">
+                                <div class="ctd-board-section">
+                                    <div class="ctd-board-header">
+                                        <div class="ctd-board-title">
+                                            <i class="bi bi-kanban-fill me-2"></i>
+                                            <span>Work Progress</span>
+                                        </div>
+                                        <div class="ctd-board-pct-wrap">
+                                            <span class="ctd-board-pct-label">
+                                                <t t-esc="board_done" />/<t t-esc="board_total" /> tasks done
+                                            </span>
+                                            <span t-attf-class="ctd-board-pct-badge{{ ' ctd-all-done' if board_progress == 100 else '' }}">
+                                                <t t-esc="board_progress" />%
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <!-- Overall progress bar -->
+                                    <div class="ctd-progress-bg">
+                                        <div class="ctd-progress-fill"
+                                             t-attf-style="width: {{ board_progress }}%;"
+                                             t-attf-class="ctd-progress-fill{{ ' done' if board_progress == 100 else '' }}" />
+                                    </div>
+                                    <!-- Columns and tasks -->
+                                    <div class="ctd-cols">
+                                        <t t-foreach="board_columns" t-as="col">
+                                            <div class="ctd-col">
+                                                <div class="ctd-col-header"
+                                                     t-attf-style="border-left: 3px solid {{ col['color'] }}">
+                                                    <span class="ctd-col-name"><t t-esc="col['name']"/></span>
+                                                    <span class="ctd-col-count">
+                                                        <t t-esc="col['done_count']"/>/<t t-esc="col['task_count']"/>
+                                                    </span>
+                                                </div>
+                                                <t t-if="col['tasks']">
+                                                    <div class="ctd-task-list">
+                                                        <t t-foreach="col['tasks']" t-as="task">
+                                                            <div t-attf-class="ctd-task{{ ' ctd-task-done' if task['is_done'] else '' }}">
+                                                                <i t-attf-class="bi {{ 'bi-check-circle-fill ctd-done-icon' if task['is_done'] else 'bi-circle ctd-open-icon' }}"></i>
+                                                                <span class="ctd-task-name"><t t-esc="task['name']"/></span>
+                                                                <t t-if="task['members']">
+                                                                    <div class="ctd-task-members">
+                                                                        <t t-foreach="task['members']" t-as="m">
+                                                                            <span class="ctd-avatar" t-att-title="m['name']">
+                                                                                <t t-esc="m['initials']"/>
+                                                                            </span>
+                                                                        </t>
+                                                                    </div>
+                                                                </t>
+                                                            </div>
+                                                        </t>
+                                                    </div>
+                                                </t>
+                                                <t t-else="">
+                                                    <div class="ctd-col-empty">No tasks yet</div>
+                                                </t>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
 
                             <!-- Communication Section -->
                             <div class="communication-section">

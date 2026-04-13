@@ -285,7 +285,7 @@
                         <div class="header-nav">
                             <a href="#" class="nav-link active" id="portalOverviewNav">
                                 <i class="bi bi-speedometer2 me-2"></i>Overview </a>
-                            <a href="/customer_support/tickets" class="nav-link"
+                            <a href="/customer_support/tickets/list" class="nav-link"
                                 id="portalTicketsNav">
                                 <i class="bi bi-ticket-detailed me-2"></i>Tickets </a>
                             <a href="#" class="nav-link" id="portalReportingNav">
@@ -561,7 +561,7 @@
                                     <p>Submit a new support request</p>
                                 </div>
                             </a>
-                            <a href="/customer_support/tickets" class="action-card">
+                            <a href="/customer_support/tickets/list" class="action-card">
                                 <div class="action-icon">
                                     <i class="bi bi-list-task"></i>
                                 </div>
@@ -799,21 +799,21 @@ document.addEventListener('DOMContentLoaded', function () {
     var ticketsNav = document.getElementById('portalTicketsNav');
     if (ticketsNav) ticketsNav.addEventListener('click', function (e) {
         e.preventDefault();
-        window.location.href = '/customer_support/tickets';
+        window.location.href = '/customer_support/tickets/list';
     });
     var reportingNav = document.getElementById('portalReportingNav');
     if (reportingNav) reportingNav.addEventListener('click', function (e) { e.preventDefault(); showReporting(); });
     var reportActionCard = document.getElementById('portalReportActionCard');
     if (reportActionCard) reportActionCard.addEventListener('click', function (e) { e.preventDefault(); showReporting(); });
     var listBtn = document.getElementById('portalListBtn');
-    if (listBtn) listBtn.addEventListener('click', function () { window.location.href = '/customer_support/tickets'; });
+    if (listBtn) listBtn.addEventListener('click', function () { window.location.href = '/customer_support/tickets/kanban'; });
     var kanbanActiveBtn = document.getElementById('portalKanbanActiveBtn');
     if (kanbanActiveBtn) kanbanActiveBtn.addEventListener('click', function () { showKanban(); });
 
     document.querySelectorAll('#portal-kanban-page .kanban-card').forEach(function (card) {
         card.addEventListener('click', function () {
             var id = this.getAttribute('data-ticket-id');
-            if (id) window.location.href = '/customer_support/ticket/' + id;
+            if (id) window.location.href = '/customer_support/customer/ticket/' + id;
         });
     });
     document.querySelectorAll('.action-card').forEach(function (card) {
@@ -868,7 +868,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (badge) { badge.textContent = items.length; badge.classList.remove('d-none'); }
         notifList.innerHTML = items.map(function (n) {
-            var href = n.ticket_id ? '/customer_support/ticket/' + encodeURIComponent(n.ticket_id) : '#';
+            var href = n.ticket_id ? '/customer_support/customer/ticket/' + encodeURIComponent(n.ticket_id) : '#';
             var cls  = sanitise(n.cls  || 'status');
             var icon = sanitise(n.icon || 'bi-bell-fill');
             var msg  = sanitise(n.message || '');
@@ -1047,6 +1047,10 @@ document.addEventListener('DOMContentLoaded', function () {
         showKanban();
         history.replaceState(null, null, window.location.pathname);
     }
+});
+// bfcache guard: reload if browser restores this page from cache after logout
+window.addEventListener('pageshow', function (e) {
+    if (e.persisted) { window.location.reload(); }
 });
                 //]]>
             </script>

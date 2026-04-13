@@ -34,11 +34,23 @@ class CustomerSupportAuth(http.Controller):
     @http.route("/customer_support", type="http", auth="public", website=True)
     def landing_page(self, **kw):
         """
-        Landing Page - Public welcome page
-        Working: Displays welcome screen with login/register options
-        Access: Public (no login required)
+        Landing Page - Public welcome page.
+        Authenticated users are redirected to their dashboard so the back
+        button can never strand a logged-in user on the landing page.
         """
-        return request.render("customer_support.landing_page")
+        user = request.env.user
+        public_user = request.env.ref("base.public_user")
+        if user and user.id != public_user.id and user.active:
+            if user.has_group("base.group_system"):
+                return werkzeug.utils.redirect("/customer_support/admin_dashboard")
+            elif user.has_group("base.group_user"):
+                return werkzeug.utils.redirect("/customer_support/support_dashboard")
+            elif user.has_group("base.group_portal"):
+                return werkzeug.utils.redirect("/customer_support/dashboard")
+
+        response = request.render("customer_support.landing_page")
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        return response
 
     # =========================================================================
     # LOGIN
@@ -49,17 +61,28 @@ class CustomerSupportAuth(http.Controller):
         """
         Login Page - Renders the custom login form
         Working: Shows login form with email/password fields
-        Access: Public (no login required)
+        Access: Public (no login required) — redirects already-authenticated users
         """
-        return request.render(
+        user = request.env.user
+        public_user = request.env.ref("base.public_user")
+        if user and user.id != public_user.id and user.active:
+            # User is already logged in — redirect to their dashboard
+            if user.has_group("base.group_system"):
+                return werkzeug.utils.redirect("/customer_support/admin_dashboard")
+            elif user.has_group("base.group_user"):
+                return werkzeug.utils.redirect("/customer_support/support_dashboard")
+            elif user.has_group("base.group_portal"):
+                return werkzeug.utils.redirect("/customer_support/dashboard")
+
+        response = request.render(
             "customer_support.portal_login_page",
             {
                 "error": kw.get("error", ""),
-                "redirect": kw.get(
-                    "redirect", ""
-                ),  # ← ADDED: pass redirect URL to template
+                "redirect": kw.get("redirect", ""),
             },
         )
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        return response
 
     @http.route(
         "/customer_support/authenticate",
@@ -152,7 +175,7 @@ class CustomerSupportAuth(http.Controller):
                     return werkzeug.utils.redirect(destination)
 
                 elif user.has_group("base.group_user"):
-                    # Internal user (focal person / support agent) → agent dashboard
+                    # Internal user (focal person / support agent) → analytics dashboard
                     request.session["customer_support_login"] = True
                     return werkzeug.utils.redirect(
                         "/customer_support/support_dashboard"
@@ -183,13 +206,12 @@ class CustomerSupportAuth(http.Controller):
     @http.route("/customer_support/logout", type="http", auth="user", website=True)
     def support_logout(self, **kw):
         """
-        Logout - Standard logout route
-        Working: Clears the session and redirects to the landing page
+        Logout - Clears the session and redirects to the login page
         Access: All authenticated users
         """
         try:
             request.session.logout()
-            return werkzeug.utils.redirect("/customer_support")
+            return werkzeug.utils.redirect("/customer_support/login")
         except Exception as e:
             _logger.error(f"Logout error: {str(e)}")
             return werkzeug.utils.redirect("/customer_support/login")

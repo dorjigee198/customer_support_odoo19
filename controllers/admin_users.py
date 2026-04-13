@@ -1149,17 +1149,10 @@ class CustomerSupportAdminUsers(http.Controller):
         if not user.has_group("base.group_system"):
             return werkzeug.utils.redirect("/customer_support/dashboard")
 
-        projects = (
-            request.env["customer_support.project"]
-            .sudo()
-            .search([("active", "=", True)])
-        )
-
         return request.render(
             "customer_support.admin_create_user_form",
             {
                 "user": user,
-                "projects": projects,
                 "page_name": "create_user",
                 "error": kw.get("error", ""),
             },
@@ -1186,7 +1179,6 @@ class CustomerSupportAdminUsers(http.Controller):
             password = post_dict.get("password", "").strip()
             user_type = post_dict.get("user_type", "customer")
             phone = post_dict.get("phone", "").strip()
-            project_id = post_dict.get("project_id")
 
             if not name:
                 return werkzeug.utils.redirect(
@@ -1199,10 +1191,6 @@ class CustomerSupportAdminUsers(http.Controller):
             if not password:
                 return werkzeug.utils.redirect(
                     "/customer_support/admin_dashboard/create_user?error=Password is required"
-                )
-            if not project_id:
-                return werkzeug.utils.redirect(
-                    "/customer_support/admin_dashboard/create_user?error=Project is required"
                 )
 
             existing_user = (
@@ -1225,7 +1213,6 @@ class CustomerSupportAdminUsers(http.Controller):
                         "email": email,
                         "phone": phone,
                         "is_company": False,
-                        "project_id": int(project_id),
                     }
                 )
             )
@@ -1255,8 +1242,7 @@ class CustomerSupportAdminUsers(http.Controller):
                 new_user.sudo().write({"group_ids": [(6, 0, groups_to_add)]})
 
             _logger.info(
-                f"User created: {new_user.name} ({user_type}) assigned to project "
-                f"{project_id} by {user.name}"
+                f"User created: {new_user.name} ({user_type}) by {user.name}"
             )
 
             try:
@@ -1371,9 +1357,7 @@ class CustomerSupportAdminUsers(http.Controller):
                     f"/customer_support/admin_dashboard/user/{user_id}/edit?error=Email already exists"
                 )
 
-            edit_user.partner_id.sudo().write(
-                {"name": name, "email": email, "phone": phone}
-            )
+            edit_user.partner_id.sudo().write({"name": name, "email": email, "phone": phone})
 
             update_vals = {"name": name, "login": email, "email": email}
             if password:

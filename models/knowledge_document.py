@@ -16,6 +16,14 @@ class KnowledgeDocument(models.Model):
 
     name = fields.Char(string="Document Name", required=True)
     description = fields.Text(string="Description / Notes")
+
+    project_id = fields.Many2one(
+        "customer_support.project",
+        string="Project",
+        required=False,
+        ondelete="set null",
+        help="Link this document to a specific project so it appears on that project's ticket boards",
+    )
     file = fields.Binary(string="File", required=True, attachment=True)
     filename = fields.Char(string="Filename")
     file_type = fields.Selection(
