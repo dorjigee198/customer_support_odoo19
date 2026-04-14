@@ -10,16 +10,18 @@
     """,
     "author": "Dragon Coders",
     "website": "https://www.yourwebsite.com",
-    "depends": ["base", "mail", "web", "portal"],
+    "depends": ["base", "mail", "web", "portal", "auth_signup"],
     "external_dependencies": {
         "python": ["openai"],
     },
     "data": [
         "security/ir.model.access.csv",
         "data/sequence.xml",
+        "data/session_config.xml",
         "views/customer_support_views.xml",
         "views/templates/landing_page.xml",
         "views/templates/portal_login.xml",
+        "views/templates/password_recovery.xml",
         "views/portal_dashboard.xml",
         "views/portal_tickets.xml",
         "views/support_dashboard.xml",
@@ -28,7 +30,6 @@
         "views/chatbot_page.xml",
         "views/landing_chat.xml",
         "views/admin_dashboard.xml",
-        "views/admin_ticket_detail.xml",
         "views/user_management.xml",
         "views/system_configuration.xml",
         "views/report_templates.xml",
@@ -39,6 +40,7 @@
         "views/focal_projects.xml",
         "views/focal_project_tickets.xml",
         "views/ticket_board.xml",
+        "data/password_reset_email_template.xml",
     ],
     "assets": {
         "web.assets_backend": [

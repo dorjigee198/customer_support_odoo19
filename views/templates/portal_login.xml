@@ -60,6 +60,9 @@
                                 <div class="error-message" t-if="error">
                                     <t t-esc="error"/>
                                 </div>
+                                <div class="alert alert-success" t-if="success">
+                                    <t t-esc="success"/>
+                                </div>
 
                                 <!--  Login Form  -->
                                 <form action="/customer_support/authenticate" method="post">
@@ -99,8 +102,7 @@
 
                                     <!--  Forgot/Reset Links  -->
                                     <div class="login-links">
-                                        <a href="/web/reset_password" class="text-decoration-none">Forgot password?</a>
-                                        <a href="/web/reset_password" class="text-decoration-none">Reset password</a>
+                                        <a href="/customer_support/forgot_password" class="text-decoration-none">Forgot password?</a>
                                     </div>
 
                                     <!--  Submit Button  -->
@@ -121,17 +123,37 @@
             <!--  Custom JavaScript  -->
             <script src="/customer_support/static/src/js/portal_login.js"/>
             <script>
+                //<![CDATA[
+                var _params = new URLSearchParams(window.location.search || '');
+                var _fromLogout = _params.get('from_logout') === '1';
+
+                if (_fromLogout) {
+                    // Build an explicit local history pair:
+                    // previous entry = landing, current entry = login.
+                    // This makes a single browser-back go to landing reliably.
+                    history.replaceState({ from_logout_landing: true }, '', '/customer_support/');
+                    history.pushState({ from_logout_login: true }, '', window.location.href);
+                }
+
                 // bfcache guard: reload if browser restores this page while authenticated
                 window.addEventListener('pageshow', function (e) {
                     if (e.persisted) { window.location.reload(); }
                 });
-                // popstate guard: if back/forward navigates outside the portal
-                // (e.g. to /web/login), redirect to the landing page
-                window.addEventListener('popstate', function () {
+
+                // Back-button guard after logout: always send user to landing page.
+                window.addEventListener('popstate', function (e) {
+                    if (_fromLogout || (e.state && e.state.from_logout_landing)) {
+                        window.location.replace('/customer_support/');
+                        return;
+                    }
+
+                    // Existing guard: if back/forward navigates outside the portal
+                    // (e.g. to /web/login), redirect to landing page.
                     if (!window.location.pathname.startsWith('/customer_support/')) {
                         window.location.replace('/customer_support/');
                     }
                 });
+                //]]>
             </script>
 
         </t>

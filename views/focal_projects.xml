@@ -8,10 +8,14 @@
         <t t-call="web.layout">
             <t t-set="head">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-                <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/focal_projects.css" />
-                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+                    rel="stylesheet" />
+                <link
+                    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+                    rel="stylesheet" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/focal_projects.css?v=2" />
+                <script
+                    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
             </t>
 
             <div id="wrap">
@@ -29,19 +33,10 @@
                                 <i class="bi bi-kanban"></i>
                                 <span>My Projects</span>
                             </a>
-                            <a href="/customer_support/support_dashboard?view=faq" class="nav-link-external">
-                                <i class="bi bi-question-circle"></i>
-                                <span>FAQ</span>
-                            </a>
                         </div>
 
                         <!-- Right controls -->
                         <div class="header-right">
-
-                            <!-- Grid icon (static, matches analytics navbar) -->
-                            <button class="view-toggle-btn" title="Grid View">
-                                <i class="bi bi-grid-3x3-gap-fill"></i>
-                            </button>
 
                             <!-- Notification Bell -->
                             <div class="notif-wrap me-1">
@@ -52,16 +47,14 @@
                                 <div class="notif-dropdown" id="notifDropdown">
                                     <div class="notif-header">
                                         <h6><i class="bi bi-bell me-2"></i>SLA Alerts</h6>
-                                        <button class="notif-mark-read" id="markAllRead">Mark all read</button>
+                                        <button class="notif-mark-read" id="markAllRead">Mark all
+                                            read</button>
                                     </div>
                                     <div class="notif-list" id="notifList">
                                         <div class="notif-empty">
-                                            <i class="bi bi-arrow-repeat" style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>
-                                            Loading alerts...
-                                        </div>
-                                    </div>
-                                    <div class="notif-footer">
-                                        <a href="/customer_support/support_dashboard">View all tickets &#x2192;</a>
+                                            <i class="bi bi-arrow-repeat"
+                                                style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>
+                                            Loading alerts... </div>
                                     </div>
                                 </div>
                             </div>
@@ -78,17 +71,20 @@
                                         alt="Avatar" class="user-avatar"
                                         onerror="this.src='/web/static/img/avatar_gray.svg'" />
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="fpUserDropdown">
+                                <ul class="dropdown-menu dropdown-menu-end"
+                                    aria-labelledby="fpUserDropdown">
                                     <li>
-                                        <a class="dropdown-item" href="/customer_support/profile">
-                                            <i class="bi bi-person me-2"></i>Edit Profile
-                                        </a>
+                                        <a class="dropdown-item"
+                                            href="/customer_support/support/profile">
+                                            <i class="bi bi-person me-2"></i>Edit Profile </a>
                                     </li>
-                                    <li><hr class="dropdown-divider" /></li>
                                     <li>
-                                        <a class="dropdown-item text-danger" href="/customer_support/logout_manual">
-                                            <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                        </a>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item text-danger"
+                                            href="/customer_support/logout_manual">
+                                            <i class="bi bi-box-arrow-right me-2"></i>Logout </a>
                                     </li>
                                 </ul>
                             </div>
@@ -102,17 +98,21 @@
                 <div class="fp-content">
                     <t t-if="not projects">
                         <div class="fp-empty-state">
-                            <div class="fp-empty-icon"><i class="bi bi-folder-x"></i></div>
+                            <div class="fp-empty-icon">
+                                <i class="bi bi-folder-x"></i>
+                            </div>
                             <h3>No Projects Assigned</h3>
-                            <p>You haven't been added to any project yet. Ask your admin to assign you to a project.</p>
+                            <p>You haven't been added to any project yet. Ask your admin to assign
+                                you to a project.</p>
                         </div>
                     </t>
 
                     <t t-if="projects">
                         <div class="fp-project-grid" id="projectGrid">
                             <t t-foreach="projects" t-as="proj">
-                                <a t-attf-href="/customer_support/my_projects/{{ proj['id'] }}/tickets"
-                                   class="fp-project-card">
+                                <a
+                                    t-attf-href="/customer_support/my_projects/{{ proj['id'] }}/tickets"
+                                    class="fp-project-card">
 
                                     <!-- Card header -->
                                     <div class="fp-card-header">
@@ -132,13 +132,12 @@
                                             <!-- Open ticket badge -->
                                             <t t-if="proj['open_tickets'] &gt; 0">
                                                 <span class="fp-open-badge">
-                                                    <t t-esc="proj['open_tickets']" /> open
-                                                </span>
+                                                    <t t-esc="proj['open_tickets']" /> open </span>
                                             </t>
                                             <t t-if="proj['open_tickets'] == 0">
                                                 <span class="fp-done-badge">
-                                                    <i class="bi bi-check2-circle me-1"></i>All resolved
-                                                </span>
+                                                    <i class="bi bi-check2-circle me-1"></i>All
+                                                    resolved </span>
                                             </t>
                                         </div>
                                     </div>
@@ -176,12 +175,13 @@
                                             <div class="fp-progress-header">
                                                 <span class="fp-progress-title">Resolution Progress</span>
                                                 <span class="fp-progress-pct">
-                                                    <t t-esc="(proj['total_tickets'] - proj['open_tickets']) * 100 // proj['total_tickets']" />%
-                                                </span>
+                                                    <t
+                                                        t-esc="(proj['total_tickets'] - proj['open_tickets']) * 100 // proj['total_tickets']" />
+                                                    % </span>
                                             </div>
                                             <div class="fp-progress-wrap">
                                                 <div class="fp-progress-bar"
-                                                     t-attf-style="width: {{ (proj['total_tickets'] - proj['open_tickets']) * 100 // proj['total_tickets'] }}%">
+                                                    t-attf-style="width: {{ (proj['total_tickets'] - proj['open_tickets']) * 100 // proj['total_tickets'] }}%">
                                                 </div>
                                             </div>
                                         </t>
@@ -208,7 +208,7 @@
 
             <!-- ── NOTIFICATION BELL JS ── -->
             <script type="text/javascript">
-            //<![CDATA[
+                //<![CDATA[
             (function () {
                 var bell     = document.getElementById('notifBell');
                 var dropdown = document.getElementById('notifDropdown');
@@ -224,10 +224,12 @@
                 dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
 
                 document.getElementById('markAllRead').addEventListener('click', function () {
-                    document.querySelectorAll('.notif-item').forEach(function (i) {
-                        i.classList.remove('unread');
-                    });
-                    badge.classList.add('d-none');
+                    fetch('/customer_support/dashboard/sla_alerts/mark_read', {
+                        method: 'POST', credentials: 'same-origin',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                    .catch(function () {})
+                    .then(function () { loadSlaAlerts(); });
                 });
 
                 function loadSlaAlerts() {
@@ -250,16 +252,18 @@
                     badge.textContent = alerts.length;
                     badge.classList.remove('d-none');
                     list.innerHTML = alerts.map(function (a) {
-                        var cls   = a.sla_status === 'breached' ? 'breached' : 'at-risk';
-                        var icon  = cls === 'breached' ? 'bi-x-octagon-fill' : 'bi-exclamation-triangle-fill';
-                        var label = cls === 'breached' ? 'SLA Breached' : 'At Risk';
-                        return '<a class="notif-item unread" href="/customer_support/ticket/' + a.ticket_id + '">'
+                        var isAssignment = a.alert_type === 'assignment';
+                        var cls   = isAssignment ? 'at-risk' : (a.sla_status === 'breached' ? 'breached' : 'at-risk');
+                        var icon  = isAssignment ? 'bi-ticket-detailed-fill' : (cls === 'breached' ? 'bi-x-octagon-fill' : 'bi-exclamation-triangle-fill');
+                        var label = isAssignment ? 'New Assignment' : (cls === 'breached' ? 'SLA Breached' : 'At Risk');
+                        var policyLine = isAssignment ? 'Ticket assigned to you' : ('Policy: ' + (a.policy_name || 'None'));
+                        return '<div class="notif-item unread">'
                             + '<div class="notif-icon-wrap ' + cls + '"><i class="bi ' + icon + '"></i></div>'
                             + '<div class="notif-body">'
-                            + '<div class="notif-title">' + a.ticket_name + ' \u2014 ' + a.subject + '</div>'
+                            + '<div class="notif-title">Ticket #' + a.ticket_id + ' \u2014 ' + a.subject + '</div>'
                             + '<div class="notif-sub">' + label + ' \u00b7 ' + a.time_display + '</div>'
-                            + '<div class="notif-time-text">Policy: ' + (a.policy_name || 'None') + '</div>'
-                            + '</div><div class="notif-dot ' + cls + '"></div></a>';
+                            + '<div class="notif-time-text">Project: ' + (a.project_name || 'General') + '</div>'
+                            + '</div><div class="notif-dot ' + cls + '"></div></div>';
                     }).join('');
                 }
 

@@ -9,9 +9,9 @@
                 <link
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css?v=2" />
                 <link rel="stylesheet"
-                    href="/customer_support/static/src/css/support_dashboard_mobile.css" />
+                    href="/customer_support/static/src/css/support_dashboard_mobile.css?v=2" />
                 <style>
                     /* ── NOTIFICATION BELL DROPDOWN ── */
                     .notif-wrap { position: relative; }
@@ -169,52 +169,124 @@
                     }
                     /* ── BACK BUTTON WARNING MODAL ── */
                     #focalLogoutWarningModal {
-                        display: none; position: fixed; top: 0; left: 0;
-                        width: 100%; height: 100%;
-                        background: rgba(0,0,0,0.5); z-index: 99999;
-                        align-items: center; justify-content: center;
-                        backdrop-filter: blur(4px);
+                    display: none; position: fixed; top: 0; left: 0;
+                    width: 100%; height: 100%;
+                    background: rgba(0,0,0,0.5); z-index: 99999;
+                    align-items: center; justify-content: center;
+                    backdrop-filter: blur(4px);
                     }
                     #focalLogoutWarningModal.show { display: flex !important; }
                     .focal-logout-modal-box {
-                        background: #ffffff; border-radius: 20px;
-                        padding: 2.5rem 2rem; max-width: 420px; width: 90%;
-                        box-shadow: 0 24px 60px rgba(12,74,110,0.25);
-                        text-align: center;
-                        animation: focalModalPop 0.25s ease;
+                    background: #ffffff; border-radius: 20px;
+                    padding: 2.5rem 2rem; max-width: 420px; width: 90%;
+                    box-shadow: 0 24px 60px rgba(12,74,110,0.25);
+                    text-align: center;
+                    animation: focalModalPop 0.25s ease;
                     }
                     @keyframes focalModalPop {
-                        from { transform: scale(0.88); opacity: 0; }
-                        to   { transform: scale(1);    opacity: 1; }
+                    from { transform: scale(0.88); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
                     }
                     .focal-logout-modal-icon {
-                        width: 68px; height: 68px; background: #fef3c7;
-                        border-radius: 50%; display: flex; align-items: center;
-                        justify-content: center; margin: 0 auto 1.25rem;
-                        border: 3px solid #fde68a;
+                    width: 68px; height: 68px; background: #fef3c7;
+                    border-radius: 50%; display: flex; align-items: center;
+                    justify-content: center; margin: 0 auto 1.25rem;
+                    border: 3px solid #fde68a;
                     }
                     .focal-logout-modal-icon i { font-size: 1.9rem; color: #d97706; }
                     .focal-logout-modal-box h5 {
-                        color: #0c4a6e; font-weight: 700; font-size: 1.2rem; margin-bottom: 0.6rem;
+                    color: #0c4a6e; font-weight: 700; font-size: 1.2rem; margin-bottom: 0.6rem;
                     }
                     .focal-logout-modal-box p {
-                        color: #475569; font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.75rem;
+                    color: #475569; font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.75rem;
                     }
                     .focal-logout-modal-box p strong { color: #0c4a6e; }
-                    .focal-logout-modal-btns { display: flex; gap: 0.85rem; justify-content: center; }
+                    .focal-logout-modal-btns { display: flex; gap: 0.85rem; justify-content: center;
+                    }
                     .focal-btn-stay {
-                        padding: 0.6rem 1.4rem; border-radius: 10px;
-                        border: 1.5px solid rgba(12,74,110,0.2); background: #f0f9ff;
-                        color: #0c4a6e; font-weight: 600; font-size: 0.9rem;
-                        cursor: pointer; transition: background 0.2s, border-color 0.2s;
+                    padding: 0.6rem 1.4rem; border-radius: 10px;
+                    border: 1.5px solid rgba(12,74,110,0.2); background: #f0f9ff;
+                    color: #0c4a6e; font-weight: 600; font-size: 0.9rem;
+                    cursor: pointer; transition: background 0.2s, border-color 0.2s;
                     }
                     .focal-btn-stay:hover { background: #e0f2fe; border-color: #0c4a6e; }
                     .focal-btn-logout-now {
-                        padding: 0.6rem 1.4rem; border-radius: 10px; border: none;
-                        background: #0c4a6e; color: #ffffff; font-weight: 600;
-                        font-size: 0.9rem; cursor: pointer; transition: background 0.2s;
+                    padding: 0.6rem 1.4rem; border-radius: 10px; border: none;
+                    background: #0c4a6e; color: #ffffff; font-weight: 600;
+                    font-size: 0.9rem; cursor: pointer; transition: background 0.2s;
                     }
                     .focal-btn-logout-now:hover { background: #075985; }
+
+                    /* ── PREMIUM CONSISTENCY LAYER (match customer dashboard) ── */
+                    .dashboard-wrapper {
+                    background:
+                    radial-gradient(circle at 14% 6%, rgba(201, 164, 92, 0.14) 0%, transparent 34%),
+                    radial-gradient(circle at 92% 92%, rgba(31, 110, 140, 0.11) 0%, transparent 36%),
+                    linear-gradient(160deg, #edf3f9 0%, #e6eef6 50%, #eff4f9 100%) !important;
+                    }
+                    .dashboard-header {
+                    background: linear-gradient(130deg, #071a2d 0%, #0d3253 46%, #18486e 100%) !important;
+                    border-bottom: 1px solid rgba(233, 214, 172, 0.22) !important;
+                    box-shadow: 0 8px 24px rgba(7, 24, 40, 0.26) !important;
+                    }
+                    .nav-link.active {
+                    background: rgba(255, 255, 255, 0.08) !important;
+                    border-bottom: 2px solid #e9d6ac !important;
+                    }
+                    .dashboard-card,
+                    .ticket-table-wrapper,
+                    .action-card,
+                    .kanban-col {
+                    background: rgba(255, 255, 255, 0.9) !important;
+                    border: 1px solid rgba(15, 53, 85, 0.14) !important;
+                    box-shadow: 0 12px 30px rgba(8, 27, 43, 0.12) !important;
+                    backdrop-filter: blur(8px);
+                    }
+                    .card-title,
+                    .action-content h4,
+                    .stat-value,
+                    .performance-value,
+                    .kanban-col-title,
+                    .tkt-ref,
+                    .tkt-subject {
+                    color: #0f3555 !important;
+                    }
+                    .card-title i,
+                    .action-icon i,
+                    .stat-icon,
+                    .performance-icon,
+                    .kanban-card-id {
+                    color: #1f6e8c !important;
+                    }
+                    .action-icon,
+                    .score-badge,
+                    .view-btn.active,
+                    .filter-pill.active,
+                    .focal-btn-logout-now {
+                    background: linear-gradient(140deg, #103b5f 0%, #1f6e8c 100%) !important;
+                    color: #ffffff !important;
+                    border-color: #154869 !important;
+                    }
+                    .notif-dropdown {
+                    border: 1px solid rgba(15, 53, 85, 0.14) !important;
+                    box-shadow: 0 16px 36px rgba(8, 27, 43, 0.2) !important;
+                    border-radius: 14px !important;
+                    }
+                    .notif-header {
+                    background: linear-gradient(90deg, rgba(31, 110, 140, 0.11) 0%, rgba(201, 164, 92, 0.13) 100%) !important;
+                    }
+                    .notif-item:hover,
+                    .ticket-table tbody tr:hover {
+                    background: linear-gradient(90deg, rgba(31, 110, 140, 0.08) 0%, rgba(201, 164, 92, 0.08) 100%) !important;
+                    }
+                    .kanban-card:hover {
+                    border-color: rgba(31, 110, 140, 0.45) !important;
+                    box-shadow: 0 10px 24px rgba(8, 27, 43, 0.2) !important;
+                    }
+                    .focal-logout-modal-box {
+                    border: 1px solid rgba(15, 53, 85, 0.14) !important;
+                    box-shadow: 0 22px 60px rgba(8, 27, 43, 0.28) !important;
+                    }
                 </style>
             </t>
 
@@ -222,22 +294,20 @@
 
                 <!-- BACK BUTTON WARNING MODAL -->
                 <div id="focalLogoutWarningModal" role="dialog" aria-modal="true"
-                     aria-labelledby="focalLogoutModalTitle">
+                    aria-labelledby="focalLogoutModalTitle">
                     <div class="focal-logout-modal-box">
                         <div class="focal-logout-modal-icon">
                             <i class="bi bi-exclamation-triangle-fill"></i>
                         </div>
                         <h5 id="focalLogoutModalTitle">Hold On!</h5>
-                        <p>Please use the <strong>Logout</strong> button to exit safely.<br/>
-                           Pressing the back button may leave your session unsecured and expose
-                           your account to unauthorised access.</p>
+                        <p>Please use the <strong>Logout</strong> button to exit safely.<br />
+                            Pressing the back button may leave your session unsecured and expose
+                            your account to unauthorised access.</p>
                         <div class="focal-logout-modal-btns">
                             <button class="focal-btn-stay" id="focalModalStayBtn">
-                                <i class="bi bi-arrow-left-circle me-1"></i> Stay on Page
-                            </button>
+                                <i class="bi bi-arrow-left-circle me-1"></i> Stay on Page </button>
                             <button class="focal-btn-logout-now" id="focalModalLogoutBtn">
-                                <i class="bi bi-box-arrow-right me-1"></i> Logout Properly
-                            </button>
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout Properly </button>
                         </div>
                     </div>
                 </div>
@@ -259,17 +329,9 @@
                                 <i class="bi bi-kanban"></i>
                                 <span>My Projects</span>
                             </a>
-                            <a href="#" class="nav-link" data-view="faq">
-                                <i class="bi bi-question-circle"></i>
-                                <span>FAQ</span>
-                            </a>
                         </div>
 
                         <div class="header-right">
-                            <button class="view-toggle-btn me-2" id="kanbanToggleBtn"
-                                title="Toggle Kanban View">
-                                <i class="bi bi-grid-3x3-gap-fill"></i>
-                            </button>
                             <div class="notif-wrap me-3">
                                 <button class="notif-btn" id="notifBell" title="SLA Alerts">
                                     <i class="bi bi-bell-fill"></i>
@@ -286,10 +348,6 @@
                                             <i class="bi bi-arrow-repeat"
                                                 style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>
                                             Loading alerts... </div>
-                                    </div>
-                                    <div class="notif-footer">
-                                        <a href="#" data-view="tickets" class="notif-nav-link">View
-                                            all tickets &#x2192;</a>
                                     </div>
                                 </div>
                             </div>
@@ -308,7 +366,8 @@
                                 <ul class="dropdown-menu dropdown-menu-end"
                                     aria-labelledby="userProfileDropdown">
                                     <li>
-                                        <a class="dropdown-item" href="/customer_support/profile"><i
+                                        <a class="dropdown-item"
+                                            href="/customer_support/support/profile"><i
                                                 class="bi bi-person me-2"></i>Edit Profile</a>
                                     </li>
                                     <li>
@@ -358,202 +417,162 @@
                 <!-- ═══ OVERVIEW PAGE ═══ -->
                 <div class="page-content dashboard-content" id="overview-page">
                     <div class="dashboard-card">
-                            <div class="card-header">
-                                <h2 class="card-title"><i class="bi bi-bar-chart-fill"></i>Ticket
-                                    Analytics</h2>
-                                <div class="card-actions">
-                                    <span class="last-updated"><i class="bi bi-clock"></i>Updated
-                                        just now</span>
+                        <div class="card-header">
+                            <h2 class="card-title"><i class="bi bi-bar-chart-fill"></i>Ticket
+                                Analytics</h2>
+                            <div class="card-actions">
+                                <span class="last-updated"><i class="bi bi-clock"></i>Updated just
+                                    now</span>
+                            </div>
+                        </div>
+                        <div class="analytics-grid">
+                            <div class="stat-box" data-key="open_tickets">
+                                <div class="stat-icon">
+                                    <i class="bi bi-folder-plus"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-label">Open Tickets</div>
+                                    <div class="stat-value">
+                                        <t t-esc="analytics.get('open_tickets',0)" />
+                                    </div>
+                                    <div class="stat-subtitle">Active Tickets</div>
                                 </div>
                             </div>
-                            <div class="analytics-grid">
-                                <div class="stat-box" data-key="open_tickets">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-folder-plus"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">Open Tickets</div>
-                                        <div class="stat-value">
-                                            <t t-esc="analytics.get('open_tickets',0)" />
-                                        </div>
-                                        <div class="stat-subtitle">Active Tickets</div>
-                                    </div>
+                            <div class="stat-box" data-key="total_tickets">
+                                <div class="stat-icon">
+                                    <i class="bi bi-stack"></i>
                                 </div>
-                                <div class="stat-box" data-key="total_tickets">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-stack"></i>
+                                <div class="stat-content">
+                                    <div class="stat-label">Total Tickets</div>
+                                    <div class="stat-value">
+                                        <t t-esc="analytics.get('total_tickets',0)" />
                                     </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">Total Tickets</div>
-                                        <div class="stat-value">
-                                            <t t-esc="analytics.get('total_tickets',0)" />
-                                        </div>
-                                        <div class="stat-subtitle">All Tickets</div>
-                                    </div>
-                                </div>
-                                <div class="stat-box" data-key="high_priority">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-exclamation-triangle"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">High Priority</div>
-                                        <div class="stat-value">
-                                            <t t-esc="analytics.get('high_priority',0)" />
-                                        </div>
-                                        <div class="stat-subtitle">High Priority</div>
-                                    </div>
-                                </div>
-                                <div class="stat-box" data-key="urgent">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-lightning-charge-fill"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">Urgent</div>
-                                        <div class="stat-value">
-                                            <t t-esc="analytics.get('urgent',0)" />
-                                        </div>
-                                        <div class="stat-subtitle">Urgent Priority</div>
-                                    </div>
+                                    <div class="stat-subtitle">All Tickets</div>
                                 </div>
                             </div>
-                            <div class="analytics-grid">
-                                <div class="stat-box" data-key="avg_open_hours">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-clock-history"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">Avg Open Hours</div>
-                                        <div class="stat-value">
-                                            <t t-esc="analytics.get('avg_open_hours',0)" />
-                                        </div>
-                                        <div class="stat-subtitle">Hours</div>
-                                    </div>
+                            <div class="stat-box" data-key="high_priority">
+                                <div class="stat-icon">
+                                    <i class="bi bi-exclamation-triangle"></i>
                                 </div>
-                                <div class="stat-box" data-key="total_hours">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-clock-fill"></i>
+                                <div class="stat-content">
+                                    <div class="stat-label">High Priority</div>
+                                    <div class="stat-value">
+                                        <t t-esc="analytics.get('high_priority',0)" />
                                     </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">Total Hours</div>
-                                        <div class="stat-value">
-                                            <t t-esc="analytics.get('total_hours',0)" />
-                                        </div>
-                                        <div class="stat-subtitle">Hours Open</div>
-                                    </div>
-                                </div>
-                                <div class="stat-box" data-key="avg_high_hours">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-exclamation-octagon"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">Avg High Priority Hours</div>
-                                        <div class="stat-value">
-                                            <t t-esc="analytics.get('avg_high_hours',0)" />
-                                        </div>
-                                        <div class="stat-subtitle">Hours</div>
-                                    </div>
-                                </div>
-                                <div class="stat-box" data-key="avg_urgent_hours">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-lightning-charge-fill"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">Avg Urgent Hours</div>
-                                        <div class="stat-value">
-                                            <t t-esc="analytics.get('avg_urgent_hours',0)" />
-                                        </div>
-                                        <div class="stat-subtitle">Hours</div>
-                                    </div>
+                                    <div class="stat-subtitle">High Priority</div>
                                 </div>
                             </div>
-                            <div class="analytics-grid">
-                                <div class="stat-box" data-key="resolved_tickets">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-check-circle"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">Resolved Tickets</div>
-                                        <div class="stat-value">
-                                            <t t-esc="analytics.get('resolved_tickets',0)" />
-                                        </div>
-                                        <div class="stat-subtitle">Fixed Tickets</div>
-                                    </div>
+                            <div class="stat-box" data-key="urgent">
+                                <div class="stat-icon">
+                                    <i class="bi bi-lightning-charge-fill"></i>
                                 </div>
-                                <div class="stat-box" data-key="solve_rate">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-percent"></i>
+                                <div class="stat-content">
+                                    <div class="stat-label">Urgent</div>
+                                    <div class="stat-value">
+                                        <t t-esc="analytics.get('urgent',0)" />
                                     </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">Solve Rate</div>
-                                        <div class="stat-value"><t
-                                                t-esc="analytics.get('solve_rate',0)" />%</div>
-                                        <div class="stat-subtitle">Success Rate</div>
-                                    </div>
-                                </div>
-                                <div class="stat-box" data-key="high_resolved">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-check-square"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">High Priority Resolved</div>
-                                        <div class="stat-value">
-                                            <t t-esc="analytics.get('high_resolved',0)" />
-                                        </div>
-                                        <div class="stat-subtitle">High Fixed</div>
-                                    </div>
-                                </div>
-                                <div class="stat-box" data-key="urgent_resolved">
-                                    <div class="stat-icon">
-                                        <i class="bi bi-check-all"></i>
-                                    </div>
-                                    <div class="stat-content">
-                                        <div class="stat-label">Urgent Resolved</div>
-                                        <div class="stat-value">
-                                            <t t-esc="analytics.get('urgent_resolved',0)" />
-                                        </div>
-                                        <div class="stat-subtitle">Urgent Fixed</div>
-                                    </div>
+                                    <div class="stat-subtitle">Urgent Priority</div>
                                 </div>
                             </div>
                         </div>
-                    <div class="quick-actions">
-                        <div class="actions-grid">
-                            <a href="#" class="action-card">
-                                <div class="action-icon">
-                                    <i class="bi bi-plus-circle-fill"></i>
+                        <div class="analytics-grid">
+                            <div class="stat-box" data-key="avg_open_hours">
+                                <div class="stat-icon">
+                                    <i class="bi bi-clock-history"></i>
                                 </div>
-                                <div class="action-content">
-                                    <h4>Create New Ticket</h4>
-                                    <p>Submit a new support request</p>
+                                <div class="stat-content">
+                                    <div class="stat-label">Avg Open Hours</div>
+                                    <div class="stat-value">
+                                        <t t-esc="analytics.get('avg_open_hours',0)" />
+                                    </div>
+                                    <div class="stat-subtitle">Hours</div>
                                 </div>
-                            </a>
-                            <a href="#" class="action-card" data-view="tickets">
-                                <div class="action-icon">
-                                    <i class="bi bi-list-task"></i>
+                            </div>
+                            <div class="stat-box" data-key="total_hours">
+                                <div class="stat-icon">
+                                    <i class="bi bi-clock-fill"></i>
                                 </div>
-                                <div class="action-content">
-                                    <h4>View All Tickets</h4>
-                                    <p>See all your support tickets</p>
+                                <div class="stat-content">
+                                    <div class="stat-label">Total Hours</div>
+                                    <div class="stat-value">
+                                        <t t-esc="analytics.get('total_hours',0)" />
+                                    </div>
+                                    <div class="stat-subtitle">Hours Open</div>
                                 </div>
-                            </a>
-                            <a href="#" class="action-card">
-                                <div class="action-icon">
-                                    <i class="bi bi-file-earmark-text"></i>
+                            </div>
+                            <div class="stat-box" data-key="avg_high_hours">
+                                <div class="stat-icon">
+                                    <i class="bi bi-exclamation-octagon"></i>
                                 </div>
-                                <div class="action-content">
-                                    <h4>Generate Report</h4>
-                                    <p>Download performance report</p>
+                                <div class="stat-content">
+                                    <div class="stat-label">Avg High Priority Hours</div>
+                                    <div class="stat-value">
+                                        <t t-esc="analytics.get('avg_high_hours',0)" />
+                                    </div>
+                                    <div class="stat-subtitle">Hours</div>
                                 </div>
-                            </a>
-                            <a href="#" class="action-card" data-view="faq">
-                                <div class="action-icon">
-                                    <i class="bi bi-question-circle-fill"></i>
+                            </div>
+                            <div class="stat-box" data-key="avg_urgent_hours">
+                                <div class="stat-icon">
+                                    <i class="bi bi-lightning-charge-fill"></i>
                                 </div>
-                                <div class="action-content">
-                                    <h4>Help Center</h4>
-                                    <p>Browse FAQ and guides</p>
+                                <div class="stat-content">
+                                    <div class="stat-label">Avg Urgent Hours</div>
+                                    <div class="stat-value">
+                                        <t t-esc="analytics.get('avg_urgent_hours',0)" />
+                                    </div>
+                                    <div class="stat-subtitle">Hours</div>
                                 </div>
-                            </a>
+                            </div>
+                        </div>
+                        <div class="analytics-grid">
+                            <div class="stat-box" data-key="resolved_tickets">
+                                <div class="stat-icon">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-label">Resolved Tickets</div>
+                                    <div class="stat-value">
+                                        <t t-esc="analytics.get('resolved_tickets',0)" />
+                                    </div>
+                                    <div class="stat-subtitle">Fixed Tickets</div>
+                                </div>
+                            </div>
+                            <div class="stat-box" data-key="solve_rate">
+                                <div class="stat-icon">
+                                    <i class="bi bi-percent"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-label">Solve Rate</div>
+                                    <div class="stat-value"><t
+                                            t-esc="analytics.get('solve_rate',0)" />%</div>
+                                    <div class="stat-subtitle">Success Rate</div>
+                                </div>
+                            </div>
+                            <div class="stat-box" data-key="high_resolved">
+                                <div class="stat-icon">
+                                    <i class="bi bi-check-square"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-label">High Priority Resolved</div>
+                                    <div class="stat-value">
+                                        <t t-esc="analytics.get('high_resolved',0)" />
+                                    </div>
+                                    <div class="stat-subtitle">High Fixed</div>
+                                </div>
+                            </div>
+                            <div class="stat-box" data-key="urgent_resolved">
+                                <div class="stat-icon">
+                                    <i class="bi bi-check-all"></i>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-label">Urgent Resolved</div>
+                                    <div class="stat-value">
+                                        <t t-esc="analytics.get('urgent_resolved',0)" />
+                                    </div>
+                                    <div class="stat-subtitle">Urgent Fixed</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -713,17 +732,6 @@
                 </div>
                 <!-- ═══ END TICKETS PAGE ═══ -->
 
-                <!-- ═══ FAQ PAGE ═══ -->
-                <div class="page-content dashboard-content" id="faq-page" style="display:none;">
-                    <div class="dashboard-card">
-                        <div class="card-header">
-                            <h2 class="card-title"><i class="bi bi-question-circle"></i>Manage FAQ</h2>
-                        </div>
-                        <p class="text-muted">FAQ Management interface coming soon...</p>
-                    </div>
-                </div>
-                <!-- ═══ END FAQ PAGE ═══ -->
-
                 <!-- Hover tooltip (single shared instance) -->
                 <div class="ticket-tooltip" id="ticketTooltip"></div>
 
@@ -768,18 +776,6 @@
                                 <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
                             </a>
                         </li>
-                        <li>
-                            <a class="mobile-nav-item" data-view="faq">
-                                <div class="mobile-nav-item-icon">
-                                    <i class="bi bi-question-circle"></i>
-                                </div>
-                                <div class="mobile-nav-item-text">
-                                    <strong>FAQ</strong>
-                                    <span>Browse help &amp; guides</span>
-                                </div>
-                                <i class="bi bi-chevron-right mobile-nav-item-arrow"></i>
-                            </a>
-                        </li>
                     </ul>
                     <div class="mobile-nav-drawer-footer">
                         <p>Customer Support System &#169; 2025</p>
@@ -803,8 +799,9 @@ bell.addEventListener('click',function(e){e.stopPropagation();dropdown.classList
 document.addEventListener('click',function(){dropdown.classList.remove('open');});
 dropdown.addEventListener('click',function(e){e.stopPropagation();});
 document.getElementById('markAllRead').addEventListener('click',function(){
-    document.querySelectorAll('.notif-item').forEach(function(i){i.classList.remove('unread');});
-    document.getElementById('notifBadge').classList.add('d-none');
+    fetch('/customer_support/dashboard/sla_alerts/mark_read',{method:'POST',credentials:'same-origin',headers:{'X-Requested-With':'XMLHttpRequest'}})
+    .catch(function(){})
+    .then(function(){loadSlaAlerts();});
 });
 document.querySelectorAll('.notif-nav-link').forEach(function(a){
     a.addEventListener('click',function(e){
@@ -830,16 +827,18 @@ function renderAlerts(alerts){
     badge.textContent=alerts.length;
     badge.classList.remove('d-none');
     list.innerHTML=alerts.map(function(a){
-        var cls=a.sla_status==='breached'?'breached':'at-risk';
-        var icon=cls==='breached'?'bi-x-octagon-fill':'bi-exclamation-triangle-fill';
-        var label=cls==='breached'?'SLA Breached':'At Risk';
-        return '<a class="notif-item unread" href="/customer_support/ticket/'+a.ticket_id+'">'
+        var isAssignment=a.alert_type==='assignment';
+        var cls=isAssignment?'at-risk':(a.sla_status==='breached'?'breached':'at-risk');
+        var icon=isAssignment?'bi-ticket-detailed-fill':(cls==='breached'?'bi-x-octagon-fill':'bi-exclamation-triangle-fill');
+        var label=isAssignment?'New Assignment':(cls==='breached'?'SLA Breached':'At Risk');
+        var policyLine=isAssignment?'Ticket assigned to you':'Policy: '+(a.policy_name||'None');
+        return '<div class="notif-item unread">'
             +'<div class="notif-icon-wrap '+cls+'"><i class="bi '+icon+'"></i></div>'
             +'<div class="notif-body">'
-            +'<div class="notif-title">'+a.ticket_name+' \u2014 '+a.subject+'</div>'
+            +'<div class="notif-title">Ticket #'+a.ticket_id+' \u2014 '+a.subject+'</div>'
             +'<div class="notif-sub">'+label+' \u00b7 '+a.time_display+'</div>'
-            +'<div class="notif-time-text">Policy: '+(a.policy_name||'None')+'</div>'
-            +'</div><div class="notif-dot '+cls+'"></div></a>';
+            +'<div class="notif-time-text">Project: '+(a.project_name||'General')+'</div>'
+            +'</div><div class="notif-dot '+cls+'"></div></div>';
     }).join('');
 }
 document.addEventListener('DOMContentLoaded',function(){loadSlaAlerts();setInterval(loadSlaAlerts,30000);});
@@ -935,7 +934,7 @@ document.addEventListener('DOMContentLoaded',function(){
         link.addEventListener('click',function(e){e.preventDefault();window.switchView(this.getAttribute('data-view'));});
     });
 
-    /* ── Handle ?view= param from external pages (e.g. My Projects → FAQ) ── */
+    /* ── Handle ?view= param from external pages ── */
     (function(){
         var p = new URLSearchParams(window.location.search);
         var v = p.get('view');
@@ -968,9 +967,12 @@ document.addEventListener('DOMContentLoaded',function(){
     kanbanViewBtn.addEventListener('click',showKanban);
     document.getElementById('mobilePillList').addEventListener('click',showList);
     document.getElementById('mobilePillKanban').addEventListener('click',showKanban);
-    document.getElementById('kanbanToggleBtn').addEventListener('click',function(){
-        window.switchView('tickets');showKanban();this.classList.toggle('active');
-    });
+    var kanbanToggleBtn=document.getElementById('kanbanToggleBtn');
+    if(kanbanToggleBtn){
+        kanbanToggleBtn.addEventListener('click',function(){
+            window.switchView('tickets');showKanban();this.classList.toggle('active');
+        });
+    }
 
     /* ── Column counts ── */
     function updateCounts(){
@@ -1355,7 +1357,7 @@ if(drawer){
             </script>
 
             <script type="text/javascript">
-            //<![CDATA[
+                //<![CDATA[
 // ── BACK BUTTON TRAP (focal dashboard) ───────────────────────────────────
 document.addEventListener('DOMContentLoaded', function () {
     var modal     = document.getElementById('focalLogoutWarningModal');
@@ -1387,7 +1389,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     stayBtn.addEventListener('click', function () { modal.classList.remove('show'); });
     logoutBtn.addEventListener('click', function () {
-        window.location.href = '/customer_support/logout_manual';
+        window.location.replace('/customer_support/logout_manual');
+    });
+
+    // Make all dashboard logout links history-safe as well.
+    document.addEventListener('click', function (e) {
+        var logoutLink = e.target.closest('a[href="/customer_support/logout_manual"]');
+        if (!logoutLink) return;
+        e.preventDefault();
+        window.location.replace('/customer_support/logout_manual');
     });
     // Click outside modal to dismiss
     modal.addEventListener('click', function (e) {
@@ -1397,6 +1407,8 @@ document.addEventListener('DOMContentLoaded', function () {
 //]]>
             </script>
 
+            <!-- Session timeout tracker -->
+            <script type="text/javascript" src="/customer_support/static/src/js/session_timeout.js"></script>
         </t>
     </template>
 </odoo>

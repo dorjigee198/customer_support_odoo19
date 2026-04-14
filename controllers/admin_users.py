@@ -39,6 +39,140 @@ class CustomerSupportAdminUsers(http.Controller):
     Every route in this class is protected — non-admins are redirected away.
     """
 
+    def _admin_notif_param_key(self):
+        return f"customer_support.admin_notif_read_keys.{request.env.user.id}"
+
+    def _load_admin_read_keys(self):
+        raw = (
+            request.env["ir.config_parameter"]
+            .sudo()
+            .get_param(self._admin_notif_param_key())
+            or "[]"
+        )
+        try:
+            keys = json.loads(raw)
+            if isinstance(keys, list):
+                return set(keys)
+        except Exception:
+            pass
+        return set()
+
+    def _save_admin_read_keys(self, keys):
+        # Cap stored keys to avoid unbounded growth.
+        trimmed = list(keys)[-1000:]
+        request.env["ir.config_parameter"].sudo().set_param(
+            self._admin_notif_param_key(),
+            json.dumps(trimmed),
+        )
+
+    def _build_admin_notifications(self, now):
+        """Build notification payload with stable keys for per-admin read persistence."""
+        Ticket = request.env["customer.support"].sudo()
+
+        breached_tickets = Ticket.search(
+            [
+                ("sla_deadline", "!=", False),
+                ("sla_deadline", "<", now),
+                ("state", "not in", ["resolved", "closed"]),
+            ],
+            limit=20,
+            order="sla_deadline asc",
+        )
+
+        sla_breaches = []
+        for t in breached_tickets:
+            over_seconds = (now - t.sla_deadline).total_seconds()
+            h = int(over_seconds // 3600)
+            m = int((over_seconds % 3600) // 60)
+            time_display = (
+                f"{h}h {m}m past deadline" if h > 0 else f"{m}m past deadline"
+            )
+            key = f"sla:{t.id}:{fields.Datetime.to_string(t.sla_deadline) or ''}"
+            sla_breaches.append(
+                {
+                    "_key": key,
+                    "ticket_id": t.id,
+                    "ticket_name": t.name or "",
+                    "subject": t.subject or "(No subject)",
+                    "agent_name": t.assigned_to.name if t.assigned_to else "Unassigned",
+                    "priority": (t.priority or "low").capitalize(),
+                    "time_display": time_display,
+                }
+            )
+
+        unassigned_tickets = Ticket.search(
+            [
+                ("assigned_to", "=", False),
+                ("state", "in", ["new"]),
+            ],
+            limit=15,
+            order="create_date asc",
+        )
+
+        unassigned = []
+        for t in unassigned_tickets:
+            if t.create_date:
+                waiting_secs = (now - t.create_date).total_seconds()
+                h = int(waiting_secs // 3600)
+                m = int((waiting_secs % 3600) // 60)
+                waiting = f"{h}h {m}m" if h > 0 else f"{m}m"
+            else:
+                waiting = "Unknown"
+            key = f"unassigned:{t.id}:{fields.Datetime.to_string(t.create_date) or ''}"
+            unassigned.append(
+                {
+                    "_key": key,
+                    "ticket_id": t.id,
+                    "ticket_name": t.name or "",
+                    "subject": t.subject or "(No subject)",
+                    "priority": (t.priority or "low").capitalize(),
+                    "waiting": waiting,
+                    "create_date": (
+                        t.create_date.strftime("%b %d, %H:%M") if t.create_date else "—"
+                    ),
+                }
+            )
+
+        cutoff = now - timedelta(minutes=30)
+        recently_changed = Ticket.search(
+            [
+                ("write_date", ">=", cutoff),
+                ("state", "not in", ["new"]),
+            ],
+            limit=15,
+            order="write_date desc",
+        )
+
+        status_changes = []
+        state_labels = {
+            "new": "New",
+            "assigned": "Assigned",
+            "in_progress": "In Progress",
+            "resolved": "Resolved",
+            "closed": "Closed",
+        }
+        for t in recently_changed:
+            key = f"status:{t.id}:{fields.Datetime.to_string(t.write_date) or ''}"
+            status_changes.append(
+                {
+                    "_key": key,
+                    "ticket_id": t.id,
+                    "ticket_name": t.name or "",
+                    "subject": t.subject or "(No subject)",
+                    "new_state": state_labels.get(t.state, t.state),
+                    "agent_name": t.assigned_to.name if t.assigned_to else "Unassigned",
+                    "changed_at": (
+                        t.write_date.strftime("%b %d, %H:%M") if t.write_date else "—"
+                    ),
+                }
+            )
+
+        return {
+            "sla_breaches": sla_breaches,
+            "unassigned": unassigned,
+            "status_changes": status_changes,
+        }
+
     # =========================================================================
     # ADMIN DASHBOARD
     # =========================================================================
@@ -849,119 +983,32 @@ class CustomerSupportAdminUsers(http.Controller):
         """
         try:
             now = fields.Datetime.now()
-            Ticket = request.env["customer.support"].sudo()
+            payload = self._build_admin_notifications(now)
 
-            # ── 1. SLA Breaches across all agents ────────────────────────────
-            breached_tickets = Ticket.search(
-                [
-                    ("sla_deadline", "!=", False),
-                    ("sla_deadline", "<", now),
-                    ("state", "not in", ["resolved", "closed"]),
-                ],
-                limit=20,
-                order="sla_deadline asc",
-            )
-
-            sla_breaches = []
-            for t in breached_tickets:
-                over_seconds = (now - t.sla_deadline).total_seconds()
-                h = int(over_seconds // 3600)
-                m = int((over_seconds % 3600) // 60)
-                time_display = (
-                    f"{h}h {m}m past deadline" if h > 0 else f"{m}m past deadline"
-                )
-                sla_breaches.append(
-                    {
-                        "ticket_id": t.id,
-                        "ticket_name": t.name or "",
-                        "subject": t.subject or "(No subject)",
-                        "agent_name": (
-                            t.assigned_to.name if t.assigned_to else "Unassigned"
-                        ),
-                        "priority": (t.priority or "low").capitalize(),
-                        "time_display": time_display,
-                    }
-                )
-
-            # ── 2. Unassigned tickets ─────────────────────────────────────────
-            unassigned_tickets = Ticket.search(
-                [
-                    ("assigned_to", "=", False),
-                    ("state", "in", ["new"]),
-                ],
-                limit=15,
-                order="create_date asc",
-            )
-
-            unassigned = []
-            for t in unassigned_tickets:
-                if t.create_date:
-                    waiting_secs = (now - t.create_date).total_seconds()
-                    h = int(waiting_secs // 3600)
-                    m = int((waiting_secs % 3600) // 60)
-                    waiting = f"{h}h {m}m" if h > 0 else f"{m}m"
-                else:
-                    waiting = "Unknown"
-                unassigned.append(
-                    {
-                        "ticket_id": t.id,
-                        "ticket_name": t.name or "",
-                        "subject": t.subject or "(No subject)",
-                        "priority": (t.priority or "low").capitalize(),
-                        "waiting": waiting,
-                        "create_date": (
-                            t.create_date.strftime("%b %d, %H:%M")
-                            if t.create_date
-                            else "—"
-                        ),
-                    }
-                )
-
-            # ── 3. Status changes in last 30 minutes ──────────────────────────
-            cutoff = now - timedelta(minutes=30)
-            recently_changed = Ticket.search(
-                [
-                    ("write_date", ">=", cutoff),
-                    ("state", "not in", ["new"]),
-                ],
-                limit=15,
-                order="write_date desc",
-            )
-
-            status_changes = []
-            state_labels = {
-                "new": "New",
-                "assigned": "Assigned",
-                "in_progress": "In Progress",
-                "resolved": "Resolved",
-                "closed": "Closed",
+            # Keep only keys that still exist in current payload.
+            current_keys = {
+                item.get("_key")
+                for section in payload.values()
+                for item in section
+                if item.get("_key")
             }
-            for t in recently_changed:
-                status_changes.append(
-                    {
-                        "ticket_id": t.id,
-                        "ticket_name": t.name or "",
-                        "subject": t.subject or "(No subject)",
-                        "new_state": state_labels.get(t.state, t.state),
-                        "agent_name": (
-                            t.assigned_to.name if t.assigned_to else "Unassigned"
-                        ),
-                        "changed_at": (
-                            t.write_date.strftime("%b %d, %H:%M")
-                            if t.write_date
-                            else "—"
-                        ),
-                    }
-                )
+            read_keys = self._load_admin_read_keys()
+            pruned_read_keys = read_keys.intersection(current_keys)
+            if pruned_read_keys != read_keys:
+                self._save_admin_read_keys(pruned_read_keys)
+
+            for section_name in ("sla_breaches", "unassigned", "status_changes"):
+                filtered = []
+                for item in payload[section_name]:
+                    if item.get("_key") in pruned_read_keys:
+                        continue
+                    clean_item = dict(item)
+                    clean_item.pop("_key", None)
+                    filtered.append(clean_item)
+                payload[section_name] = filtered
 
             return request.make_response(
-                json.dumps(
-                    {
-                        "sla_breaches": sla_breaches,
-                        "unassigned": unassigned,
-                        "status_changes": status_changes,
-                    }
-                ),
+                json.dumps(payload),
                 headers=[("Content-Type", "application/json")],
             )
 
@@ -976,6 +1023,48 @@ class CustomerSupportAdminUsers(http.Controller):
                     }
                 ),
                 headers=[("Content-Type", "application/json")],
+            )
+
+    @http.route(
+        "/customer_support/admin/notifications/mark_read",
+        type="http",
+        auth="user",
+        methods=["POST"],
+        website=True,
+        csrf=False,
+    )
+    def admin_notifications_mark_read(self, **kw):
+        """Persist 'mark all read' for current admin user across sessions."""
+        try:
+            if not request.env.user.has_group("base.group_system"):
+                return request.make_response(
+                    json.dumps({"success": False, "error": "Access denied"}),
+                    headers=[("Content-Type", "application/json")],
+                    status=403,
+                )
+
+            now = fields.Datetime.now()
+            payload = self._build_admin_notifications(now)
+            current_keys = {
+                item.get("_key")
+                for section in payload.values()
+                for item in section
+                if item.get("_key")
+            }
+
+            existing = self._load_admin_read_keys()
+            self._save_admin_read_keys(existing.union(current_keys))
+
+            return request.make_response(
+                json.dumps({"success": True}),
+                headers=[("Content-Type", "application/json")],
+            )
+        except Exception as e:
+            _logger.error(f"Admin notifications mark_read error: {str(e)}")
+            return request.make_response(
+                json.dumps({"success": False}),
+                headers=[("Content-Type", "application/json")],
+                status=500,
             )
 
     # =========================================================================
@@ -1241,9 +1330,7 @@ class CustomerSupportAdminUsers(http.Controller):
             if groups_to_add:
                 new_user.sudo().write({"group_ids": [(6, 0, groups_to_add)]})
 
-            _logger.info(
-                f"User created: {new_user.name} ({user_type}) by {user.name}"
-            )
+            _logger.info(f"User created: {new_user.name} ({user_type}) by {user.name}")
 
             try:
                 if user_type == "customer":
@@ -1357,7 +1444,9 @@ class CustomerSupportAdminUsers(http.Controller):
                     f"/customer_support/admin_dashboard/user/{user_id}/edit?error=Email already exists"
                 )
 
-            edit_user.partner_id.sudo().write({"name": name, "email": email, "phone": phone})
+            edit_user.partner_id.sudo().write(
+                {"name": name, "email": email, "phone": phone}
+            )
 
             update_vals = {"name": name, "login": email, "email": email}
             if password:

@@ -15,6 +15,8 @@
                 <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard.css" />
                 <link rel="stylesheet"
                     href="/customer_support/static/src/css/admin_dashboard_mobile.css" />
+                <script
+                    src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
                 <style>
                     /* ── BACK BUTTON WARNING MODAL ── */
                     #adminLogoutWarningModal {
@@ -210,8 +212,25 @@
                                 <ul class="dropdown-menu dropdown-menu-end"
                                     aria-labelledby="userProfileDropdown">
                                     <li>
-                                        <a class="dropdown-item" href="/customer_support/profile"><i
+                                        <a class="dropdown-item"
+                                            href="/customer_support/admin/profile"><i
                                                 class="bi bi-person me-2"></i>Edit Profile</a>
+                                    </li>
+                                    <li>
+                                        <hr class="dropdown-divider my-1" />
+                                    </li>
+                                    <li>
+                                        <a
+                                            class="dropdown-item d-flex align-items-center justify-content-between"
+                                            href="#" id="adminAutoAssignMenuItem"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#adminAutoAssignModal">
+                                            <span><i class="bi bi-magic me-2"></i>Auto Assignment</span>
+                                            <span class="auto-assign-dot is-off"
+                                                id="autoAssignMenuBadge"
+                                                title="Disabled"
+                                                aria-hidden="true"></span>
+                                        </a>
                                     </li>
                                     <li>
                                         <hr class="dropdown-divider" />
@@ -272,170 +291,168 @@
                             aria-labelledby="overview-tab">
                             <div class="dashboard-content">
                                 <div class="dashboard-card">
-                                        <div class="card-header">
-                                            <h2 class="card-title"><i
-                                                    class="bi bi-bar-chart-fill me-2"></i>Ticket
-                                                Analytics</h2>
-                                            <div class="card-actions">
-                                                <span class="last-updated"><i
-                                                        class="bi bi-clock me-1"></i>Updated just
-                                                    now</span>
+                                    <div class="card-header">
+                                        <h2 class="card-title"><i
+                                                class="bi bi-bar-chart-fill me-2"></i>Ticket
+                                            Analytics</h2>
+                                        <div class="card-actions">
+                                            <span class="last-updated"><i
+                                                    class="bi bi-clock me-1"></i>Updated just now</span>
+                                        </div>
+                                    </div>
+                                    <div class="analytics-grid">
+                                        <div class="stat-box" data-key="open_tickets">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-folder-plus"></i>
+                                            </div>
+                                            <div class="stat-content">
+                                                <div class="stat-label">Open Tickets</div>
+                                                <div class="stat-value">
+                                                    <t t-esc="analytics.get('open_tickets',0)" />
+                                                </div>
+                                                <div class="stat-subtitle">Active Tickets</div>
                                             </div>
                                         </div>
-                                        <div class="analytics-grid">
-                                            <div class="stat-box" data-key="open_tickets">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-folder-plus"></i>
-                                                </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">Open Tickets</div>
-                                                    <div class="stat-value">
-                                                        <t t-esc="analytics.get('open_tickets',0)" />
-                                                    </div>
-                                                    <div class="stat-subtitle">Active Tickets</div>
-                                                </div>
+                                        <div class="stat-box" data-key="total_tickets">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-stack"></i>
                                             </div>
-                                            <div class="stat-box" data-key="total_tickets">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-stack"></i>
+                                            <div class="stat-content">
+                                                <div class="stat-label">Total Tickets</div>
+                                                <div class="stat-value">
+                                                    <t t-esc="analytics.get('total_tickets',0)" />
                                                 </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">Total Tickets</div>
-                                                    <div class="stat-value">
-                                                        <t t-esc="analytics.get('total_tickets',0)" />
-                                                    </div>
-                                                    <div class="stat-subtitle">All Tickets</div>
-                                                </div>
-                                            </div>
-                                            <div class="stat-box" data-key="high_priority">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-exclamation-triangle"></i>
-                                                </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">High Priority</div>
-                                                    <div class="stat-value">
-                                                        <t t-esc="analytics.get('high_priority',0)" />
-                                                    </div>
-                                                    <div class="stat-subtitle">High Priority</div>
-                                                </div>
-                                            </div>
-                                            <div class="stat-box" data-key="urgent">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-lightning-charge"></i>
-                                                </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">Urgent</div>
-                                                    <div class="stat-value">
-                                                        <t t-esc="analytics.get('urgent',0)" />
-                                                    </div>
-                                                    <div class="stat-subtitle">Urgent Priority</div>
-                                                </div>
+                                                <div class="stat-subtitle">All Tickets</div>
                                             </div>
                                         </div>
-                                        <div class="analytics-grid">
-                                            <div class="stat-box" data-key="avg_open_hours">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-clock-history"></i>
-                                                </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">Avg Open Hours</div>
-                                                    <div class="stat-value">
-                                                        <t t-esc="analytics.get('avg_open_hours',0)" />
-                                                    </div>
-                                                    <div class="stat-subtitle">Hours</div>
-                                                </div>
+                                        <div class="stat-box" data-key="high_priority">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-exclamation-triangle"></i>
                                             </div>
-                                            <div class="stat-box" data-key="total_hours">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-clock-fill"></i>
+                                            <div class="stat-content">
+                                                <div class="stat-label">High Priority</div>
+                                                <div class="stat-value">
+                                                    <t t-esc="analytics.get('high_priority',0)" />
                                                 </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">Total Hours</div>
-                                                    <div class="stat-value">
-                                                        <t t-esc="analytics.get('total_hours',0)" />
-                                                    </div>
-                                                    <div class="stat-subtitle">Hours Open</div>
-                                                </div>
-                                            </div>
-                                            <div class="stat-box" data-key="avg_high_hours">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-exclamation-octagon"></i>
-                                                </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">Avg High Priority Hours</div>
-                                                    <div class="stat-value">
-                                                        <t t-esc="analytics.get('avg_high_hours',0)" />
-                                                    </div>
-                                                    <div class="stat-subtitle">Hours</div>
-                                                </div>
-                                            </div>
-                                            <div class="stat-box" data-key="avg_urgent_hours">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-lightning-charge-fill"></i>
-                                                </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">Avg Urgent Hours</div>
-                                                    <div class="stat-value">
-                                                        <t
-                                                            t-esc="analytics.get('avg_urgent_hours',0)" />
-                                                    </div>
-                                                    <div class="stat-subtitle">Hours</div>
-                                                </div>
+                                                <div class="stat-subtitle">High Priority</div>
                                             </div>
                                         </div>
-                                        <div class="analytics-grid">
-                                            <div class="stat-box" data-key="resolved_tickets">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-check-circle"></i>
-                                                </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">Resolved Tickets</div>
-                                                    <div class="stat-value">
-                                                        <t
-                                                            t-esc="analytics.get('resolved_tickets',0)" />
-                                                    </div>
-                                                    <div class="stat-subtitle">Fixed Tickets</div>
-                                                </div>
+                                        <div class="stat-box" data-key="urgent">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-lightning-charge"></i>
                                             </div>
-                                            <div class="stat-box" data-key="solve_rate">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-percent"></i>
+                                            <div class="stat-content">
+                                                <div class="stat-label">Urgent</div>
+                                                <div class="stat-value">
+                                                    <t t-esc="analytics.get('urgent',0)" />
                                                 </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">Solve Rate</div>
-                                                    <div class="stat-value"><t
-                                                            t-esc="analytics.get('solve_rate',0)" />
-                                                        %</div>
-                                                    <div class="stat-subtitle">Success Rate</div>
-                                                </div>
-                                            </div>
-                                            <div class="stat-box" data-key="high_resolved">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-check-square"></i>
-                                                </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">High Priority Resolved</div>
-                                                    <div class="stat-value">
-                                                        <t t-esc="analytics.get('high_resolved',0)" />
-                                                    </div>
-                                                    <div class="stat-subtitle">High Fixed</div>
-                                                </div>
-                                            </div>
-                                            <div class="stat-box" data-key="urgent_resolved">
-                                                <div class="stat-icon">
-                                                    <i class="bi bi-check-all"></i>
-                                                </div>
-                                                <div class="stat-content">
-                                                    <div class="stat-label">Urgent Resolved</div>
-                                                    <div class="stat-value">
-                                                        <t
-                                                            t-esc="analytics.get('urgent_resolved',0)" />
-                                                    </div>
-                                                    <div class="stat-subtitle">Urgent Fixed</div>
-                                                </div>
+                                                <div class="stat-subtitle">Urgent Priority</div>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="analytics-grid">
+                                        <div class="stat-box" data-key="avg_open_hours">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-clock-history"></i>
+                                            </div>
+                                            <div class="stat-content">
+                                                <div class="stat-label">Avg Open Hours</div>
+                                                <div class="stat-value">
+                                                    <t t-esc="analytics.get('avg_open_hours',0)" />
+                                                </div>
+                                                <div class="stat-subtitle">Hours</div>
+                                            </div>
+                                        </div>
+                                        <div class="stat-box" data-key="total_hours">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-clock-fill"></i>
+                                            </div>
+                                            <div class="stat-content">
+                                                <div class="stat-label">Total Hours</div>
+                                                <div class="stat-value">
+                                                    <t t-esc="analytics.get('total_hours',0)" />
+                                                </div>
+                                                <div class="stat-subtitle">Hours Open</div>
+                                            </div>
+                                        </div>
+                                        <div class="stat-box" data-key="avg_high_hours">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-exclamation-octagon"></i>
+                                            </div>
+                                            <div class="stat-content">
+                                                <div class="stat-label">Avg High Priority Hours</div>
+                                                <div class="stat-value">
+                                                    <t t-esc="analytics.get('avg_high_hours',0)" />
+                                                </div>
+                                                <div class="stat-subtitle">Hours</div>
+                                            </div>
+                                        </div>
+                                        <div class="stat-box" data-key="avg_urgent_hours">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-lightning-charge-fill"></i>
+                                            </div>
+                                            <div class="stat-content">
+                                                <div class="stat-label">Avg Urgent Hours</div>
+                                                <div class="stat-value">
+                                                    <t
+                                                        t-esc="analytics.get('avg_urgent_hours',0)" />
+                                                </div>
+                                                <div class="stat-subtitle">Hours</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="analytics-grid">
+                                        <div class="stat-box" data-key="resolved_tickets">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-check-circle"></i>
+                                            </div>
+                                            <div class="stat-content">
+                                                <div class="stat-label">Resolved Tickets</div>
+                                                <div class="stat-value">
+                                                    <t
+                                                        t-esc="analytics.get('resolved_tickets',0)" />
+                                                </div>
+                                                <div class="stat-subtitle">Fixed Tickets</div>
+                                            </div>
+                                        </div>
+                                        <div class="stat-box" data-key="solve_rate">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-percent"></i>
+                                            </div>
+                                            <div class="stat-content">
+                                                <div class="stat-label">Solve Rate</div>
+                                                <div class="stat-value"><t
+                                                        t-esc="analytics.get('solve_rate',0)" /> %</div>
+                                                <div class="stat-subtitle">Success Rate</div>
+                                            </div>
+                                        </div>
+                                        <div class="stat-box" data-key="high_resolved">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-check-square"></i>
+                                            </div>
+                                            <div class="stat-content">
+                                                <div class="stat-label">High Priority Resolved</div>
+                                                <div class="stat-value">
+                                                    <t t-esc="analytics.get('high_resolved',0)" />
+                                                </div>
+                                                <div class="stat-subtitle">High Fixed</div>
+                                            </div>
+                                        </div>
+                                        <div class="stat-box" data-key="urgent_resolved">
+                                            <div class="stat-icon">
+                                                <i class="bi bi-check-all"></i>
+                                            </div>
+                                            <div class="stat-content">
+                                                <div class="stat-label">Urgent Resolved</div>
+                                                <div class="stat-value">
+                                                    <t
+                                                        t-esc="analytics.get('urgent_resolved',0)" />
+                                                </div>
+                                                <div class="stat-subtitle">Urgent Fixed</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="quick-actions mt-4">
                                     <div class="actions-grid">
                                         <a href="/customer_support/admin_dashboard/users"
@@ -569,30 +586,55 @@
                                             <table class="table table-hover ticket-table">
                                                 <thead>
                                                     <tr>
-                                                        <th style="width:5%;">
-                                                            <i>Sl.no</i>
+                                                        <th class="ta-col-sl">
+                                                            <span class="ta-th-inner">
+                                                                <i class="bi bi-hash"></i>
+                                                                <span>Sl. No</span>
+                                                            </span>
                                                         </th>
-                                                        <th style="width:18%;"><i
-                                                                class="bi bi-ticket-perforated me-1 align-middle"></i>
-                                                            Ticket</th>
-                                                        <th style="width:13%;"><i
-                                                                class="bi bi-person-circle me-1 align-middle"></i>
-                                                            Client</th>
-                                                        <th style="width:8%;"><i
-                                                                class="bi bi-exclamation-triangle me-1 align-middle"></i>
-                                                            Priority</th>
-                                                        <th style="width:8%;"><i
-                                                                class="bi bi-clock-history me-1 align-middle"></i>
-                                                            Status</th>
-                                                        <th style="width:13%;"><i
-                                                                class="bi bi-calendar-check me-1 align-middle"></i>
-                                                            Created_On</th>
-                                                        <th style="width:12%;"><i
-                                                                class="bi bi-person-check me-1 align-middle"></i>
-                                                            Assigned_To</th>
-                                                        <th style="width:23%;"><i
-                                                                class="bi bi-three-dots-vertical me-1 align-middle"></i>
-                                                            Action</th>
+                                                        <th class="ta-col-ticket">
+                                                            <span class="ta-th-inner">
+                                                                <i class="bi bi-ticket-perforated"></i>
+                                                                <span>Ticket</span>
+                                                            </span>
+                                                        </th>
+                                                        <th class="ta-col-client">
+                                                            <span class="ta-th-inner">
+                                                                <i class="bi bi-person-circle"></i>
+                                                                <span>Client</span>
+                                                            </span>
+                                                        </th>
+                                                        <th class="ta-col-priority">
+                                                            <span class="ta-th-inner">
+                                                                <i
+                                                                    class="bi bi-exclamation-triangle"></i>
+                                                                <span>Priority</span>
+                                                            </span>
+                                                        </th>
+                                                        <th class="ta-col-status">
+                                                            <span class="ta-th-inner">
+                                                                <i class="bi bi-clock-history"></i>
+                                                                <span>Status</span>
+                                                            </span>
+                                                        </th>
+                                                        <th class="ta-col-created">
+                                                            <span class="ta-th-inner">
+                                                                <i class="bi bi-calendar-check"></i>
+                                                                <span>Created On</span>
+                                                            </span>
+                                                        </th>
+                                                        <th class="ta-col-assigned">
+                                                            <span class="ta-th-inner">
+                                                                <i class="bi bi-person-check"></i>
+                                                                <span>Assigned To</span>
+                                                            </span>
+                                                        </th>
+                                                        <th class="ta-col-action">
+                                                            <span class="ta-th-inner">
+                                                                <i class="bi bi-gear"></i>
+                                                                <span>Action</span>
+                                                            </span>
+                                                        </th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -601,13 +643,19 @@
                                                             <td>
                                                                 <a
                                                                     t-att-href="'/customer_support/admin_view/ticket/%s' % ticket.id"
-                                                                    class="stretched-link text-decoration-none text-reset">
+                                                                    t-att-data-ticket-id="ticket.id"
+                                                                    class="stretched-link text-decoration-none text-reset admin-ticket-open">
                                                                     <t t-esc="ticket.id" />
                                                                 </a>
                                                             </td>
                                                             <td>
-                                                                <i class="bi bi-link-45deg me-1"></i>
-                                                                <t t-esc="ticket.subject" />
+                                                                <a
+                                                                    t-att-href="'/customer_support/admin_view/ticket/%s' % ticket.id"
+                                                                    t-att-data-ticket-id="ticket.id"
+                                                                    class="admin-ticket-open text-decoration-none text-reset">
+                                                                    <i class="bi bi-link-45deg me-1"></i>
+                                                                    <t t-esc="ticket.subject" />
+                                                                </a>
                                                             </td>
                                                             <td>
                                                                 <t t-esc="ticket.customer_id.name" />
@@ -663,16 +711,22 @@
                                                                             class="form-select form-select-sm mb-1"
                                                                             name="assigned_to"
                                                                             required="required">
-                                                                            <option value="">Select Focal Person</option>
-                                                                            <t t-set="focal_group_id" t-value="request.env.ref('base.group_user').id"/>
-                                                                            <t t-set="system_group_id" t-value="request.env.ref('base.group_system').id"/>
+                                                                            <option value="">Select
+                                                                                Focal Person</option>
+                                                                            <t
+                                                                                t-set="focal_group_id"
+                                                                                t-value="request.env.ref('base.group_user').id" />
+                                                                            <t
+                                                                                t-set="system_group_id"
+                                                                                t-value="request.env.ref('base.group_system').id" />
                                                                             <t
                                                                                 t-foreach="request.env['res.users'].sudo().search([('active','=',True),('share','=',False),('group_ids','in',[focal_group_id]),('group_ids','not in',[system_group_id])])"
                                                                                 t-as="u">
                                                                                 <option
                                                                                     t-att-value="u.id"
                                                                                     t-att-selected="'selected' if ticket.assigned_to and ticket.assigned_to.id == u.id else None">
-                                                                                    <t t-esc="u.name" />
+                                                                                    <t
+                                                                                        t-esc="u.name" />
                                                                                 </option>
                                                                             </t>
                                                                         </select>
@@ -680,11 +734,16 @@
                                                                             class="form-select form-select-sm mb-1"
                                                                             name="project_id"
                                                                             required="required">
-                                                                            <option value="">Select Project</option>
-                                                                            <t t-foreach="request.env['customer_support.project'].sudo().search([('active','=',True)])" t-as="proj">
-                                                                                <option t-att-value="proj.id"
+                                                                            <option value="">Select
+                                                                                Project</option>
+                                                                            <t
+                                                                                t-foreach="request.env['customer_support.project'].sudo().search([('active','=',True)])"
+                                                                                t-as="proj">
+                                                                                <option
+                                                                                    t-att-value="proj.id"
                                                                                     t-att-selected="'selected' if ticket.project_id and ticket.project_id.id == proj.id else None">
-                                                                                    <t t-esc="proj.name"/>
+                                                                                    <t
+                                                                                        t-esc="proj.name" />
                                                                                 </option>
                                                                             </t>
                                                                         </select>
@@ -704,16 +763,14 @@
                                                                                     (<t
                                                                                         t-esc="sla.response_time" /><t
                                                                                         t-esc="' ' + sla.time_unit" />
-                                                                                    )
-                                                                                </option>
+                                                                                    ) </option>
                                                                             </t>
                                                                         </select>
                                                                         <button type="submit"
                                                                             class="btn btn-primary btn-sm w-100">
                                                                             <i
                                                                                 class="bi bi-person-check me-1"></i>
-                                                                            Assign
-                                                                        </button>
+                                                                            Assign </button>
                                                                     </form>
                                                                 </t>
                                                                 <t
@@ -785,9 +842,13 @@
                                                         <select class="form-select mb-2"
                                                             name="assigned_to" required="required">
                                                             <option value="">Select Focal Person</option>
-                                                            <t t-set="focal_group_id2" t-value="request.env.ref('base.group_user').id"/>
-                                                            <t t-set="system_group_id2" t-value="request.env.ref('base.group_system').id"/>
-                                                            <t t-foreach="request.env['res.users'].sudo().search([('active','=',True),('share','=',False),('group_ids','in',[focal_group_id2]),('group_ids','not in',[system_group_id2])])" t-as="u">
+                                                            <t t-set="focal_group_id2"
+                                                                t-value="request.env.ref('base.group_user').id" />
+                                                            <t t-set="system_group_id2"
+                                                                t-value="request.env.ref('base.group_system').id" />
+                                                            <t
+                                                                t-foreach="request.env['res.users'].sudo().search([('active','=',True),('share','=',False),('group_ids','in',[focal_group_id2]),('group_ids','not in',[system_group_id2])])"
+                                                                t-as="u">
                                                                 <option t-att-value="u.id"
                                                                     t-att-selected="'selected' if ticket.assigned_to and ticket.assigned_to.id == u.id else None">
                                                                     <t t-esc="u.name" />
@@ -797,10 +858,12 @@
                                                         <select class="form-select mb-2"
                                                             name="project_id" required="required">
                                                             <option value="">Select Project</option>
-                                                            <t t-foreach="request.env['customer_support.project'].sudo().search([('active','=',True)])" t-as="proj">
+                                                            <t
+                                                                t-foreach="request.env['customer_support.project'].sudo().search([('active','=',True)])"
+                                                                t-as="proj">
                                                                 <option t-att-value="proj.id"
                                                                     t-att-selected="'selected' if ticket.project_id and ticket.project_id.id == proj.id else None">
-                                                                    <t t-esc="proj.name"/>
+                                                                    <t t-esc="proj.name" />
                                                                 </option>
                                                             </t>
                                                         </select>
@@ -815,15 +878,13 @@
                                                                     <t t-esc="sla.name" /> (<t
                                                                         t-esc="sla.response_time" /><t
                                                                         t-esc="' ' + sla.time_unit" />
-                                                                    )
-                                                                </option>
+                                                                    ) </option>
                                                             </t>
                                                         </select>
                                                         <button type="submit"
                                                             class="btn btn-primary">
                                                             <i class="bi bi-person-check me-1"></i>
-                                                            Assign
-                                                        </button>
+                                                            Assign </button>
                                                     </form>
                                                 </t>
                                                 <t t-if="ticket.state in ['resolved','closed']">
@@ -958,6 +1019,16 @@
                         <!-- ═══ SYSTEM CONFIGURATION TAB ═══ -->
                         <div class="tab-pane fade" id="system-configuration" role="tabpanel"
                             aria-labelledby="system-configuration-tab">
+                            <t t-if="request.params.get('project_deleted')">
+                                <div class="alert alert-success alert-dismissible fade show mb-3"
+                                    role="alert">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    <strong>Project
+                                    deleted.</strong> A closure report has been saved under Project
+                                    Reports. <button type="button" class="btn-close"
+                                        data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
                             <div class="row g-4 mb-4">
                                 <div class="col-md-3">
                                     <div class="config-option-card">
@@ -1016,6 +1087,21 @@
                                         <button class="btn btn-config" data-bs-toggle="modal"
                                             data-bs-target="#knowledgeBaseModal"><i
                                                 class="bi bi-cloud-upload me-2"></i>Manage Docs</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="config-option-card">
+                                        <div class="config-icon-wrapper">
+                                            <div class="config-icon">
+                                                <i class="bi bi-file-earmark-bar-graph-fill"></i>
+                                            </div>
+                                        </div>
+                                        <h3 class="config-title">Project Reports</h3>
+                                        <p class="config-description">View closure reports generated
+                                            when projects are deleted</p>
+                                        <button class="btn btn-config"
+                                            onclick="openProjectReportsModal()"><i
+                                                class="bi bi-bar-chart-line me-2"></i>View Reports</button>
                                     </div>
                                 </div>
                             </div>
@@ -1208,17 +1294,10 @@
                                                     </div>
                                                 </div>
                                                 <div class="tab-pane fade" id="ticketDefaultsTab">
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Auto-assignment</label>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input"
-                                                                type="checkbox" id="autoAssign"
-                                                                checked="" />
-                                                            <label class="form-check-label"
-                                                                for="autoAssign">Enable
-                                                                auto-assignment</label>
-                                                        </div>
-                                                    </div>
+                                                    <div class="alert alert-info mb-3" role="alert">
+                                                        <i class="bi bi-info-circle-fill me-2"></i>
+                                                        Auto-assignment is now managed from the
+                                                        profile dropdown in the top-right header. </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Default Priority</label>
                                                         <select class="form-select">
@@ -1389,22 +1468,13 @@
                                                                     </t>
                                                                 </td>
                                                                 <td>
-                                                                    <a
-                                                                        t-att-href="'/customer_support/admin_dashboard/projects/%d/edit' % project.id"
-                                                                        class="btn btn-sm btn-outline-primary me-1">
-                                                                        <i
-                                                                            class="bi bi-pencil-square"></i>
-                                                                    </a>
-                                                                    <form
-                                                                        t-att-action="'/customer_support/admin_dashboard/projects/delete/%d' % project.id"
-                                                                        method="post"
-                                                                        style="display:inline">
-                                                                        <button type="submit"
-                                                                            class="btn btn-sm btn-outline-danger"
-                                                                            onclick="return confirm('Archive this project?');">
-                                                                            <i class="bi bi-archive"></i>
-                                                                        </button>
-                                                                    </form>
+                                                                    <button type="button"
+                                                                        class="btn btn-sm btn-outline-danger"
+                                                                        t-att-data-project-id="project.id"
+                                                                        t-att-data-project-name="project.name"
+                                                                        onclick="openDeleteProjectModal(this.dataset.projectId, this.dataset.projectName)">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
                                                                 </td>
                                                             </tr>
                                                         </t>
@@ -1415,6 +1485,125 @@
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ══════════════════════════════════════
+                                 DELETE PROJECT CONFIRMATION MODAL
+                            ══════════════════════════════════════ -->
+                            <div class="modal fade" id="deleteProjectModal" tabindex="-1"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered"
+                                    style="max-width:420px;">
+                                    <div class="modal-content"
+                                        style="border-radius:12px;border:none;box-shadow:0 20px 60px rgba(0,0,0,.18);">
+                                        <div class="modal-body p-4 text-center">
+                                            <div
+                                                style="width:56px;height:56px;border-radius:50%;background:#fff0f0;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+                                                <i class="bi bi-trash"
+                                                    style="font-size:1.5rem;color:#dc3545;"></i>
+                                            </div>
+                                            <h5 class="fw-semibold mb-1">Delete Project?</h5>
+                                            <p class="text-muted mb-0" style="font-size:.9rem;"> Are
+                                                you sure you want to delete <strong
+                                                    id="deleteProjectName"></strong>? </p>
+                                            <p class="text-muted mt-1" style="font-size:.82rem;">
+                                                A closure report will be saved automatically before
+                                                deletion. This action cannot be undone.
+                                            </p>
+                                        </div>
+                                        <div
+                                            class="modal-footer border-0 pt-0 pb-4 d-flex gap-2 justify-content-center">
+                                            <button type="button"
+                                                class="btn btn-outline-secondary px-4"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                            <form id="deleteProjectForm" method="post"
+                                                style="display:inline;">
+                                                <input type="hidden" name="csrf_token"
+                                                    t-att-value="request.csrf_token()" />
+                                                <button type="submit" class="btn btn-danger px-4">
+                                                    <i class="bi bi-trash me-1"></i>Yes, Delete </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ══════════════════════════════════════
+                                 PROJECT REPORTS MODAL
+                            ══════════════════════════════════════ -->
+                            <div class="modal fade" id="projectReportsModal" tabindex="-1"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">
+                                                <i class="bi bi-file-earmark-bar-graph-fill me-2"></i>Project
+                                                Closure Reports </h5>
+                                            <button type="button" class="btn-close"
+                                                data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="text-muted mb-3" style="font-size:.88rem;">
+                                                Reports are automatically generated when a project
+                                                is deleted.
+                                                Each report captures ticket statistics, team
+                                                composition, task completion, and SLA performance at
+                                                the time of closure.
+                                            </p>
+                                            <div id="prAlert" class="d-none mb-3"></div>
+                                            <div id="prReportsList">
+                                                <div class="text-center py-5 text-muted"
+                                                    id="prLoadingState">
+                                                    <div
+                                                        class="spinner-border spinner-border-sm me-2"></div>Loading
+                                                    reports... </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ══════════════════════════════════════
+                                 PROJECT REPORT DETAIL MODAL
+                            ══════════════════════════════════════ -->
+                            <div class="modal fade" id="prDetailModal" tabindex="-1"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                                    <div class="modal-content">
+                                        <div class="modal-header"
+                                            style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;border-radius:0;">
+                                            <div>
+                                                <h5 class="modal-title mb-0">
+                                                    <i
+                                                        class="bi bi-file-earmark-bar-graph-fill me-2"></i>
+                                                    <span id="prDetailTitle"></span>
+                                                </h5>
+                                                <small style="opacity:.7;" id="prDetailSubtitle"></small>
+                                            </div>
+                                            <div class="d-flex gap-2 align-items-center">
+                                                <button type="button" class="btn btn-sm btn-light"
+                                                    id="prDownloadBtn">
+                                                    <i class="bi bi-download me-1"></i>Download PDF </button>
+                                                <button type="button"
+                                                    class="btn-close btn-close-white"
+                                                    data-bs-dismiss="modal"></button>
+                                            </div>
+                                        </div>
+                                        <div class="modal-body p-0" id="prDetailBody"
+                                            style="background:#f8f9fa;"></div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-primary"
+                                                id="prDownloadBtn2">
+                                                <i class="bi bi-download me-1"></i>Download PDF </button>
                                         </div>
                                     </div>
                                 </div>
@@ -1568,8 +1757,7 @@
                                                                 class="text-center text-muted py-4">
                                                                 <i
                                                                     class="bi bi-hourglass-split me-2"></i>
-                                                                Loading...
-                                                            </td>
+                                                                Loading... </td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -1834,6 +2022,131 @@
                     </div>
                 </div>
 
+                <!-- Ticket Quick View Modal -->
+                <div class="modal fade admin-ticket-modal" id="adminTicketQuickView"
+                    tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <div>
+                                    <h5 class="modal-title mb-1">
+                                        <i class="bi bi-ticket-perforated me-2"></i>Ticket <span
+                                            id="aqvTicketName">Details</span>
+                                    </h5>
+                                    <small class="text-muted" id="aqvTicketSubject"></small>
+                                </div>
+                                <button type="button" class="btn-close"
+                                    data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="aqvLoading" class="aqv-loading">
+                                    <i class="bi bi-arrow-repeat"></i>Loading ticket details... </div>
+                                <div id="aqvContent" style="display:none;">
+                                    <div class="row g-3 mb-3">
+                                        <div class="col-md-4">
+                                            <div class="aqv-info-card">
+                                                <div class="aqv-label">Client</div>
+                                                <div class="aqv-value" id="aqvClient"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="aqv-info-card">
+                                                <div class="aqv-label">Priority</div>
+                                                <div class="aqv-value" id="aqvPriority"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="aqv-info-card">
+                                                <div class="aqv-label">Status</div>
+                                                <div class="aqv-value" id="aqvStatus"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="aqv-info-card">
+                                                <div class="aqv-label">Created On</div>
+                                                <div class="aqv-value" id="aqvCreated"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="aqv-info-card">
+                                                <div class="aqv-label">Assigned To</div>
+                                                <div class="aqv-value" id="aqvAssigned"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="aqv-info-card">
+                                                <div class="aqv-label">Project</div>
+                                                <div class="aqv-value" id="aqvProject"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="aqv-section">
+                                        <div class="aqv-section-title">
+                                            <i class="bi bi-card-text me-2"></i>Description </div>
+                                        <div class="aqv-description" id="aqvDescription"></div>
+                                    </div>
+                                    <div class="aqv-section mt-3">
+                                        <div class="aqv-section-title">
+                                            <i class="bi bi-paperclip me-2"></i>Attachments </div>
+                                        <div id="aqvAttachments" class="aqv-attachments"></div>
+                                    </div>
+                                </div>
+                                <div id="aqvError" class="alert alert-danger" style="display:none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auto Assignment Modal -->
+                <div class="modal fade" id="adminAutoAssignModal" tabindex="-1"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-magic me-2"></i>Auto Ticket Assignment </h5>
+                                <button type="button" class="btn-close"
+                                    data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="aaAlert" class="alert d-none" role="alert"></div>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox"
+                                        role="switch" id="aaEnabled" />
+                                    <label class="form-check-label" for="aaEnabled">
+                                        Enable auto-assignment
+                                    </label>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="aaDuration">Duration</label>
+                                    <select id="aaDuration" class="form-select">
+                                        <option value="30">30 minutes</option>
+                                        <option value="60">1 hour</option>
+                                        <option value="120">2 hours</option>
+                                        <option value="240">4 hours</option>
+                                        <option value="480">8 hours</option>
+                                        <option value="1440">24 hours</option>
+                                    </select>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label" for="aaStrategy">Strategy</label>
+                                    <select id="aaStrategy" class="form-select">
+                                        <option value="round_robin">Round Robin</option>
+                                        <option value="least_load">Least Load</option>
+                                    </select>
+                                </div>
+                                <small class="text-muted" id="aaStatusText">Status: Loading...</small>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary"
+                                    data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="aaSaveBtn">
+                                    <i class="bi bi-check2 me-1"></i>Apply </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- MOBILE NAV OVERLAY -->
                 <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
 
@@ -1933,7 +2246,22 @@ var bell=document.getElementById('adminNotifBell'),bellIcon=document.getElementB
 bell.addEventListener('click',function(e){e.stopPropagation();dropdown.classList.toggle('open');});
 document.addEventListener('click',function(){dropdown.classList.remove('open');});
 dropdown.addEventListener('click',function(e){e.stopPropagation();});
-document.getElementById('adminMarkAllRead').addEventListener('click',function(){list.querySelectorAll('.admin-notif-item').forEach(function(i){i.classList.remove('unread');});badge.classList.add('hidden');});
+document.getElementById('adminMarkAllRead').addEventListener('click',function(){
+    fetch('/customer_support/admin/notifications/mark_read',{
+        method:'POST',
+        credentials:'same-origin',
+        headers:{'Accept':'application/json'}
+    })
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(d){
+        if(d&&d.success){
+            list.querySelectorAll('.admin-notif-item').forEach(function(i){i.classList.remove('unread');});
+            badge.classList.add('hidden');
+            loadNotifications();
+        }
+    })
+    .catch(function(e){console.warn('Admin mark-read failed:',e);});
+});
 document.getElementById('notifViewAllTickets').addEventListener('click',function(e){e.preventDefault();dropdown.classList.remove('open');var t=document.getElementById('ticket-assignment-tab');if(t)new bootstrap.Tab(t).show();});
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function loadNotifications(){fetch('/customer_support/admin/notifications',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){renderNotifications(d);}).catch(function(e){console.warn('Admin notifications failed:',e);});}
@@ -2021,6 +2349,85 @@ document.addEventListener('DOMContentLoaded',function(){
 //]]>
             </script>
 
+            <!-- 5.1 TICKET QUICK VIEW MODAL -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+function esc(v){return String(v||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function toTitle(v){v=String(v||'').replace(/_/g,' ');return v.charAt(0).toUpperCase()+v.slice(1);}
+var modalEl=document.getElementById('adminTicketQuickView');
+if(!modalEl){return;}
+var modal=new bootstrap.Modal(modalEl);
+var loadingEl=document.getElementById('aqvLoading');
+var contentEl=document.getElementById('aqvContent');
+var errorEl=document.getElementById('aqvError');
+
+function setLoading(){loadingEl.style.display='block';contentEl.style.display='none';errorEl.style.display='none';}
+function setError(msg){loadingEl.style.display='none';contentEl.style.display='none';errorEl.textContent=msg||'Could not load ticket details.';errorEl.style.display='block';}
+
+function render(data){
+    var t=data.ticket||{};
+    document.getElementById('aqvTicketName').textContent=t.name||('#'+(t.id||''));
+    document.getElementById('aqvTicketSubject').textContent=t.subject||'';
+    document.getElementById('aqvClient').textContent=t.customer||'-';
+    document.getElementById('aqvCreated').textContent=t.created_on||'-';
+    document.getElementById('aqvAssigned').textContent=t.assigned_to||'Unassigned';
+    document.getElementById('aqvProject').textContent=t.project||'-';
+    document.getElementById('aqvPriority').innerHTML='<span class="priority-badge priority-'+esc((t.priority||'').toLowerCase())+'">'+esc(toTitle(t.priority||'-'))+'</span>';
+    document.getElementById('aqvStatus').innerHTML='<span class="status-badge status-'+esc((t.state||'').toLowerCase())+'">'+esc(toTitle(t.state||'-'))+'</span>';
+    document.getElementById('aqvDescription').textContent=t.description||'No description provided.';
+
+    var aWrap=document.getElementById('aqvAttachments');
+    var attachments=t.attachments||[];
+    if(!attachments.length){
+        aWrap.innerHTML='<div class="text-muted small">No attachments available.</div>';
+    } else {
+        aWrap.innerHTML=attachments.map(function(a){
+            return '<a class="aqv-attach-item" href="'+esc(a.url)+'" target="_blank" rel="noopener"><i class="bi bi-paperclip"></i><span>'+esc(a.name)+'</span></a>';
+        }).join('');
+    }
+
+    loadingEl.style.display='none';
+    errorEl.style.display='none';
+    contentEl.style.display='block';
+}
+
+function loadTicket(ticketId){
+    if(!ticketId){return;}
+    setLoading();
+    modal.show();
+    fetch('/customer_support/admin/ticket/'+ticketId+'/quick_view',{credentials:'same-origin',headers:{'Accept':'application/json'}})
+        .then(function(r){if(!r.ok){throw new Error('HTTP '+r.status);}return r.json();})
+        .then(function(d){if(!d.success){throw new Error(d.error||'Unable to load ticket.');}render(d);})
+        .catch(function(e){setError(e.message||'Unable to load ticket details.');});
+}
+
+document.addEventListener('click',function(e){
+    var link=e.target.closest('.admin-ticket-open');
+    if(!link){return;}
+    e.preventDefault();
+    var ticketId=link.getAttribute('data-ticket-id');
+    loadTicket(ticketId);
+});
+
+document.addEventListener('DOMContentLoaded',function(){
+    var p=new URLSearchParams(window.location.search);
+    var ticketModalId=p.get('ticket_modal');
+    if(ticketModalId){
+        var tabBtn=document.getElementById('ticket-assignment-tab');
+        if(tabBtn){new bootstrap.Tab(tabBtn).show();}
+        setTimeout(function(){loadTicket(ticketModalId);},250);
+        p.delete('ticket_modal');
+        var clean=p.toString();
+        var next=window.location.pathname+(clean?('?'+clean):'')+window.location.hash;
+        window.history.replaceState({},'',next);
+    }
+});
+})();
+//]]>
+                        </script>
+
             <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
             <!-- 6. REPORTING TAB JS -->
@@ -2063,9 +2470,415 @@ function kbLoadDocs(){fetch('/customer_support/knowledge/list',{credentials:'sam
 window.kbUpload=function(){var name=document.getElementById('kbDocName').value.trim();var category=document.getElementById('kbCategory').value;var desc=document.getElementById('kbDescription').value.trim();var fileEl=document.getElementById('kbFile');if(!name||!fileEl.files.length){kbAlert('Please fill in the document name and select a file.','warning');return;}var allowed=['.pdf','.docx','.txt','.xlsx'];var filename=fileEl.files[0].name.toLowerCase();if(!allowed.some(function(ext){return filename.endsWith(ext);})){kbAlert('Invalid file type. Allowed: PDF, DOCX, TXT, XLSX','danger');return;}var formData=new FormData();formData.append('name',name);formData.append('category',category);formData.append('description',desc);formData.append('file',fileEl.files[0]);var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);var btn=document.getElementById('kbUploadBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Processing...';}fetch('/customer_support/knowledge/upload',{method:'POST',credentials:'same-origin',body:formData}).then(function(){kbAlert('Document uploaded and processed successfully! &#x2705;','success');document.getElementById('kbDocName').value='';document.getElementById('kbDescription').value='';document.getElementById('kbFile').value='';kbLoadDocs();}).catch(function(){kbAlert('Upload failed. Please try again.','danger');}).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="bi bi-upload me-2"></i>Upload &amp; Process';}});};
 window.kbDelete=function(id,name){if(!confirm('Delete "'+name+'"?\nThe AI will no longer use this document.'))return;var formData=new FormData();var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);fetch('/customer_support/knowledge/delete/'+id,{method:'POST',credentials:'same-origin',body:formData}).then(function(){kbAlert('Document deleted.','success');kbLoadDocs();}).catch(function(){kbAlert('Delete failed.','danger');});};
 document.addEventListener('DOMContentLoaded',function(){var modal=document.getElementById('knowledgeBaseModal');if(modal)modal.addEventListener('shown.bs.modal',function(){kbLoadDocs();});});
+
+/* ── DELETE PROJECT MODAL ──────────────────────────────────────────── */
+window.openDeleteProjectModal = function(projectId, projectName) {
+    document.getElementById('deleteProjectName').textContent = projectName;
+    document.getElementById('deleteProjectForm').action =
+        '/customer_support/admin_dashboard/projects/delete/' + projectId;
+    var modal = new bootstrap.Modal(document.getElementById('deleteProjectModal'));
+    modal.show();
+};
+
+/* ── PROJECT REPORTS MODAL ─────────────────────────────────────────── */
+window.openProjectReportsModal = function() {
+    var modal = new bootstrap.Modal(document.getElementById('projectReportsModal'));
+    modal.show();
+    prLoadReports();
+};
+
+function prLoadReports() {
+    var container = document.getElementById('prReportsList');
+    container.innerHTML = '<div class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Loading reports...</div>';
+    fetch('/customer_support/admin_dashboard/project_reports', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'call', id: 1, params: {} })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(resp) {
+        var data = resp.result || {};
+        if (!data.success) {
+            container.innerHTML = '<div class="alert alert-danger">Failed to load reports.</div>';
+            return;
+        }
+        var reports = data.reports || [];
+        if (!reports.length) {
+            container.innerHTML =
+                '<div class="text-center py-5 text-muted">' +
+                '<i class="bi bi-file-earmark-x" style="font-size:2.5rem;display:block;margin-bottom:.75rem;opacity:.4;"></i>' +
+                '<strong>No reports yet</strong><br>' +
+                '<span style="font-size:.88rem;">Reports are generated automatically when a project is deleted.</span>' +
+                '</div>';
+            return;
+        }
+        var rows = reports.map(function(r) {
+            var solved = r.total_tickets > 0
+                ? Math.round(r.resolved_tickets / r.total_tickets * 100) : 0;
+            return '<tr>' +
+                '<td><strong>' + r.project_name + '</strong><br><span class="badge bg-info" style="font-size:.72rem;">' + r.project_key + '</span></td>' +
+                '<td><span class="text-muted" style="font-size:.85rem;">' + r.start_date + ' &rarr; ' + r.end_date + '</span></td>' +
+                '<td>' + r.total_tickets + '</td>' +
+                '<td>' +
+                    '<span class="badge bg-success me-1">' + r.resolved_tickets + ' resolved</span>' +
+                    (r.open_tickets ? '<span class="badge bg-warning text-dark">' + r.open_tickets + ' open</span>' : '') +
+                '</td>' +
+                '<td><span class="badge ' + (solved >= 80 ? 'bg-success' : solved >= 50 ? 'bg-warning text-dark' : 'bg-danger') + '">' + solved + '%</span></td>' +
+                '<td><small class="text-muted">' + r.generated_on + '</small></td>' +
+                '<td><button class="btn btn-sm btn-outline-primary" onclick="prShowDetail(' + JSON.stringify(r).replace(/"/g, '&quot;') + ')">' +
+                    '<i class="bi bi-eye"></i></button></td>' +
+                '</tr>';
+        }).join('');
+        container.innerHTML =
+            '<div class="table-responsive">' +
+            '<table class="table table-hover align-middle">' +
+            '<thead><tr>' +
+            '<th>Project</th><th>Timeline</th><th>Tickets</th>' +
+            '<th>Outcomes</th><th>Resolve Rate</th><th>Generated</th><th></th>' +
+            '</tr></thead>' +
+            '<tbody>' + rows + '</tbody>' +
+            '</table></div>';
+    })
+    .catch(function() {
+        container.innerHTML = '<div class="alert alert-danger">Network error loading reports.</div>';
+    });
+}
+
+window.prShowDetail = function(r) {
+    document.getElementById('prDetailTitle').textContent = r.project_name + ' — Closure Report';
+    document.getElementById('prDetailSubtitle').textContent = 'Generated ' + r.generated_on;
+
+    var team     = Array.isArray(r.team) ? r.team : [];
+    var customers= Array.isArray(r.customers) ? r.customers : [];
+    var openTkts = Array.isArray(r.open_ticket_details) ? r.open_ticket_details : [];
+    var sb       = r.state_breakdown || {};
+    var slaTotal = r.sla_met + r.sla_breached;
+    var taskPct  = r.total_tasks > 0 ? Math.round(r.completed_tasks / r.total_tasks * 100) : 0;
+    var resolveRate = r.total_tickets > 0 ? Math.round(r.resolved_tickets / r.total_tickets * 100) : 0;
+
+    function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function badge(txt, cls){ return '<span class="badge ' + cls + ' me-1" style="font-size:.72rem;">' + esc(txt) + '</span>'; }
+    function priCls(p){
+        p = (p||'').toLowerCase();
+        return p==='urgent'?'bg-danger': p==='high'?'bg-warning text-dark': p==='low'?'bg-secondary':'bg-info text-dark';
+    }
+
+    /* ── section helper ─────────────────────────────────────────── */
+    function section(icon, title, content) {
+        return '<div style="background:#fff;border-radius:10px;padding:1.2rem 1.4rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,.07);">' +
+            '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.9rem;">' +
+            '<i class="bi ' + icon + '" style="color:#4f46e5;font-size:1.1rem;"></i>' +
+            '<h6 style="margin:0;font-weight:600;font-size:.95rem;">' + title + '</h6>' +
+            '</div>' + content + '</div>';
+    }
+
+    /* ── stat pill ──────────────────────────────────────────────── */
+    function stat(val, label, color) {
+        return '<div style="text-align:center;flex:1;">' +
+            '<div style="font-size:1.6rem;font-weight:700;color:' + (color||'#1a1a2e') + ';">' + val + '</div>' +
+            '<div style="font-size:.72rem;color:#6c757d;margin-top:2px;">' + label + '</div></div>';
+    }
+
+    /* ── BUILD SECTIONS ─────────────────────────────────────────── */
+
+    /* 1. Project info */
+    var techParts = [];
+    if (r.tech_languages) techParts.push('<strong>Languages:</strong> ' + esc(r.tech_languages));
+    if (r.tech_frameworks) techParts.push('<strong>Frameworks:</strong> ' + esc(r.tech_frameworks));
+    if (r.tech_databases)  techParts.push('<strong>Databases:</strong> ' + esc(r.tech_databases));
+
+    var infoHtml =
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem .8rem;font-size:.87rem;">' +
+        '<div><span style="color:#6c757d;">Project Key</span><br><span class="badge bg-info">' + esc(r.project_key) + '</span></div>' +
+        '<div><span style="color:#6c757d;">Type</span><br><strong>' + esc(r.project_type||'-') + '</strong></div>' +
+        '<div><span style="color:#6c757d;">Warranty Start</span><br><strong>' + esc(r.start_date) + '</strong></div>' +
+        '<div><span style="color:#6c757d;">Warranty End</span><br><strong>' + esc(r.end_date) + '</strong></div>' +
+        '<div><span style="color:#6c757d;">Focal Person</span><br><strong>' + esc(r.focal_person) + '</strong></div>' +
+        '<div><span style="color:#6c757d;">Compliance</span><br><strong>' + esc(r.compliance_flags||'None') + '</strong></div>' +
+        '</div>' +
+        (r.project_goals ? '<hr style="margin:.8rem 0;"/><div style="font-size:.85rem;"><span style="color:#6c757d;">Goals &amp; Objectives</span><p style="margin:.3rem 0 0;white-space:pre-line;">' + esc(r.project_goals) + '</p></div>' : '') +
+        (techParts.length ? '<hr style="margin:.8rem 0;"/><div style="font-size:.85rem;color:#374151;">' + techParts.join(' &nbsp;·&nbsp; ') + '</div>' : '');
+
+    /* 2. Team */
+    var teamHtml = team.length
+        ? '<div style="display:flex;flex-wrap:wrap;gap:.5rem;">' +
+          team.map(function(m){
+              return '<div style="background:#f3f4f6;border-radius:8px;padding:.4rem .75rem;font-size:.83rem;">' +
+                  '<strong>' + esc(m.name) + '</strong><br><span style="color:#6c757d;">' + esc(m.role) + '</span></div>';
+          }).join('') + '</div>'
+        : '<p class="text-muted" style="font-size:.87rem;">No team data recorded.</p>';
+
+    /* 3. Customers */
+    var custHtml = customers.length
+        ? '<div style="display:flex;flex-wrap:wrap;gap:.5rem;">' +
+          customers.map(function(c){
+              return '<div style="background:#f0fdf4;border-radius:8px;padding:.4rem .75rem;font-size:.83rem;">' +
+                  '<strong>' + esc(c.name) + '</strong>' +
+                  (c.email ? '<br><span style="color:#6c757d;">' + esc(c.email) + '</span>' : '') + '</div>';
+          }).join('') + '</div>'
+        : '<p class="text-muted" style="font-size:.87rem;">No customers recorded.</p>';
+
+    /* 4. Ticket statistics */
+    var ticketHtml =
+        '<div style="display:flex;gap:1rem;margin-bottom:1rem;">' +
+        stat(r.total_tickets,    'Total') +
+        stat(r.resolved_tickets, 'Resolved', '#16a34a') +
+        stat(r.open_tickets,     'Open at Closure', r.open_tickets > 0 ? '#d97706' : '#6c757d') +
+        stat(resolveRate + '%',  'Resolve Rate', resolveRate >= 80 ? '#16a34a' : resolveRate >= 50 ? '#d97706' : '#dc2626') +
+        '</div>' +
+        '<div style="font-size:.82rem;color:#6c757d;margin-bottom:.5rem;">Priority Breakdown</div>' +
+        '<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem;">' +
+        badge('Low ' + r.priority_low, 'bg-secondary') +
+        badge('Medium ' + r.priority_medium, 'bg-info text-dark') +
+        badge('High ' + r.priority_high, 'bg-warning text-dark') +
+        badge('Urgent ' + r.priority_urgent, 'bg-danger') +
+        '</div>' +
+        '<div style="font-size:.82rem;color:#6c757d;margin-bottom:.5rem;">Status at Closure</div>' +
+        '<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem;">' +
+        (sb.new       ? badge('New ' + sb.new, 'bg-secondary') : '') +
+        (sb.assigned  ? badge('Assigned ' + sb.assigned, 'bg-primary') : '') +
+        (sb.in_progress ? badge('In Progress ' + sb.in_progress, 'bg-info text-dark') : '') +
+        (sb.pending   ? badge('Pending ' + sb.pending, 'bg-warning text-dark') : '') +
+        (sb.resolved  ? badge('Resolved ' + sb.resolved, 'bg-success') : '') +
+        (sb.closed    ? badge('Closed ' + sb.closed, 'bg-dark') : '') +
+        '</div>' +
+        '<div style="font-size:.85rem;">Avg resolution time: <strong>' + r.avg_resolution_hrs + ' hrs</strong></div>';
+
+    /* 5. SLA & Tasks */
+    var slaBarWidth = slaTotal > 0 ? Math.round(r.sla_met / slaTotal * 100) : 0;
+    var slaHtml =
+        '<div style="display:flex;gap:1rem;margin-bottom:.8rem;">' +
+        stat(r.sla_met,      'SLA Met',      '#16a34a') +
+        stat(r.sla_breached, 'SLA Breached', '#dc2626') +
+        stat(slaBarWidth + '%', 'Compliance Rate', slaBarWidth >= 80 ? '#16a34a' : '#d97706') +
+        '</div>' +
+        (slaTotal > 0 ? '<div style="background:#e9ecef;border-radius:4px;height:6px;margin-bottom:1rem;"><div style="background:#16a34a;border-radius:4px;height:6px;width:' + slaBarWidth + '%;"></div></div>' : '') +
+        '<hr style="margin:.8rem 0;"/>' +
+        '<div style="display:flex;gap:1rem;">' +
+        stat(r.total_tasks,     'Total Tasks') +
+        stat(r.completed_tasks, 'Completed', '#16a34a') +
+        stat(taskPct + '%',     'Completion Rate', taskPct >= 80 ? '#16a34a' : '#d97706') +
+        '</div>';
+
+    /* 6. Open tickets at closure (follow-up table) */
+    var openHtml;
+    if (openTkts.length === 0) {
+        openHtml = '<p style="color:#16a34a;font-size:.88rem;"><i class="bi bi-check-circle-fill me-1"></i>All tickets were resolved at project closure.</p>';
+    } else {
+        openHtml = '<p style="font-size:.82rem;color:#6c757d;margin-bottom:.6rem;">These tickets were still open when the project was deleted — may need follow-up.</p>' +
+            '<table style="width:100%;border-collapse:collapse;font-size:.83rem;">' +
+            '<thead><tr style="background:#f3f4f6;">' +
+            '<th style="padding:.4rem .6rem;text-align:left;">Ticket</th>' +
+            '<th style="padding:.4rem .6rem;text-align:left;">Subject</th>' +
+            '<th style="padding:.4rem .6rem;">Priority</th>' +
+            '<th style="padding:.4rem .6rem;">Status</th>' +
+            '<th style="padding:.4rem .6rem;text-align:left;">Customer</th>' +
+            '</tr></thead><tbody>' +
+            openTkts.map(function(t, i) {
+                return '<tr style="background:' + (i%2===0?'#fff':'#f9fafb') + ';border-top:1px solid #e9ecef;">' +
+                    '<td style="padding:.4rem .6rem;font-weight:600;">' + esc(t.name) + '</td>' +
+                    '<td style="padding:.4rem .6rem;">' + esc(t.subject) + '</td>' +
+                    '<td style="padding:.4rem .6rem;text-align:center;">' + badge(t.priority, priCls(t.priority)) + '</td>' +
+                    '<td style="padding:.4rem .6rem;text-align:center;">' + badge(t.state, 'bg-secondary') + '</td>' +
+                    '<td style="padding:.4rem .6rem;">' + esc(t.customer) + '</td>' +
+                    '</tr>';
+            }).join('') +
+            '</tbody></table>';
+    }
+
+    /* ── ASSEMBLE ────────────────────────────────────────────────── */
+    var html =
+        '<div id="prReportContent" style="padding:1.5rem;font-family:system-ui,sans-serif;">' +
+        /* Report header band */
+        '<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;border-radius:10px;padding:1.5rem 2rem;margin-bottom:1.2rem;display:flex;justify-content:space-between;align-items:flex-start;">' +
+        '<div>' +
+        '<div style="font-size:.75rem;opacity:.7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;">Project Closure Report</div>' +
+        '<h2 style="margin:0;font-size:1.5rem;font-weight:700;">' + esc(r.project_name) + '</h2>' +
+        '<div style="opacity:.75;font-size:.85rem;margin-top:.3rem;">' + esc(r.project_type||'') + ' &nbsp;·&nbsp; ' + esc(r.project_key) + '</div>' +
+        '</div>' +
+        '<div style="text-align:right;font-size:.8rem;opacity:.7;">' +
+        'Warranty Period<br><strong style="opacity:1;">' + esc(r.start_date) + ' → ' + esc(r.end_date) + '</strong>' +
+        '<br><br>Generated<br><strong style="opacity:1;">' + esc(r.generated_on) + '</strong>' +
+        '</div>' +
+        '</div>' +
+        section('bi-info-circle-fill', 'Project Overview', infoHtml) +
+        section('bi-people-fill', 'Team', teamHtml) +
+        section('bi-person-lines-fill', 'Customers', custHtml) +
+        section('bi-ticket-perforated-fill', 'Ticket Statistics', ticketHtml) +
+        section('bi-clock-history', 'SLA Performance &amp; Task Completion', slaHtml) +
+        section('bi-exclamation-triangle-fill', 'Open Tickets at Closure', openHtml) +
+        '</div>';
+
+    document.getElementById('prDetailBody').innerHTML = html;
+
+    /* ── PDF download handler ────────────────────────────────────── */
+    function doPdfDownload() {
+        var el = document.getElementById('prReportContent');
+        var filename = (r.project_name + '_closure_report').replace(/\s+/g,'_') + '.pdf';
+        var opt = {
+            margin:       [10, 10, 10, 10],
+            filename:     filename,
+            image:        { type: 'jpeg', quality: 0.97 },
+            html2canvas:  { scale: 2, useCORS: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(el).save();
+    }
+    var btn1 = document.getElementById('prDownloadBtn');
+    var btn2 = document.getElementById('prDownloadBtn2');
+    if (btn1) { btn1.onclick = doPdfDownload; }
+    if (btn2) { btn2.onclick = doPdfDownload; }
+
+    /* ── Show modal (stacked over reports list) ──────────────────── */
+    var m1 = bootstrap.Modal.getInstance(document.getElementById('projectReportsModal'));
+    if (m1) m1.hide();
+    setTimeout(function() {
+        new bootstrap.Modal(document.getElementById('prDetailModal')).show();
+    }, 300);
+};
+
 })();
 //]]>
             </script>
+
+            <!-- 7.1 AUTO ASSIGNMENT JS -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+var modalEl=document.getElementById('adminAutoAssignModal');
+if(!modalEl){return;}
+
+var enabledEl=document.getElementById('aaEnabled');
+var durationEl=document.getElementById('aaDuration');
+var strategyEl=document.getElementById('aaStrategy');
+var statusEl=document.getElementById('aaStatusText');
+var alertEl=document.getElementById('aaAlert');
+var saveBtn=document.getElementById('aaSaveBtn');
+var badgeEl=document.getElementById('autoAssignMenuBadge');
+
+function showAlert(msg,type){
+    if(!alertEl){return;}
+    alertEl.className='alert alert-'+(type||'info');
+    alertEl.textContent=msg;
+    alertEl.classList.remove('d-none');
+}
+
+function hideAlert(){
+    if(!alertEl){return;}
+    alertEl.classList.add('d-none');
+}
+
+function setControlsEnabled(){
+    var on=!!enabledEl.checked;
+    durationEl.disabled=!on;
+}
+
+function updateMenuBadge(state){
+    if(!badgeEl){return;}
+    if(state.enabled){
+        badgeEl.className='auto-assign-dot is-on';
+        badgeEl.title='Enabled';
+    } else {
+        badgeEl.className='auto-assign-dot is-off';
+        badgeEl.title='Disabled';
+    }
+}
+
+function statusTextFrom(state){
+    if(!state.enabled){return 'Status: Disabled';}
+    var mins=parseInt(state.remaining_minutes||0,10);
+    if(mins>=60){
+        var hrs=(mins/60).toFixed(mins%60===0?0:1);
+        return 'Status: Enabled for ~'+hrs+'h';
+    }
+    return 'Status: Enabled for ~'+mins+'m';
+}
+
+function fetchState(){
+    return fetch('/customer_support/admin/auto_assignment/status',{
+        method:'GET',
+        credentials:'same-origin',
+        headers:{'Accept':'application/json'}
+    })
+    .then(function(r){return r.text().then(function(txt){
+        var data={};
+        try{data=JSON.parse(txt||'{}');}catch(_e){throw new Error('Invalid server response.');}
+        if(data.redirect_url){window.location.href=data.redirect_url;throw new Error('REDIRECT');}
+        if(!r.ok||!data.success){throw new Error(data.error||('Request failed ('+r.status+')'));}
+        return data;
+    });});
+}
+
+function applyState(state){
+    enabledEl.checked=!!state.enabled;
+    strategyEl.value=state.strategy||'round_robin';
+    var options=state.duration_options||[];
+    if(options.length){
+        var hasCurrent=options.some(function(v){return String(v)===String(durationEl.value);});
+        if(!hasCurrent){durationEl.value=String(options[0]);}
+    }
+    setControlsEnabled();
+    statusEl.textContent=statusTextFrom(state);
+    updateMenuBadge(state);
+}
+
+function saveState(){
+    hideAlert();
+    saveBtn.disabled=true;
+    var original=saveBtn.innerHTML;
+    saveBtn.innerHTML='<i class="bi bi-arrow-repeat me-1"></i>Saving...';
+
+    var body=new URLSearchParams();
+    body.append('enabled',enabledEl.checked?'true':'false');
+    body.append('duration_minutes',durationEl.value||'60');
+    body.append('strategy',strategyEl.value||'round_robin');
+
+    fetch('/customer_support/admin/auto_assignment/update',{
+        method:'POST',
+        credentials:'same-origin',
+        headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json'},
+        body:body.toString()
+    })
+    .then(function(r){return r.text().then(function(txt){
+        var data={};
+        try{data=JSON.parse(txt||'{}');}catch(_e){throw new Error('Invalid server response.');}
+        if(data.redirect_url){window.location.href=data.redirect_url;throw new Error('REDIRECT');}
+        if(!r.ok||!data.success){throw new Error(data.error||('Request failed ('+r.status+')'));}
+        return data;
+    });})
+    .then(function(state){
+        applyState(state);
+        showAlert('Auto-assignment settings updated.', 'success');
+    })
+    .catch(function(err){
+        if(err&&err.message!=='REDIRECT'){showAlert(err.message||'Failed to update settings.','danger');}
+    })
+    .finally(function(){
+        saveBtn.disabled=false;
+        saveBtn.innerHTML=original;
+    });
+}
+
+    enabledEl.addEventListener('change',setControlsEnabled);
+    saveBtn.addEventListener('click',saveState);
+    modalEl.addEventListener('show.bs.modal',function(){
+        hideAlert();
+        statusEl.textContent='Status: Loading...';
+        fetchState().then(applyState).catch(function(err){
+            if(err&&err.message!=='REDIRECT'){
+                showAlert(err.message||'Failed to load status.','danger');
+                statusEl.textContent='Status: Unable to load';
+            }
+        });
+    });
+
+    // Keep dropdown badge fresh on page load.
+    fetchState().then(applyState).catch(function(_e){});
+})();
+//]]>
+                        </script>
 
             <!-- 8. MOBILE HAMBURGER DRAWER JS -->
             <script type="text/javascript">
@@ -2157,6 +2970,8 @@ document.addEventListener('DOMContentLoaded', function () {
 //]]>
             </script>
 
+            <!-- Session timeout tracker -->
+            <script type="text/javascript" src="/customer_support/static/src/js/session_timeout.js"></script>
         </t>
     </template>
 </odoo>

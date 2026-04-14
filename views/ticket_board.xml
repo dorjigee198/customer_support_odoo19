@@ -894,6 +894,10 @@
 
             <!-- Board JS -->
             <script src="/customer_support/static/src/js/ticket_board.js"></script>
+            <!-- Session timeout tracker (focal/admin only — not public board) -->
+            <t t-if="not public_board">
+                <script type="text/javascript" src="/customer_support/static/src/js/session_timeout.js"></script>
+            </t>
         </t>
     </template>
 

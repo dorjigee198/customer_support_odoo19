@@ -34,22 +34,29 @@ class CustomerSupportAuth(http.Controller):
     @http.route("/customer_support", type="http", auth="public", website=True)
     def landing_page(self, **kw):
         """
-        Landing Page - Public welcome page.
-        Authenticated users are redirected to their dashboard so the back
-        button can never strand a logged-in user on the landing page.
+        Landing Page - Always shown. If the user is already logged in,
+        the CTA button changes to 'Go to Dashboard' instead of 'Get Started'.
         """
         user = request.env.user
         public_user = request.env.ref("base.public_user")
+        dashboard_url = ""
         if user and user.id != public_user.id and user.active:
             if user.has_group("base.group_system"):
-                return werkzeug.utils.redirect("/customer_support/admin_dashboard")
+                dashboard_url = "/customer_support/admin_dashboard"
             elif user.has_group("base.group_user"):
-                return werkzeug.utils.redirect("/customer_support/support_dashboard")
+                dashboard_url = "/customer_support/support_dashboard"
             elif user.has_group("base.group_portal"):
-                return werkzeug.utils.redirect("/customer_support/dashboard")
+                dashboard_url = "/customer_support/dashboard"
 
-        response = request.render("customer_support.landing_page")
-        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response = request.render(
+            "customer_support.landing_page",
+            {
+                "dashboard_url": dashboard_url,
+            },
+        )
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, max-age=0"
+        )
         return response
 
     # =========================================================================
@@ -74,14 +81,19 @@ class CustomerSupportAuth(http.Controller):
             elif user.has_group("base.group_portal"):
                 return werkzeug.utils.redirect("/customer_support/dashboard")
 
+        # Accept both ?next= (from our ir.http override) and ?redirect= (legacy)
+        next_url = kw.get("next", "") or kw.get("redirect", "")
         response = request.render(
             "customer_support.portal_login_page",
             {
                 "error": kw.get("error", ""),
-                "redirect": kw.get("redirect", ""),
+                "success": kw.get("success", ""),
+                "redirect": next_url,
             },
         )
-        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, max-age=0"
+        )
         return response
 
     @http.route(
@@ -161,25 +173,25 @@ class CustomerSupportAuth(http.Controller):
                     )
 
                 # Route to the correct dashboard based on the user's role
+                # Validate redirect_url — only allow relative /customer_support/ paths
+                safe_redirect = ""
+                if redirect_url and redirect_url.startswith("/customer_support/"):
+                    safe_redirect = redirect_url
+
                 if user.has_group("base.group_system"):
-                    # System administrator → admin dashboard (ignore redirect)
                     request.session["customer_support_login"] = True
-                    return werkzeug.utils.redirect("/customer_support/admin_dashboard")
+                    destination = safe_redirect or "/customer_support/admin_dashboard"
+                    return werkzeug.utils.redirect(destination)
 
                 elif user.has_group("base.group_portal"):
-                    # Portal user (customer) → redirect param if present, else dashboard
                     request.session["customer_support_login"] = True
-                    destination = (
-                        redirect_url if redirect_url else "/customer_support/dashboard"
-                    )  # ← FIXED
+                    destination = safe_redirect or "/customer_support/dashboard"
                     return werkzeug.utils.redirect(destination)
 
                 elif user.has_group("base.group_user"):
-                    # Internal user (focal person / support agent) → analytics dashboard
                     request.session["customer_support_login"] = True
-                    return werkzeug.utils.redirect(
-                        "/customer_support/support_dashboard"
-                    )
+                    destination = safe_redirect or "/customer_support/support_dashboard"
+                    return werkzeug.utils.redirect(destination)
 
                 else:
                     # Authenticated but no recognised role — deny access
@@ -203,21 +215,30 @@ class CustomerSupportAuth(http.Controller):
     # LOGOUT
     # =========================================================================
 
-    @http.route("/customer_support/logout", type="http", auth="user", website=True)
+    @http.route("/customer_support/logout", type="http", auth="public", website=True)
     def support_logout(self, **kw):
         """
         Logout - Clears the session and redirects to the login page
         Access: All authenticated users
         """
         try:
-            request.session.logout()
-            return werkzeug.utils.redirect("/customer_support/login")
+            if request.session.uid:
+                request.session.logout()
+            response = werkzeug.utils.redirect("/customer_support/login?from_logout=1")
+            response.headers["Cache-Control"] = (
+                "no-store, no-cache, must-revalidate, max-age=0"
+            )
+            return response
         except Exception as e:
             _logger.error(f"Logout error: {str(e)}")
-            return werkzeug.utils.redirect("/customer_support/login")
+            response = werkzeug.utils.redirect("/customer_support/login?from_logout=1")
+            response.headers["Cache-Control"] = (
+                "no-store, no-cache, must-revalidate, max-age=0"
+            )
+            return response
 
     @http.route(
-        "/customer_support/logout_manual", type="http", auth="user", website=True
+        "/customer_support/logout_manual", type="http", auth="public", website=True
     )
     def logout_manual(self):
         """
@@ -225,5 +246,10 @@ class CustomerSupportAuth(http.Controller):
         Working: Clears the session and redirects to the login page
         Access: All authenticated users
         """
-        request.session.logout()
-        return request.redirect("/customer_support/login")
+        if request.session.uid:
+            request.session.logout()
+        response = werkzeug.utils.redirect("/customer_support/login?from_logout=1")
+        response.headers["Cache-Control"] = (
+            "no-store, no-cache, must-revalidate, max-age=0"
+        )
+        return response

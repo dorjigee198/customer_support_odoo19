@@ -141,7 +141,7 @@ class CustomerSupport(models.Model):
 
     board_bg = fields.Char(
         string="Board Background",
-        default='',
+        default="",
         help="CSS background value for the ticket board (color or gradient)",
     )
 
@@ -247,6 +247,148 @@ class CustomerSupport(models.Model):
         except Exception as e:
             _logger.warning(f"Ticket log creation failed [{event_type}]: {e}")
 
+    def _get_auto_assignment_state(self):
+        """Read runtime auto-assignment config from ir.config_parameter."""
+        params = self.env["ir.config_parameter"].sudo()
+        until_raw = params.get_param("customer_support.auto_assign_enabled_until") or ""
+        strategy = (
+            params.get_param("customer_support.auto_assign_strategy") or "round_robin"
+        )
+        last_user_raw = (
+            params.get_param("customer_support.auto_assign_last_user_id") or "0"
+        )
+
+        enabled_until = False
+        if until_raw:
+            try:
+                enabled_until = fields.Datetime.to_datetime(until_raw)
+            except Exception:
+                enabled_until = False
+
+        try:
+            last_user_id = int(last_user_raw)
+        except Exception:
+            last_user_id = 0
+
+        if strategy not in ("round_robin", "least_load"):
+            strategy = "round_robin"
+
+        is_enabled = bool(enabled_until and enabled_until > fields.Datetime.now())
+        return {
+            "enabled": is_enabled,
+            "enabled_until": enabled_until,
+            "strategy": strategy,
+            "last_user_id": last_user_id,
+        }
+
+    def _get_auto_assign_candidates(self):
+        """Prefer focal persons from ticket project; fallback to active internal users."""
+        self.ensure_one()
+
+        members = self.env["customer_support.project.member"].sudo()
+        candidates = self.env["res.users"].browse()
+
+        if self.project_id:
+            project_members = members.search(
+                [
+                    ("project_id", "=", self.project_id.id),
+                    ("role", "=", "focal_person"),
+                    ("user_id", "!=", False),
+                    ("user_id.active", "=", True),
+                ]
+            )
+            candidates = project_members.mapped("user_id")
+
+        if not candidates:
+            internal_group = self.env.ref("base.group_user")
+            candidates = internal_group.users.filtered(
+                lambda u: u.active and not u.has_group("base.group_system")
+            )
+
+        return candidates.sorted(lambda u: u.id)
+
+    def _pick_round_robin_assignee(self, candidates, last_user_id):
+        """Pick the next user after last_user_id in ascending id order."""
+        if not candidates:
+            return False
+
+        for user in candidates:
+            if user.id > last_user_id:
+                return user
+        return candidates[0]
+
+    def _pick_least_load_assignee(self, candidates, workload_cache=None):
+        """Pick assignee with the fewest currently open tickets."""
+        if not candidates:
+            return False
+
+        if workload_cache is None:
+            workload_cache = {}
+
+        missing_ids = [uid for uid in candidates.ids if uid not in workload_cache]
+        if missing_ids:
+            grouped = (
+                self.env["customer.support"]
+                .sudo()
+                .read_group(
+                    [
+                        ("assigned_to", "in", missing_ids),
+                        ("state", "not in", ["resolved", "closed"]),
+                    ],
+                    ["assigned_to"],
+                    ["assigned_to"],
+                )
+            )
+            grouped_counts = {
+                row["assigned_to"][0]: row["assigned_to_count"]
+                for row in grouped
+                if row.get("assigned_to")
+            }
+            for uid in missing_ids:
+                workload_cache[uid] = grouped_counts.get(uid, 0)
+
+        return min(candidates, key=lambda u: (workload_cache.get(u.id, 0), u.id))
+
+    def _auto_assign_new_tickets(self):
+        """Assign newly created unassigned tickets when auto-assignment is active."""
+        state = self._get_auto_assignment_state()
+        if not state["enabled"]:
+            return
+
+        params = self.env["ir.config_parameter"].sudo()
+        system_user_id = self.env.ref("base.user_root").id
+        last_user_id = state["last_user_id"]
+        workload_cache = {}
+
+        for ticket in self.filtered(lambda t: not t.assigned_to and t.state == "new"):
+            candidates = ticket._get_auto_assign_candidates()
+            if not candidates:
+                continue
+
+            if state["strategy"] == "least_load":
+                assignee = ticket._pick_least_load_assignee(candidates, workload_cache)
+            else:
+                assignee = ticket._pick_round_robin_assignee(candidates, last_user_id)
+
+            if not assignee:
+                continue
+
+            ticket.sudo().write(
+                {
+                    "assigned_to": assignee.id,
+                    "assigned_by": system_user_id,
+                    "assigned_date": fields.Datetime.now(),
+                    "state": "assigned",
+                }
+            )
+
+            if state["strategy"] == "least_load":
+                workload_cache[assignee.id] = workload_cache.get(assignee.id, 0) + 1
+
+            last_user_id = assignee.id
+
+        params.set_param("customer_support.auto_assign_last_user_id", str(last_user_id))
+
     # ── CRUD ──────────────────────────────────────────────────────────────────
 
     @api.model_create_multi
@@ -288,6 +430,8 @@ class CustomerSupport(models.Model):
                 actor_id=self.env.user.id,
             )
             # ─────────────────────────────────────────────────────────────
+
+        records._auto_assign_new_tickets()
 
         return records
 

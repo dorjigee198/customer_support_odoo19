@@ -127,6 +127,13 @@
                                     <button class="pc-alert-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
                                 </div>
                             </t>
+                            <t t-if="request.params.get('project_deleted')">
+                                <div class="pc-alert pc-alert-success">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Project deleted. A closure report has been saved under Project Reports.</span>
+                                    <button class="pc-alert-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
+                                </div>
+                            </t>
                             <t t-if="request.params.get('error')">
                                 <div class="pc-alert pc-alert-danger">
                                     <i class="bi bi-exclamation-triangle-fill"></i>

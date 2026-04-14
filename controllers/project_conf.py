@@ -2,6 +2,7 @@
 from odoo import http
 from odoo.http import request
 import logging
+import json
 from ..services.email_service import EmailService
 
 _logger = logging.getLogger(__name__)
@@ -175,35 +176,213 @@ class CustomerSupportProjectController(http.Controller):
         csrf=True,
     )
     def customer_support_delete_project(self, project_id, **post):
-        """Handle project deletion"""
+        """Generate closure report then delete the project."""
         try:
-            ProjectModel = request.env["customer_support.project"].sudo()
-            ConfigModel = request.env["customer_support.project.config"].sudo()
+            ProjectModel  = request.env["customer_support.project"].sudo()
+            ConfigModel   = request.env["customer_support.project.config"].sudo()
+            MemberModel   = request.env["customer_support.project.member"].sudo()
+            TicketModel   = request.env["customer.support"].sudo()
+            TaskModel     = request.env["customer_support.ticket.task"].sudo()
+            ReportModel   = request.env["customer_support.project.report"].sudo()
 
             project = ProjectModel.browse(project_id)
-            config = ConfigModel.search([("project_id", "=", project.id)])
-
             if not project.exists():
                 return request.redirect(
-                    "/customer_support/admin_dashboard/system_configuration?error=1&error_msg=Project not found&tab=project"
+                    "/customer_support/admin_dashboard"
+                    "?tab=system-configuration&modal=projects&error=Project not found"
                 )
 
+            config  = ConfigModel.search([("project_id", "=", project.id)], limit=1)
+            members = MemberModel.search([("project_id", "=", project.id)])
+            tickets = TicketModel.search([("project_id", "=", project.id)])
+
+            # ── Tech stack & goals (from config) ──────────────────────
+            tech_languages  = config.programming_languages or "" if config else ""
+            tech_frameworks = config.frameworks or "" if config else ""
+            tech_databases  = config.databases or "" if config else ""
+            project_goals   = config.project_goals or "" if config else ""
+
+            compliance_parts = []
+            if config:
+                if config.compliance_gdpr:    compliance_parts.append("GDPR")
+                if config.compliance_hipaa:   compliance_parts.append("HIPAA")
+                if config.compliance_pci_dss: compliance_parts.append("PCI-DSS")
+                if config.compliance_iso27001: compliance_parts.append("ISO 27001")
+            compliance_flags = ", ".join(compliance_parts) if compliance_parts else "None"
+
+            # ── Ticket stats ──────────────────────────────────────────
+            total_tickets    = len(tickets)
+            resolved_tickets = len(tickets.filtered(lambda t: t.state in ("resolved", "closed")))
+            open_at_closure  = tickets.filtered(lambda t: t.state not in ("resolved", "closed"))
+            open_tickets     = len(open_at_closure)
+
+            priority_counts = {"low": 0, "medium": 0, "high": 0, "urgent": 0}
+            state_counts    = {"new": 0, "assigned": 0, "in_progress": 0,
+                               "pending": 0, "resolved": 0, "closed": 0}
+            for t in tickets:
+                p = (t.priority or "medium").lower()
+                if p in priority_counts:
+                    priority_counts[p] += 1
+                s = t.state or "new"
+                if s in state_counts:
+                    state_counts[s] += 1
+
+            # Open ticket details (for future follow-up reference)
+            open_ticket_details = [
+                {
+                    "name":     t.name,
+                    "subject":  t.subject or "",
+                    "priority": (t.priority or "medium").title(),
+                    "state":    t.state.replace("_", " ").title() if t.state else "",
+                    "customer": t.customer_id.name if t.customer_id else "",
+                }
+                for t in open_at_closure
+            ]
+
+            # Unique customers
+            seen = set()
+            customers = []
+            for t in tickets:
+                if t.customer_id and t.customer_id.id not in seen:
+                    seen.add(t.customer_id.id)
+                    customers.append({
+                        "name":  t.customer_id.name,
+                        "email": t.customer_id.email or "",
+                    })
+
+            # Avg resolution hours
+            avg_hrs = 0.0
+            resolved = tickets.filtered(lambda t: t.state in ("resolved", "closed"))
+            if resolved:
+                total_secs = sum(
+                    (t.write_date - t.create_date).total_seconds()
+                    for t in resolved if t.write_date and t.create_date
+                )
+                avg_hrs = round(total_secs / 3600 / len(resolved), 1)
+
+            sla_met      = len(tickets.filtered(lambda t: t.sla_status == "on_track"))
+            sla_breached = len(tickets.filtered(lambda t: t.sla_status == "breached"))
+
+            # ── Task stats ────────────────────────────────────────────
+            ticket_ids = tickets.ids
+            all_tasks  = (TaskModel.search([("ticket_id", "in", ticket_ids)])
+                          if ticket_ids else TaskModel.browse())
+            total_tasks = len(all_tasks)
+            done_tasks  = len(all_tasks.filtered(lambda t: t.is_done))
+
+            # ── Team ──────────────────────────────────────────────────
+            focal = members.filtered(lambda m: m.role == "focal_person")
+            focal_name = focal[0].user_id.name if focal and focal[0].user_id else ""
+            team_data  = [
+                {"name": m.user_id.name if m.user_id else (m.member_name or ""),
+                 "role": m.role_label}
+                for m in members
+            ]
+
+            # ── Persist report ────────────────────────────────────────
+            ReportModel.create({
+                "project_name":         project.name,
+                "project_key":          project.code or "",
+                "project_type":         config.project_type.replace("_", " ").title()
+                                        if config and config.project_type else "",
+                "start_date":           config.start_date if config else False,
+                "end_date":             config.end_date if config else False,
+                "tech_languages":       tech_languages,
+                "tech_frameworks":      tech_frameworks,
+                "tech_databases":       tech_databases,
+                "project_goals":        project_goals,
+                "compliance_flags":     compliance_flags,
+                "focal_person":         focal_name,
+                "team_members":         json.dumps(team_data),
+                "customers":            json.dumps(customers),
+                "total_tickets":        total_tickets,
+                "resolved_tickets":     resolved_tickets,
+                "open_tickets":         open_tickets,
+                "avg_resolution_hrs":   avg_hrs,
+                "priority_low":         priority_counts["low"],
+                "priority_medium":      priority_counts["medium"],
+                "priority_high":        priority_counts["high"],
+                "priority_urgent":      priority_counts["urgent"],
+                "state_breakdown":      json.dumps(state_counts),
+                "open_ticket_details":  json.dumps(open_ticket_details),
+                "sla_met":              sla_met,
+                "sla_breached":         sla_breached,
+                "total_tasks":          total_tasks,
+                "completed_tasks":      done_tasks,
+            })
+
             project_name = project.name
-            # Delete config first to maintain integrity
             config.unlink()
             project.unlink()
 
-            _logger.info(f"Project + Config deleted: {project_name}")
+            _logger.info(f"Project deleted & report generated: {project_name}")
 
             return request.redirect(
-                "/customer_support/admin_dashboard/system_configuration?project_deleted=1&tab=project"
+                "/customer_support/admin_dashboard"
+                "?tab=system-configuration&modal=projects&project_deleted=1"
             )
 
         except Exception as e:
-            _logger.error(f"Error deleting project configuration: {str(e)}")
+            _logger.error(f"Error deleting project: {str(e)}")
+            import traceback
+            _logger.error(traceback.format_exc())
             return request.redirect(
-                f"/customer_support/admin_dashboard/system_configuration?error=1&error_msg={str(e)}&tab=project"
+                "/customer_support/admin_dashboard"
+                f"?tab=system-configuration&modal=projects&error={str(e)}"
             )
+
+    @http.route(
+        "/customer_support/admin_dashboard/project_reports",
+        type="json",
+        auth="user",
+        csrf=False,
+    )
+    def list_project_reports(self, **kw):
+        """Return all project closure reports as JSON."""
+        try:
+            reports = request.env["customer_support.project.report"].sudo().search([])
+            data = []
+            for r in reports:
+                def _json(field):
+                    try:
+                        return json.loads(field or "[]")
+                    except Exception:
+                        return []
+                data.append({
+                    "id":                   r.id,
+                    "project_name":         r.project_name,
+                    "project_key":          r.project_key or "",
+                    "project_type":         r.project_type or "",
+                    "start_date":           r.start_date.strftime("%b %d, %Y") if r.start_date else "-",
+                    "end_date":             r.end_date.strftime("%b %d, %Y") if r.end_date else "-",
+                    "generated_on":         r.generated_on.strftime("%b %d, %Y %H:%M") if r.generated_on else "",
+                    "tech_languages":       r.tech_languages or "",
+                    "tech_frameworks":      r.tech_frameworks or "",
+                    "tech_databases":       r.tech_databases or "",
+                    "project_goals":        r.project_goals or "",
+                    "compliance_flags":     r.compliance_flags or "None",
+                    "focal_person":         r.focal_person or "-",
+                    "team":                 _json(r.team_members),
+                    "customers":            _json(r.customers),
+                    "total_tickets":        r.total_tickets,
+                    "resolved_tickets":     r.resolved_tickets,
+                    "open_tickets":         r.open_tickets,
+                    "avg_resolution_hrs":   r.avg_resolution_hrs,
+                    "priority_low":         r.priority_low,
+                    "priority_medium":      r.priority_medium,
+                    "priority_high":        r.priority_high,
+                    "priority_urgent":      r.priority_urgent,
+                    "state_breakdown":      _json(r.state_breakdown) if r.state_breakdown else {},
+                    "open_ticket_details":  _json(r.open_ticket_details),
+                    "sla_met":              r.sla_met,
+                    "sla_breached":         r.sla_breached,
+                    "total_tasks":          r.total_tasks,
+                    "completed_tasks":      r.completed_tasks,
+                })
+            return {"success": True, "reports": data}
+        except Exception as e:
+            _logger.error(f"list_project_reports error: {e}")
+            return {"success": False, "error": str(e)}
 
     @http.route(
         "/customer_support/admin_dashboard/projects/get/<int:project_id>",

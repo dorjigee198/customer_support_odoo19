@@ -52,6 +52,225 @@ body {
 }
 
 /* ============================================
+   PREMIUM WELCOME CURTAIN
+   ============================================ */
+.welcome-curtain {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    pointer-events: auto;
+    overflow: hidden;
+    background: #1a0305;
+}
+
+.curtain-panel {
+    position: absolute;
+    top: 0;
+    width: 50.5%;
+    height: 100%;
+    background:
+        radial-gradient(120% 80% at 50% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 55%),
+        repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.08) 0px,
+            rgba(255, 255, 255, 0.08) 1px,
+            transparent 1px,
+            transparent 16px
+        ),
+        linear-gradient(140deg, #5e0509 0%, #980c14 45%, #6e070d 100%);
+    box-shadow: inset -18px 0 28px rgba(0, 0, 0, 0.28);
+}
+
+.curtain-left {
+    left: 0;
+    border-right: 1px solid rgba(255, 235, 235, 0.35);
+}
+
+.curtain-right {
+    right: 0;
+    border-left: 1px solid rgba(255, 235, 235, 0.35);
+    box-shadow: inset 18px 0 28px rgba(0, 0, 0, 0.28);
+}
+
+.curtain-rope-wrap {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.curtain-rope {
+    width: 4px;
+    height: 120px;
+    background: linear-gradient(180deg, #f5d7a8 0%, #d5a868 100%);
+    box-shadow: 0 0 0 1px rgba(126, 68, 20, 0.3);
+}
+
+.curtain-tassel {
+    width: 26px;
+    height: 34px;
+    border-radius: 0 0 14px 14px;
+    margin-top: -1px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.25) 0%, transparent 35%),
+        linear-gradient(180deg, #b0772a 0%, #7f4d12 100%);
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.35);
+}
+
+.curtain-ring {
+    width: 34px;
+    height: 34px;
+    margin-top: 8px;
+    border-radius: 50%;
+    border: 4px solid #f4cc72;
+    background: radial-gradient(circle at 35% 35%, #ffe7a6 0%, #d2a24d 55%, #9f6c22 100%);
+    box-shadow:
+        0 10px 22px rgba(0, 0, 0, 0.35),
+        inset 0 0 10px rgba(255, 240, 180, 0.45);
+    cursor: grab;
+    touch-action: none;
+    outline: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.curtain-ring.pulling {
+    cursor: grabbing;
+}
+
+.curtain-ring:hover,
+.curtain-ring:focus-visible {
+    transform: translateY(1px) scale(1.05);
+    box-shadow:
+        0 12px 26px rgba(0, 0, 0, 0.42),
+        inset 0 0 12px rgba(255, 240, 180, 0.6);
+}
+
+.curtain-center-mark {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #fff7f7;
+    text-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+    z-index: 2;
+}
+
+.curtain-overline {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.95;
+}
+
+.curtain-title {
+    margin: 0.45rem 0 0;
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.curtain-instruction {
+    margin: 0.85rem 0 0;
+    font-size: 0.92rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: rgba(255, 245, 245, 0.95);
+}
+
+.welcome-curtain.awaiting .curtain-ring {
+    animation: ringPulse 1.6s ease-in-out infinite;
+}
+
+.welcome-curtain.play .curtain-left {
+    animation: curtainLeftOpen 1.45s cubic-bezier(0.72, 0.03, 0.31, 1) 0.75s forwards;
+}
+
+.welcome-curtain.play .curtain-right {
+    animation: curtainRightOpen 1.45s cubic-bezier(0.72, 0.03, 0.31, 1) 0.75s forwards;
+}
+
+.welcome-curtain.play .curtain-center-mark {
+    animation: curtainTextFade 0.7s ease 1.0s forwards;
+}
+
+.welcome-curtain.play .curtain-rope-wrap {
+    animation: curtainRopePull 0.7s cubic-bezier(0.2, 0.9, 0.22, 1) 0.25s forwards;
+}
+
+.welcome-curtain.skip,
+.welcome-curtain.done {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s ease;
+}
+
+@keyframes curtainLeftOpen {
+    to {
+        transform: translateX(-102%);
+    }
+}
+
+@keyframes curtainRightOpen {
+    to {
+        transform: translateX(102%);
+    }
+}
+
+@keyframes curtainTextFade {
+    to {
+        opacity: 0;
+        transform: translate(-50%, -52%);
+    }
+}
+
+@keyframes curtainRopePull {
+    0% {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    35% {
+        transform: translateX(-50%) translateY(26px);
+    }
+
+    100% {
+        transform: translateX(-50%) translateY(10px);
+    }
+}
+
+@keyframes ringPulse {
+    0%,
+    100% {
+        transform: scale(1);
+        box-shadow:
+            0 10px 22px rgba(0, 0, 0, 0.35),
+            inset 0 0 10px rgba(255, 240, 180, 0.45);
+    }
+
+    50% {
+        transform: scale(1.08);
+        box-shadow:
+            0 14px 28px rgba(0, 0, 0, 0.4),
+            0 0 0 8px rgba(255, 216, 122, 0.2),
+            inset 0 0 14px rgba(255, 240, 180, 0.65);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .welcome-curtain,
+    .welcome-curtain * {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* ============================================
    HERO BACKGROUND - FULLY VISIBLE | CINEMATIC ZOOM
    ============================================ */
 .background-image {

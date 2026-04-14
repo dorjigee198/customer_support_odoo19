@@ -9,18 +9,67 @@
                 <link
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/portal_dashboard.css" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/portal_tickets.css" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/portal_dashboard.css?v=3" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/portal_tickets.css?v=3" />
                 <link rel="stylesheet"
-                    href="/customer_support/static/src/css/portal_dashboard_mobile.css?v=2" />
+                    href="/customer_support/static/src/css/portal_dashboard_mobile.css?v=4" />
                 <style>
-                    #portal-kanban-page { background: #e0f2fe; min-height: 100vh; }
+                    .notif-item {
+                    display: flex; align-items: flex-start; gap: 0.75rem;
+                    padding: 0.75rem 1rem; border-bottom: 1px solid rgba(12,74,110,0.07);
+                    cursor: default;
+                    }
+                    .notif-item:last-child { border-bottom: none; }
+                    .notif-icon-wrap {
+                    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+                    display: flex; align-items: center; justify-content: center; font-size: .9rem;
+                    }
+                    .notif-icon-wrap.status { background: rgba(2,132,199,.12); color: #0284c7; }
+                    .notif-icon-wrap.assigned { background: rgba(22,163,74,.12); color: #16a34a; }
+                    .notif-icon-wrap.breach { background: rgba(239,68,68,.12); color: #ef4444; }
+                    .notif-body { flex: 1; min-width: 0; }
+                    .notif-title {
+                    font-size: .8rem; font-weight: 700; color: #0c4a6e;
+                    margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow:
+                    ellipsis;
+                    }
+                    .notif-sub {
+                    font-size: .78rem; color: #475569; line-height: 1.4;
+                    word-break: break-word; white-space: normal;
+                    }
+                    .notif-time-text { font-size: .7rem; color: #94a3b8; margin-top: 3px; }
+                    .notif-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+                    margin-top: 6px; }
+                    .notif-dot.status { background: #0284c7; }
+                    .notif-dot.assigned { background: #16a34a; }
+                    .notif-dot.breach { background: #ef4444; }
+
+                    /* Premium palette alignment */
+                    .notif-title { color: #0f3555; }
+                    .notif-sub { color: #5b6f83; }
+                    .notif-icon-wrap.status {
+                    background: rgba(31,110,140,.14);
+                    color: #1f6e8c;
+                    }
+                    .notif-dot.status { background: #1f6e8c; }
+
+                    #portal-kanban-page {
+                    background:
+                    radial-gradient(circle at 14% 6%, rgba(201, 164, 92, 0.14) 0%, transparent 34%),
+                    radial-gradient(circle at 92% 92%, rgba(31, 110, 140, 0.11) 0%, transparent 36%),
+                    linear-gradient(160deg, #edf3f9 0%, #e6eef6 50%, #eff4f9 100%);
+                    min-height: 100vh;
+                    }
                     .kanban-board { background: transparent; }
-                    .kanban-col { background: #f0f9ff; border-color: rgba(12,74,110,0.12); }
+                    .kanban-col {
+                    background: rgba(255,255,255,0.9);
+                    border-color: rgba(15,53,85,0.14);
+                    box-shadow: 0 10px 24px rgba(8,27,43,0.1);
+                    }
                     .view-btn {
                     background: rgba(255,255,255,0.6);
-                    border: 1px solid rgba(12,74,110,0.2);
-                    color: #0c4a6e;
+                    border: 1px solid rgba(15,53,85,0.2);
+                    color: #0f3555;
                     padding: 6px 12px;
                     border-radius: 8px;
                     cursor: pointer;
@@ -29,7 +78,11 @@
                     }
                     .view-btn:hover { background: rgba(255,255,255,0.85); border-color:
                     rgba(12,74,110,0.35); }
-                    .view-btn.active { background: #0c4a6e; color: #ffffff; border-color: #0c4a6e; }
+                    .view-btn.active {
+                    background: linear-gradient(140deg, #103b5f 0%, #1f6e8c 100%);
+                    color: #ffffff;
+                    border-color: #154869;
+                    }
 
                     /* ── Board Progress Bar ───────────────────────────────── */
                     .kc-progress-wrap {
@@ -51,7 +104,7 @@
                     .kc-progress-pct {
                         font-size: 11px;
                         font-weight: 700;
-                        color: #0c4a6e;
+                        color: #0f3555;
                     }
                     .kc-progress-bar-bg {
                         height: 5px;
@@ -62,7 +115,7 @@
                     .kc-progress-bar-fill {
                         height: 100%;
                         border-radius: 99px;
-                        background: linear-gradient(90deg, #38bdf8 0%, #0ea5e9 100%);
+                        background: linear-gradient(90deg, #1f6e8c 0%, #2c7a9b 100%);
                         transition: width 0.4s ease;
                     }
                     .kc-progress-bar-fill.is-done {
@@ -106,6 +159,33 @@
                                     <i class="bi bi-plus-circle me-2"></i>New Ticket</a>
                             </div>
                             <div class="user-profile dropdown">
+                                <!-- NOTIFICATION BELL -->
+                                <div class="notif-wrap me-3">
+                                    <button class="notif-btn" id="kanbanNotifBell"
+                                        title="Notifications">
+                                        <i class="bi bi-bell-fill"></i>
+                                        <span class="notif-badge d-none" id="kanbanNotifBadge">0</span>
+                                    </button>
+                                    <div class="notif-dropdown" id="kanbanNotifDropdown">
+                                        <div class="notif-header">
+                                            <h6><i class="bi bi-bell me-2" style="color:#0284c7;"></i>
+                                                Notifications</h6>
+                                            <button class="notif-mark-read" id="kanbanMarkRead">Mark
+                                                all read</button>
+                                        </div>
+                                        <div class="notif-list" id="kanbanNotifList">
+                                            <div class="notif-empty">
+                                                <i class="bi bi-arrow-repeat"
+                                                    style="font-size:1.5rem;display:block;margin-bottom:.5rem;"></i>
+                                                Loading... </div>
+                                        </div>
+                                        <div class="notif-footer">
+                                            <a href="/customer_support/tickets">View my tickets
+                                                &#8594;</a>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <a class="d-flex align-items-center text-white dropdown-toggle"
                                     href="#" id="userProfileDropdown"
                                     data-bs-toggle="dropdown" aria-expanded="false"
@@ -279,7 +359,7 @@
 
                     // ── TOGGLE BUTTONS ────────────────────────────────────
                     document.getElementById('listViewBtn').addEventListener('click', function () {
-                        window.location.href = '/customer_support/tickets/list';
+                        window.location.href = '/customer_support/tickets';
                     });
                     document.getElementById('kanbanViewBtn').addEventListener('click', function () {
                         window.location.href = '/customer_support/tickets/kanban';
@@ -379,6 +459,70 @@
 
                 });
                 //]]>
+            </script>
+
+            <!-- Notification Bell JS -->
+            <script type="text/javascript">
+                //<![CDATA[
+            (function () {
+                var bell      = document.getElementById('kanbanNotifBell');
+                var dropdown  = document.getElementById('kanbanNotifDropdown');
+                var badge     = document.getElementById('kanbanNotifBadge');
+                var notifList = document.getElementById('kanbanNotifList');
+                if (bell && dropdown) {
+                    bell.addEventListener('click', function (e) { e.stopPropagation(); dropdown.classList.toggle('open'); });
+                    document.addEventListener('click', function () { dropdown.classList.remove('open'); });
+                    dropdown.addEventListener('click', function (e) { e.stopPropagation(); });
+                }
+                var markReadBtn = document.getElementById('kanbanMarkRead');
+                if (markReadBtn) {
+                    markReadBtn.addEventListener('click', function () {
+                        fetch('/customer_support/customer/notifications/mark_read', { method: 'POST', credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+                        .then(function () {
+                            if (badge) { badge.classList.add('d-none'); badge.textContent = '0'; }
+                            if (notifList) { notifList.innerHTML = '<div class="notif-empty"><i class="bi bi-check-circle-fill" style="font-size:2rem;color:#22c55e;display:block;margin-bottom:.5rem;"></i>All caught up!</div>'; }
+                        });
+                    });
+                }
+                function sanitise(str) { var d = document.createElement('div'); d.textContent = String(str || ''); return d.innerHTML; }
+                function renderNotifications(items) {
+                    if (!notifList) return;
+                    if (!items || !items.length) {
+                        notifList.innerHTML = '<div class="notif-empty"><i class="bi bi-check-circle-fill" style="font-size:2rem;color:#22c55e;display:block;margin-bottom:.5rem;"></i>No new notifications</div>';
+                        if (badge) badge.classList.add('d-none');
+                        return;
+                    }
+                    if (badge) { badge.textContent = items.length; badge.classList.remove('d-none'); }
+                    var typeLabels = { status_change: 'Status Update', assigned: 'Assigned', sla_breach: 'SLA Breach' };
+                    notifList.innerHTML = items.map(function (n) {
+                        var cls        = sanitise(n.cls   || 'status');
+                        var icon       = sanitise(n.icon  || 'bi-bell-fill');
+                        var ticketName = sanitise(n.ticket_name || (n.ticket_id ? '#' + n.ticket_id : ''));
+                        var typeLabel  = sanitise(typeLabels[n.type] || 'Notification');
+                        var msg        = sanitise(n.message || '');
+                        var time       = sanitise(n.time   || '');
+                        var title      = ticketName ? ticketName + ' \u00b7 ' + typeLabel : typeLabel;
+                        return '<div class="notif-item">'
+                            + '<div class="notif-icon-wrap ' + cls + '"><i class="bi ' + icon + '"></i></div>'
+                            + '<div class="notif-body">'
+                            + '<div class="notif-title">' + title + '</div>'
+                            + '<div class="notif-sub">' + msg + '</div>'
+                            + '<div class="notif-time-text">' + time + '</div>'
+                            + '</div>'
+                            + '<div class="notif-dot ' + cls + '"></div>'
+                            + '</div>';
+                    }).join('');
+                }
+                function loadNotifications() {
+                    fetch('/customer_support/customer/notifications', { method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) { renderNotifications(data.notifications || []); })
+                    .catch(function () { renderNotifications([]); });
+                }
+                loadNotifications();
+                setInterval(loadNotifications, 30000);
+            })();
+            //]]>
             </script>
 
             <!-- ── TICKET DETAIL MODAL ───────────────────────────────────── -->

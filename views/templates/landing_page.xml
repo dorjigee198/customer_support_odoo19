@@ -18,6 +18,22 @@
             
             <!-- Landing Page Content -->
             <div class="minimal-landing">
+                <!-- Premium Welcome Curtain -->
+                <div id="welcomeCurtain" class="welcome-curtain" aria-hidden="true">
+                    <div class="curtain-panel curtain-left"></div>
+                    <div class="curtain-panel curtain-right"></div>
+                    <div class="curtain-rope-wrap">
+                        <div class="curtain-rope"></div>
+                        <div class="curtain-tassel"></div>
+                        <button id="curtainRing" class="curtain-ring" type="button" aria-label="Open curtain"></button>
+                    </div>
+                    <div class="curtain-center-mark">
+                        <p class="curtain-overline">WELCOME TO</p>
+                        <h2 class="curtain-title">Dragon Support</h2>
+                        <p class="curtain-instruction">Pull the gold ring to enter</p>
+                    </div>
+                </div>
+
                 <!-- Animated Background with Image -->
                 <div class="background-image"></div>
                 
@@ -50,10 +66,17 @@
                         <!-- Elegant Subtitle with Quote Marks -->
                         <p class="welcome-subtitle">Your trusted partner for exceptional customer service</p>
                         
-                        <!-- Premium CTA Button with Multiple Effects -->
-                        <a href="/customer_support/login" class="get-started-btn" id="getStartedBtn">
-                            Get Started
-                        </a>
+                        <!-- CTA: Dashboard if logged in, Login if not -->
+                        <t t-if="dashboard_url">
+                            <a t-att-href="dashboard_url" class="get-started-btn" id="getStartedBtn">
+                                Go to Dashboard
+                            </a>
+                        </t>
+                        <t t-else="">
+                            <a href="/customer_support/login" class="get-started-btn" id="getStartedBtn">
+                                Get Started
+                            </a>
+                        </t>
                     </div>
                 </div>
                 
@@ -63,7 +86,96 @@
             
             <!-- Enhanced JavaScript for Interactive Effects -->
             <script type="text/javascript">
+                //<![CDATA[
                 document.addEventListener('DOMContentLoaded', function() {
+                    // Premium one-time welcome curtain
+                    const curtain = document.getElementById('welcomeCurtain');
+                    const curtainRing = document.getElementById('curtainRing');
+                    const params = new URLSearchParams(window.location.search);
+                    const forceCurtain = params.get('curtain') === '1';
+                    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    const alreadySeen = sessionStorage.getItem('cs_welcome_curtain_seen') === '1';
+
+                    if (curtain) {
+                        if ((prefersReducedMotion || alreadySeen) && !forceCurtain) {
+                            curtain.classList.add('skip');
+                            document.body.classList.add('curtain-finished');
+                        } else {
+                            if (forceCurtain) {
+                                sessionStorage.removeItem('cs_welcome_curtain_seen');
+                            }
+                            curtain.classList.add('awaiting');
+
+                            let opened = false;
+                            const openCurtain = () => {
+                                if (opened) return;
+                                opened = true;
+                                curtain.classList.remove('awaiting');
+                                curtain.classList.add('play');
+
+                                if (prefersReducedMotion) {
+                                    curtain.classList.add('done');
+                                    document.body.classList.add('curtain-finished');
+                                    sessionStorage.setItem('cs_welcome_curtain_seen', '1');
+                                    return;
+                                }
+
+                                setTimeout(() => {
+                                    curtain.classList.add('done');
+                                    document.body.classList.add('curtain-finished');
+                                    sessionStorage.setItem('cs_welcome_curtain_seen', '1');
+                                }, 2400);
+                            };
+
+                            if (curtainRing) {
+                                let pulling = false;
+                                let startY = 0;
+                                let deltaY = 0;
+
+                                const resetPull = function() {
+                                    pulling = false;
+                                    deltaY = 0;
+                                    curtainRing.classList.remove('pulling');
+                                    curtainRing.style.transform = '';
+                                };
+
+                                curtainRing.addEventListener('pointerdown', function(e) {
+                                    if (!e.isTrusted || opened) return;
+                                    e.preventDefault();
+                                    pulling = true;
+                                    startY = e.clientY;
+                                    deltaY = 0;
+                                    curtainRing.classList.add('pulling');
+                                    curtainRing.setPointerCapture(e.pointerId);
+                                });
+
+                                curtainRing.addEventListener('pointermove', function(e) {
+                                    if (!pulling || opened) return;
+                                    deltaY = Math.max(0, Math.min(36, e.clientY - startY));
+                                    curtainRing.style.transform = 'translateY(' + deltaY + 'px)';
+                                });
+
+                                curtainRing.addEventListener('pointerup', function(e) {
+                                    if (!pulling || opened) return;
+                                    if (deltaY >= 18) {
+                                        openCurtain();
+                                    }
+                                    if (curtainRing.hasPointerCapture(e.pointerId)) {
+                                        curtainRing.releasePointerCapture(e.pointerId);
+                                    }
+                                    resetPull();
+                                });
+
+                                curtainRing.addEventListener('pointercancel', function(e) {
+                                    if (curtainRing.hasPointerCapture(e.pointerId)) {
+                                        curtainRing.releasePointerCapture(e.pointerId);
+                                    }
+                                    resetPull();
+                                });
+                            }
+                        }
+                    }
+
                     // Add ripple effect to button
                     const button = document.getElementById('getStartedBtn');
                     
@@ -129,13 +241,15 @@ if (window.innerWidth > 768) {
                     
                     // Add subtle float animation to logo on hover
                     const logoCircle = document.querySelector('.logo-circle');
-                    logoCircle.addEventListener('mouseenter', function() {
-                        this.style.animation = 'logoGlow 3s ease-in-out infinite, logoFloat 2s ease-in-out infinite';
-                    });
-                    
-                    logoCircle.addEventListener('mouseleave', function() {
-                        this.style.animation = 'logoGlow 3s ease-in-out infinite';
-                    });
+                    if (logoCircle) {
+                        logoCircle.addEventListener('mouseenter', function() {
+                            this.style.animation = 'logoGlow 3s ease-in-out infinite, logoFloat 2s ease-in-out infinite';
+                        });
+
+                        logoCircle.addEventListener('mouseleave', function() {
+                            this.style.animation = 'logoGlow 3s ease-in-out infinite';
+                        });
+                    }
                 });
                 
                 // Additional logo float animation
@@ -151,6 +265,7 @@ if (window.innerWidth > 768) {
                     }
                 `;
                 document.head.appendChild(style);
+                //]]>
             </script>
             <!-- bfcache guard: reload if browser restores this page while user is logged in,
                  triggering the server-side redirect-if-authenticated check -->

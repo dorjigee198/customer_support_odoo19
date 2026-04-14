@@ -138,14 +138,44 @@
                     .notif-header h6 i { color: #0284c7 !important; }
                     .notif-mark-read { color: #0284c7 !important; }
                     .notif-mark-read:hover { color: #0c4a6e !important; }
-                    .notif-title { color: #0c4a6e !important; }
-                    .notif-time { color: #64748b !important; }
-                    .notif-item:hover { background: #f0f9ff !important; }
                     .notif-empty { color: #475569 !important; }
                     .notif-footer { background: #f0f9ff !important; border-top: 1px solid
                     rgba(12,74,110,0.08) !important; }
                     .notif-footer a { color: #0284c7 !important; }
                     .notif-footer a:hover { color: #0c4a6e !important; }
+                    /* ── notification item — not clickable ── */
+                    .notif-item {
+                    display: flex; align-items: flex-start; gap: 0.75rem;
+                    padding: 0.75rem 1rem; border-bottom: 1px solid rgba(12,74,110,0.07);
+                    cursor: default;
+                    }
+                    .notif-item:last-child { border-bottom: none; }
+                    /* icon pill colours */
+                    .notif-icon-wrap {
+                    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+                    display: flex; align-items: center; justify-content: center; font-size: .9rem;
+                    }
+                    .notif-icon-wrap.status   { background: rgba(2,132,199,.12);  color: #0284c7; }
+                    .notif-icon-wrap.assigned { background: rgba(22,163,74,.12);  color: #16a34a; }
+                    .notif-icon-wrap.breach   { background: rgba(239,68,68,.12);  color: #ef4444; }
+                    /* body text */
+                    .notif-body { flex: 1; min-width: 0; }
+                    .notif-title {
+                    font-size: .8rem; font-weight: 700; color: #0c4a6e !important;
+                    margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+                    }
+                    .notif-sub {
+                    font-size: .78rem; color: #475569; line-height: 1.4;
+                    word-break: break-word; white-space: normal;
+                    }
+                    .notif-time-text { font-size: .7rem; color: #94a3b8; margin-top: 3px; }
+                    /* dot */
+                    .notif-dot {
+                    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 6px;
+                    }
+                    .notif-dot.status   { background: #0284c7; }
+                    .notif-dot.assigned { background: #16a34a; }
+                    .notif-dot.breach   { background: #ef4444; }
 
                     /* ── BACK BUTTON WARNING MODAL ── */
                     #logoutWarningModal {
@@ -238,6 +268,59 @@
                     background: #075985;
                     }
 
+                    /* Premium theme overrides for dashboard inline styles */
+                    .dashboard-wrapper {
+                    background:
+                    radial-gradient(circle at 14% 6%, rgba(201, 164, 92, 0.14) 0%, transparent 34%),
+                    radial-gradient(circle at 92% 92%, rgba(31, 110, 140, 0.11) 0%, transparent 36%),
+                    linear-gradient(160deg, #edf3f9 0%, #e6eef6 50%, #eff4f9 100%) !important;
+                    }
+                    .dashboard-header {
+                    background: linear-gradient(130deg, #071a2d 0%, #0d3253 46%, #18486e 100%) !important;
+                    border-bottom: 1px solid rgba(233,214,172,0.22) !important;
+                    }
+                    .nav-link.active::after {
+                    background: linear-gradient(90deg, #c9a45c 0%, #e9d6ac 100%) !important;
+                    }
+                    .btn-new-ticket {
+                    background: linear-gradient(145deg, #f0d8a5 0%, #cba461 45%, #b18947 100%) !important;
+                    color: #1b2f42 !important;
+                    }
+                    .dashboard-card,
+                    .performance-card,
+                    .report-kpi,
+                    .report-chart-card,
+                    .action-card {
+                    background: rgba(255,255,255,0.9) !important;
+                    border: 1px solid rgba(15,53,85,0.14) !important;
+                    box-shadow: 0 12px 30px rgba(8,27,43,0.12) !important;
+                    backdrop-filter: blur(8px);
+                    }
+                    .card-title,
+                    .reporting-title,
+                    .report-chart-title,
+                    .report-kpi-value,
+                    .action-content h4 {
+                    color: #0f3555 !important;
+                    }
+                    .card-title i,
+                    .reporting-title i,
+                    .report-chart-title i,
+                    .action-icon {
+                    color: #1f6e8c !important;
+                    }
+                    .action-icon,
+                    .score-badge,
+                    .day-btn.active,
+                    .print-btn,
+                    .btn-logout-now {
+                    background: linear-gradient(140deg, #103b5f 0%, #1f6e8c 100%) !important;
+                    color: #ffffff !important;
+                    }
+                    .notif-header {
+                    background: linear-gradient(90deg, rgba(31,110,140,0.11) 0%, rgba(201,164,92,0.13) 100%) !important;
+                    }
+
                 </style>
             </t>
 
@@ -299,10 +382,6 @@
                                     <i class="bi bi-plus-circle me-2"></i>New Ticket </a>
                             </div>
                             <div class="user-profile dropdown">
-
-                                <!-- 9-DOT GRID ICON -->
-                                <i class="bi bi-grid-3x3-gap-fill text-white me-2"
-                                    style="font-size: 1.2rem; cursor: pointer;"></i>
 
                                 <!-- NOTIFICATION BELL -->
                                 <div class="notif-wrap me-3">
@@ -867,16 +946,24 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         if (badge) { badge.textContent = items.length; badge.classList.remove('d-none'); }
+        var typeLabels = { status_change: 'Status Update', assigned: 'Assigned', sla_breach: 'SLA Breach' };
         notifList.innerHTML = items.map(function (n) {
-            var href = n.ticket_id ? '/customer_support/customer/ticket/' + encodeURIComponent(n.ticket_id) : '#';
-            var cls  = sanitise(n.cls  || 'status');
-            var icon = sanitise(n.icon || 'bi-bell-fill');
-            var msg  = sanitise(n.message || '');
-            var time = sanitise(n.time   || '');
-            return '<a class="notif-item" href="' + href + '">'
+            var cls       = sanitise(n.cls   || 'status');
+            var icon      = sanitise(n.icon  || 'bi-bell-fill');
+            var ticketName = sanitise(n.ticket_name || n.ticket_id || '');
+            var typeLabel  = sanitise(typeLabels[n.type] || 'Notification');
+            var msg       = sanitise(n.message || '');
+            var time      = sanitise(n.time   || '');
+            var title     = ticketName ? ticketName + ' &middot; ' + typeLabel : typeLabel;
+            return '<div class="notif-item">'
                 + '<div class="notif-icon-wrap ' + cls + '"><i class="bi ' + icon + '"></i></div>'
-                + '<div class="notif-body"><div class="notif-title">' + msg + '</div><div class="notif-time">' + time + '</div></div>'
-                + '<div class="notif-dot ' + cls + '"></div></a>';
+                + '<div class="notif-body">'
+                +   '<div class="notif-title">' + title + '</div>'
+                +   '<div class="notif-sub">' + msg + '</div>'
+                +   '<div class="notif-time-text">' + time + '</div>'
+                + '</div>'
+                + '<div class="notif-dot ' + cls + '"></div>'
+                + '</div>';
         }).join('');
     }
     function loadNotifications() {
@@ -1054,6 +1141,8 @@ window.addEventListener('pageshow', function (e) {
 });
                 //]]>
             </script>
+        <!-- Session timeout tracker -->
+        <script type="text/javascript" src="/customer_support/static/src/js/session_timeout.js"></script>
         </t>
     </template>
 </odoo>

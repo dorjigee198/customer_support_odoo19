@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Set server-side session inactivity to 1 hour (3600 seconds).
+         noupdate=1 means this only applies on first install, not on every upgrade,
+         so admins can change it via Settings > Technical > Parameters without it
+         being overwritten. -->
+    <record id="session_inactivity_param" model="ir.config_parameter">
+        <field name="key">web.session_inactivity</field>
+        <field name="value">3600</field>
+    </record>
+</odoo>

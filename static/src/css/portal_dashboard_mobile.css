@@ -63,7 +63,7 @@
     width: 78vw;
     max-width: 300px;
     height: 100%;
-    background: #0d2240;
+    background: linear-gradient(170deg, #071a2d 0%, #0b2a45 54%, #123a5a 100%);
     z-index: 1050;
     transform: translateX(-100%);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -90,7 +90,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 1rem 1.1rem;
-    background: #1a3a5c;
+    background: linear-gradient(100deg, rgba(31, 110, 140, 0.28) 0%, rgba(201, 164, 92, 0.2) 100%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     flex-shrink: 0;
 }
@@ -99,7 +99,7 @@
     width: 36px;
     height: 36px;
     border-radius: 9px;
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    background: linear-gradient(145deg, #cba461 0%, #b48d4d 100%);
     border: none;
     display: flex;
     align-items: center;
@@ -107,7 +107,7 @@
     font-size: 1rem;
     color: #ffffff;
     flex-shrink: 0;
-    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.45);
+    box-shadow: 0 6px 14px rgba(6, 21, 35, 0.4);
 }
 
 .portal-drawer-brand-text {
@@ -212,10 +212,10 @@
 
 .portal-nav-item.active {
     background: linear-gradient(135deg,
-                rgba(37, 99, 235, 0.28),
-                rgba(29, 78, 216, 0.18));
-    border-color: rgba(59, 130, 246, 0.38);
-    box-shadow: 0 2px 14px rgba(37, 99, 235, 0.14);
+                rgba(31, 110, 140, 0.3),
+                rgba(201, 164, 92, 0.2));
+    border-color: rgba(201, 164, 92, 0.4);
+    box-shadow: 0 2px 14px rgba(6, 25, 40, 0.22);
     color: #ffffff;
 }
 
@@ -227,14 +227,14 @@
     top: 18%;
     bottom: 18%;
     width: 3px;
-    background: #3b82f6;
+    background: #c9a45c;
     border-radius: 0 3px 3px 0;
 }
 
 .portal-nav-item.active .portal-nav-item-icon {
-    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    background: linear-gradient(145deg, #cba461 0%, #b48d4d 100%);
     color: #ffffff;
-    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.45);
+    box-shadow: 0 4px 12px rgba(6, 21, 35, 0.38);
 }
 
 /* Icon bubble */
@@ -297,7 +297,7 @@
 }
 
 .portal-nav-item.active .portal-nav-item-arrow {
-    color: rgba(59, 130, 246, 0.65);
+    color: rgba(233, 214, 172, 0.75);
 }
 
 /* ── DIVIDER ─────────────────────────────────────────────────*/

@@ -2,6 +2,13 @@
    TICKETS LIST — Professional table-style layout
    ============================================================ */
 
+:root {
+    --cs-primary: #0f3555;
+    --cs-accent: #1f6e8c;
+    --cs-gold: #c9a45c;
+    --cs-border: rgba(15, 53, 85, 0.14);
+}
+
 .dashboard-content {
     padding: 1.5rem 2rem;
     max-width: 1400px;
@@ -20,11 +27,11 @@
 .page-title {
     font-size: 1.35rem;
     font-weight: 700;
-    color: #0c4a6e;
+    color: var(--cs-primary);
     margin: 0;
 }
 
-.page-title i { color: #0284c7; }
+.page-title i { color: var(--cs-accent); }
 
 .page-stats {
     display: flex;
@@ -56,9 +63,9 @@
     gap: .3rem;
     padding: .38rem .85rem;
     border-radius: 8px;
-    border: 1px solid rgba(12,74,110,.2);
+    border: 1px solid rgba(15,53,85,.2);
     background: rgba(255,255,255,.6);
-    color: #0c4a6e;
+    color: var(--cs-primary);
     font-size: .82rem;
     font-weight: 600;
     cursor: pointer;
@@ -66,15 +73,19 @@
 }
 
 .view-btn:hover { background: rgba(255,255,255,.9); border-color: rgba(12,74,110,.35); }
-.view-btn.active { background: #0c4a6e; color: #fff; border-color: #0c4a6e; }
+.view-btn.active {
+    background: linear-gradient(140deg, #103b5f 0%, #1f6e8c 100%);
+    color: #fff;
+    border-color: #154869;
+}
 
 /* ── Search bar ──────────────────────────────────────────── */
 .search-container {
-    background: #fff;
+    background: rgba(255, 255, 255, 0.94);
     border-radius: 10px;
     padding: .75rem 1rem;
-    border: 1px solid rgba(12,74,110,.1);
-    box-shadow: 0 2px 8px rgba(12,74,110,.05);
+    border: 1px solid var(--cs-border);
+    box-shadow: 0 8px 20px rgba(8, 27, 43, 0.08);
     margin-bottom: 1rem;
 }
 
@@ -111,6 +122,11 @@
 }
 
 #clear-search:hover { background: #0c4a6e; color: #fff; border-color: #0c4a6e; }
+#clear-search:hover {
+    background: linear-gradient(140deg, #103b5f 0%, #1f6e8c 100%);
+    color: #fff;
+    border-color: #154869;
+}
 
 /* ── Filter bar ──────────────────────────────────────────── */
 .filter-container {
@@ -118,11 +134,11 @@
     align-items: center;
     gap: .75rem;
     flex-wrap: wrap;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.94);
     border-radius: 10px;
     padding: .6rem 1rem;
-    border: 1px solid rgba(12,74,110,.1);
-    box-shadow: 0 2px 8px rgba(12,74,110,.05);
+    border: 1px solid var(--cs-border);
+    box-shadow: 0 8px 20px rgba(8, 27, 43, 0.08);
     margin-bottom: 1.25rem;
 }
 
@@ -152,11 +168,23 @@
 
 /* ── Tickets container ───────────────────────────────────── */
 .tickets-container {
-    background: #fff;
+    background: rgba(255, 255, 255, 0.96);
     border-radius: 12px;
-    border: 1px solid rgba(12,74,110,.1);
-    box-shadow: 0 4px 16px rgba(12,74,110,.07);
+    border: 1px solid var(--cs-border);
+    box-shadow: 0 12px 30px rgba(8, 27, 43, 0.1);
     overflow: hidden;
+}
+
+/* Fixed-height scrollable list — height never changes regardless of filter results */
+#tickets-list {
+    height: calc(100vh - 370px);
+    min-height: 320px;
+    overflow-y: auto;
+}
+
+/* Class-based hiding — never touches inline display so grid layout is preserved */
+.ticket-card.tl-filtered-out {
+    display: none !important;
 }
 
 /* ── Table header row ────────────────────────────────────── */
@@ -165,7 +193,7 @@
     grid-template-columns: 120px 1fr 110px 90px 160px 140px;
     gap: 0 1rem;
     padding: .6rem 1.25rem;
-    background: #f1f5f9;
+    background: linear-gradient(90deg, rgba(31, 110, 140, 0.08) 0%, rgba(201, 164, 92, 0.12) 100%);
     border-bottom: 2px solid #e2e8f0;
     font-size: .72rem;
     font-weight: 700;
@@ -187,7 +215,9 @@
 }
 
 .ticket-card:last-child { border-bottom: none; }
-.ticket-card:hover { background: #f0f9ff; }
+.ticket-card:hover {
+    background: linear-gradient(90deg, rgba(31, 110, 140, 0.08) 0%, rgba(201, 164, 92, 0.08) 100%);
+}
 
 /* ── Columns ─────────────────────────────────────────────── */
 .tl-col-id {
@@ -201,8 +231,8 @@
     font-family: 'Courier New', monospace;
     font-size: .78rem;
     font-weight: 700;
-    color: #0284c7;
-    background: #e0f2fe;
+    color: var(--cs-primary);
+    background: linear-gradient(90deg, rgba(31, 110, 140, 0.12) 0%, rgba(201, 164, 92, 0.16) 100%);
     padding: .18rem .55rem;
     border-radius: 5px;
     white-space: nowrap;
@@ -221,7 +251,7 @@
 .tl-subject {
     font-size: .875rem;
     font-weight: 600;
-    color: #0c4a6e;
+    color: var(--cs-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -355,5 +385,3 @@
 }
 
 .ticket-card { animation: tlFadeIn .25s ease-out both; }
-
-.dropdown-menu.show { animation: tlFadeIn .15s ease; }

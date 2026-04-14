@@ -251,13 +251,14 @@ class CustomerSupportCustomer(http.Controller):
 
                 items.append(
                     {
-                        "id": n.id,
-                        "ticket_id": n.ticket_id.id if n.ticket_id else None,
-                        "message": n.message or "",
-                        "type": n.notification_type,
-                        "icon": type_meta["icon"],
-                        "cls": type_meta["cls"],
-                        "time": time_str,
+                        "id":          n.id,
+                        "ticket_id":   n.ticket_id.id if n.ticket_id else None,
+                        "ticket_name": n.ticket_name or "",
+                        "message":     n.message or "",
+                        "type":        n.notification_type,
+                        "icon":        type_meta["icon"],
+                        "cls":         type_meta["cls"],
+                        "time":        time_str,
                     }
                 )
 

@@ -1196,6 +1196,56 @@ body {
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.5px;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.ticket-table .ta-th-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    line-height: 1;
+}
+
+.ticket-table .ta-th-inner i {
+    width: 14px;
+    text-align: center;
+    color: #475569;
+    font-size: 0.82rem;
+    transform: translateY(-1px);
+}
+
+.ticket-table .ta-col-sl {
+    width: 5%;
+    min-width: 76px;
+}
+
+.ticket-table .ta-col-ticket {
+    width: 18%;
+}
+
+.ticket-table .ta-col-client {
+    width: 13%;
+}
+
+.ticket-table .ta-col-priority {
+    width: 8%;
+}
+
+.ticket-table .ta-col-status {
+    width: 8%;
+}
+
+.ticket-table .ta-col-created {
+    width: 13%;
+}
+
+.ticket-table .ta-col-assigned {
+    width: 12%;
+}
+
+.ticket-table .ta-col-action {
+    width: 23%;
 }
 
 .ticket-table tbody td {
@@ -1260,38 +1310,66 @@ body {
    STATUS BADGES
    ======================================== */
 .status-badge {
-    padding: 0.35rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    font-size: 0.78rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    display: inline-block;
+    text-transform: capitalize;
+    letter-spacing: 0;
+}
+
+.status-badge::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #94a3b8;
+    flex-shrink: 0;
 }
 
 .status-new {
-    background: #dbeafe;
     color: #1e40af;
 }
 
+.status-new::before {
+    background: #3b82f6;
+}
+
 .status-assigned {
-    background: #fef3c7;
     color: #92400e;
 }
 
+.status-assigned::before {
+    background: #f59e0b;
+}
+
 .status-in_progress {
-    background: #e0e7ff;
     color: #3730a3;
 }
 
+.status-in_progress::before {
+    background: #6366f1;
+}
+
 .status-resolved {
-    background: #d1fae5;
     color: #065f46;
 }
 
+.status-resolved::before {
+    background: #10b981;
+}
+
 .status-closed {
-    background: #e5e7eb;
     color: #374151;
+}
+
+.status-closed::before {
+    background: #6b7280;
 }
 
 /* ========================================
@@ -1473,6 +1551,124 @@ body {
 }
 
 /* ========================================
+   ADMIN TICKET QUICK VIEW MODAL
+   ======================================== */
+.admin-ticket-modal .modal-content {
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.22);
+    overflow: hidden;
+}
+
+.admin-ticket-modal .modal-dialog {
+    max-width: 880px;
+}
+
+.admin-ticket-modal .modal-header {
+    background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 1.2rem;
+}
+
+.admin-ticket-modal .modal-body {
+    padding: 1.2rem;
+    background: #fbfdff;
+}
+
+.aqv-loading {
+    text-align: center;
+    color: #64748b;
+    font-size: 0.9rem;
+    padding: 1.25rem 0;
+}
+
+.aqv-loading i {
+    display: inline-block;
+    margin-right: 0.45rem;
+    animation: aqvSpin 0.8s linear infinite;
+}
+
+@keyframes aqvSpin {
+    to { transform: rotate(360deg); }
+}
+
+.aqv-info-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.7rem 0.85rem;
+}
+
+.aqv-label {
+    font-size: 0.7rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+
+.aqv-value {
+    font-size: 0.86rem;
+    color: #0f172a;
+    font-weight: 600;
+}
+
+.aqv-section {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.85rem;
+}
+
+.aqv-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.55rem;
+}
+
+.aqv-description {
+    color: #334155;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    max-height: 220px;
+    overflow: auto;
+}
+
+.aqv-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.aqv-attach-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: #f8fafc;
+    border: 1px solid #dbe3ee;
+    border-radius: 8px;
+    padding: 0.4rem 0.6rem;
+    text-decoration: none;
+    color: #1e3a8a;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.aqv-attach-item:hover {
+    background: #eef4ff;
+    border-color: #bfd3ff;
+    color: #1d4ed8;
+}
+
+.modal-backdrop.show {
+    background-color: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(4px);
+}
+
+/* ========================================
    DROPDOWN MENU
    ======================================== */
 .dropdown-menu {
@@ -1500,6 +1696,26 @@ body {
 .dropdown-divider {
     margin: 0.5rem 0;
     border-color: #e0f2fe !important;
+}
+
+.auto-assign-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 0.6rem;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95), 0 0 0 3px rgba(148, 163, 184, 0.32);
+}
+
+.auto-assign-dot.is-on {
+    background: #22c55e;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95), 0 0 0 3px rgba(34, 197, 94, 0.35);
+}
+
+.auto-assign-dot.is-off {
+    background: #ef4444;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.95), 0 0 0 3px rgba(239, 68, 68, 0.28);
 }
 
 /* ========================================

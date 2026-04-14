@@ -9,3 +9,4 @@ from . import knowledge_chunk
 from . import ir_http
 from . import ticket_log
 from . import ticket_board
+from . import project_report

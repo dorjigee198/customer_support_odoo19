@@ -196,11 +196,11 @@ body {
     max-width: 75%;
     border-radius: var(--radius-lg);
     position: relative;
-    animation: fadeIn 0.3s ease-out;
+    animation: chatbotFadeIn 0.3s ease-out;
     line-height: 1.5;
 }
 
-@keyframes fadeIn {
+@keyframes chatbotFadeIn {
     from {
         opacity: 0;
         transform: translateY(10px);
