@@ -455,7 +455,7 @@
                                 </div>
                                 <div class="quick-actions mt-4">
                                     <div class="actions-grid">
-                                        <a href="/customer_support/admin_dashboard/users"
+                                        <a href="/customer_support/admin_dashboard?tab=user-management"
                                             class="action-card">
                                             <div class="action-icon">
                                                 <i class="bi bi-people-fill"></i>
@@ -914,13 +914,47 @@
                                             class="card-header d-flex justify-content-between align-items-center">
                                             <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>System
                                                 Users</h5>
-                                            <a href="/customer_support/admin_dashboard/users"
+                                            <a href="/customer_support/admin_dashboard/create_user"
                                                 class="btn btn-primary btn-sm"><i
                                                     class="bi bi-person-plus me-2"></i>Add New User</a>
                                         </div>
                                         <div class="card-body">
+                                            <t t-if="request.params.get('success')">
+                                                <div
+                                                    class="alert alert-success alert-dismissible fade show mb-3"
+                                                    role="alert">
+                                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                                    <t t-esc="request.params.get('success')" />
+                                                    <button type="button" class="btn-close"
+                                                        data-bs-dismiss="alert"></button>
+                                                </div>
+                                            </t>
+                                            <t t-if="request.params.get('error')">
+                                                <div
+                                                    class="alert alert-danger alert-dismissible fade show mb-3"
+                                                    role="alert">
+                                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                                                    <t t-esc="request.params.get('error')" />
+                                                    <button type="button" class="btn-close"
+                                                        data-bs-dismiss="alert"></button>
+                                                </div>
+                                            </t>
+                                            <div class="d-flex flex-wrap gap-2 mb-3" id="umRoleFilters">
+                                                <button type="button"
+                                                    class="btn btn-outline-secondary btn-sm active"
+                                                    data-role-filter="all">All Users</button>
+                                                <button type="button"
+                                                    class="btn btn-outline-secondary btn-sm"
+                                                    data-role-filter="customer">Customers</button>
+                                                <button type="button"
+                                                    class="btn btn-outline-secondary btn-sm"
+                                                    data-role-filter="focal_person">Focal Persons</button>
+                                                <button type="button"
+                                                    class="btn btn-outline-secondary btn-sm"
+                                                    data-role-filter="deactivated">Deactivated Users</button>
+                                            </div>
                                             <div class="table-responsive">
-                                                <table class="table table-hover">
+                                                <table class="table table-hover" id="umUsersTable">
                                                     <thead>
                                                         <tr>
                                                             <th><i class="bi bi-hash me-1"></i>User
@@ -938,8 +972,9 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <t t-foreach="users_data" t-as="user_item">
-                                                            <tr>
+                                                        <t t-foreach="active_users_data" t-as="user_item">
+                                                            <tr
+                                                                t-att-data-role="(user_item['role'] or '').lower().replace(' ', '_')">
                                                                 <td>
                                                                     <t t-esc="user_item['id']" />
                                                                 </td>
@@ -994,8 +1029,9 @@
                                                                     <form
                                                                         t-att-action="'/customer_support/admin_dashboard/user/%s/delete' % user_item['id']"
                                                                         method="post"
-                                                                        style="display:inline-block;"
-                                                                        onsubmit="return confirm('Are you sure?');">
+                                                                        class="js-user-delete-form"
+                                                                        t-att-data-user-name="user_item['name']"
+                                                                        style="display:inline-block;">
                                                                         <input type="hidden"
                                                                             name="csrf_token"
                                                                             t-att-value="request.csrf_token()" />
@@ -1007,9 +1043,84 @@
                                                                 </td>
                                                             </tr>
                                                         </t>
+                                                        <t t-foreach="deactivated_users_data" t-as="inactive_user">
+                                                            <tr data-role="deactivated">
+                                                                <td>
+                                                                    <t t-esc="inactive_user['id']" />
+                                                                </td>
+                                                                <td>
+                                                                    <i
+                                                                        class="bi bi-person-circle me-2 text-muted"></i>
+                                                                    <t t-esc="inactive_user['name']" />
+                                                                </td>
+                                                                <td>
+                                                                    <t t-esc="inactive_user['email']" />
+                                                                </td>
+                                                                <td>
+                                                                    <span
+                                                                        t-att-class="'badge bg-' + inactive_user['role_class']">
+                                                                        <t t-esc="inactive_user['role']" />
+                                                                    </span>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="badge bg-secondary"><i
+                                                                            class="bi bi-x-circle me-1"></i>
+                                                                        Inactive</span>
+                                                                </td>
+                                                                <td>
+                                                                    <form
+                                                                        t-att-action="'/customer_support/admin_dashboard/user/%s/toggle_active' % inactive_user['id']"
+                                                                        method="post"
+                                                                        style="display:inline-block;">
+                                                                        <input type="hidden"
+                                                                            name="csrf_token"
+                                                                            t-att-value="request.csrf_token()" />
+                                                                        <button type="submit"
+                                                                            class="btn btn-sm btn-outline-success">
+                                                                            <i
+                                                                                class="bi bi-arrow-clockwise me-1"></i>
+                                                                            Activate
+                                                                        </button>
+                                                                    </form>
+                                                                </td>
+                                                            </tr>
+                                                        </t>
+                                                        <tr id="umNoResultsRow"
+                                                            class="d-none">
+                                                            <td colspan="6"
+                                                                class="text-center text-muted py-4">
+                                                                No users found for this filter.
+                                                            </td>
+                                                        </tr>
                                                     </tbody>
                                                 </table>
                                             </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="userDeleteConfirmModal" tabindex="-1"
+                                aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 shadow">
+                                        <div class="modal-header bg-danger text-white">
+                                            <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>
+                                                Confirm User Deactivation</h5>
+                                            <button type="button" class="btn-close btn-close-white"
+                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="mb-2 fw-semibold">Are you sure you want to deactivate this user?</p>
+                                            <p class="mb-0 text-muted" id="userDeleteConfirmText"></p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-outline-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-danger"
+                                                id="confirmUserDeleteBtn">
+                                                <i class="bi bi-trash3 me-1"></i>Deactivate User
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -2296,13 +2407,60 @@ document.addEventListener('DOMContentLoaded',function(){loadWorkload();setInterv
 'use strict';
 var PL={any:'Any',low:'Low',medium:'Medium',high:'High',urgent:'Urgent'};
 var PC={any:'secondary',low:'info',medium:'primary',high:'warning',urgent:'danger'};
+function escHtml(v){return String(v||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function slaAlert(msg,type){var el=document.getElementById('slaAlert');if(!el)return;el.className='alert alert-'+(type||'success')+' mb-3';el.textContent=msg;setTimeout(function(){el.className='d-none';},4000);}
-function slaLoadPolicies(){fetch('/customer_support/sla/policies',{credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){var tb=document.getElementById('slaPoliciesBody');if(!tb)return;if(!d.policies||!d.policies.length){tb.innerHTML='<tr><td colspan="5" class="text-center text-muted py-3"><i class="bi bi-inbox me-2"></i>No SLA policies defined yet.</td></tr>';return;}tb.innerHTML=d.policies.map(function(p){return'<tr><td><strong>'+p.name+'</strong></td><td><span class="badge bg-dark">'+p.response_time+' '+p.time_unit+'</span></td><td><span class="badge bg-'+(PC[p.priority_level]||'secondary')+'">'+(PL[p.priority_level]||p.priority_level)+'</span></td><td><small class="text-muted">'+(p.description||'-')+'</small></td><td><button class="btn btn-sm btn-outline-primary me-1" onclick="slaOpenEdit('+JSON.stringify(p)+')"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger" onclick="slaDelete('+p.id+',\''+p.name+'\')"><i class="bi bi-trash3"></i></button></td></tr>';}).join('');}).catch(function(e){console.warn('SLA load failed:',e);});}
+function slaLoadPolicies(){var tb=document.getElementById('slaPoliciesBody');if(!tb)return;tb.innerHTML='<tr><td colspan="5" class="text-center text-muted py-3"><div class="spinner-border spinner-border-sm me-2" role="status"></div>Loading SLA policies...</td></tr>';fetch('/customer_support/sla/policies',{credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){return r.text().then(function(txt){return {ok:r.ok,text:txt,contentType:(r.headers.get('content-type')||'')};});}).then(function(resp){if(resp.contentType.indexOf('application/json')===-1){throw new Error('Your session may have expired. Please refresh and sign in again.');}var d={};try{d=JSON.parse(resp.text||'{}');}catch(parseErr){throw new Error('Invalid SLA response received from server.');}if(!resp.ok||d.success===false){throw new Error(d.error||('Request failed ('+(resp.ok?'unknown':'http')+')'));}if(!d.policies||!d.policies.length){tb.innerHTML='<tr><td colspan="5" class="text-center text-muted py-3"><i class="bi bi-inbox me-2"></i>No SLA policies defined yet.</td></tr>';return;}tb.innerHTML=d.policies.map(function(p){var policyPayload=encodeURIComponent(JSON.stringify(p));return'<tr><td><strong>'+escHtml(p.name)+'</strong></td><td><span class="badge bg-dark">'+escHtml(p.response_time)+' '+escHtml(p.time_unit)+'</span></td><td><span class="badge bg-'+(PC[p.priority_level]||'secondary')+'">'+escHtml(PL[p.priority_level]||p.priority_level)+'</span></td><td><small class="text-muted">'+escHtml(p.description||'-')+'</small></td><td><button class="btn btn-sm btn-outline-primary me-1 js-sla-edit" data-policy="'+policyPayload+'"><i class="bi bi-pencil"></i></button><button class="btn btn-sm btn-outline-danger js-sla-delete" data-policy-id="'+escHtml(p.id)+'" data-policy-name="'+escHtml(p.name)+'"><i class="bi bi-trash3"></i></button></td></tr>';}).join('');}).catch(function(e){console.warn('SLA load failed:',e);tb.innerHTML='<tr><td colspan="5" class="text-center text-danger py-3"><i class="bi bi-exclamation-triangle me-2"></i>'+escHtml(e.message||'Failed to load SLA policies')+'</td></tr>';slaAlert(e.message||'Failed to load SLA policies','danger');});}
 window.slaCreate=function(e){e.preventDefault();var form=document.getElementById('slaCreateForm');var data=new FormData(form);var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)data.set('csrf_token',csrf.value);fetch('/customer_support/sla/create',{method:'POST',credentials:'same-origin',body:new URLSearchParams(data)}).then(function(r){if(r.redirected||r.ok){slaAlert('SLA policy created!','success');form.reset();slaLoadPolicies();}else{slaAlert('Failed.','danger');}}).catch(function(){slaAlert('Network error.','danger');});};
 window.slaOpenEdit=function(p){document.getElementById('editSlaId').value=p.id;document.getElementById('editSlaName').value=p.name;document.getElementById('editSlaTime').value=p.response_time;document.getElementById('editSlaUnit').value=p.time_unit;document.getElementById('editSlaPriority').value=p.priority_level;document.getElementById('editSlaDesc').value=p.description||'';new bootstrap.Modal(document.getElementById('slaEditModal')).show();};
 window.slaSaveEdit=function(){var id=document.getElementById('editSlaId').value;var data=new URLSearchParams({sla_name:document.getElementById('editSlaName').value,sla_response_time:document.getElementById('editSlaTime').value,sla_time_unit:document.getElementById('editSlaUnit').value,sla_priority_level:document.getElementById('editSlaPriority').value,sla_description:document.getElementById('editSlaDesc').value});var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)data.set('csrf_token',csrf.value);fetch('/customer_support/sla/'+id+'/update',{method:'POST',credentials:'same-origin',body:data}).then(function(r){return r.json();}).then(function(d){bootstrap.Modal.getInstance(document.getElementById('slaEditModal')).hide();if(d.success){slaAlert('Updated.','success');slaLoadPolicies();}else{slaAlert('Failed:'+(d.error||'unknown'),'danger');}});};
 window.slaDelete=function(id,name){if(!confirm('Delete "'+name+'"?'))return;fetch('/customer_support/sla/'+id+'/delete',{method:'POST',credentials:'same-origin'}).then(function(r){return r.json();}).then(function(d){if(d.success){slaAlert('Deleted.','success');slaLoadPolicies();}else{slaAlert('Delete failed.','danger');}});};
-document.addEventListener('DOMContentLoaded',function(){var m=document.getElementById('ticketSettingsModal');if(m)m.addEventListener('shown.bs.modal',function(){slaLoadPolicies();});});
+document.addEventListener('DOMContentLoaded',function(){
+    var m=document.getElementById('ticketSettingsModal');
+    var slaTabBtn=document.querySelector('#ticketSettingsModal [data-bs-target="#slaTab"]');
+
+    if(m){
+        m.addEventListener('shown.bs.modal',function(){
+            if(slaTabBtn){
+                new bootstrap.Tab(slaTabBtn).show();
+            }
+            slaLoadPolicies();
+        });
+    }
+
+    if(slaTabBtn){
+        slaTabBtn.addEventListener('shown.bs.tab',function(){
+            slaLoadPolicies();
+        });
+    }
+
+    document.querySelectorAll('[data-bs-target="#ticketSettingsModal"]').forEach(function(btn){
+        btn.addEventListener('click',function(){
+            setTimeout(function(){
+                slaLoadPolicies();
+            },200);
+        });
+    });
+
+    slaLoadPolicies();
+
+    var body=document.getElementById('slaPoliciesBody');
+    if(body)body.addEventListener('click',function(e){
+        var editBtn=e.target.closest('.js-sla-edit');
+        if(editBtn){
+            var payload=editBtn.getAttribute('data-policy');
+            if(payload){
+                try{window.slaOpenEdit(JSON.parse(decodeURIComponent(payload)));}
+                catch(err){console.warn('Invalid SLA payload',err);slaAlert('Could not open SLA policy editor.','danger');}
+            }
+            return;
+        }
+
+        var delBtn=e.target.closest('.js-sla-delete');
+        if(delBtn){
+            window.slaDelete(delBtn.getAttribute('data-policy-id'),delBtn.getAttribute('data-policy-name')||'policy');
+        }
+    });
+});
 })();
 //]]>
             </script>
@@ -2427,6 +2585,74 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 //]]>
                         </script>
+
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+document.addEventListener('DOMContentLoaded',function(){
+    var filterWrap=document.getElementById('umRoleFilters');
+    var table=document.getElementById('umUsersTable');
+    var noResults=document.getElementById('umNoResultsRow');
+    if(filterWrap&&table&&noResults){
+        var userRows=Array.prototype.slice.call(table.querySelectorAll('tbody tr[data-role]'));
+
+        function applyFilter(filterValue){
+            var visibleCount=0;
+            userRows.forEach(function(row){
+                var role=row.getAttribute('data-role')||'';
+                var shouldShow=filterValue==='all'||role===filterValue;
+                row.style.display=shouldShow?'':'none';
+                if(shouldShow){visibleCount+=1;}
+            });
+            noResults.classList.toggle('d-none',visibleCount!==0);
+        }
+
+        filterWrap.addEventListener('click',function(e){
+            var btn=e.target.closest('button[data-role-filter]');
+            if(!btn){return;}
+            filterWrap.querySelectorAll('button[data-role-filter]').forEach(function(item){
+                item.classList.remove('active');
+            });
+            btn.classList.add('active');
+            applyFilter(btn.getAttribute('data-role-filter'));
+        });
+
+        applyFilter('all');
+    }
+
+    var deleteModalEl=document.getElementById('userDeleteConfirmModal');
+    var deleteMsgEl=document.getElementById('userDeleteConfirmText');
+    var confirmDeleteBtn=document.getElementById('confirmUserDeleteBtn');
+    var pendingDeleteForm=null;
+
+    if(deleteModalEl&&confirmDeleteBtn&&deleteMsgEl){
+        var deleteModal=new bootstrap.Modal(deleteModalEl);
+
+        document.querySelectorAll('.js-user-delete-form').forEach(function(form){
+            form.addEventListener('submit',function(e){
+                e.preventDefault();
+                pendingDeleteForm=form;
+                var userName=form.getAttribute('data-user-name')||'this user';
+                deleteMsgEl.textContent='User: '+userName+'. This action will archive access until the user is reactivated.';
+                deleteModal.show();
+            });
+        });
+
+        confirmDeleteBtn.addEventListener('click',function(){
+            if(pendingDeleteForm){
+                pendingDeleteForm.submit();
+            }
+        });
+
+        deleteModalEl.addEventListener('hidden.bs.modal',function(){
+            pendingDeleteForm=null;
+        });
+    }
+});
+})();
+//]]>
+            </script>
 
             <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 

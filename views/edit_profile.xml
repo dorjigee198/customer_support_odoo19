@@ -209,7 +209,8 @@
                     }
                     .ep-btn-save-photo.visible { display: inline-flex; }
                     .ep-btn-save-photo:hover { background: #0369a1; }
-                    .ep-btn-save-photo:hover { background: linear-gradient(140deg, #0f3555 0%, #195f7a 100%); }
+                    .ep-btn-save-photo:hover { background: linear-gradient(140deg, #0f3555 0%,
+                    #195f7a 100%); }
 
                     .ep-btn-primary {
                     width: 100%;

@@ -23,6 +23,7 @@ Email notifications are delegated to EmailService:
 
 import json
 import logging
+from urllib.parse import urlencode
 from datetime import timedelta
 from odoo import http, fields
 from odoo.http import request
@@ -41,6 +42,16 @@ class CustomerSupportAdminUsers(http.Controller):
 
     def _admin_notif_param_key(self):
         return f"customer_support.admin_notif_read_keys.{request.env.user.id}"
+
+    def _redirect_user_management_tab(self, success=None, error=None):
+        params = {"tab": "user-management"}
+        if success:
+            params["success"] = success
+        if error:
+            params["error"] = error
+        return werkzeug.utils.redirect(
+            f"/customer_support/admin_dashboard?{urlencode(params)}"
+        )
 
     def _load_admin_read_keys(self):
         raw = (
@@ -235,16 +246,17 @@ class CustomerSupportAdminUsers(http.Controller):
 
         all_users = (
             request.env["res.users"]
+            .with_context(active_test=False)
             .search(
                 [
                     ("id", "not in", [1, request.env.ref("base.public_user").id]),
-                    ("active", "=", True),
                 ]
             )
             .sorted(key=lambda r: r.create_date, reverse=True)
         )
 
-        users_data = []
+        active_users_data = []
+        deactivated_users_data = []
         for u in all_users:
             if u.has_group("base.group_system"):
                 role = "Admin"
@@ -259,16 +271,19 @@ class CustomerSupportAdminUsers(http.Controller):
                 role = "User"
                 role_class = "secondary"
 
-            users_data.append(
-                {
-                    "id": u.id,
-                    "name": u.name,
-                    "email": u.email or u.login,
-                    "role": role,
-                    "role_class": role_class,
-                    "active": u.active,
-                }
-            )
+            item = {
+                "id": u.id,
+                "name": u.name,
+                "email": u.email or u.login,
+                "role": role,
+                "role_class": role_class,
+                "active": u.active,
+            }
+
+            if u.active:
+                active_users_data.append(item)
+            else:
+                deactivated_users_data.append(item)
 
         return request.render(
             "customer_support.admin_dashboard",
@@ -276,7 +291,9 @@ class CustomerSupportAdminUsers(http.Controller):
                 "user": user,
                 "tickets": tickets,
                 "ticket_counts": ticket_counts,
-                "users_data": users_data,
+                "users_data": active_users_data,
+                "active_users_data": active_users_data,
+                "deactivated_users_data": deactivated_users_data,
                 "analytics": analytics,
                 "performance": performance,
                 "page_name": "admin_dashboard",
@@ -1193,34 +1210,10 @@ class CustomerSupportAdminUsers(http.Controller):
         user = request.env.user
         if not user.has_group("base.group_system"):
             return werkzeug.utils.redirect("/customer_support/dashboard")
-
-        all_users = (
-            request.env["res.users"]
-            .search(
-                [
-                    ("id", "not in", [1, request.env.ref("base.public_user").id]),
-                    ("active", "=", True),
-                ]
-            )
-            .sorted(key=lambda r: r.create_date, reverse=True)
-        )
-
-        focal_persons = all_users.filtered(lambda u: u.has_group("base.group_user"))
-        customers = all_users.filtered(
-            lambda u: u.has_group("base.group_portal")
-            and not u.has_group("base.group_user")
-        )
-
-        return request.render(
-            "customer_support.admin_users_management",
-            {
-                "user": user,
-                "focal_persons": focal_persons,
-                "customers": customers,
-                "page_name": "user_management",
-                "success": kw.get("success", ""),
-                "error": kw.get("error", ""),
-            },
+        # Legacy route kept for backward compatibility; user management now lives
+        # directly in the Admin Dashboard tab.
+        return self._redirect_user_management_tab(
+            success=kw.get("success"), error=kw.get("error")
         )
 
     # =========================================================================
@@ -1343,8 +1336,8 @@ class CustomerSupportAdminUsers(http.Controller):
             user_type_label = (
                 "Focal Person" if user_type == "focal_person" else "Customer"
             )
-            return werkzeug.utils.redirect(
-                f"/customer_support/admin_dashboard/users?success={user_type_label} created successfully"
+            return self._redirect_user_management_tab(
+                success=f"{user_type_label} created successfully"
             )
 
         except Exception as e:
@@ -1370,9 +1363,7 @@ class CustomerSupportAdminUsers(http.Controller):
 
         edit_user = request.env["res.users"].sudo().browse(user_id)
         if not edit_user.exists():
-            return werkzeug.utils.redirect(
-                "/customer_support/admin_dashboard/users?error=User not found"
-            )
+            return self._redirect_user_management_tab(error="User not found")
 
         user_type = (
             "focal_person" if edit_user.has_group("base.group_user") else "customer"
@@ -1405,9 +1396,7 @@ class CustomerSupportAdminUsers(http.Controller):
 
             edit_user = request.env["res.users"].sudo().browse(user_id)
             if not edit_user.exists():
-                return werkzeug.utils.redirect(
-                    "/customer_support/admin_dashboard/users?error=User not found"
-                )
+                return self._redirect_user_management_tab(error="User not found")
 
             post_dict = dict(post) if not isinstance(post, dict) else post
 
@@ -1467,8 +1456,8 @@ class CustomerSupportAdminUsers(http.Controller):
             edit_user.sudo().write(update_vals)
             _logger.info(f"User updated: {edit_user.name} by {current_user.name}")
 
-            return werkzeug.utils.redirect(
-                "/customer_support/admin_dashboard/users?success=User updated successfully"
+            return self._redirect_user_management_tab(
+                success="User updated successfully"
             )
 
         except Exception as e:
@@ -1497,13 +1486,11 @@ class CustomerSupportAdminUsers(http.Controller):
 
             edit_user = request.env["res.users"].sudo().browse(user_id)
             if not edit_user.exists():
-                return werkzeug.utils.redirect(
-                    "/customer_support/admin_dashboard/users?error=User not found"
-                )
+                return self._redirect_user_management_tab(error="User not found")
 
             if edit_user.id == current_user.id:
-                return werkzeug.utils.redirect(
-                    "/customer_support/admin_dashboard/users?error=Cannot deactivate yourself"
+                return self._redirect_user_management_tab(
+                    error="Cannot deactivate yourself"
                 )
 
             new_status = not edit_user.active
@@ -1511,14 +1498,14 @@ class CustomerSupportAdminUsers(http.Controller):
             status_text = "activated" if new_status else "deactivated"
             _logger.info(f"User {status_text}: {edit_user.name} by {current_user.name}")
 
-            return werkzeug.utils.redirect(
-                f"/customer_support/admin_dashboard/users?success=User {status_text} successfully"
+            return self._redirect_user_management_tab(
+                success=f"User {status_text} successfully"
             )
 
         except Exception as e:
             _logger.exception(f"Toggle user active error: {str(e)}")
-            return werkzeug.utils.redirect(
-                "/customer_support/admin_dashboard/users?error=Error updating user status"
+            return self._redirect_user_management_tab(
+                error="Error updating user status"
             )
 
     # =========================================================================
@@ -1541,25 +1528,19 @@ class CustomerSupportAdminUsers(http.Controller):
 
             edit_user = request.env["res.users"].sudo().browse(user_id)
             if not edit_user.exists():
-                return werkzeug.utils.redirect(
-                    "/customer_support/admin_dashboard/users?error=User not found"
-                )
+                return self._redirect_user_management_tab(error="User not found")
 
             if edit_user.id == current_user.id:
-                return werkzeug.utils.redirect(
-                    "/customer_support/admin_dashboard/users?error=Cannot delete yourself"
-                )
+                return self._redirect_user_management_tab(error="Cannot delete yourself")
 
             user_name = edit_user.name
             edit_user.sudo().write({"active": False})
             _logger.info(f"User archived: {user_name} by {current_user.name}")
 
-            return werkzeug.utils.redirect(
-                "/customer_support/admin_dashboard/users?success=User deleted successfully"
+            return self._redirect_user_management_tab(
+                success="User deleted successfully"
             )
 
         except Exception as e:
             _logger.exception(f"Delete user error: {str(e)}")
-            return werkzeug.utils.redirect(
-                "/customer_support/admin_dashboard/users?error=Error deleting user"
-            )
+            return self._redirect_user_management_tab(error="Error deleting user")
