@@ -41,7 +41,9 @@ class IrHttp(models.AbstractModel):
                 # returns it directly (isinstance(exc, HTTPException) → return exc)
                 redirect_resp = werkzeug.utils.redirect(redirect_url, 302)
                 exc = werkzeug.exceptions.HTTPException(response=redirect_resp)
-                exc.code = 302
+                # Do NOT set exc.code — Odoo only returns exc.get_response() when
+                # exc.code is None (see _serve_db). Setting it causes a re-raise
+                # that the website module mishandles as a missing template.
                 raise exc
             raise SessionExpiredException("Session expired")
 

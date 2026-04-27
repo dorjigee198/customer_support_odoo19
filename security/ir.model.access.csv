@@ -23,3 +23,14 @@ access_ticket_column_portal,customer_support.ticket.column.portal,model_customer
 access_ticket_task_portal,customer_support.ticket.task.portal,model_customer_support_ticket_task,base.group_portal,1,0,0,0
 access_ticket_comment_user,customer_support.ticket.comment.user,model_customer_support_ticket_comment,base.group_user,1,1,1,0
 access_ticket_comment_manager,customer_support.ticket.comment.manager,model_customer_support_ticket_comment,base.group_system,1,1,1,1
+access_project_config_user,customer_support.project.config.user,model_customer_support_project_config,base.group_user,1,1,1,0
+access_project_config_manager,customer_support.project.config.manager,model_customer_support_project_config,base.group_system,1,1,1,1
+access_ticket_log_user,customer_support.ticket.log.user,model_customer_support_ticket_log,base.group_user,1,0,0,0
+access_ticket_log_manager,customer_support.ticket.log.manager,model_customer_support_ticket_log,base.group_system,1,1,1,1
+access_notification_user,customer_support.notification.user,model_customer_support_notification,base.group_user,1,1,1,0
+access_notification_manager,customer_support.notification.manager,model_customer_support_notification,base.group_system,1,1,1,1
+access_notification_portal,customer_support.notification.portal,model_customer_support_notification,base.group_portal,1,0,0,0
+access_project_report_user,customer_support.project.report.user,model_customer_support_project_report,base.group_user,1,0,0,0
+access_project_report_manager,customer_support.project.report.manager,model_customer_support_project_report,base.group_system,1,1,1,1
+access_task_checklist_user,customer_support.task.checklist.user,model_customer_support_task_checklist,base.group_user,1,1,1,0
+access_task_checklist_manager,customer_support.task.checklist.manager,model_customer_support_task_checklist,base.group_system,1,1,1,1

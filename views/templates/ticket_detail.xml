@@ -770,7 +770,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="msg-body" t-att-data-message-id="activity.id">
-                                                        <t t-if="activity.body"><t t-raw="activity.body"/></t>
+                                                        <t t-if="activity.body"><t t-out="activity.body"/></t>
                                                         <t t-else=""><em style="color:var(--text-soft);">[Empty message]</em></t>
                                                     </div>
                                                     <div class="msg-edit-form" t-att-data-message-id="activity.id">

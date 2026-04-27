@@ -163,7 +163,7 @@ class UserProfile(http.Controller):
         auth="public",
         methods=["POST"],
         website=True,
-        csrf=False,
+        csrf=True,
     )
     def update_password(self, **post):
         """AJAX — returns JSON {success, error?}."""
@@ -202,7 +202,7 @@ class UserProfile(http.Controller):
         auth="public",
         methods=["POST"],
         website=True,
-        csrf=False,
+        csrf=True,
     )
     def update_admin_password(self, **post):
         auth_error = self._ensure_logged_in_json()
@@ -220,7 +220,7 @@ class UserProfile(http.Controller):
         auth="public",
         methods=["POST"],
         website=True,
-        csrf=False,
+        csrf=True,
     )
     def update_support_password(self, **post):
         auth_error = self._ensure_logged_in_json()
@@ -238,7 +238,7 @@ class UserProfile(http.Controller):
         auth="public",
         methods=["POST"],
         website=True,
-        csrf=False,
+        csrf=True,
     )
     def update_picture(self, **post):
         """AJAX — returns JSON {success, avatar_url?, error?}."""
@@ -275,7 +275,7 @@ class UserProfile(http.Controller):
         auth="public",
         methods=["POST"],
         website=True,
-        csrf=False,
+        csrf=True,
     )
     def update_admin_picture(self, **post):
         auth_error = self._ensure_logged_in_json()
@@ -293,7 +293,7 @@ class UserProfile(http.Controller):
         auth="public",
         methods=["POST"],
         website=True,
-        csrf=False,
+        csrf=True,
     )
     def update_support_picture(self, **post):
         auth_error = self._ensure_logged_in_json()

@@ -66,6 +66,7 @@
 
                                 <!--  Login Form  -->
                                 <form action="/customer_support/authenticate" method="post">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
 
                                     <!-- ← ADDED: passes the redirect URL through the form so
                                          after login the customer lands back on their ticket -->

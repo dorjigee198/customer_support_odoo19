@@ -279,7 +279,7 @@
                                                     </div>
                                                     <div class="message-body">
                                                         <t t-if="activity['body']">
-                                                            <t t-raw="activity['body']" />
+                                                            <t t-out="activity['body']" />
                                                         </t>
                                                         <t t-else="">
                                                             <em class="text-muted">[Empty message]</em>

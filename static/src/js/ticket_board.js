@@ -14,6 +14,7 @@
     const currentUserId= D.currentUserId;
     const publicBoard  = D.publicBoard || false;
     let   projectMembers = D.projectMembers || [];
+    let   customerConversation = D.customerConversation || [];
 
     // =========================================================
     // UTILITIES
@@ -58,6 +59,12 @@
             .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
     function escAttr(str) { return escHtml(str); }
+
+    function htmlToText(str) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = String(str || '');
+        return (tmp.textContent || tmp.innerText || '').trim();
+    }
 
     function openModal(id)  { const el = document.getElementById(id); if (el) el.classList.add('open'); }
     function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('open'); }
@@ -238,6 +245,7 @@
 
     const statusToggle   = document.getElementById('statusToggle');
     const statusDropdown = document.getElementById('statusDropdown');
+    const statusLabel    = document.getElementById('statusLabel');
 
     if (statusToggle && statusDropdown) {
         statusToggle.addEventListener('click', (e) => {
@@ -261,6 +269,9 @@
 
                 try {
                     const body = new URLSearchParams({ status: newState });
+                    if (csrf) {
+                        body.set('csrf_token', csrf);
+                    }
                     const res = await fetch(
                         `/customer_support/ticket/${ticketId}/update_status`,
                         {
@@ -278,8 +289,7 @@
                     if (data.success) {
                         const dot = statusToggle.querySelector('.tb-sdot');
                         if (dot) dot.className = `tb-sdot tb-sdot-${newState}`;
-                        const textNodes = [...statusToggle.childNodes].filter(n => n.nodeType === 3);
-                        if (textNodes.length) textNodes[0].textContent = STATUS_LABELS[newState] || newState;
+                        if (statusLabel) statusLabel.textContent = STATUS_LABELS[newState] || newState;
                         statusToggle.dataset.state = newState;
                         document.querySelectorAll('.tb-status-option').forEach(o =>
                             o.classList.toggle('active', o.dataset.state === newState)
@@ -718,6 +728,9 @@
         allDoneResolveBtn.addEventListener('click', async () => {
             try {
                 const body = new URLSearchParams({ status: 'resolved' });
+                if (csrf) {
+                    body.set('csrf_token', csrf);
+                }
                 const res = await fetch(
                     `/customer_support/ticket/${ticketId}/update_status`,
                     {
@@ -736,8 +749,7 @@
                     if (statusToggle) {
                         const dot = statusToggle.querySelector('.tb-sdot');
                         if (dot) dot.className = 'tb-sdot tb-sdot-resolved';
-                        const textNodes = [...statusToggle.childNodes].filter(n => n.nodeType === 3);
-                        if (textNodes.length) textNodes[0].textContent = 'Resolved';
+                        if (statusLabel) statusLabel.textContent = 'Resolved';
                         statusToggle.dataset.state = 'resolved';
                         document.querySelectorAll('.tb-status-option').forEach(o =>
                             o.classList.toggle('active', o.dataset.state === 'resolved')
@@ -1251,6 +1263,52 @@
 
     const customerReplySend  = document.getElementById('customerReplySend');
     const customerReplyInput = document.getElementById('customerReplyInput');
+    const customerConversationList = document.getElementById('customerConversationList');
+
+    function conversationBubbleHtml(msg) {
+        const mine = msg.is_me ? ' mine' : '';
+        const side = msg.from_customer ? 'customer' : 'focal';
+        const author = msg.from_customer ? 'Customer' : (msg.author || 'Support');
+        const initials = escHtml(msg.initials || '?');
+        const text = escHtml(htmlToText(msg.body));
+        const created = escHtml(msg.created || '');
+        return `<div class="tb-conv-item ${side}${mine}">
+            <div class="tb-conv-avatar">${initials}</div>
+            <div class="tb-conv-body">
+                <div class="tb-conv-meta">
+                    <span class="tb-conv-author">${escHtml(author)}</span>
+                    <span class="tb-conv-time">${created}</span>
+                </div>
+                <div class="tb-conv-msg">${text}</div>
+            </div>
+        </div>`;
+    }
+
+    function renderConversation(messages) {
+        if (!customerConversationList) return;
+        customerConversationList.innerHTML = '';
+        if (!messages || !messages.length) {
+            customerConversationList.innerHTML = '<div class="tb-empty-text" id="customerConversationEmpty">No customer conversation yet.</div>';
+            return;
+        }
+        messages.forEach(msg => {
+            customerConversationList.insertAdjacentHTML('beforeend', conversationBubbleHtml(msg));
+        });
+        customerConversationList.scrollTop = customerConversationList.scrollHeight;
+    }
+
+    async function refreshConversation(silent) {
+        if (publicBoard || !customerConversationList) return;
+        const res = await jsonRpc(`/customer_support/ticket/${ticketId}/conversation/messages`, {});
+        if (!res.success) {
+            if (!silent) toast(res.error || 'Failed to load conversation.', 'error');
+            return;
+        }
+        customerConversation = res.messages || [];
+        renderConversation(customerConversation);
+    }
+
+    renderConversation(customerConversation);
 
     if (customerReplySend && customerReplyInput) {
         customerReplySend.addEventListener('click', async () => {
@@ -1269,13 +1327,32 @@
             customerReplySend.innerHTML = '<i class="bi bi-send-fill me-1"></i>Send to Customer';
 
             if (res.success) {
+                const now = new Date();
+                customerConversation.push({
+                    initials: 'Me',
+                    author: 'You',
+                    body: message,
+                    created: now.toLocaleString('en-US', {
+                        month: 'short', day: '2-digit', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit', hour12: false,
+                    }).replace(',', ''),
+                    from_customer: false,
+                    is_me: true,
+                });
+                renderConversation(customerConversation);
                 customerReplyInput.value = '';
                 toast('Reply sent to customer!');
+                setTimeout(() => refreshConversation(true), 500);
             } else {
                 toast(res.error || 'Failed to send reply.', 'error');
             }
         });
     }
+
+    setInterval(() => {
+        const replyTab = document.getElementById('tab-reply');
+        if (replyTab && replyTab.classList.contains('active')) refreshConversation(true);
+    }, 20000);
 
     // =========================================================
     // INVITE TEAM MEMBER (focal/admin only)

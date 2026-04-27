@@ -46,11 +46,7 @@ class CustomerSupportProjectConfig(models.Model):
     create_date = fields.Datetime(string="Created On", readonly=True)
     write_date = fields.Datetime(string="Last Updated", readonly=True)
 
-    # SQL constraint to enforce 1-to-1 relationship
-    _sql_constraints = [
-        (
-            "unique_project_config",
-            "unique(project_id)",
-            "Each project can have only one configuration.",
-        )
-    ]
+    _unique_project_config = models.Constraint(
+        'unique(project_id)',
+        'Each project can have only one configuration.',
+    )

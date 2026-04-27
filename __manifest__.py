@@ -18,6 +18,8 @@
         "security/ir.model.access.csv",
         "data/sequence.xml",
         "data/session_config.xml",
+        "data/knowledge_processing_cron.xml",
+        "data/scheduled_actions.xml",
         "views/customer_support_views.xml",
         "views/templates/landing_page.xml",
         "views/templates/portal_login.xml",

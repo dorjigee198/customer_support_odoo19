@@ -610,6 +610,8 @@ html, body {
 .msg-edit-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 .msg-edit-actions { display: flex; gap: 0.4rem; margin-top: 0.5rem; }
 .msg-compose { padding: 1rem 1.1rem; border-top: 1px solid var(--card-border); background: #fafbfc; }
+.msg-compose form { display: flex; flex-direction: column; }
+.msg-compose form button[type="submit"] { align-self: flex-end; }
 .msg-compose-textarea { width: 100%; background: #fff; border: 1px solid var(--card-border); border-radius: var(--radius-sm); color: var(--text-dark); font-size: 0.82rem; font-family: var(--font); padding: 0.7rem 0.9rem; resize: none; margin-bottom: 0.65rem; transition: border-color 0.15s, box-shadow 0.15s; }
 .msg-compose-textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
 .msg-compose-textarea::placeholder { color: var(--text-soft); }

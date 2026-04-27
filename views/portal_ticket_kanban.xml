@@ -589,6 +589,21 @@
                                 <div class="tdm-cols-row" id="tdmCols"></div>
                             </div>
 
+                            <div class="tdm-section" id="tdmCommSection">
+                                <div class="tdm-section-title">
+                                    <i class="bi bi-chat-left-text me-1"></i>
+                                    Communication
+                                </div>
+                                <div class="tdm-msg-list" id="tdmMessages"></div>
+                                <div class="tdm-reply-box">
+                                    <textarea id="tdmReplyInput" class="tdm-reply-input" rows="3"
+                                        placeholder="Type a message to support team..."></textarea>
+                                    <button type="button" class="tdm-reply-send" id="tdmReplySend">
+                                        <i class="bi bi-send-fill"></i><span class="tdm-reply-send-label">Send</span>
+                                    </button>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
 
@@ -776,6 +791,119 @@
             .tdm-task-name { color: #475569; line-height: 1.3; }
             .tdm-col-empty { padding: 0.5rem 0.65rem; font-size: 0.75rem; color: #94a3b8; font-style: italic; }
 
+            .tdm-msg-list {
+                max-height: 260px;
+                overflow: auto;
+                border: 1px solid #e2e8f0;
+                border-radius: 10px;
+                background: #f8fafc;
+                padding: 0.65rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.55rem;
+            }
+            .tdm-msg-row {
+                display: flex;
+                align-items: flex-start;
+                gap: 0.45rem;
+            }
+            .tdm-msg-row.mine {
+                justify-content: flex-end;
+            }
+            .tdm-msg-bubble {
+                max-width: 82%;
+                padding: 0.52rem 0.62rem;
+                border-radius: 10px;
+                border: 1px solid #e5e7eb;
+                background: #fff;
+            }
+            .tdm-msg-row.mine .tdm-msg-bubble {
+                background: #e0f2fe;
+                border-color: #7dd3fc;
+            }
+            .tdm-msg-head {
+                display: flex;
+                justify-content: space-between;
+                gap: 0.5rem;
+                margin-bottom: 0.25rem;
+            }
+            .tdm-msg-author {
+                font-size: 0.76rem;
+                font-weight: 700;
+                color: #0c4a6e;
+            }
+            .tdm-msg-time {
+                font-size: 0.7rem;
+                color: #94a3b8;
+                white-space: nowrap;
+            }
+            .tdm-msg-body {
+                font-size: 0.8rem;
+                color: #334155;
+                white-space: pre-wrap;
+                word-break: break-word;
+                line-height: 1.45;
+            }
+            .tdm-msg-empty {
+                font-size: 0.78rem;
+                color: #94a3b8;
+                font-style: italic;
+                padding: 0.25rem 0;
+            }
+            .tdm-reply-box {
+                margin-top: 0.65rem;
+                position: relative;
+            }
+            .tdm-reply-input {
+                width: 100%;
+                border: 1px solid #cbd5e1;
+                border-radius: 8px;
+                padding: 0.55rem 0.7rem 2.4rem 0.7rem;
+                font-size: 0.82rem;
+                resize: vertical;
+                min-height: 86px;
+                background: #fff;
+                color: #334155;
+            }
+            .tdm-reply-input:focus {
+                outline: none;
+                border-color: #38bdf8;
+                box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.12);
+            }
+            .tdm-reply-send {
+                position: absolute;
+                right: 0.45rem;
+                bottom: 0.45rem;
+                padding: 0.38rem 0.7rem;
+                border: 0;
+                border-radius: 7px;
+                background: #0c4a6e;
+                color: #fff;
+                font-size: 0.74rem;
+                font-weight: 700;
+                cursor: pointer;
+                line-height: 1;
+                display: flex;
+                align-items: center;
+                gap: 0.34rem;
+            }
+            .tdm-reply-send:disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+
+            @media (max-width: 576px) {
+                .tdm-reply-send {
+                    padding: 0.44rem 0.5rem;
+                    min-width: 34px;
+                    justify-content: center;
+                    gap: 0;
+                }
+                .tdm-reply-send-label {
+                    display: none;
+                }
+            }
+
             /* Footer */
             .tdm-footer {
                 display: flex; align-items: center; justify-content: flex-end;
@@ -799,17 +927,46 @@
                 var panel    = overlay ? overlay.querySelector('.tdm-panel') : null;
                 var loading  = document.getElementById('tdmLoading');
                 var content  = document.getElementById('tdmContent');
+                var currentTicketId = null;
                 var csrf     = (document.cookie.match(/\bsession_id=([^;]+)/) || [])[1] || '';
 
                 function escHtml(s) {
                     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
                 }
 
+                function stripHtml(s) {
+                    var d = document.createElement('div');
+                    d.innerHTML = String(s || '');
+                    return (d.textContent || d.innerText || '').trim();
+                }
+
+                function renderMessages(items) {
+                    var host = document.getElementById('tdmMessages');
+                    if (!host) return;
+                    if (!items || !items.length) {
+                        host.innerHTML = '<div class="tdm-msg-empty">No messages yet.</div>';
+                        return;
+                    }
+                    host.innerHTML = items.map(function (m) {
+                        var mine = m.is_me ? ' mine' : '';
+                        return '<div class="tdm-msg-row' + mine + '">'
+                            + '<div class="tdm-msg-bubble">'
+                            + '<div class="tdm-msg-head"><span class="tdm-msg-author">' + escHtml(m.is_me ? 'You' : (m.author || 'Support')) + '</span><span class="tdm-msg-time">' + escHtml(m.date || '') + '</span></div>'
+                            + '<div class="tdm-msg-body">' + escHtml(stripHtml(m.body || '')) + '</div>'
+                            + '</div>'
+                            + '</div>';
+                    }).join('');
+                    host.scrollTop = host.scrollHeight;
+                }
+
                 function openTicketModal(ticketId) {
+                    currentTicketId = ticketId;
                     overlay.style.display = 'flex';
                     document.body.style.overflow = 'hidden';
                     loading.style.display = 'flex';
                     content.style.display = 'none';
+                    var ri = document.getElementById('tdmReplyInput');
+                    if (ri) ri.value = '';
 
                     fetch('/customer_support/customer/ticket/' + ticketId + '/data', {
                         method: 'POST',
@@ -893,6 +1050,8 @@
                     } else {
                         boardSec.style.display = 'none';
                     }
+
+                    renderMessages(data.messages || []);
                 }
 
                 function closeModal() {
@@ -902,6 +1061,36 @@
 
                 // Expose globally for inline handlers
                 window.openTicketModal = openTicketModal;
+
+                var sendBtn = document.getElementById('tdmReplySend');
+                var replyInput = document.getElementById('tdmReplyInput');
+                if (sendBtn && replyInput) {
+                    sendBtn.addEventListener('click', function () {
+                        var msg = (replyInput.value || '').trim();
+                        if (!currentTicketId || !msg) return;
+                        sendBtn.disabled = true;
+                        fetch('/customer_support/customer/ticket/' + currentTicketId + '/message/add', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ jsonrpc: '2.0', method: 'call', id: 1, params: { message: msg } })
+                        })
+                        .then(function (r) { return r.json(); })
+                        .then(function (resp) {
+                            var d = resp.result || {};
+                            if (!d.success) return;
+                            replyInput.value = '';
+                            return fetch('/customer_support/customer/ticket/' + currentTicketId + '/data', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ jsonrpc: '2.0', method: 'call', id: 1, params: {} })
+                            }).then(function (r) { return r.json(); }).then(function (ref) {
+                                var rd = ref.result || {};
+                                if (rd.success) fillModal(rd);
+                            });
+                        })
+                        .finally(function () { sendBtn.disabled = false; });
+                    });
+                }
 
                 document.getElementById('tdmClose').addEventListener('click', closeModal);
                 document.getElementById('tdmCloseBtn').addEventListener('click', closeModal);

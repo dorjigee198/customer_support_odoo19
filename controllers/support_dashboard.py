@@ -8,7 +8,7 @@ import json
 class SupportDashboard(http.Controller):
     # ============ ROUTE FOR UPDATING TICKET PHASE (AJAX) ============
 
-    @http.route("/customer_support/ticket/update_phase", type="json", auth="user")
+    @http.route("/customer_support/ticket/update_phase", type="jsonrpc", auth="user")
     def update_ticket_phase(self, ticket_id, new_phase, **kwargs):
         """
         AJAX endpoint to update ticket phase/state
@@ -48,7 +48,7 @@ class SupportDashboard(http.Controller):
 
     # ============ ROUTE FOR ADDING TICKET NOTES (AJAX) ============
 
-    @http.route("/customer_support/ticket/add_note", type="json", auth="user")
+    @http.route("/customer_support/ticket/add_note", type="jsonrpc", auth="user")
     def add_ticket_note(self, ticket_id, note, **kwargs):
         """
         AJAX endpoint to add internal notes to a ticket
@@ -81,7 +81,7 @@ class SupportDashboard(http.Controller):
 
     # ============ AJAX ENDPOINT FOR SEARCH ============
 
-    @http.route("/customer_support/tickets/search", type="json", auth="user")
+    @http.route("/customer_support/tickets/search", type="jsonrpc", auth="user")
     def search_tickets(self, search_term="", **kwargs):
         """AJAX endpoint for searching tickets"""
         user = request.env.user

@@ -141,10 +141,10 @@
                                     <button class="pc-alert-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
                                 </div>
                             </t>
-                            <t t-if="request.params.get('success') == '1'">
+                            <t t-if="request.params.get('success') in ['1', 'queued']">
                                 <div class="pc-alert pc-alert-success">
                                     <i class="bi bi-check-circle-fill"></i>
-                                    <span>Document uploaded successfully.</span>
+                                    <span>Document uploaded. Processing has started in the background.</span>
                                     <button class="pc-alert-close" onclick="this.parentElement.remove()"><i class="bi bi-x"></i></button>
                                 </div>
                             </t>

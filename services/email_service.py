@@ -47,8 +47,8 @@ class EmailService:
         )  # ← FIXED: removes trailing slash to prevent double // in URLs
 
     @staticmethod
-    def _send(subject, body_html, email_to):
-        """Low-level send helper. Returns True on success."""
+    def _send(subject, body_html, email_to, force_send=False):
+        """Create a mail.mail record. If force_send=True, deliver via SMTP immediately."""
         mail = (
             request.env["mail.mail"]
             .sudo()
@@ -62,7 +62,11 @@ class EmailService:
                 }
             )
         )
-        mail.send()
+        if force_send:
+            mail.send()
+            _logger.info("Mail sent immediately to %s (mail_id=%s)", email_to, mail.id)
+        else:
+            _logger.info("Mail queued for %s (mail_id=%s)", email_to, mail.id)
         return True
 
     # ── Public send methods ───────────────────────────────────────────────────
@@ -73,7 +77,7 @@ class EmailService:
         try:
             login_url = f"{EmailService._get_base_url()}/customer_support/login"
             body = render_welcome_customer(user_name, user_email, password, login_url)
-            EmailService._send("Welcome to Customer Support Portal", body, user_email)
+            EmailService._send("Welcome to Customer Support Portal", body, user_email, force_send=True)
             _logger.info(f"✓ Welcome email sent to {user_email}")
             return True
         except Exception as e:
@@ -90,6 +94,7 @@ class EmailService:
                 "Welcome to Customer Support Portal - Support Agent Account",
                 body,
                 user_email,
+                force_send=True,
             )
             _logger.info(f"✓ Agent welcome email sent to {user_email}")
             return True
@@ -115,7 +120,7 @@ class EmailService:
                 body,
                 agent_email,
             )
-            _logger.info(f"✓ Assignment email sent to {agent_email} for {ticket.name}")
+            _logger.info(f"✓ Assignment email queued for {agent_email} ({ticket.name})")
             return True
         except Exception as e:
             _logger.error(f"✗ Assignment email failed for {ticket.name}: {e}")
@@ -139,7 +144,7 @@ class EmailService:
                 body,
                 customer_email,
             )
-            _logger.info(f"✓ Customer assignment notification sent to {customer_email}")
+            _logger.info(f"✓ Customer assignment notification queued for {customer_email}")
             return True
         except Exception as e:
             _logger.error(
@@ -171,7 +176,7 @@ class EmailService:
                 customer_email,
             )
             _logger.info(
-                f"✓ Status email sent to {customer_email} ({old_status} → {new_status})"
+                f"✓ Status email queued for {customer_email} ({old_status} → {new_status})"
             )
             return True
         except Exception as e:
@@ -237,8 +242,8 @@ class EmailService:
 </body>
 </html>"""
 
-            EmailService._send(subject, body, member_email)
-            _logger.info(f"✓ Board invite sent to {member_email} for ticket {ticket.name}")
+            EmailService._send(subject, body, member_email, force_send=True)
+            _logger.info(f"✓ Board invite sent to {member_email} ({ticket.name})")
             return True
         except Exception as e:
             _logger.error(f"✗ Board invite failed for {member_email}: {e}")
@@ -283,7 +288,7 @@ class EmailService:
 </div></body></html>"""
 
             EmailService._send(subject, body, customer_email)
-            _logger.info(f"✓ Customer reply sent to {customer_email} for {ticket.name}")
+            _logger.info(f"✓ Customer reply queued for {customer_email} ({ticket.name})")
             return True
         except Exception as e:
             _logger.error(f"✗ Customer reply failed for {ticket.name}: {e}")
@@ -324,7 +329,7 @@ class EmailService:
 </div></body></html>"""
 
             EmailService._send(subject, body, user_email)
-            _logger.info(f"✓ Mention notification sent to {user_email}")
+            _logger.info(f"✓ Mention notification queued for {user_email}")
             return True
         except Exception as e:
             _logger.error(f"✗ Mention notification failed for {user_email}: {e}")

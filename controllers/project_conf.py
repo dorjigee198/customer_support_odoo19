@@ -333,7 +333,7 @@ class CustomerSupportProjectController(http.Controller):
 
     @http.route(
         "/customer_support/admin_dashboard/project_reports",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=False,
     )
@@ -386,7 +386,7 @@ class CustomerSupportProjectController(http.Controller):
 
     @http.route(
         "/customer_support/admin_dashboard/projects/get/<int:project_id>",
-        type="json",
+        type="jsonrpc",
         auth="user",
         methods=["POST"],
         csrf=True,
@@ -465,7 +465,7 @@ class CustomerSupportProjectController(http.Controller):
 
     @http.route(
         "/customer_support/admin_dashboard/focal_persons",
-        type="json",
+        type="jsonrpc",
         auth="user",
         methods=["POST"],
         csrf=True,
@@ -503,7 +503,7 @@ class CustomerSupportProjectController(http.Controller):
 
     @http.route(
         "/customer_support/admin_dashboard/projects/<int:project_id>/focal/assign",
-        type="json",
+        type="jsonrpc",
         auth="user",
         methods=["POST"],
         csrf=True,
@@ -541,7 +541,7 @@ class CustomerSupportProjectController(http.Controller):
 
     @http.route(
         "/customer_support/admin_dashboard/projects/<int:project_id>/focal/remove",
-        type="json",
+        type="jsonrpc",
         auth="user",
         methods=["POST"],
         csrf=True,
@@ -566,7 +566,7 @@ class CustomerSupportProjectController(http.Controller):
 
     @http.route(
         "/customer_support/admin_dashboard/projects/<int:project_id>/members",
-        type="json",
+        type="jsonrpc",
         auth="user",
         methods=["POST"],
         csrf=True,
@@ -592,7 +592,7 @@ class CustomerSupportProjectController(http.Controller):
 
     @http.route(
         "/customer_support/admin_dashboard/projects/<int:project_id>/members/add",
-        type="json",
+        type="jsonrpc",
         auth="user",
         methods=["POST"],
         csrf=True,
@@ -644,7 +644,7 @@ class CustomerSupportProjectController(http.Controller):
 
     @http.route(
         "/customer_support/admin_dashboard/projects/members/<int:member_id>/remove",
-        type="json",
+        type="jsonrpc",
         auth="user",
         methods=["POST"],
         csrf=True,
@@ -667,7 +667,7 @@ class CustomerSupportProjectController(http.Controller):
 
     @http.route(
         "/customer_support/admin_dashboard/projects/<int:project_id>/documents",
-        type="json",
+        type="jsonrpc",
         auth="user",
         methods=["POST"],
         csrf=True,
@@ -704,7 +704,7 @@ class CustomerSupportProjectController(http.Controller):
 
     @http.route(
         "/customer_support/admin_dashboard/documents/<int:doc_id>/delete",
-        type="json",
+        type="jsonrpc",
         auth="user",
         methods=["POST"],
         csrf=True,

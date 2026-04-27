@@ -13,6 +13,7 @@ Role-based redirection is handled after successful login.
 """
 
 import logging
+from urllib.parse import urlsplit
 from odoo import http
 from odoo.http import request
 import werkzeug
@@ -102,7 +103,7 @@ class CustomerSupportAuth(http.Controller):
         auth="public",
         methods=["POST"],
         website=True,
-        csrf=False,
+        csrf=True,
     )
     def support_authenticate(self, **post):
         """
@@ -173,10 +174,21 @@ class CustomerSupportAuth(http.Controller):
                     )
 
                 # Route to the correct dashboard based on the user's role
-                # Validate redirect_url — only allow relative /customer_support/ paths
+                # Validate redirect_url — allow only safe in-portal relative paths.
                 safe_redirect = ""
-                if redirect_url and redirect_url.startswith("/customer_support/"):
-                    safe_redirect = redirect_url
+                if redirect_url:
+                    parts = urlsplit(redirect_url)
+                    path = parts.path or ""
+                    if (
+                        not parts.scheme
+                        and not parts.netloc
+                        and path.startswith("/customer_support/")
+                        and not path.startswith("/customer_support//")
+                        and ".." not in path
+                        and "\\" not in redirect_url
+                        and "\x00" not in redirect_url
+                    ):
+                        safe_redirect = redirect_url
 
                 if user.has_group("base.group_system"):
                     request.session["customer_support_login"] = True

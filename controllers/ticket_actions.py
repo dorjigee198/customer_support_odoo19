@@ -14,13 +14,65 @@ Customer notifications are created automatically on:
 
 import json
 import logging
+import threading
+import odoo
 from odoo import http, fields
 from odoo.http import request
+from odoo.modules.registry import Registry
 import werkzeug
 
 from ..services.email_service import EmailService
+from ..services.email_templates import render_assignment_agent, render_assignment_customer
 
 _logger = logging.getLogger(__name__)
+
+
+def _bg_post_assign(dbname, ticket_id, assigned_user_id, sla_note,
+                    agent_email, agent_html, customer_email, customer_html,
+                    subject_agent, subject_customer, from_email):
+    """Background thread: chatter log + in-app notification + mail queue."""
+    try:
+        with Registry(dbname).cursor() as cr:
+            env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
+            ticket = env['customer.support'].browse(ticket_id)
+            assigned_user = env['res.users'].browse(assigned_user_id)
+            if not ticket.exists():
+                return
+
+            ticket.message_post(
+                body=f"Ticket assigned to {assigned_user.name}{sla_note}",
+                subject="Ticket Assigned",
+            )
+
+            try:
+                env['customer.support.notification'].create_notification(
+                    ticket, 'assigned',
+                    f"{ticket.name} has been assigned to {assigned_user.name}",
+                )
+            except Exception as ne:
+                _logger.warning("Background notification failed (ticket %s): %s", ticket_id, ne)
+
+            if agent_email and agent_html:
+                env['mail.mail'].sudo().create({
+                    'subject': subject_agent,
+                    'body_html': agent_html,
+                    'email_to': agent_email,
+                    'email_from': from_email,
+                    'auto_delete': False,
+                })
+            if customer_email and customer_html:
+                env['mail.mail'].sudo().create({
+                    'subject': subject_customer,
+                    'body_html': customer_html,
+                    'email_to': customer_email,
+                    'email_from': from_email,
+                    'auto_delete': False,
+                })
+            cr.commit()
+            _logger.info("Background assignment notifications done for ticket %s", ticket_id)
+    except Exception as e:
+        _logger.error("Background assignment failed (ticket %s): %s", ticket_id, e)
+
 
 STATUS_LABELS = {
     "new": "New",
@@ -65,6 +117,12 @@ class CustomerSupportTicketActions(http.Controller):
                 ticket.assigned_to.id == user.id if ticket.assigned_to else False
             )
             is_customer = ticket.customer_id.id == user.partner_id.id
+
+            # Enforce record-level access before loading related ticket data.
+            if not (is_admin or is_assigned or is_customer):
+                return werkzeug.utils.redirect(
+                    "/customer_support/dashboard?error=Access denied"
+                )
 
             focal_persons = []
             if is_admin:
@@ -171,29 +229,30 @@ class CustomerSupportTicketActions(http.Controller):
         type="http",
         auth="user",
         methods=["POST"],
-        website=True,
+        website=False,
         csrf=True,
     )
     def assign_ticket(self, ticket_id, **post):
+        def _err(msg):
+            return request.make_response(
+                json.dumps({"success": False, "error": msg}),
+                headers=[("Content-Type", "application/json")],
+            )
+
         try:
             user = request.env.user
 
             if not user.has_group("base.group_system"):
-                return werkzeug.utils.redirect(
-                    f"/customer_support/ticket/{ticket_id}?error=Access denied"
-                )
+                return _err("Access denied")
 
             ticket = request.env["customer.support"].browse(ticket_id)
             if not ticket.exists():
-                return werkzeug.utils.redirect(
-                    "/customer_support/dashboard?error=Ticket not found"
-                )
+                return _err("Ticket not found")
 
             post_dict = dict(post) if not isinstance(post, dict) else post
             assigned_to = post_dict.get("assigned_to")
             if not assigned_to:
-                return werkzeug.utils.redirect(
-                    f"/customer_support/ticket/{ticket_id}?error=Please select a user to assign"
+                return _err("Please select a user to assign"
                 )
 
             assigned_user_id = int(assigned_to)
@@ -271,42 +330,56 @@ class CustomerSupportTicketActions(http.Controller):
                 f"by {user.name}{sla_note}"
             )
 
-            ticket.message_post(
-                body=f"Ticket assigned to {assigned_user.name}{sla_note}",
-                subject="Ticket Assigned",
-                partner_ids=[assigned_user.partner_id.id],
-            )
-
-            # Customer notification
+            # Pre-render email content now (pure string ops, no SMTP, fast)
+            # so the background thread doesn't need request.env
             try:
-                request.env["customer.support.notification"].create_notification(
-                    ticket,
-                    "assigned",
-                    f"{ticket.name} has been assigned to {assigned_user.name}",
-                )
-            except Exception as ne:
-                _logger.warning(f"Could not create assignment notification: {ne}")
+                agent_email = assigned_user.email or assigned_user.login
+                customer_email = ticket.customer_id.email if ticket.customer_id else None
+                base_url = EmailService._get_base_url()
+                from_email = EmailService._get_default_email_from()
+                ticket_url = f"{base_url}/customer_support/ticket/{ticket.id}"
+                agent_html = render_assignment_agent(ticket, assigned_user, ticket_url) if agent_email else None
+                customer_html = render_assignment_customer(ticket, assigned_user, ticket_url) if customer_email else None
+                subject_agent = f"New Ticket Assigned: {ticket.name} - {ticket.subject}"
+                subject_customer = f"Your Ticket Has Been Assigned: {ticket.name}"
+            except Exception as pre_err:
+                _logger.warning("Could not pre-render assignment emails: %s", pre_err)
+                agent_email = customer_email = agent_html = customer_html = None
+                from_email = "noreply@example.com"
+                subject_agent = subject_customer = ""
 
-            # Emails
-            try:
-                EmailService.send_assignment_email(ticket, assigned_user)
-                EmailService.send_assignment_notification_to_customer(
-                    ticket, assigned_user
-                )
-            except Exception as email_error:
-                _logger.error(
-                    f"Assignment email(s) failed for ticket {ticket.name}: {str(email_error)}"
-                )
+            # Schedule background thread to run after this transaction commits
+            dbname = request.env.cr.dbname
+            tid = ticket.id
+            uid = assigned_user_id
 
-            return werkzeug.utils.redirect(
-                f"/customer_support/admin_dashboard?tab=ticket-assignment"
-                f"&success=Ticket {ticket.name} assigned successfully to {assigned_user.name}"
+            def _start_bg():
+                threading.Thread(
+                    target=_bg_post_assign,
+                    args=(dbname, tid, uid, sla_note, agent_email, agent_html,
+                          customer_email, customer_html, subject_agent,
+                          subject_customer, from_email),
+                    daemon=True,
+                ).start()
+
+            request.env.cr.postcommit.add(_start_bg)
+
+            return request.make_response(
+                json.dumps({
+                    "success": True,
+                    "ticket_id": ticket.id,
+                    "ticket_name": ticket.name,
+                    "assigned_to": assigned_user.name,
+                    "assigned_to_id": assigned_user_id,
+                }),
+                headers=[("Content-Type", "application/json")],
             )
 
         except Exception as e:
             _logger.exception(f"Assign ticket error: {str(e)}")
-            return werkzeug.utils.redirect(
-                f"/customer_support/ticket/{ticket_id}?error=Error assigning ticket"
+            return request.make_response(
+                json.dumps({"success": False, "error": "Error assigning ticket"}),
+                headers=[("Content-Type", "application/json")],
             )
 
     # =========================================================================
@@ -319,7 +392,7 @@ class CustomerSupportTicketActions(http.Controller):
         auth="user",
         methods=["POST"],
         website=True,
-        csrf=False,
+        csrf=True,
     )
     def update_ticket_status(self, ticket_id, **post):
         def _is_ajax():

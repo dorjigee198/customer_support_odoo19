@@ -41,6 +41,7 @@ Routes for the project-based ticket management flow:
 import json
 import logging
 import secrets
+from markupsafe import Markup
 from odoo import http
 from odoo.http import request
 import werkzeug
@@ -104,6 +105,43 @@ def _log(ticket_id, event_type, summary, actor=None, detail=None, old_value=None
         request.env["customer.support.ticket.log"].sudo().create(vals)
     except Exception as e:
         _logger.warning("Board activity log failed: %s", e)
+
+
+def _conversation_messages(ticket, user, limit=80):
+    """Return customer-facing chatter entries for ticket as serializable dicts."""
+    raw_messages = (
+        request.env["mail.message"]
+        .sudo()
+        .search(
+            [
+                ("model", "=", "customer.support"),
+                ("res_id", "=", ticket.id),
+                ("message_type", "in", ["comment", "notification"]),
+                ("subtype_id.internal", "=", False),
+            ],
+            order="date asc",
+            limit=limit,
+        )
+    )
+    customer_partner_id = ticket.customer_id.id if ticket.customer_id else False
+
+    def _initials(name):
+        parts = (name or "?").split()
+        return "".join(p[0].upper() for p in parts[:2]) or "?"
+
+    return [
+        {
+            "id": m.id,
+            "author": m.author_id.name if m.author_id else "System",
+            "author_id": m.author_id.id if m.author_id else False,
+            "initials": _initials(m.author_id.name if m.author_id else "System"),
+            "body": m.body or "",
+            "created": m.date.strftime("%b %d, %Y %H:%M") if m.date else "",
+            "from_customer": bool(customer_partner_id and m.author_id.id == customer_partner_id),
+            "is_me": bool(user and m.author_id and m.author_id.id == user.partner_id.id),
+        }
+        for m in raw_messages
+    ]
 
 
 class FocalBoardController(http.Controller):
@@ -388,6 +426,8 @@ class FocalBoardController(http.Controller):
                 for c in comments_recs
             ]
 
+            customer_conversation = _conversation_messages(ticket, user)
+
             # Activity log (last 40 entries)
             log_recs = (
                 request.env["customer.support.ticket.log"]
@@ -411,15 +451,16 @@ class FocalBoardController(http.Controller):
                     "user": user,
                     "ticket": ticket,
                     "board_columns": board_columns,
-                    "board_columns_json": json.dumps(board_columns),
+                    "board_columns_json": Markup(json.dumps(board_columns)),
                     "project_members": project_members,
-                    "project_members_json": json.dumps(project_members),
+                    "project_members_json": Markup(json.dumps(project_members)),
                     "attachments": attachment_list,
                     "project_docs": project_docs,
                     "comments": comments,
+                    "customer_conversation_json": Markup(json.dumps(customer_conversation)),
                     "activity_log": activity_log,
                     "page_name": "ticket_board",
-                    "board_bg_json": json.dumps(ticket.board_bg or ''),
+                    "board_bg_json": Markup(json.dumps(ticket.board_bg or '')),
                 },
             )
 
@@ -499,17 +540,18 @@ class FocalBoardController(http.Controller):
                     "user": None,
                     "ticket": ticket,
                     "board_columns": board_columns,
-                    "board_columns_json": json.dumps(board_columns),
+                    "board_columns_json": Markup(json.dumps(board_columns)),
                     "project_members": [],
-                    "project_members_json": "[]",
+                    "project_members_json": Markup("[]"),
                     "attachments": [],
                     "project_docs": project_docs,
                     "comments": [],
+                    "customer_conversation_json": Markup("[]"),
                     "activity_log": [],
                     "page_name": "ticket_board",
                     "public_board": True,
                     "board_token": token,
-                    "board_bg_json": json.dumps(ticket.board_bg or ''),
+                    "board_bg_json": Markup(json.dumps(ticket.board_bg or '')),
                 },
             )
 
@@ -523,7 +565,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/<int:ticket_id>/board/column/add",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -561,7 +603,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/column/<int:column_id>/rename",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -593,7 +635,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/column/<int:column_id>/delete",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -616,7 +658,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/project_member/<int:member_id>/set_role",
-        type="json", auth="user", csrf=True,
+        type="jsonrpc", auth="user", csrf=True,
     )
     def set_member_role(self, member_id, **kw):
         try:
@@ -635,7 +677,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/<int:ticket_id>/board/set_bg",
-        type="json", auth="user", csrf=True,
+        type="jsonrpc", auth="user", csrf=True,
     )
     def set_board_bg(self, ticket_id, **kw):
         try:
@@ -651,7 +693,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/<int:ticket_id>/columns/reorder",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -676,7 +718,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/column/<int:column_id>/task/add",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -726,7 +768,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/task/<int:task_id>/toggle",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -750,7 +792,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/task/<int:task_id>/update",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -803,7 +845,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/task/<int:task_id>/delete",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -830,7 +872,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/task/<int:task_id>/move",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -869,7 +911,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/<int:ticket_id>/comment/add",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -943,7 +985,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/my_projects/<int:project_id>/members_json",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -985,7 +1027,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/<int:ticket_id>/board/invite",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -1062,7 +1104,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/<int:ticket_id>/activity_log",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=False,
     )
@@ -1096,7 +1138,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/<int:ticket_id>/reply_customer",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -1116,6 +1158,13 @@ class FocalBoardController(http.Controller):
                 return {"error": "Customer has no email address on file"}
 
             EmailService.send_customer_reply(ticket, message, request.env.user.name)
+            # Persist the same reply in the ticket chatter so it is visible in customer detail views.
+            ticket.message_post(
+                body=message,
+                message_type="comment",
+                subtype_xmlid="mail.mt_comment",
+                author_id=request.env.user.partner_id.id,
+            )
             short_msg = (message[:60] + "…") if len(message) > 60 else message
             _log(ticket_id, "board_reply",
                  f'{request.env.user.name} sent a reply to customer',
@@ -1126,13 +1175,38 @@ class FocalBoardController(http.Controller):
             _logger.error("reply_customer error: %s", e)
             return {"error": str(e)}
 
+    @http.route(
+        "/customer_support/ticket/<int:ticket_id>/conversation/messages",
+        type="jsonrpc",
+        auth="user",
+        csrf=True,
+    )
+    def conversation_messages(self, ticket_id, **kw):
+        """Return ticket conversation thread for focal-side chat UI."""
+        try:
+            user = request.env.user
+            if not _require_focal(user):
+                return {"success": False, "error": "Access denied"}
+
+            ticket = request.env["customer.support"].sudo().browse(ticket_id)
+            if not ticket.exists():
+                return {"success": False, "error": "Ticket not found"}
+
+            return {
+                "success": True,
+                "messages": _conversation_messages(ticket, user),
+            }
+        except Exception as e:
+            _logger.error("conversation_messages error: %s", e)
+            return {"success": False, "error": str(e)}
+
     # =========================================================================
     # TASK CHECKLIST CRUD
     # =========================================================================
 
     @http.route(
         "/customer_support/ticket/task/<int:task_id>/checklist/add",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -1168,7 +1242,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/task/checklist/<int:item_id>/toggle",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )
@@ -1190,7 +1264,7 @@ class FocalBoardController(http.Controller):
 
     @http.route(
         "/customer_support/ticket/task/checklist/<int:item_id>/delete",
-        type="json",
+        type="jsonrpc",
         auth="user",
         csrf=True,
     )

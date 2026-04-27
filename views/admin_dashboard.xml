@@ -455,7 +455,8 @@
                                 </div>
                                 <div class="quick-actions mt-4">
                                     <div class="actions-grid">
-                                        <a href="/customer_support/admin_dashboard?tab=user-management"
+                                        <a
+                                            href="/customer_support/admin_dashboard?tab=user-management"
                                             class="action-card">
                                             <div class="action-icon">
                                                 <i class="bi bi-people-fill"></i>
@@ -939,7 +940,8 @@
                                                         data-bs-dismiss="alert"></button>
                                                 </div>
                                             </t>
-                                            <div class="d-flex flex-wrap gap-2 mb-3" id="umRoleFilters">
+                                            <div class="d-flex flex-wrap gap-2 mb-3"
+                                                id="umRoleFilters">
                                                 <button type="button"
                                                     class="btn btn-outline-secondary btn-sm active"
                                                     data-role-filter="all">All Users</button>
@@ -972,7 +974,8 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <t t-foreach="active_users_data" t-as="user_item">
+                                                        <t t-foreach="active_users_data"
+                                                            t-as="user_item">
                                                             <tr
                                                                 t-att-data-role="(user_item['role'] or '').lower().replace(' ', '_')">
                                                                 <td>
@@ -1043,7 +1046,8 @@
                                                                 </td>
                                                             </tr>
                                                         </t>
-                                                        <t t-foreach="deactivated_users_data" t-as="inactive_user">
+                                                        <t t-foreach="deactivated_users_data"
+                                                            t-as="inactive_user">
                                                             <tr data-role="deactivated">
                                                                 <td>
                                                                     <t t-esc="inactive_user['id']" />
@@ -1054,12 +1058,14 @@
                                                                     <t t-esc="inactive_user['name']" />
                                                                 </td>
                                                                 <td>
-                                                                    <t t-esc="inactive_user['email']" />
+                                                                    <t
+                                                                        t-esc="inactive_user['email']" />
                                                                 </td>
                                                                 <td>
                                                                     <span
                                                                         t-att-class="'badge bg-' + inactive_user['role_class']">
-                                                                        <t t-esc="inactive_user['role']" />
+                                                                        <t
+                                                                            t-esc="inactive_user['role']" />
                                                                     </span>
                                                                 </td>
                                                                 <td>
@@ -1079,8 +1085,7 @@
                                                                             class="btn btn-sm btn-outline-success">
                                                                             <i
                                                                                 class="bi bi-arrow-clockwise me-1"></i>
-                                                                            Activate
-                                                                        </button>
+                                                                            Activate </button>
                                                                     </form>
                                                                 </td>
                                                             </tr>
@@ -1105,13 +1110,15 @@
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content border-0 shadow">
                                         <div class="modal-header bg-danger text-white">
-                                            <h5 class="modal-title"><i class="bi bi-exclamation-triangle me-2"></i>
+                                            <h5 class="modal-title"><i
+                                                    class="bi bi-exclamation-triangle me-2"></i>
                                                 Confirm User Deactivation</h5>
                                             <button type="button" class="btn-close btn-close-white"
                                                 data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <p class="mb-2 fw-semibold">Are you sure you want to deactivate this user?</p>
+                                            <p class="mb-2 fw-semibold">Are you sure you want to
+                                                deactivate this user?</p>
                                             <p class="mb-0 text-muted" id="userDeleteConfirmText"></p>
                                         </div>
                                         <div class="modal-footer">
@@ -1119,8 +1126,7 @@
                                                 data-bs-dismiss="modal">Cancel</button>
                                             <button type="button" class="btn btn-danger"
                                                 id="confirmUserDeleteBtn">
-                                                <i class="bi bi-trash3 me-1"></i>Deactivate User
-                                            </button>
+                                                <i class="bi bi-trash3 me-1"></i>Deactivate User </button>
                                         </div>
                                     </div>
                                 </div>
@@ -2693,7 +2699,7 @@ document.addEventListener('DOMContentLoaded',function(){
 var CAT_LABELS={company:'Company Info',services:'Services & Products',projects:'Projects',pricing:'Pricing',technical:'Technical Docs',faq:'FAQ',other:'Other'};
 function kbAlert(msg,type){var el=document.getElementById('kbAlert');if(!el)return;el.className='alert alert-'+(type||'success')+' mb-3';el.textContent=msg;el.classList.remove('d-none');setTimeout(function(){el.classList.add('d-none');},4000);}
 function kbLoadDocs(){fetch('/customer_support/knowledge/list',{credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).then(function(data){var docs=data.documents||[];document.getElementById('kbTotalDocs').textContent=docs.length;document.getElementById('kbReadyDocs').textContent=docs.filter(function(d){return d.state==='ready';}).length;document.getElementById('kbPendingDocs').textContent=docs.filter(function(d){return d.state==='pending';}).length;document.getElementById('kbErrorDocs').textContent=docs.filter(function(d){return d.state==='error';}).length;var tb=document.getElementById('kbDocsBody');if(!docs.length){tb.innerHTML='<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-folder2-open me-2"></i>No documents uploaded yet. Upload your first document above.</td></tr>';return;}tb.innerHTML=docs.map(function(d){var stateBadge=d.state==='ready'?'<span class="badge bg-success">&#x2705; Ready</span>':d.state==='error'?'<span class="badge bg-danger" title="'+(d.error_msg||'')+'">&#x274C; Error</span>':'<span class="badge bg-warning text-dark">&#x23F3; Pending</span>';var typeBadge={pdf:'<span class="badge bg-danger">PDF</span>',docx:'<span class="badge bg-primary">DOCX</span>',txt:'<span class="badge bg-success">TXT</span>',xlsx:'<span class="badge bg-info text-dark">XLSX</span>'}[d.file_type]||'<span class="badge bg-secondary">FILE</span>';return'<tr><td><strong>'+d.name+'</strong>'+(d.description?'<br><small class="text-muted">'+d.description+'</small>':'')+'</td><td><span class="badge bg-secondary">'+(CAT_LABELS[d.category]||d.category)+'</span></td><td>'+typeBadge+'</td><td>'+stateBadge+'</td><td class="text-center fw-bold text-primary">'+(d.chunk_count||0)+'</td><td><small class="text-muted">'+(d.create_date||'')+'</small></td><td><button class="btn btn-sm btn-outline-danger" onclick="kbDelete('+d.id+',\''+d.name.replace(/'/g,"\\'")+'\')" title="Delete"><i class="bi bi-trash3"></i></button></td></tr>';}).join('');}).catch(function(e){console.warn('KB load failed:',e);});}
-window.kbUpload=function(){var name=document.getElementById('kbDocName').value.trim();var category=document.getElementById('kbCategory').value;var desc=document.getElementById('kbDescription').value.trim();var fileEl=document.getElementById('kbFile');if(!name||!fileEl.files.length){kbAlert('Please fill in the document name and select a file.','warning');return;}var allowed=['.pdf','.docx','.txt','.xlsx'];var filename=fileEl.files[0].name.toLowerCase();if(!allowed.some(function(ext){return filename.endsWith(ext);})){kbAlert('Invalid file type. Allowed: PDF, DOCX, TXT, XLSX','danger');return;}var formData=new FormData();formData.append('name',name);formData.append('category',category);formData.append('description',desc);formData.append('file',fileEl.files[0]);var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);var btn=document.getElementById('kbUploadBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Processing...';}fetch('/customer_support/knowledge/upload',{method:'POST',credentials:'same-origin',body:formData}).then(function(){kbAlert('Document uploaded and processed successfully! &#x2705;','success');document.getElementById('kbDocName').value='';document.getElementById('kbDescription').value='';document.getElementById('kbFile').value='';kbLoadDocs();}).catch(function(){kbAlert('Upload failed. Please try again.','danger');}).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="bi bi-upload me-2"></i>Upload &amp; Process';}});};
+window.kbUpload=function(){var name=document.getElementById('kbDocName').value.trim();var category=document.getElementById('kbCategory').value;var desc=document.getElementById('kbDescription').value.trim();var fileEl=document.getElementById('kbFile');if(!name||!fileEl.files.length){kbAlert('Please fill in the document name and select a file.','warning');return;}var allowed=['.pdf','.docx','.txt','.xlsx'];var filename=fileEl.files[0].name.toLowerCase();if(!allowed.some(function(ext){return filename.endsWith(ext);})){kbAlert('Invalid file type. Allowed: PDF, DOCX, TXT, XLSX','danger');return;}var formData=new FormData();formData.append('name',name);formData.append('category',category);formData.append('description',desc);formData.append('file',fileEl.files[0]);var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);var btn=document.getElementById('kbUploadBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Uploading...';}fetch('/customer_support/knowledge/upload',{method:'POST',credentials:'same-origin',body:formData}).then(function(){kbAlert('Document uploaded. Processing has started in the background.','success');document.getElementById('kbDocName').value='';document.getElementById('kbDescription').value='';document.getElementById('kbFile').value='';kbLoadDocs();}).catch(function(){kbAlert('Upload failed. Please try again.','danger');}).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="bi bi-upload me-2"></i>Upload Document';}});};
 window.kbDelete=function(id,name){if(!confirm('Delete "'+name+'"?\nThe AI will no longer use this document.'))return;var formData=new FormData();var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);fetch('/customer_support/knowledge/delete/'+id,{method:'POST',credentials:'same-origin',body:formData}).then(function(){kbAlert('Document deleted.','success');kbLoadDocs();}).catch(function(){kbAlert('Delete failed.','danger');});};
 document.addEventListener('DOMContentLoaded',function(){var modal=document.getElementById('knowledgeBaseModal');if(modal)modal.addEventListener('shown.bs.modal',function(){kbLoadDocs();});});
 
@@ -3198,6 +3204,74 @@ document.addEventListener('DOMContentLoaded', function () {
 
             <!-- Session timeout tracker -->
             <script type="text/javascript" src="/customer_support/static/src/js/session_timeout.js"></script>
+
+            <!-- ASYNC ASSIGNMENT: intercept .assign-form and .mtc-assign-form -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function handleAssignForm(form){
+    form.addEventListener('submit',function(e){
+        e.preventDefault();
+
+        // Read the selected agent name immediately from the dropdown
+        var sel=form.querySelector('select[name="assigned_to"]');
+        var assignedName=sel?sel.options[sel.selectedIndex].text.trim():'';
+        if(!assignedName||!sel||!sel.value){return;}
+
+        // ── Optimistic update: show success instantly, before the request ──
+        var cell=form.closest('td,div');
+        var originalCellHtml=cell?cell.innerHTML:null;
+        if(cell){
+            cell.innerHTML='<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>'+esc(assignedName)+'</span>';
+        }
+        showToast('Assigned to '+esc(assignedName),'success');
+
+        // ── Fire request in background ────────────────────────────────────
+        var data=new FormData(form);
+        fetch(form.action,{
+            method:'POST',
+            credentials:'same-origin',
+            body:data
+        })
+        .then(function(r){return r.json();})
+        .then(function(res){
+            if(!res.success){
+                // Revert on server error
+                if(cell&&originalCellHtml!==null){cell.innerHTML=originalCellHtml;}
+                showToast(res.error||'Assignment failed — please try again','danger');
+                // Re-attach handler after revert
+                var newForm=cell&&cell.querySelector('form');
+                if(newForm){handleAssignForm(newForm);}
+            }
+        })
+        .catch(function(){
+            // Revert on network error
+            if(cell&&originalCellHtml!==null){cell.innerHTML=originalCellHtml;}
+            showToast('Network error — assignment may not have saved','danger');
+            var newForm=cell&&cell.querySelector('form');
+            if(newForm){handleAssignForm(newForm);}
+        });
+    });
+}
+
+function showToast(msg,type){
+    var t=document.createElement('div');
+    t.className='alert alert-'+type+' alert-dismissible position-fixed shadow';
+    t.style.cssText='bottom:1.5rem;right:1.5rem;z-index:9999;min-width:280px;';
+    t.innerHTML='<i class="bi bi-'+(type==='success'?'check-circle':'exclamation-triangle')+' me-2"></i>'+esc(msg)+'<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();},4000);
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+    document.querySelectorAll('.assign-form,.mtc-assign-form').forEach(handleAssignForm);
+});
+})();
+//]]>
+            </script>
         </t>
     </template>
 </odoo>

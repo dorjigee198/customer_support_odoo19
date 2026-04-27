@@ -1,0 +1,142 @@
+stages:
+  - static
+  - security
+  - odoo_test
+  - deploy
+
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - when: never
+
+variables:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PIP_NO_CACHE_DIR: "1"
+  ADDON_PATH: "custom_addons/customer_support"
+
+default:
+  image: python:3.11-slim
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends libxml2-utils ripgrep git
+    - pip install --upgrade pip
+    - pip install ruff
+
+manifest_sanity:
+  stage: static
+  script:
+    - python -m py_compile __manifest__.py
+
+python_compile:
+  stage: static
+  script:
+    - find . -name "*.py" -print0 | xargs -0 -n1 python -m py_compile
+
+xml_parse_validation:
+  stage: static
+  script:
+    - xml_files=$(find . -name "*.xml")
+    - |
+      if [ -n "$xml_files" ]; then
+        xmllint --noout $xml_files
+      else
+        echo "No XML files found."
+      fi
+
+ruff_lint:
+  stage: static
+  script:
+    - ruff check .
+
+csrf_disabled_scan:
+  stage: security
+  script:
+    - rg -n "csrf=False" controllers || true
+
+controller_sudo_scan:
+  stage: security
+  script:
+    - rg -n "\\.sudo\\(" controllers || true
+
+redirect_logic_scan:
+  stage: security
+  script:
+    - rg -n "redirect_to|safe_redirect|startswith\\(" controllers || true
+
+odoo_module_install_smoke:
+  stage: odoo_test
+  image: odoo:19.0
+  rules:
+    - if: '$RUN_ODOO_TESTS == "1"'
+    - when: never
+  services:
+    - name: postgres:16
+      alias: db
+  variables:
+    POSTGRES_DB: postgres
+    POSTGRES_USER: odoo
+    POSTGRES_PASSWORD: odoo
+    HOST: db
+    PORT: "5432"
+    USER: odoo
+    PASSWORD: odoo
+    CI_TEST_DB: ci_customer_support
+  script:
+    - odoo --version
+    - odoo --addons-path=/mnt/extra-addons -d "$CI_TEST_DB" -i customer_support --stop-after-init
+
+odoo_module_update_smoke:
+  stage: odoo_test
+  image: odoo:19.0
+  rules:
+    - if: '$RUN_ODOO_TESTS == "1"'
+    - when: never
+  services:
+    - name: postgres:16
+      alias: db
+  variables:
+    POSTGRES_DB: postgres
+    POSTGRES_USER: odoo
+    POSTGRES_PASSWORD: odoo
+    HOST: db
+    PORT: "5432"
+    USER: odoo
+    PASSWORD: odoo
+    CI_TEST_DB: ci_customer_support
+  script:
+    - odoo --addons-path=/mnt/extra-addons -d "$CI_TEST_DB" -i customer_support --stop-after-init
+    - odoo --addons-path=/mnt/extra-addons -d "$CI_TEST_DB" -u customer_support --stop-after-init
+
+deploy_customer_support:
+  stage: deploy
+  image: alpine:3.20
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: manual
+    - when: never
+  before_script:
+    - apk add --no-cache openssh-client rsync
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$DEPLOY_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - |
+      if [ -n "$DEPLOY_SSH_KNOWN_HOSTS" ]; then
+        echo "$DEPLOY_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+      else
+        ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+      fi
+  script:
+    - test -n "$DEPLOY_HOST"
+    - test -n "$DEPLOY_USER"
+    - test -n "$DEPLOY_PATH"
+    - rsync -az --delete --exclude ".git" ./ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/customer_support/"
+    - |
+      if [ -n "$REMOTE_POST_DEPLOY_COMMAND" ]; then
+        ssh "$DEPLOY_USER@$DEPLOY_HOST" "$REMOTE_POST_DEPLOY_COMMAND"
+      else
+        echo "REMOTE_POST_DEPLOY_COMMAND not set; skipping remote service restart"
+      fi
+  environment:
+    name: production

@@ -151,6 +151,11 @@ class CustomerSupport(models.Model):
     )
     is_overdue = fields.Boolean(string="Is Overdue", compute="_compute_is_overdue")
 
+    # Cron deduplication flags — prevent repeated notifications
+    sla_warning_sent = fields.Boolean(default=False, copy=False)
+    sla_breach_notified = fields.Boolean(default=False, copy=False)
+    overdue_notified = fields.Boolean(default=False, copy=False)
+
     # ── Compute Methods ───────────────────────────────────────────────────────
 
     @api.depends("sla_deadline", "state", "resolved_date", "closed_date")
@@ -441,7 +446,18 @@ class CustomerSupport(models.Model):
         old_assignees = {r.id: r.assigned_to for r in self}
         # ─────────────────────────────────────────────────────────────────
 
+        # Reset SLA warning flag when deadline is rescheduled
+        if 'sla_deadline' in vals:
+            vals.setdefault('sla_warning_sent', False)
+
         result = super(CustomerSupport, self).write(vals)
+
+        # Reset breach/overdue flags when a ticket is reopened
+        if 'state' in vals and vals['state'] in ('new', 'in_progress', 'assigned', 'pending'):
+            super(CustomerSupport, self).write({
+                'sla_breach_notified': False,
+                'overdue_notified': False,
+            })
 
         # SLA deadline recalc (original logic — unchanged)
         if "sla_policy_id" in vals or "assigned_date" in vals:
@@ -522,7 +538,6 @@ class CustomerSupport(models.Model):
             self.message_post(
                 body=f"Ticket assigned to {self.assigned_to.name}",
                 subject="Ticket Assigned",
-                partner_ids=[self.assigned_to.partner_id.id],
             )
         return True
 
@@ -542,7 +557,6 @@ class CustomerSupport(models.Model):
             self.message_post(
                 body="Your ticket has been resolved. Please review the resolution.",
                 subject="Ticket Resolved",
-                partner_ids=[self.customer_id.id],
             )
         return True
 
@@ -573,15 +587,16 @@ class CustomerSupport(models.Model):
             self.message_post(
                 body="We need more information from you to proceed with this ticket.",
                 subject="Ticket Pending - Action Required",
-                partner_ids=[self.customer_id.id],
             )
         return True
 
     @api.model
     def _cron_check_overdue_tickets(self):
-        overdue_tickets = self.search(
-            [("state", "not in", ["resolved", "closed"]), ("days_open", ">", 7)]
-        )
+        overdue_tickets = self.search([
+            ("state", "not in", ["resolved", "closed"]),
+            ("days_open", ">", 7),
+            ("overdue_notified", "=", False),
+        ])
         for ticket in overdue_tickets:
             if ticket.assigned_to:
                 ticket.message_post(
@@ -589,6 +604,7 @@ class CustomerSupport(models.Model):
                     subject="Overdue Ticket Reminder",
                     partner_ids=[ticket.assigned_to.partner_id.id],
                 )
+            ticket.sudo().write({"overdue_notified": True})
         return True
 
     @api.model
@@ -599,23 +615,22 @@ class CustomerSupport(models.Model):
         """
         now = fields.Datetime.now()
 
-        # ── At-risk tickets ───────────────────────────────────────────────
-        at_risk = self.search(
-            [
-                ("state", "not in", ["resolved", "closed"]),
-                ("sla_deadline", "!=", False),
-                ("sla_deadline", ">", now),
-            ]
-        )
+        # ── At-risk tickets (only notify once per deadline window) ───────
+        at_risk = self.search([
+            ("state", "not in", ["resolved", "closed"]),
+            ("sla_deadline", "!=", False),
+            ("sla_deadline", ">", now),
+            ("sla_warning_sent", "=", False),
+        ])
         for ticket in at_risk:
             remaining = (ticket.sla_deadline - now).total_seconds() / 3600
-            if remaining <= 2 and ticket.assigned_to:
-                ticket.message_post(
-                    body=f"⚠️ SLA Warning: Only {remaining:.1f} hours remaining to resolve this ticket.",
-                    subject="SLA At Risk",
-                    partner_ids=[ticket.assigned_to.partner_id.id],
-                )
-                # ── Log: SLA warning ──────────────────────────────────────
+            if remaining <= 2:
+                if ticket.assigned_to:
+                    ticket.message_post(
+                        body=f"⚠️ SLA Warning: Only {remaining:.1f} hours remaining to resolve this ticket.",
+                        subject="SLA At Risk",
+                        partner_ids=[ticket.assigned_to.partner_id.id],
+                    )
                 self._create_log(
                     ticket_id=ticket.id,
                     event_type="sla",
@@ -627,15 +642,14 @@ class CustomerSupport(models.Model):
                     ),
                     actor_id=self.env.ref("base.user_root").id,
                 )
-                # ─────────────────────────────────────────────────────────
+                ticket.sudo().write({"sla_warning_sent": True})
 
-        # ── Breached tickets ──────────────────────────────────────────────
-        breached = self.search(
-            [
-                ("state", "not in", ["resolved", "closed"]),
-                ("sla_deadline", "<", now),
-            ]
-        )
+        # ── Breached tickets (only notify once per breach) ────────────────
+        breached = self.search([
+            ("state", "not in", ["resolved", "closed"]),
+            ("sla_deadline", "<", now),
+            ("sla_breach_notified", "=", False),
+        ])
         for ticket in breached:
             if ticket.assigned_to:
                 ticket.message_post(
@@ -643,17 +657,16 @@ class CustomerSupport(models.Model):
                     subject="SLA Breached",
                     partner_ids=[ticket.assigned_to.partner_id.id],
                 )
-                # ── Log: SLA breach ───────────────────────────────────────
-                self._create_log(
-                    ticket_id=ticket.id,
-                    event_type="sla",
-                    summary="SLA Breached",
-                    detail=(
-                        f"Ticket passed its SLA deadline on "
-                        f"{ticket.sla_deadline.strftime('%b %d, %Y at %I:%M %p')}."
-                    ),
-                    actor_id=self.env.ref("base.user_root").id,
-                )
-                # ─────────────────────────────────────────────────────────
+            self._create_log(
+                ticket_id=ticket.id,
+                event_type="sla",
+                summary="SLA Breached",
+                detail=(
+                    f"Ticket passed its SLA deadline on "
+                    f"{ticket.sla_deadline.strftime('%b %d, %Y at %I:%M %p')}."
+                ),
+                actor_id=self.env.ref("base.user_root").id,
+            )
+            ticket.sudo().write({"sla_breach_notified": True})
 
         return True

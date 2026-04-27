@@ -22,7 +22,7 @@ class CustomerSupportChatbot(http.Controller):
         """Render the Dragon Coders support chatbot page"""
         return request.render("customer_support.chatbot_page")
 
-    @http.route("/customer_support/chatbot/message", type="json", auth="user")
+    @http.route("/customer_support/chatbot/message", type="jsonrpc", auth="user")
     def chatbot_message(self, message, **kw):
         if not message or not message.strip():
             return {"intent": "error", "reply": "Please enter a message."}
@@ -64,12 +64,12 @@ class CustomerSupportChatbot(http.Controller):
                 "reply": "Sorry, something went wrong. Please try again.",
             }
 
-    @http.route("/customer_support/chatbot/clear", type="json", auth="user")
+    @http.route("/customer_support/chatbot/clear", type="jsonrpc", auth="user")
     def chatbot_clear(self, **kw):
         support_bot.clear_history(request.env.user.id)
         return {"success": True}
 
-    @http.route("/customer_support/chatbot/status", type="json", auth="user")
+    @http.route("/customer_support/chatbot/status", type="jsonrpc", auth="user")
     def chatbot_status(self, **kw):
         online = support_bot.is_online()
         doc_count = (
@@ -89,7 +89,7 @@ class CustomerSupportChatbot(http.Controller):
         """Public general / FAQ chat page – loads your landing_chat template"""
         return request.render("customer_support.landing_chat")
 
-    @http.route("/dragon-chat/message", type="json", auth="public", website=True, csrf=False)
+    @http.route("/dragon-chat/message", type="jsonrpc", auth="public", website=True, csrf=False)
     def faq_chat_message(self, message, **kw):
         if not message or not message.strip():
             return {"reply": "Please type a question."}
@@ -145,6 +145,10 @@ class CustomerSupportChatbot(http.Controller):
         csrf=True,
     )
     def knowledge_upload(self, **kw):
+        def _redirect_with_param(path, param):
+            sep = "&" if "?" in path else "?"
+            return request.redirect(f"{path}{sep}{param}")
+
         if not request.env.user.has_group("base.group_user"):
             return request.redirect("/customer_support/dashboard")
 
@@ -156,16 +160,18 @@ class CustomerSupportChatbot(http.Controller):
         redirect_to = kw.get("redirect_to", "/customer_support/knowledge")
 
         if not uploaded_file or not name:
-            return request.redirect(
-                f"{redirect_to}?error=Please+fill+all+required+fields"
+            return _redirect_with_param(
+                redirect_to,
+                "error=Please+fill+all+required+fields",
             )
 
         filename = uploaded_file.filename
         allowed = (".pdf", ".docx", ".txt", ".xlsx")
 
         if not any(filename.lower().endswith(ext) for ext in allowed):
-            return request.redirect(
-                f"{redirect_to}?error=Invalid+file+type.+Allowed:+PDF,+DOCX,+TXT,+XLSX"
+            return _redirect_with_param(
+                redirect_to,
+                "error=Invalid+file+type.+Allowed:+PDF,+DOCX,+TXT,+XLSX",
             )
 
         try:
@@ -184,14 +190,13 @@ class CustomerSupportChatbot(http.Controller):
                 except (ValueError, TypeError):
                     pass
 
-            doc = request.env["dc.knowledge.document"].sudo().create(vals)
+            request.env["dc.knowledge.document"].sudo().create(vals)
 
-            doc.action_process()
-
-            return request.redirect(f"{redirect_to}?success=1")
+            # Keep upload request fast: processing is handled by scheduled cron.
+            return _redirect_with_param(redirect_to, "success=queued")
 
         except Exception as e:
-            return request.redirect(f"{redirect_to}?error={str(e)[:100]}")
+            return _redirect_with_param(redirect_to, f"error={str(e)[:100]}")
 
     @http.route(
         "/customer_support/knowledge/delete/<int:doc_id>",

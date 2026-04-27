@@ -431,6 +431,7 @@
                 //<![CDATA[
             var profileScriptEl = document.getElementById('epProfileScript');
             var profileRouteBase = (profileScriptEl && profileScriptEl.dataset.profileRouteBase) || '/customer_support/profile';
+            var csrfToken = (window.odoo && window.odoo.csrf_token) || '';
 
             function parseJsonOrRedirect(response) {
                 return response.text().then(function (raw) {
@@ -521,6 +522,9 @@
 
                 var fd = new FormData();
                 fd.append('avatar', file);
+                if (csrfToken) {
+                    fd.append('csrf_token', csrfToken);
+                }
 
                 fetch(profileRouteBase + '/update_picture', {
                     method: 'POST',
@@ -582,6 +586,9 @@
                 params.append('old_pwd',     oldPwd);
                 params.append('new_pwd',     newPwd);
                 params.append('confirm_pwd', confirmPwd);
+                if (csrfToken) {
+                    params.append('csrf_token', csrfToken);
+                }
 
                 fetch(profileRouteBase + '/update_password', {
                     method: 'POST',

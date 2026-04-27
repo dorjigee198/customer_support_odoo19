@@ -146,6 +146,7 @@
                     #kanbanToast.show { transform: translateY(0); opacity: 1; }
                     #kanbanToast.success { border-color: rgba(16,185,129,0.4); }
                     #kanbanToast.error { border-color: rgba(239,68,68,0.4); }
+                    #kanbanToast.warning { border-color: rgba(245,158,11,0.45); background: #fffbeb; }
 
                     /* ── NEW TICKET FLASH ── */
                     @keyframes ticketNewFlash {
@@ -949,12 +950,14 @@ document.addEventListener('DOMContentLoaded',function(){
     var kanbanViewBtn=document.getElementById('kanbanViewBtn');
     var listView=document.getElementById('listView');
     var kanbanView=document.getElementById('kanbanView');
+    var shouldShowKanbanReminder=true;
 
     function showList(){
         listView.style.display='block';kanbanView.style.display='none';
         listViewBtn.classList.add('active');kanbanViewBtn.classList.remove('active');
         document.getElementById('mobilePillList').classList.add('active');
         document.getElementById('mobilePillKanban').classList.remove('active');
+        shouldShowKanbanReminder=true;
     }
     function showKanban(){
         listView.style.display='none';kanbanView.style.display='block';
@@ -962,6 +965,10 @@ document.addEventListener('DOMContentLoaded',function(){
         document.getElementById('mobilePillList').classList.remove('active');
         document.getElementById('mobilePillKanban').classList.add('active');
         updateCounts();
+        if(shouldShowKanbanReminder){
+            showToast('Please update ticket status promptly to keep customers assured.','warning');
+            shouldShowKanbanReminder=false;
+        }
     }
     listViewBtn.addEventListener('click',showList);
     kanbanViewBtn.addEventListener('click',showKanban);
@@ -1303,6 +1310,8 @@ document.addEventListener('DOMContentLoaded',function(){
     function saveTicketStatus(ticketId,newState){
         var fd=new FormData();
         fd.append('status',newState);
+        var csrfToken=(window.odoo && window.odoo.csrf_token) ? window.odoo.csrf_token : '';
+        if(csrfToken){fd.append('csrf_token',csrfToken);}
         fetch('/customer_support/ticket/'+ticketId+'/update_status',{method:'POST',body:fd,credentials:'same-origin',headers:{'Accept':'application/json'}})
         .then(function(r){return r.json();})
         .then(function(data){

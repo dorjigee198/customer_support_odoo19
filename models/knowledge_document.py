@@ -238,6 +238,23 @@ class KnowledgeDocument(models.Model):
         for rec in self:
             rec._embed_all_chunks()
 
+    @api.model
+    def _cron_process_pending_documents(self, batch_size=2):
+        """Cron worker: process pending knowledge documents in small batches."""
+        docs = (
+            self.sudo()
+            .search([("state", "=", "pending")], order="create_date asc", limit=batch_size)
+        )
+        if not docs:
+            return
+
+        _logger.info("Knowledge processing cron picked %s pending document(s)", len(docs))
+        for doc in docs:
+            try:
+                doc.action_process()
+            except Exception as e:
+                _logger.error("Knowledge processing cron failed for doc %s: %s", doc.id, e)
+
     def action_delete(self):
         """Delete document and its chunks."""
         self.env["dc.knowledge.chunk"].search(

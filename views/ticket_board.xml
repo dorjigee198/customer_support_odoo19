@@ -25,12 +25,13 @@
                 </t><t
                     t-if="not ticket.project_id">null</t>, csrfToken: "<t
                     t-esc="request.csrf_token()" />", projectMembers: <t
-                    t-raw="project_members_json" />, currentUserId: <t t-if="user">
+                    t-out="project_members_json" />, currentUserId: <t t-if="user">
                     <t t-esc="user.id" />
                 </t><t t-if="not user">null</t>,
                 publicBoard: <t t-if="public_board">true</t><t t-if="not public_board">false</t>,
-                boardColumns: <t t-raw="board_columns_json" />,
-                boardBg: <t t-raw="board_bg_json" /> }; </script>
+                boardColumns: <t t-out="board_columns_json" />,
+                customerConversation: <t t-out="customer_conversation_json" />,
+                boardBg: <t t-out="board_bg_json" /> }; </script>
 
             <div id="wrap" class="tb-wrap">
 
@@ -85,12 +86,14 @@
                                 <button class="tb-status-current" id="statusToggle"
                                     t-attf-data-state="{{ ticket.state }}">
                                     <span t-attf-class="tb-sdot tb-sdot-{{ ticket.state }}"></span>
-                                    <t t-if="ticket.state == 'new'">New</t>
-                                    <t t-if="ticket.state == 'assigned'">Assigned</t>
-                                    <t t-if="ticket.state == 'in_progress'">In Progress</t>
-                                    <t t-if="ticket.state == 'pending'">Pending</t>
-                                    <t t-if="ticket.state == 'resolved'">Resolved</t>
-                                    <t t-if="ticket.state == 'closed'">Closed</t>
+                                    <span class="tb-status-label" id="statusLabel">
+                                        <t t-if="ticket.state == 'new'">New</t>
+                                        <t t-if="ticket.state == 'assigned'">Assigned</t>
+                                        <t t-if="ticket.state == 'in_progress'">In Progress</t>
+                                        <t t-if="ticket.state == 'pending'">Pending</t>
+                                        <t t-if="ticket.state == 'resolved'">Resolved</t>
+                                        <t t-if="ticket.state == 'closed'">Closed</t>
+                                    </span>
                                     <i class="bi bi-chevron-down ms-1" style="font-size:0.7rem;"></i>
                                 </button>
                                 <div class="tb-status-dropdown" id="statusDropdown">
@@ -652,7 +655,7 @@
                                 <div class="tb-sidebar-section">
                                     <h6 class="tb-sidebar-label">
                                         <i class="bi bi-reply me-1"></i>Reply to Customer <span
-                                            class="tb-label-sub">— sends email directly</span>
+                                            class="tb-label-sub">— shared conversation</span>
                                     </h6>
                                     <div class="tb-reply-customer-info">
                                         <i class="bi bi-person-circle"></i>
@@ -666,6 +669,11 @@
                                             </t>
                                         </span>
                                     </div>
+
+                                    <div class="tb-conversation-list" id="customerConversationList">
+                                        <div class="tb-empty-text" id="customerConversationEmpty">No customer conversation yet.</div>
+                                    </div>
+
                                     <textarea class="tb-comment-input" id="customerReplyInput"
                                         placeholder="Type your reply to the customer…" rows="4"></textarea>
                                     <button class="tb-comment-send" id="customerReplySend"

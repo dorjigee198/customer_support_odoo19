@@ -799,6 +799,90 @@ select.tb-form-input option { background: #1e293b; }
 .tb-reply-customer-info .bi { font-size: 1.1rem; color: #64748b; }
 .tb-reply-email { color: #64748b; font-size: 0.78rem; margin-left: 4px; }
 
+.tb-conversation-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 2px 2px 6px;
+    margin-bottom: 10px;
+}
+
+.tb-conversation-list::-webkit-scrollbar { width: 3px; }
+.tb-conversation-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+.tb-conv-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.tb-conv-item.mine {
+    flex-direction: row-reverse;
+}
+
+.tb-conv-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: #334155;
+    color: #e2e8f0;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+.tb-conv-item.customer .tb-conv-avatar { background: #0f766e; }
+.tb-conv-item.focal .tb-conv-avatar { background: #4338ca; }
+
+.tb-conv-body {
+    max-width: calc(100% - 34px);
+    padding: 7px 9px;
+    border-radius: 10px;
+    background: #1e293b;
+    border: 1px solid #334155;
+}
+
+.tb-conv-item.mine .tb-conv-body {
+    background: #1e1b4b;
+    border-color: #4338ca;
+}
+
+.tb-conv-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.tb-conv-item.mine .tb-conv-meta {
+    justify-content: flex-end;
+}
+
+.tb-conv-author {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #a5b4fc;
+}
+
+.tb-conv-time {
+    font-size: 0.65rem;
+    color: #64748b;
+}
+
+.tb-conv-msg {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 0.79rem;
+    color: #e2e8f0;
+    line-height: 1.45;
+}
+
 /* ── TEAM AVATARS IN META BAR ────────────────────────────── */
 .tb-team-avatars-wrap {
     display: flex; align-items: center; gap: 0.5rem; cursor: pointer;

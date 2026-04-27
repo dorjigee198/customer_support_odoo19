@@ -107,50 +107,65 @@ class CustomerTickets(http.Controller):
             ]
 
             try:
+                MailMessage = request.env["mail.message"].sudo()
+
+                # Primary source: ticket relation when available.
                 if hasattr(ticket, "message_ids") and ticket.message_ids:
-                    all_messages = ticket.sudo().message_ids.sorted(
+                    raw_messages = ticket.sudo().message_ids.sorted(
                         key=lambda r: r.date, reverse=True
                     )
+                else:
+                    # Reliable fallback: direct search on mail.message.
+                    raw_messages = MailMessage.search(
+                        [
+                            ("model", "=", "customer.support"),
+                            ("res_id", "=", ticket_id),
+                            ("message_type", "in", ["comment", "notification"]),
+                        ],
+                        order="date desc",
+                    )
 
-                    # Filter out empty messages
-                    filtered_messages = all_messages.filtered(
-                        lambda m: (
-                            m.body
-                            and m.body.strip()
-                            and m.body.strip() not in empty_patterns
-                            and m.message_type in ["comment", "notification"]
-                            and len(
-                                m.body.strip()
-                                .replace("<p>", "")
-                                .replace("</p>", "")
-                                .replace("<br>", "")
-                                .replace("<br/>", "")
-                                .replace("<div>", "")
-                                .replace("</div>", "")
-                                .strip()
-                            )
-                            > 0
+                filtered_messages = raw_messages.filtered(
+                    lambda m: (
+                        m.body
+                        and m.body.strip()
+                        and m.body.strip() not in empty_patterns
+                        and m.message_type in ["comment", "notification"]
+                        and (is_admin or not (m.subtype_id and m.subtype_id.internal))
+                        and len(
+                            m.body.strip()
+                            .replace("<p>", "")
+                            .replace("</p>", "")
+                            .replace("<br>", "")
+                            .replace("<br/>", "")
+                            .replace("<div>", "")
+                            .replace("</div>", "")
+                            .strip()
                         )
+                        > 0
                     )
+                )
 
-                    activities = list(filtered_messages)
+                # Normalize for the customer template that expects dict-style keys.
+                activities = [
+                    {
+                        "id": m.id,
+                        "author_id": m.author_id.id if m.author_id else False,
+                        "author_name": m.author_id.name if m.author_id else "System",
+                        "date": m.date,
+                        "body": m.body or "",
+                    }
+                    for m in filtered_messages
+                ]
 
-                    _logger.info(
-                        f"Customer view - Ticket {ticket_id}: {len(all_messages)} total, "
-                        f"{len(activities)} displayed after filtering"
-                    )
+                _logger.info(
+                    f"Customer view - Ticket {ticket_id}: {len(raw_messages)} total, "
+                    f"{len(activities)} displayed after filtering"
+                )
 
             except Exception as e:
                 _logger.error(f"Message filtering error: {str(e)}")
-                # Fallback to simple filtering
-                try:
-                    activities = list(
-                        ticket.message_ids.filtered(
-                            lambda m: m.message_type in ["comment", "notification"]
-                        ).sorted(key=lambda r: r.date, reverse=True)
-                    )
-                except Exception:
-                    activities = []
+                activities = []
 
             _logger.info(
                 f"Customer {user.name} viewing ticket {ticket_id}: {len(activities)} messages"
@@ -224,7 +239,7 @@ class CustomerTickets(http.Controller):
 
     @http.route(
         "/customer_support/customer/ticket/<int:ticket_id>/data",
-        type="json", auth="user", csrf=False,
+        type="jsonrpc", auth="user", csrf=False,
     )
     def customer_ticket_data(self, ticket_id, **kw):
         """JSON endpoint — returns ticket detail data for the modal popup."""
@@ -259,21 +274,36 @@ class CustomerTickets(http.Controller):
 
             board_progress = int(board_done / board_total * 100) if board_total > 0 else 0
 
-            # Last 8 messages
+            # Conversation messages (chronological for chat-style rendering)
             messages = []
             try:
+                msg_domain = [
+                    ("model", "=", "customer.support"),
+                    ("res_id", "=", ticket_id),
+                    ("message_type", "in", ["comment", "notification"]),
+                ]
+                if not user.has_group("base.group_system"):
+                    msg_domain.append(("subtype_id.internal", "=", False))
+
                 msgs = request.env["mail.message"].sudo().search(
-                    [("model", "=", "customer.support"), ("res_id", "=", ticket_id),
-                     ("message_type", "in", ["comment", "notification"])],
-                    order="date desc", limit=8,
+                    msg_domain,
+                    order="date asc", limit=80,
                 )
+                customer_partner_id = user.partner_id.id if user.partner_id else False
                 for m in msgs:
                     if not m.body or not m.body.strip() or m.body.strip() in ["<p><br></p>", "<p></p>"]:
                         continue
+                    author_partner_id = m.author_id.id if m.author_id else False
                     messages.append({
+                        "id": m.id,
                         "author": m.author_id.name if m.author_id else "System",
+                        "initials": "".join(
+                            p[0].upper() for p in (m.author_id.name or "System").split()[:2]
+                        ) if m.author_id else "SY",
                         "date": m.date.strftime("%b %d, %Y %H:%M") if m.date else "",
                         "body": m.body or "",
+                        "is_me": bool(customer_partner_id and author_partner_id == customer_partner_id),
+                        "from_customer": bool(customer_partner_id and author_partner_id == customer_partner_id),
                     })
             except Exception:
                 pass
@@ -309,8 +339,67 @@ class CustomerTickets(http.Controller):
             return {"error": str(e)}
 
     @http.route(
+        "/customer_support/customer/ticket/<int:ticket_id>/message/add",
+        type="jsonrpc",
+        auth="user",
+        csrf=False,
+    )
+    def customer_add_ticket_message(self, ticket_id, **kw):
+        """Add a customer-visible message from the customer ticket modal."""
+        try:
+            user = request.env.user
+            message = (kw.get("message") or "").strip()
+            if not message:
+                return {"success": False, "error": "Message cannot be empty"}
+
+            ticket = request.env["customer.support"].sudo().browse(ticket_id)
+            if not ticket.exists():
+                return {"success": False, "error": "Ticket not found"}
+
+            is_owner = ticket.customer_id.id == user.partner_id.id
+            is_admin = user.has_group("base.group_system")
+            if not (is_owner or is_admin):
+                return {"success": False, "error": "Access denied"}
+
+            # Store in the same ticket thread used by support/customer detail pages.
+            try:
+                msg = ticket.message_post(
+                    body=message,
+                    message_type="comment",
+                    subtype_xmlid="mail.mt_comment",
+                    author_id=user.partner_id.id,
+                )
+            except Exception:
+                msg = (
+                    request.env["mail.message"]
+                    .sudo()
+                    .create(
+                        {
+                            "model": "customer.support",
+                            "res_id": ticket.id,
+                            "body": message,
+                            "message_type": "comment",
+                            "author_id": user.partner_id.id,
+                        }
+                    )
+                )
+
+            return {
+                "success": True,
+                "message": {
+                    "id": msg.id,
+                    "author": user.partner_id.name or user.name,
+                    "date": msg.date.strftime("%b %d, %Y %H:%M") if msg.date else "",
+                    "body": msg.body or message,
+                },
+            }
+        except Exception as e:
+            _logger.error(f"customer_add_ticket_message error: {e}")
+            return {"success": False, "error": str(e)}
+
+    @http.route(
         "/customer_support/tickets/states",
-        type="json", auth="user", csrf=False,
+        type="jsonrpc", auth="user", csrf=False,
     )
     def customer_tickets_states(self, **kw):
         """Returns current {ticket_id: state} map for the logged-in customer — used by kanban polling."""

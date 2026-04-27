@@ -1337,7 +1337,7 @@ class CustomerSupportAdminUsers(http.Controller):
                 "Focal Person" if user_type == "focal_person" else "Customer"
             )
             return self._redirect_user_management_tab(
-                success=f"{user_type_label} created successfully"
+                success=f"{user_type_label} created successfully. Welcome email queued."
             )
 
         except Exception as e:
@@ -1531,7 +1531,9 @@ class CustomerSupportAdminUsers(http.Controller):
                 return self._redirect_user_management_tab(error="User not found")
 
             if edit_user.id == current_user.id:
-                return self._redirect_user_management_tab(error="Cannot delete yourself")
+                return self._redirect_user_management_tab(
+                    error="Cannot delete yourself"
+                )
 
             user_name = edit_user.name
             edit_user.sudo().write({"active": False})
