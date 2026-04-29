@@ -364,7 +364,7 @@
             <div class="tb-task-actions">
                 <button class="tb-task-edit-btn" data-task-id="${task.id}" title="Edit"><i class="bi bi-pencil"></i></button>
                 <button class="tb-task-del-btn" data-task-id="${task.id}" title="Delete"><i class="bi bi-x-lg"></i></button>
-            </div>`;
+            </div>` : '';
 
         div.innerHTML = `
             <div class="tb-task-header">
@@ -409,7 +409,7 @@
                         title="Rename"><i class="bi bi-pencil"></i></button>
                 <button class="tb-col-del-btn" data-col-id="${col.id}"
                         title="Delete"><i class="bi bi-trash3"></i></button>
-            </div>`;
+            </div>` : '';
         const dragHandle = canEdit ? `<i class="bi bi-grip-vertical tb-col-drag-handle" title="Drag to reorder"></i>` : '';
         const addTaskBtn = canEdit ? `<button class="tb-add-task-btn" data-col-id="${col.id}"><i class="bi bi-plus me-1"></i>Add Task</button>` : '';
 

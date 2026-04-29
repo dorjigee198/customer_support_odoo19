@@ -59,8 +59,6 @@
             "customer_support/static/src/css/ticket_details.css",
             "customer_support/static/src/css/project_configuration.css",
             "customer_support/static/src/js/project_configuration.js",
-            "customer_support/static/src/css/ticket_details.css",
-            "customer_support/static/src/js/ticket_details.js",
             "customer_support/static/src/css/portal_dashboard_mobile.css",
             "customer_support/static/src/css/focal_projects.css",
             # ticket_board.css and ticket_board.js are loaded directly
