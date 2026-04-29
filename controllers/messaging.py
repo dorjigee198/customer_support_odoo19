@@ -59,6 +59,7 @@ class TicketMessaging(http.Controller):
                     body=message,
                     message_type="comment",
                     subtype_xmlid="mail.mt_comment",
+                    author_id=request.env.user.partner_id.id,
                 )
                 _logger.info(
                     f"✓ Message posted successfully - ID: {msg.id if msg else 'N/A'}"
@@ -73,6 +74,7 @@ class TicketMessaging(http.Controller):
                     msg = ticket.message_post(
                         body=message,
                         message_type="comment",
+                        author_id=request.env.user.partner_id.id,
                     )
                     _logger.info(
                         f"✓ Message posted without subtype - ID: {msg.id if msg else 'N/A'}"

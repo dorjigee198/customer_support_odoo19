@@ -147,6 +147,7 @@ class CustomerTickets(http.Controller):
                 )
 
                 # Normalize for the customer template that expects dict-style keys.
+                current_partner_id = user.partner_id.id
                 activities = [
                     {
                         "id": m.id,
@@ -154,6 +155,7 @@ class CustomerTickets(http.Controller):
                         "author_name": m.author_id.name if m.author_id else "System",
                         "date": m.date,
                         "body": m.body or "",
+                        "is_me": m.author_id.id == current_partner_id if m.author_id else False,
                     }
                     for m in filtered_messages
                 ]

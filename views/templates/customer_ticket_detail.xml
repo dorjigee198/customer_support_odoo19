@@ -269,30 +269,29 @@
                                 </div>
 
                                 <!-- Messages List -->
-                                <div class="communication-messages" id="communicationMessages">
+                                <div class="message-list" id="communicationMessages">
                                     <t t-if="activities and len(activities) > 0">
                                         <t t-foreach="activities" t-as="activity">
-                                            <div class="message-item"
+                                            <div t-att-class="'message-item sent' if activity.get('is_me') else 'message-item received'"
                                                 t-att-data-message-id="activity['id']">
                                                 <img
                                                     t-att-src="'/web/image/res.partner/%s/avatar_128' % activity['author_id'] if activity['author_id'] else '/web/static/img/avatar_gray.svg'"
                                                     alt="Avatar"
-                                                    class="message-avatar"
+                                                    class="msg-avatar"
                                                     onerror="this.src='/web/static/img/avatar_gray.svg'" />
-                                                <div class="message-content">
-                                                    <div class="message-header">
-                                                        <strong>
+                                                <div class="msg-right">
+                                                    <div class="msg-header">
+                                                        <span class="msg-author">
                                                             <t t-esc="activity['author_name']" />
-                                                        </strong>
-                                                        <span class="message-time">
+                                                        </span>
+                                                        <span class="msg-time">
                                                             <t t-if="activity['date']">
-                                                                <t
-                                                                    t-esc="activity['date'].strftime('%B %d, %Y at %I:%M %p')" />
+                                                                <t t-esc="activity['date'].strftime('%B %d, %Y at %I:%M %p')" />
                                                             </t>
                                                             <t t-else="">Recently</t>
                                                         </span>
                                                     </div>
-                                                    <div class="message-body">
+                                                    <div class="msg-body">
                                                         <t t-if="activity['body']">
                                                             <t t-out="activity['body']" />
                                                         </t>
@@ -311,7 +310,7 @@
                                         </div>
                                     </t>
                                 </div>
-                                <!-- END communication-messages -->
+                                <!-- END message-list -->
                             </div>
                             <!-- END communication-section -->
                         </div>

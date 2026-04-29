@@ -594,6 +594,13 @@ html, body {
 .message-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.9rem 1.1rem; border-bottom: 1px solid var(--card-border); transition: background 0.12s; }
 .message-item:last-child { border-bottom: none; }
 .message-item:hover { background: #fafbfc; }
+/* Sent = current user (avatar on right, blue tint) */
+.message-item.sent { flex-direction: row-reverse; background: #eff6ff; }
+.message-item.sent:hover { background: #dbeafe; }
+.message-item.sent .msg-header { flex-direction: row-reverse; }
+.message-item.sent .msg-time { margin-left: 0; margin-right: auto; }
+/* Received = other party (default direction, subtle tint) */
+.message-item.received { background: transparent; }
 .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--card-border); flex-shrink: 0; margin-top: 1px; }
 .msg-right { flex: 1; min-width: 0; }
 .msg-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; flex-wrap: wrap; }

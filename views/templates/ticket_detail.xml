@@ -748,7 +748,7 @@
                                         <t t-foreach="activities" t-as="activity">
                                             <t t-set="is_author" t-value="activity.author_id.id == request.env.user.partner_id.id if activity.author_id else False"/>
                                             <t t-set="is_admin"  t-value="request.env.user.has_group('base.group_system')"/>
-                                            <div class="message-item" t-att-data-message-id="activity.id">
+                                            <div t-att-class="'message-item sent' if is_author else 'message-item received'" t-att-data-message-id="activity.id">
                                                 <t t-set="author_id" t-value="activity.author_id.id if activity.author_id else request.env.user.partner_id.id"/>
                                                 <img t-att-src="'/web/image/res.partner/%s/avatar_128' % author_id"
                                                     alt="Avatar" class="msg-avatar"
