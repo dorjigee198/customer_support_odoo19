@@ -239,9 +239,9 @@
                                     t-esc="ticket_counts.get('resolved', 0)" /> Resolved </span>
                         </div>
                         <div class="view-toggle">
-                            <button class="view-btn" id="listViewBtn">
+                            <button class="view-btn" id="listViewBtn" title="Switch to list view">
                                 <i class="bi bi-list me-1"></i>List </button>
-                            <button class="view-btn active" id="kanbanViewBtn">
+                            <button class="view-btn active" id="kanbanViewBtn" title="Switch to kanban view">
                                 <i class="bi bi-grid-3x3-gap me-1"></i>Kanban </button>
                         </div>
                     </div>

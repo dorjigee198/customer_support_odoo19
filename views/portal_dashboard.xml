@@ -685,11 +685,11 @@
                             Report </h5>
                         <div class="reporting-controls">
                             <div class="day-filter" id="reportDayFilter">
-                                <button class="day-btn" data-days="7">7 Days</button>
-                                <button class="day-btn active" data-days="30">30 Days</button>
-                                <button class="day-btn" data-days="90">90 Days</button>
+                                <button class="day-btn" data-days="7" title="View last 7 days">7 Days</button>
+                                <button class="day-btn active" data-days="30" title="View last 30 days">30 Days</button>
+                                <button class="day-btn" data-days="90" title="View last 90 days">90 Days</button>
                             </div>
-                            <button class="print-btn" onclick="window.print()">
+                            <button class="print-btn" onclick="window.print()" title="Print or save as PDF">
                                 <i class="bi bi-printer-fill"></i> Print / PDF </button>
                         </div>
                     </div>

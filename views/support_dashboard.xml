@@ -615,29 +615,29 @@
                             <span class="filter-label">Status</span>
                             <div class="filter-pill-group" id="statusFilters">
                                 <button class="filter-pill active" data-filter-type="status"
-                                    data-filter-val="all">All</button>
+                                    data-filter-val="all" title="Show all tickets">All</button>
                                 <button class="filter-pill" data-filter-type="status"
-                                    data-filter-val="new">New</button>
+                                    data-filter-val="new" title="Show new tickets">New</button>
                                 <button class="filter-pill" data-filter-type="status"
-                                    data-filter-val="in_progress">In Progress</button>
+                                    data-filter-val="in_progress" title="Show in progress tickets">In Progress</button>
                                 <button class="filter-pill" data-filter-type="status"
-                                    data-filter-val="resolved">Resolved</button>
+                                    data-filter-val="resolved" title="Show resolved tickets">Resolved</button>
                                 <button class="filter-pill" data-filter-type="status"
-                                    data-filter-val="closed">Closed</button>
+                                    data-filter-val="closed" title="Show closed tickets">Closed</button>
                             </div>
                             <div class="filter-divider"></div>
                             <span class="filter-label">Priority</span>
                             <div class="filter-pill-group" id="priorityFilters">
                                 <button class="filter-pill active" data-filter-type="priority"
-                                    data-filter-val="all">All</button>
+                                    data-filter-val="all" title="Show all priority levels">All</button>
                                 <button class="filter-pill prio-urgent" data-filter-type="priority"
-                                    data-filter-val="urgent">Urgent</button>
+                                    data-filter-val="urgent" title="Show urgent tickets">Urgent</button>
                                 <button class="filter-pill prio-high" data-filter-type="priority"
-                                    data-filter-val="high">High</button>
+                                    data-filter-val="high" title="Show high priority tickets">High</button>
                                 <button class="filter-pill prio-medium" data-filter-type="priority"
-                                    data-filter-val="medium">Medium</button>
+                                    data-filter-val="medium" title="Show medium priority tickets">Medium</button>
                                 <button class="filter-pill prio-low" data-filter-type="priority"
-                                    data-filter-val="low">Low</button>
+                                    data-filter-val="low" title="Show low priority tickets">Low</button>
                             </div>
                             <span class="filter-count" id="filterCount"></span>
                         </div>

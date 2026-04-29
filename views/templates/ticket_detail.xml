@@ -593,8 +593,8 @@
                                             <div class="doc-preview">
                                                 <p>This SOP outlines the standard procedure for triaging frontend-related bugs reported by customers. Steps include: (1) Reproduce the issue in staging, (2) Check browser console for errors, (3) Identify whether CSS, JS, or API is the root cause, (4) Assign severity label, (5) Escalate if P0 or P1.</p>
                                                 <div class="doc-preview-actions">
-                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
-                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                    <button class="btn-secondary" title="Download document"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary" title="Open document in full screen"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -612,8 +612,8 @@
                                             <div class="doc-preview">
                                                 <p>Best practices for communicating with customers during a ticket lifecycle. Always acknowledge within 1 hour. Use empathetic language. Avoid technical jargon in customer-facing messages. For delays, proactively update the customer with a revised ETA.</p>
                                                 <div class="doc-preview-actions">
-                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
-                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                    <button class="btn-secondary" title="Download document"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary" title="Open document in full screen"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -631,8 +631,8 @@
                                             <div class="doc-preview">
                                                 <p>Use this template when escalating a ticket to a senior team or management. Subject: [ESCALATION] Ticket #[ID] — [Subject]. Body should include: current status, what has been tried, customer impact level, and urgency.</p>
                                                 <div class="doc-preview-actions">
-                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
-                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                    <button class="btn-secondary" title="Download document"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary" title="Open document in full screen"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -650,8 +650,8 @@
                                             <div class="doc-preview">
                                                 <p>When an SLA breach is detected: (1) Immediately notify the assigned agent and team lead, (2) Update ticket priority to Urgent, (3) Send a proactive update to the customer, (4) Log breach reason in the internal notes, (5) Conduct a post-mortem within 48 hours.</p>
                                                 <div class="doc-preview-actions">
-                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
-                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                    <button class="btn-secondary" title="Download document"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary" title="Open document in full screen"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -669,8 +669,8 @@
                                             <div class="doc-preview">
                                                 <p>This checklist is for new support agents joining the team. Covers system access setup, tool walkthroughs, shadowing sessions, and the first 30-day milestone goals. Complete all items within the first week.</p>
                                                 <div class="doc-preview-actions">
-                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
-                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                    <button class="btn-secondary" title="Download document"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary" title="Open document in full screen"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -688,8 +688,8 @@
                                             <div class="doc-preview">
                                                 <p>Step-by-step guide for debugging common API issues: authentication failures, rate limit errors, malformed requests, and timeout handling. Includes curl examples and error code reference table.</p>
                                                 <div class="doc-preview-actions">
-                                                    <button class="btn-secondary"><i class="bi bi-download"></i> Download</button>
-                                                    <button class="btn-secondary"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
+                                                    <button class="btn-secondary" title="Download document"><i class="bi bi-download"></i> Download</button>
+                                                    <button class="btn-secondary" title="Open document in full screen"><i class="bi bi-box-arrow-up-right"></i> Open Full</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -778,8 +778,8 @@
                                                             <t t-esc="activity.body"/>
                                                         </textarea>
                                                         <div class="msg-edit-actions">
-                                                            <button class="btn-primary save-edit-btn" t-att-data-message-id="activity.id"><i class="bi bi-check"></i> Save</button>
-                                                            <button class="btn-secondary cancel-edit-btn" t-att-data-message-id="activity.id"><i class="bi bi-x"></i> Cancel</button>
+                                                            <button class="btn-primary save-edit-btn" t-att-data-message-id="activity.id" title="Save changes"><i class="bi bi-check"></i> Save</button>
+                                                            <button class="btn-secondary cancel-edit-btn" t-att-data-message-id="activity.id" title="Cancel editing"><i class="bi bi-x"></i> Cancel</button>
                                                         </div>
                                                     </div>
                                                 </div>

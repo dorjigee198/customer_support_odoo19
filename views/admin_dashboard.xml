@@ -1013,7 +1013,8 @@
                                                                 <td>
                                                                     <a
                                                                         t-att-href="'/customer_support/admin_dashboard/user/%s/edit' % user_item['id']"
-                                                                        class="btn btn-sm btn-outline-primary me-1">
+                                                                        class="btn btn-sm btn-outline-primary me-1"
+                                                                        title="Edit user">
                                                                         <i
                                                                             class="bi bi-pencil-square"></i>
                                                                     </a>
@@ -1025,7 +1026,8 @@
                                                                             name="csrf_token"
                                                                             t-att-value="request.csrf_token()" />
                                                                         <button type="submit"
-                                                                            class="btn btn-sm btn-outline-warning me-1">
+                                                                            class="btn btn-sm btn-outline-warning me-1"
+                                                                            title="Deactivate user">
                                                                             <i class="bi bi-power"></i>
                                                                         </button>
                                                                     </form>
@@ -1039,7 +1041,8 @@
                                                                             name="csrf_token"
                                                                             t-att-value="request.csrf_token()" />
                                                                         <button type="submit"
-                                                                            class="btn btn-sm btn-outline-danger">
+                                                                            class="btn btn-sm btn-outline-danger"
+                                                                            title="Delete user">
                                                                             <i class="bi bi-trash3"></i>
                                                                         </button>
                                                                     </form>
@@ -1082,7 +1085,8 @@
                                                                             name="csrf_token"
                                                                             t-att-value="request.csrf_token()" />
                                                                         <button type="submit"
-                                                                            class="btn btn-sm btn-outline-success">
+                                                                            class="btn btn-sm btn-outline-success"
+                                                                            title="Activate user">
                                                                             <i
                                                                                 class="bi bi-arrow-clockwise me-1"></i>
                                                                             Activate </button>
@@ -1589,6 +1593,7 @@
                                                                         class="btn btn-sm btn-outline-danger"
                                                                         t-att-data-project-id="project.id"
                                                                         t-att-data-project-name="project.name"
+                                                                        title="Delete project"
                                                                         onclick="openDeleteProjectModal(this.dataset.projectId, this.dataset.projectName)">
                                                                         <i class="bi bi-trash"></i>
                                                                     </button>
@@ -1809,7 +1814,19 @@
                                                                 id="kbDocName"
                                                                 placeholder="e.g. Dragon Coders Services Overview" />
                                                         </div>
-                                                        <div class="col-md-3">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-semibold">
+                                                                Link to Project <small class="text-muted fw-normal">(shows on ticket board)</small></label>
+                                                            <select class="form-select" id="kbProjectSelect">
+                                                                <option value="">— No project (general KB) —</option>
+                                                                <t t-foreach="projects" t-as="proj">
+                                                                    <option t-att-value="proj.id">
+                                                                        <t t-esc="proj.name" />
+                                                                    </option>
+                                                                </t>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
                                                             <label class="form-label fw-semibold">
                                                                 Category <span class="text-danger">*</span></label>
                                                             <select class="form-select"
@@ -1825,14 +1842,14 @@
                                                                 <option value="other">Other</option>
                                                             </select>
                                                         </div>
-                                                        <div class="col-md-5">
+                                                        <div class="col-md-6">
                                                             <label class="form-label fw-semibold">Description
                                                                 (optional)</label>
                                                             <input type="text" class="form-control"
                                                                 id="kbDescription"
                                                                 placeholder="Brief description..." />
                                                         </div>
-                                                        <div class="col-md-8">
+                                                        <div class="col-md-6">
                                                             <label class="form-label fw-semibold">
                                                                 File <span class="text-danger">*</span> <small
                                                                     class="text-muted fw-normal ms-1">PDF
@@ -1841,9 +1858,9 @@
                                                                 id="kbFile"
                                                                 accept=".pdf,.docx,.txt,.xlsx" />
                                                         </div>
-                                                        <div class="col-md-4 d-flex align-items-end">
+                                                        <div class="col-md-12 d-flex align-items-end">
                                                             <button type="button"
-                                                                class="btn btn-primary w-100"
+                                                                class="btn btn-primary"
                                                                 id="kbUploadBtn"
                                                                 onclick="kbUpload()">
                                                                 <i class="bi bi-upload me-2"></i>Upload
@@ -1860,6 +1877,7 @@
                                                     <thead class="table-dark">
                                                         <tr>
                                                             <th>Document Name</th>
+                                                            <th>Project</th>
                                                             <th>Category</th>
                                                             <th>Type</th>
                                                             <th>Status</th>
@@ -1870,7 +1888,7 @@
                                                     </thead>
                                                     <tbody id="kbDocsBody">
                                                         <tr>
-                                                            <td colspan="7"
+                                                            <td colspan="8"
                                                                 class="text-center text-muted py-4">
                                                                 <i
                                                                     class="bi bi-hourglass-split me-2"></i>
@@ -2496,19 +2514,46 @@ document.addEventListener('DOMContentLoaded',function(){run();setInterval(run,IN
                 //<![CDATA[
 (function(){
 'use strict';
-function activateTabFromURL(){var urlParams=new URLSearchParams(window.location.search);var tabParam=urlParams.get('tab');var hashParam=window.location.hash.substring(1);var targetTab=tabParam||hashParam;if(targetTab){var ts='#'+targetTab;var tb=document.querySelector('.header-left button[data-bs-target="'+ts+'"]');if(tb){document.querySelectorAll('.header-left button').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false');});document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('show','active');});tb.classList.add('active');tb.setAttribute('aria-selected','true');var tp=document.querySelector(ts);if(tp)tp.classList.add('show','active');}}}
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',activateTabFromURL);}else{activateTabFromURL();}
-window.addEventListener('load',activateTabFromURL);window.addEventListener('hashchange',activateTabFromURL);
-function openModalFromURL(){var p=new URLSearchParams(window.location.search);if(p.get('modal')==='projects'){var m=document.getElementById('projectConfigModal');if(m){activateTabFromURL();setTimeout(function(){new bootstrap.Modal(m).show();},300);}}}
-window.addEventListener('load',openModalFromURL);
-document.addEventListener('DOMContentLoaded',function(){
+function activateTabOnly(tabId){
+  var ts='#'+tabId;var tb=document.querySelector('.header-left button[data-bs-target="'+ts+'"]');
+  if(!tb)return;
+  document.querySelectorAll('.header-left button').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false');});
+  document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.remove('show','active');});
+  tb.classList.add('active');tb.setAttribute('aria-selected','true');
+  var tp=document.querySelector(ts);if(tp)tp.classList.add('show','active');
+}
+window._activateTab=activateTabOnly;
+function _initTabs(){
+  // Read all params up front BEFORE cleaning the URL
+  var urlParams=new URLSearchParams(window.location.search);
+  var tabParam=urlParams.get('tab');
+  var hashParam=window.location.hash.substring(1);
+  var targetTab=tabParam||hashParam;
+  var modalParam=urlParams.get('modal');
+  var ticketModal=urlParams.get('ticket_modal'); // kept for the ticket-modal IIFE that reads it
+  // Activate tab via manual class manipulation (no shown.bs.tab fires here)
+  if(targetTab)activateTabOnly(targetTab);
+  // Fully clean the URL — strip ALL server-redirect params (success, error, tab, modal, etc.)
+  // Only preserve ticket_modal because the ticket quick-view IIFE reads it in its own DOMContentLoaded
+  var kept=new URLSearchParams();
+  if(ticketModal)kept.set('ticket_modal',ticketModal);
+  var clean=kept.toString();
+  history.replaceState({tab:targetTab||'overview'},'',window.location.pathname+(clean?('?'+clean):''));
+  // Handle ?modal=projects (read before URL was cleaned)
+  if(modalParam==='projects'){var m=document.getElementById('projectConfigModal');if(m)setTimeout(function(){new bootstrap.Modal(m).show();},300);}
+  // Wire tab button clicks — use capture phase so our handler fires before Bootstrap's own handler,
+  // preventing Bootstrap from also calling show() and firing shown.bs.tab a second time
   var tl=[].slice.call(document.querySelectorAll('.header-left button[data-bs-toggle="tab"]'));
-  tl.forEach(function(t){t.addEventListener('click',function(e){e.preventDefault();new bootstrap.Tab(t).show();});});
-  tl.forEach(function(t){t.addEventListener('shown.bs.tab',function(e){localStorage.setItem('activeDashboardTab',e.target.getAttribute('data-bs-target'));});});
+  tl.forEach(function(t){t.addEventListener('click',function(e){e.preventDefault();new bootstrap.Tab(t).show();},true);});
+  tl.forEach(function(t){t.addEventListener('shown.bs.tab',function(e){
+    var tabId=e.target.getAttribute('data-bs-target').substring(1);
+    localStorage.setItem('activeDashboardTab',e.target.getAttribute('data-bs-target'));
+    history.pushState({tab:tabId},'',tabId==='overview'?window.location.pathname:window.location.pathname+'?tab='+tabId);
+  });});
   document.querySelectorAll('.action-card[data-bs-toggle="tab"]').forEach(function(c){c.addEventListener('click',function(e){e.preventDefault();var t=document.querySelector('.header-left button[data-bs-target="'+this.getAttribute('href')+'"]');if(t)new bootstrap.Tab(t).show();});});
-  activateTabFromURL();
   document.querySelectorAll('.alert-success,.alert-danger').forEach(function(a){setTimeout(function(){new bootstrap.Alert(a).close();},5000);});
-});
+}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',_initTabs);}else{_initTabs();}
 })();
 //]]>
             </script>
@@ -2698,8 +2743,8 @@ document.addEventListener('DOMContentLoaded',function(){
 'use strict';
 var CAT_LABELS={company:'Company Info',services:'Services & Products',projects:'Projects',pricing:'Pricing',technical:'Technical Docs',faq:'FAQ',other:'Other'};
 function kbAlert(msg,type){var el=document.getElementById('kbAlert');if(!el)return;el.className='alert alert-'+(type||'success')+' mb-3';el.textContent=msg;el.classList.remove('d-none');setTimeout(function(){el.classList.add('d-none');},4000);}
-function kbLoadDocs(){fetch('/customer_support/knowledge/list',{credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).then(function(data){var docs=data.documents||[];document.getElementById('kbTotalDocs').textContent=docs.length;document.getElementById('kbReadyDocs').textContent=docs.filter(function(d){return d.state==='ready';}).length;document.getElementById('kbPendingDocs').textContent=docs.filter(function(d){return d.state==='pending';}).length;document.getElementById('kbErrorDocs').textContent=docs.filter(function(d){return d.state==='error';}).length;var tb=document.getElementById('kbDocsBody');if(!docs.length){tb.innerHTML='<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-folder2-open me-2"></i>No documents uploaded yet. Upload your first document above.</td></tr>';return;}tb.innerHTML=docs.map(function(d){var stateBadge=d.state==='ready'?'<span class="badge bg-success">&#x2705; Ready</span>':d.state==='error'?'<span class="badge bg-danger" title="'+(d.error_msg||'')+'">&#x274C; Error</span>':'<span class="badge bg-warning text-dark">&#x23F3; Pending</span>';var typeBadge={pdf:'<span class="badge bg-danger">PDF</span>',docx:'<span class="badge bg-primary">DOCX</span>',txt:'<span class="badge bg-success">TXT</span>',xlsx:'<span class="badge bg-info text-dark">XLSX</span>'}[d.file_type]||'<span class="badge bg-secondary">FILE</span>';return'<tr><td><strong>'+d.name+'</strong>'+(d.description?'<br><small class="text-muted">'+d.description+'</small>':'')+'</td><td><span class="badge bg-secondary">'+(CAT_LABELS[d.category]||d.category)+'</span></td><td>'+typeBadge+'</td><td>'+stateBadge+'</td><td class="text-center fw-bold text-primary">'+(d.chunk_count||0)+'</td><td><small class="text-muted">'+(d.create_date||'')+'</small></td><td><button class="btn btn-sm btn-outline-danger" onclick="kbDelete('+d.id+',\''+d.name.replace(/'/g,"\\'")+'\')" title="Delete"><i class="bi bi-trash3"></i></button></td></tr>';}).join('');}).catch(function(e){console.warn('KB load failed:',e);});}
-window.kbUpload=function(){var name=document.getElementById('kbDocName').value.trim();var category=document.getElementById('kbCategory').value;var desc=document.getElementById('kbDescription').value.trim();var fileEl=document.getElementById('kbFile');if(!name||!fileEl.files.length){kbAlert('Please fill in the document name and select a file.','warning');return;}var allowed=['.pdf','.docx','.txt','.xlsx'];var filename=fileEl.files[0].name.toLowerCase();if(!allowed.some(function(ext){return filename.endsWith(ext);})){kbAlert('Invalid file type. Allowed: PDF, DOCX, TXT, XLSX','danger');return;}var formData=new FormData();formData.append('name',name);formData.append('category',category);formData.append('description',desc);formData.append('file',fileEl.files[0]);var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);var btn=document.getElementById('kbUploadBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Uploading...';}fetch('/customer_support/knowledge/upload',{method:'POST',credentials:'same-origin',body:formData}).then(function(){kbAlert('Document uploaded. Processing has started in the background.','success');document.getElementById('kbDocName').value='';document.getElementById('kbDescription').value='';document.getElementById('kbFile').value='';kbLoadDocs();}).catch(function(){kbAlert('Upload failed. Please try again.','danger');}).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="bi bi-upload me-2"></i>Upload Document';}});};
+function kbLoadDocs(){fetch('/customer_support/knowledge/list',{credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).then(function(data){var docs=data.documents||[];document.getElementById('kbTotalDocs').textContent=docs.length;document.getElementById('kbReadyDocs').textContent=docs.filter(function(d){return d.state==='ready';}).length;document.getElementById('kbPendingDocs').textContent=docs.filter(function(d){return d.state==='pending';}).length;document.getElementById('kbErrorDocs').textContent=docs.filter(function(d){return d.state==='error';}).length;var tb=document.getElementById('kbDocsBody');if(!docs.length){tb.innerHTML='<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-folder2-open me-2"></i>No documents uploaded yet. Upload your first document above.</td></tr>';return;}tb.innerHTML=docs.map(function(d){var stateBadge=d.state==='ready'?'<span class="badge bg-success">&#x2705; Ready</span>':d.state==='error'?'<span class="badge bg-danger" title="'+(d.error_msg||'')+'">&#x274C; Error</span>':'<span class="badge bg-warning text-dark">&#x23F3; Pending</span>';var typeBadge={pdf:'<span class="badge bg-danger">PDF</span>',docx:'<span class="badge bg-primary">DOCX</span>',txt:'<span class="badge bg-success">TXT</span>',xlsx:'<span class="badge bg-info text-dark">XLSX</span>'}[d.file_type]||'<span class="badge bg-secondary">FILE</span>';var projectBadge=d.project_name?'<span class="badge bg-info text-dark">'+d.project_name+'</span>':'<span class="text-muted" style="font-size:0.75rem;">—</span>';return'<tr><td><strong>'+d.name+'</strong>'+(d.description?'<br><small class="text-muted">'+d.description+'</small>':'')+'</td><td>'+projectBadge+'</td><td><span class="badge bg-secondary">'+(CAT_LABELS[d.category]||d.category)+'</span></td><td>'+typeBadge+'</td><td>'+stateBadge+'</td><td class="text-center fw-bold text-primary">'+(d.chunk_count||0)+'</td><td><small class="text-muted">'+(d.create_date||'')+'</small></td><td><button class="btn btn-sm btn-outline-danger" onclick="kbDelete('+d.id+',\''+d.name.replace(/'/g,"\\'")+'\')" title="Delete"><i class="bi bi-trash3"></i></button></td></tr>';}).join('');}).catch(function(e){console.warn('KB load failed:',e);});}
+window.kbUpload=function(){var name=document.getElementById('kbDocName').value.trim();var category=document.getElementById('kbCategory').value;var desc=document.getElementById('kbDescription').value.trim();var fileEl=document.getElementById('kbFile');var projectId=document.getElementById('kbProjectSelect').value;if(!name||!fileEl.files.length){kbAlert('Please fill in the document name and select a file.','warning');return;}var allowed=['.pdf','.docx','.txt','.xlsx'];var filename=fileEl.files[0].name.toLowerCase();if(!allowed.some(function(ext){return filename.endsWith(ext);})){kbAlert('Invalid file type. Allowed: PDF, DOCX, TXT, XLSX','danger');return;}var formData=new FormData();formData.append('name',name);formData.append('category',category);formData.append('description',desc);formData.append('file',fileEl.files[0]);if(projectId)formData.append('project_id',projectId);var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);var btn=document.getElementById('kbUploadBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Uploading...';}fetch('/customer_support/knowledge/upload',{method:'POST',credentials:'same-origin',body:formData}).then(function(){var msg=projectId?'Document uploaded and linked to project. It will appear on the ticket board once processed.':'Document uploaded. Processing has started in the background.';kbAlert(msg,'success');document.getElementById('kbDocName').value='';document.getElementById('kbDescription').value='';document.getElementById('kbFile').value='';document.getElementById('kbProjectSelect').value='';kbLoadDocs();}).catch(function(){kbAlert('Upload failed. Please try again.','danger');}).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="bi bi-upload me-2"></i>Upload &amp; Process';}});};
 window.kbDelete=function(id,name){if(!confirm('Delete "'+name+'"?\nThe AI will no longer use this document.'))return;var formData=new FormData();var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);fetch('/customer_support/knowledge/delete/'+id,{method:'POST',credentials:'same-origin',body:formData}).then(function(){kbAlert('Document deleted.','success');kbLoadDocs();}).catch(function(){kbAlert('Delete failed.','danger');});};
 document.addEventListener('DOMContentLoaded',function(){var modal=document.getElementById('knowledgeBaseModal');if(modal)modal.addEventListener('shown.bs.modal',function(){kbLoadDocs();});});
 
@@ -3159,8 +3204,13 @@ document.addEventListener('DOMContentLoaded', function () {
     history.pushState({ adminTrap: true }, '', window.location.href);
     history.pushState({ adminTrap: true }, '', window.location.href);
 
-    window.addEventListener('popstate', function () {
-        // Re-arm with 3 entries to rebuild the buffer
+    window.addEventListener('popstate', function (e) {
+        // Tab-navigation pop — restore the tab, don't show logout warning
+        if (e.state && e.state.tab) {
+            if (window._activateTab) window._activateTab(e.state.tab);
+            return;
+        }
+        // Reached a trap entry — re-arm buffer and show logout warning
         history.pushState({ adminTrap: true }, '', window.location.href);
         history.pushState({ adminTrap: true }, '', window.location.href);
         history.pushState({ adminTrap: true }, '', window.location.href);

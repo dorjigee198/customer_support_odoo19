@@ -82,6 +82,14 @@ class CustomerSupportTicketTask(models.Model):
 
     description = fields.Text(string="Description")
 
+    project_member_ids = fields.Many2many(
+        "customer_support.project.member",
+        "cs_ticket_task_project_member_rel",
+        "task_id",
+        "member_id",
+        string="Assigned Project Members",
+    )
+
     member_ids = fields.Many2many(
         "res.users",
         "cs_ticket_task_member_rel",
@@ -114,6 +122,12 @@ class CustomerSupportTicketTask(models.Model):
         string="Checklist",
     )
 
+    note_ids = fields.One2many(
+        "customer_support.task.note",
+        "task_id",
+        string="Task Notes",
+    )
+
 
 class CustomerSupportTaskChecklist(models.Model):
     _name = "customer_support.task.checklist"
@@ -130,6 +144,28 @@ class CustomerSupportTaskChecklist(models.Model):
     name = fields.Char(string="Item", required=True)
     is_done = fields.Boolean(string="Done", default=False)
     sequence = fields.Integer(string="Order", default=10)
+
+
+class CustomerSupportTaskNote(models.Model):
+    _name = "customer_support.task.note"
+    _description = "Task Resolving Note"
+    _order = "create_date asc"
+
+    task_id = fields.Many2one(
+        "customer_support.ticket.task",
+        string="Task",
+        required=True,
+        ondelete="cascade",
+        index=True,
+    )
+    user_id = fields.Many2one(
+        "res.users",
+        string="Author",
+        ondelete="set null",
+    )
+    author_name = fields.Char(string="Author Name")
+    message = fields.Text(string="Note", required=True)
+    create_date = fields.Datetime(string="Posted At", readonly=True)
 
 
 class CustomerSupportTicketComment(models.Model):

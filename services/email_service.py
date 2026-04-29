@@ -75,7 +75,7 @@ class EmailService:
     def send_welcome_email(user_email, user_name, password):
         """Send welcome email to a newly created customer."""
         try:
-            login_url = f"{EmailService._get_base_url()}/customer_support/login"
+            login_url = f"{EmailService._get_base_url()}/customer_support/login?force_login=1"
             body = render_welcome_customer(user_name, user_email, password, login_url)
             EmailService._send("Welcome to Customer Support Portal", body, user_email, force_send=True)
             _logger.info(f"✓ Welcome email sent to {user_email}")
@@ -88,7 +88,7 @@ class EmailService:
     def send_welcome_email_focal_person(user_email, user_name, password):
         """Send welcome email to a newly created support agent."""
         try:
-            login_url = f"{EmailService._get_base_url()}/customer_support/login"
+            login_url = f"{EmailService._get_base_url()}/customer_support/login?force_login=1"
             body = render_welcome_agent(user_name, user_email, password, login_url)
             EmailService._send(
                 "Welcome to Customer Support Portal - Support Agent Account",
@@ -136,7 +136,7 @@ class EmailService:
                 return False
 
             ticket_url = (
-                f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}"
+                f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}?force_login=1"
             )
             body = render_assignment_customer(ticket, assigned_user, ticket_url)
             EmailService._send(
@@ -167,7 +167,7 @@ class EmailService:
                 return False
 
             ticket_url = (
-                f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}"
+                f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}?force_login=1"
             )
             body = render_status_change(ticket, old_status, new_status, ticket_url)
             EmailService._send(
@@ -250,6 +250,61 @@ class EmailService:
             return False
 
     @staticmethod
+    def send_task_assignment(ticket, member, task):
+        """Notify a project member that a board task was assigned to them.
+
+        `member` is a `customer_support.project.member` record (may or may not
+        be linked to a `res.users` record). `task` is a
+        `customer_support.ticket.task` record.
+        """
+        try:
+            recipient_email = member.user_id.email if member.user_id else (member.member_email or None)
+            recipient_name = member.user_id.name if member.user_id else (member.member_name or "")
+            if not recipient_email:
+                _logger.warning(f"✗ No email for member {recipient_name}")
+                return False
+
+            base = EmailService._get_base_url()
+            task_url = f"{base}/customer_support/ticket/{ticket.id}/board"
+
+            due = task.due_date.strftime("%b %d, %Y") if task.due_date else "No due date"
+            priority = task.task_priority or "none"
+            safe_description = (
+                task.description or ""
+            ).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br/>")
+
+            subject = f"Task Assigned: {task.name} — {ticket.name}"
+
+            body = f"""
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"/>
+<style>body{{font-family:'Segoe UI',Arial,sans-serif;background:#f0f4f8;margin:0;padding:0}}.wrap{{max-width:560px;margin:32px auto;background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e6eef8}}</style>
+</head><body>
+<div class="wrap">
+    <div style="background:#1e5a8e;padding:20px;color:#fff"><h2 style="margin:0">New Task Assigned</h2></div>
+    <div style="padding:20px;color:#111">
+        <p>Hi <strong>{recipient_name}</strong>,</p>
+        <p>You have been assigned a task on the ticket <strong>{ticket.name}</strong>:</p>
+        <div style="background:#f8fafc;border-left:4px solid #1e5a8e;padding:12px;margin:12px 0;border-radius:6px;">
+            <div style="font-weight:700">{task.name}</div>
+            <div style="margin-top:8px;color:#475569">{safe_description}</div>
+            <div style="margin-top:10px;font-size:13px;color:#64748b">Due: {due} · Priority: {priority}</div>
+        </div>
+        <p><a href="{task_url}" style="display:inline-block;background:#1e5a8e;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none">Open Board</a></p>
+        <p style="color:#94a3b8;font-size:13px;margin-top:12px">This is an automated notification from Customer Support.</p>
+    </div>
+</div>
+</body></html>
+"""
+
+            EmailService._send(subject, body, recipient_email, force_send=True)
+            _logger.info(f"✓ Task assignment email queued for {recipient_email} (task={task.name})")
+            return True
+        except Exception as e:
+            _logger.error(f"✗ Task assignment email failed for task {task.name}: {e}")
+            return False
+
+    @staticmethod
     def send_customer_reply(ticket, message, sender_name):
         """Send a reply message from the focal/team to the customer."""
         try:
@@ -257,7 +312,7 @@ class EmailService:
             if not customer_email:
                 return False
 
-            ticket_url = f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}"
+            ticket_url = f"{EmailService._get_base_url()}/customer_support/ticket/{ticket.id}?force_login=1"
             subject = f"Update on your ticket: {ticket.name}"
             safe_message = message.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
@@ -328,8 +383,8 @@ class EmailService:
   <div class="footer">Customer Support Portal — automated notification</div>
 </div></body></html>"""
 
-            EmailService._send(subject, body, user_email)
-            _logger.info(f"✓ Mention notification queued for {user_email}")
+            EmailService._send(subject, body, user_email, force_send=True)
+            _logger.info(f"✓ Mention notification sent to {user_email}")
             return True
         except Exception as e:
             _logger.error(f"✗ Mention notification failed for {user_email}: {e}")

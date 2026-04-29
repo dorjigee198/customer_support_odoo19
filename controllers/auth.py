@@ -73,7 +73,12 @@ class CustomerSupportAuth(http.Controller):
         """
         user = request.env.user
         public_user = request.env.ref("base.public_user")
-        if user and user.id != public_user.id and user.active:
+        # Allow email links to force showing the login page even if a different
+        # user is currently authenticated in the browser by supplying
+        # ?force_login=1 — this prevents accidental access as an admin/support
+        # when a customer clicks an email link from a shared browser.
+        force_login = str(kw.get("force_login", "")).lower() in ("1", "true", "yes")
+        if user and user.id != public_user.id and user.active and not force_login:
             # User is already logged in — redirect to their dashboard
             if user.has_group("base.group_system"):
                 return werkzeug.utils.redirect("/customer_support/admin_dashboard")

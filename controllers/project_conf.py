@@ -93,7 +93,7 @@ class CustomerSupportProjectController(http.Controller):
             _logger.info(f"Project + Config created: {project.name} (ID: {project.id})")
 
             return request.redirect(
-                f"/customer_support/admin_dashboard/system_configuration?project_created=1&project_id={project.id}&tab=project"
+                f"/customer_support/admin_dashboard?tab=system-configuration&modal=projects&project_created=1&project_id={project.id}"
             )
 
         except Exception as e:
@@ -158,7 +158,7 @@ class CustomerSupportProjectController(http.Controller):
             _logger.info(f"Project + Config updated: {project.name} (ID: {project.id})")
 
             return request.redirect(
-                f"/customer_support/admin_dashboard/system_configuration?project_updated=1&project_id={project.id}&tab=project"
+                f"/customer_support/admin_dashboard?tab=system-configuration&modal=projects&project_updated=1&project_id={project.id}"
             )
 
         except Exception as e:

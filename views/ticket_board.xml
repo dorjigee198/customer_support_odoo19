@@ -29,6 +29,7 @@
                     <t t-esc="user.id" />
                 </t><t t-if="not user">null</t>,
                 publicBoard: <t t-if="public_board">true</t><t t-if="not public_board">false</t>,
+                boardToken: <t t-if="public_board">"<t t-esc="board_token"/>"</t><t t-if="not public_board">null</t>,
                 boardColumns: <t t-out="board_columns_json" />,
                 customerConversation: <t t-out="customer_conversation_json" />,
                 boardBg: <t t-out="board_bg_json" /> }; </script>
@@ -405,7 +406,8 @@
                                                 <div class="tb-task-members">
                                                     <t t-foreach="task['members']" t-as="m">
                                                         <span class="tb-avatar"
-                                                            t-att-title="m['name']">
+                                                            t-att-title="m['name']"
+                                                            t-att-data-member-id="m['member_id']">
                                                             <t t-esc="m['initials']" />
                                                         </span>
                                                     </t>
@@ -813,7 +815,14 @@
                             <div class="tb-member-picker" id="memberPicker"></div>
                         </div>
 
-                        <!-- Checklist section (edit mode only) -->
+                        <!-- Resolving notes (available to team members and focal users) -->
+                        <div class="tb-form-group" id="taskNotesGroup" style="display:none;">
+                            <label class="tb-form-label">
+                                <i class="bi bi-chat-square-text me-1"></i>Resolving Notes </label>
+                            <div id="taskNotesSection"></div>
+                        </div>
+
+                        <!-- Checklist section (focal only) -->
                         <div class="tb-form-group" id="checklistGroup" style="display:none;">
                             <label class="tb-form-label">
                                 <i class="bi bi-check2-square me-1"></i>Checklist </label>

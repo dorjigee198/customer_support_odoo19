@@ -52,9 +52,58 @@ _CSRF_PLACEHOLDER = None  # csrf token added via request at render time
 _logger = logging.getLogger(__name__)
 
 
+def _member_payload(member):
+    """Return the serialisable task-assignee payload for a project member."""
+    name = member.user_id.name if member.user_id else (member.member_name or "")
+    if not name:
+        return None
+    email = member.user_id.email if member.user_id else (member.member_email or "")
+    return {
+        "member_id": member.id,
+        "user_id": member.user_id.id if member.user_id else None,
+        "name": name,
+        "email": email,
+        "role": member.role_label or "Other",
+        "role_key": member.role,
+        "initials": "".join(p[0].upper() for p in name.split()[:2]) if name else "?",
+    }
+
+
+def _task_member_ids(task):
+    """Return the assigned project member IDs for a task, including legacy user-only data."""
+    if task.project_member_ids:
+        return task.project_member_ids.ids
+    if not task.ticket_id.project_id or not task.member_ids:
+        return []
+    members = (
+        request.env["customer_support.project.member"]
+        .sudo()
+        .search(
+            [
+                ("project_id", "=", task.ticket_id.project_id.id),
+                ("user_id", "in", task.member_ids.ids),
+            ]
+        )
+    )
+    return members.ids
+
+
 def _build_task_dict(task):
     """Build a serialisable dict for a task including checklist items."""
     due = task.due_date.isoformat() if task.due_date else None
+    members = task.project_member_ids
+    if not members and task.ticket_id.project_id and task.member_ids:
+        members = (
+            request.env["customer_support.project.member"]
+            .sudo()
+            .search(
+                [
+                    ("project_id", "=", task.ticket_id.project_id.id),
+                    ("user_id", "in", task.member_ids.ids),
+                ],
+                order="role, id",
+            )
+        )
     return {
         "id": task.id,
         "name": task.name,
@@ -62,17 +111,20 @@ def _build_task_dict(task):
         "is_done": task.is_done,
         "due_date": due,
         "task_priority": task.task_priority or "none",
-        "members": [
-            {
-                "user_id": m.id,
-                "name": m.name,
-                "initials": "".join(p[0].upper() for p in m.name.split()[:2]),
-            }
-            for m in task.member_ids
-        ],
+        "members": [payload for m in members if (payload := _member_payload(m))],
         "checklist": [
             {"id": c.id, "name": c.name, "is_done": c.is_done}
             for c in task.checklist_ids
+        ],
+        "notes": [
+            {
+                "id": n.id,
+                "author": n.user_id.name if n.user_id else (n.author_name or "Board Member"),
+                "author_id": n.user_id.id if n.user_id else False,
+                "message": n.message or "",
+                "created": n.create_date.strftime("%b %d, %Y %H:%M") if n.create_date else "",
+            }
+            for n in task.note_ids
         ],
     }
 
@@ -145,6 +197,32 @@ def _conversation_messages(ticket, user, limit=80):
 
 
 class FocalBoardController(http.Controller):
+
+    def _authorize_for_ticket(self, ticket, kw=None):
+        """Return True if the current request is allowed to modify the given ticket.
+
+        Logged-in focal users (internal) keep existing rights. Public requests must
+        supply a matching `board_token` parameter to be allowed.
+        """
+        try:
+            user = request.env.user
+            public_user_id = request.env.ref('base.public_user').id
+            # Logged-in internal focal users
+            if user and user.id != public_user_id and _require_focal(user):
+                return True
+
+            # Public access via token
+            token = None
+            if kw and isinstance(kw, dict):
+                token = kw.get('board_token') or kw.get('token')
+            if not token:
+                token = request.params.get('board_token') or request.params.get('token')
+            if token and ticket and ticket.board_token and token == ticket.board_token:
+                return True
+        except Exception:
+            pass
+        return False
+
 
     # =========================================================================
     # PROJECT CARDS
@@ -380,7 +458,10 @@ class FocalBoardController(http.Controller):
                     "id": a.id,
                     "name": a.name,
                     "mimetype": a.mimetype or "",
-                    "url": f"/web/content/{a.id}?download=true",
+                    "url": (
+                        f"/customer_support/attachment/{a.id}/download?board_token={ticket.board_token}"
+                        if ticket.board_token else f"/web/content/{a.id}?download=true"
+                    ),
                 }
                 for a in attachments
             ]
@@ -403,7 +484,10 @@ class FocalBoardController(http.Controller):
                         "filename": d.filename or d.name,
                         "file_type": d.file_type or "other",
                         "description": d.description or "",
-                        "url": f"/web/content/dc.knowledge.document/{d.id}/file/{d.filename or 'document'}?download=true",
+                        "url": (
+                            f"/customer_support/document/{d.id}/download?board_token={ticket.board_token}"
+                            if ticket.board_token else f"/web/content/dc.knowledge.document/{d.id}/file/{d.filename or 'document'}?download=true"
+                        ),
                     }
                     for d in docs
                 ]
@@ -719,7 +803,7 @@ class FocalBoardController(http.Controller):
     @http.route(
         "/customer_support/ticket/column/<int:column_id>/task/add",
         type="jsonrpc",
-        auth="user",
+        auth="public",
         csrf=True,
     )
     def add_task(self, column_id, **kw):
@@ -732,10 +816,16 @@ class FocalBoardController(http.Controller):
             if not col.exists():
                 return {"error": "Column not found"}
 
+            # Authorization: allow focal users or public token matching the ticket
+            if not self._authorize_for_ticket(col.ticket_id, kw):
+                return {"error": "Access denied"}
+
             member_ids = [mid for mid in (kw.get("member_ids") or []) if isinstance(mid, int) and mid > 0]
             description = (kw.get("description") or "").strip()
             due_date = kw.get("due_date") or False
             task_priority = kw.get("task_priority") or "none"
+            selected_members = request.env["customer_support.project.member"].sudo().browse(member_ids)
+            selected_user_ids = selected_members.mapped("user_id").ids
 
             last = request.env["customer_support.ticket.task"].sudo().search(
                 [("column_id", "=", column_id)], order="sequence desc", limit=1
@@ -746,20 +836,34 @@ class FocalBoardController(http.Controller):
                 "column_id": column_id,
                 "name": name,
                 "description": description or False,
-                "member_ids": [(6, 0, member_ids)],
+                "project_member_ids": [(6, 0, selected_members.ids)],
+                "member_ids": [(6, 0, selected_user_ids)],
                 "sequence": seq,
                 "due_date": due_date or False,
                 "task_priority": task_priority,
             })
             ticket_id = col.ticket_id.id
             assigned_names = ""
-            if member_ids:
-                members = request.env["res.users"].sudo().browse(member_ids)
-                assigned_names = ", ".join(m.name for m in members)
+            if selected_members:
+                assigned_names = ", ".join(
+                    member.user_id.name if member.user_id else (member.member_name or "")
+                    for member in selected_members
+                    if (member.user_id or member.member_name)
+                )
             summary = f'{request.env.user.name} added task "{name}" to "{col.name}"'
             if assigned_names:
                 summary += f" — assigned to {assigned_names}"
             _log(ticket_id, "board_task_add", summary, actor=request.env.user)
+            # Send assignment emails to selected members
+            try:
+                ticket = col.ticket_id
+                for member in selected_members:
+                    try:
+                        EmailService.send_task_assignment(ticket, member, task)
+                    except Exception as mail_err:
+                        _logger.warning("Task assignment email failed: %s", mail_err)
+            except Exception:
+                pass
             return {"success": True, "task": _build_task_dict(task)}
 
         except Exception as e:
@@ -769,7 +873,7 @@ class FocalBoardController(http.Controller):
     @http.route(
         "/customer_support/ticket/task/<int:task_id>/toggle",
         type="jsonrpc",
-        auth="user",
+        auth="public",
         csrf=True,
     )
     def toggle_task(self, task_id, **kw):
@@ -777,6 +881,9 @@ class FocalBoardController(http.Controller):
             task = request.env["customer_support.ticket.task"].sudo().browse(task_id)
             if not task.exists():
                 return {"error": "Task not found"}
+            # Checklist completion is focal-only; board members can add notes instead.
+            if not self._authorize_for_ticket(task.ticket_id, kw) or request.env.user.id == request.env.ref('base.public_user').id:
+                return {"error": "Access denied"}
             task.write({"is_done": not task.is_done})
             ticket_id = task.ticket_id.id
             evt = "board_task_done" if task.is_done else "board_task_undone"
@@ -793,7 +900,7 @@ class FocalBoardController(http.Controller):
     @http.route(
         "/customer_support/ticket/task/<int:task_id>/update",
         type="jsonrpc",
-        auth="user",
+        auth="public",
         csrf=True,
     )
     def update_task(self, task_id, **kw):
@@ -802,6 +909,10 @@ class FocalBoardController(http.Controller):
             if not task.exists():
                 return {"error": "Task not found"}
 
+            # Authorization
+            if not self._authorize_for_ticket(task.ticket_id, kw):
+                return {"error": "Access denied"}
+
             vals = {}
             if "name" in kw and kw["name"].strip():
                 vals["name"] = kw["name"].strip()
@@ -809,27 +920,46 @@ class FocalBoardController(http.Controller):
                 vals["description"] = kw["description"].strip() or False
             if "member_ids" in kw:
                 clean_ids = [mid for mid in (kw["member_ids"] or []) if isinstance(mid, int) and mid > 0]
-                vals["member_ids"] = [(6, 0, clean_ids)]
+                selected_members = request.env["customer_support.project.member"].sudo().browse(clean_ids)
+                vals["project_member_ids"] = [(6, 0, selected_members.ids)]
+                vals["member_ids"] = [(6, 0, selected_members.mapped("user_id").ids)]
             if "due_date" in kw:
                 vals["due_date"] = kw["due_date"] or False
             if "task_priority" in kw:
                 vals["task_priority"] = kw["task_priority"] or "none"
 
-            old_members = set(task.member_ids.ids)
+            old_members = set(_task_member_ids(task))
             task.write(vals)
             ticket_id = task.ticket_id.id
             # Log member assignments if changed
             if "member_ids" in kw:
-                new_members = set(task.member_ids.ids)
+                new_members = set(_task_member_ids(task))
                 added = new_members - old_members
                 removed = old_members - new_members
                 if added:
-                    names = ", ".join(request.env["res.users"].sudo().browse(list(added)).mapped("name"))
+                    names = ", ".join(
+                        member.user_id.name if member.user_id else (member.member_name or "")
+                        for member in request.env["customer_support.project.member"].sudo().browse(list(added))
+                        if (member.user_id or member.member_name)
+                    )
                     _log(ticket_id, "board_task_assign",
                          f'{request.env.user.name} assigned "{task.name}" to {names}',
                          actor=request.env.user)
+                    # Send assignment emails for newly added members
+                    try:
+                        for member in request.env["customer_support.project.member"].sudo().browse(list(added)):
+                            try:
+                                EmailService.send_task_assignment(task.ticket_id, member, task)
+                            except Exception as mail_err:
+                                _logger.warning("Task assignment email failed: %s", mail_err)
+                    except Exception:
+                        pass
                 if removed:
-                    names = ", ".join(request.env["res.users"].sudo().browse(list(removed)).mapped("name"))
+                    names = ", ".join(
+                        member.user_id.name if member.user_id else (member.member_name or "")
+                        for member in request.env["customer_support.project.member"].sudo().browse(list(removed))
+                        if (member.user_id or member.member_name)
+                    )
                     _log(ticket_id, "board_task_assign",
                          f'{request.env.user.name} removed {names} from task "{task.name}"',
                          actor=request.env.user)
@@ -846,7 +976,7 @@ class FocalBoardController(http.Controller):
     @http.route(
         "/customer_support/ticket/task/<int:task_id>/delete",
         type="jsonrpc",
-        auth="user",
+        auth="public",
         csrf=True,
     )
     def delete_task(self, task_id, **kw):
@@ -854,6 +984,8 @@ class FocalBoardController(http.Controller):
             task = request.env["customer_support.ticket.task"].sudo().browse(task_id)
             if not task.exists():
                 return {"error": "Task not found"}
+            if not self._authorize_for_ticket(task.ticket_id, kw):
+                return {"error": "Access denied"}
             ticket_id = task.ticket_id.id
             task_name = task.name
             task.unlink()
@@ -873,7 +1005,7 @@ class FocalBoardController(http.Controller):
     @http.route(
         "/customer_support/ticket/task/<int:task_id>/move",
         type="jsonrpc",
-        auth="user",
+        auth="public",
         csrf=True,
     )
     def move_task(self, task_id, **kw):
@@ -885,6 +1017,10 @@ class FocalBoardController(http.Controller):
             task = request.env["customer_support.ticket.task"].sudo().browse(task_id)
             if not task.exists():
                 return {"error": "Task not found"}
+
+            # Authorization
+            if not self._authorize_for_ticket(task.ticket_id, kw):
+                return {"error": "Access denied"}
 
             col = request.env["customer_support.ticket.column"].sudo().browse(int(column_id))
             if not col.exists():
@@ -912,7 +1048,7 @@ class FocalBoardController(http.Controller):
     @http.route(
         "/customer_support/ticket/<int:ticket_id>/comment/add",
         type="jsonrpc",
-        auth="user",
+        auth="public",
         csrf=True,
     )
     def add_comment(self, ticket_id, **kw):
@@ -926,6 +1062,10 @@ class FocalBoardController(http.Controller):
             ticket = request.env["customer.support"].sudo().browse(ticket_id)
             if not ticket.exists():
                 return {"error": "Ticket not found"}
+
+            # Authorization: allow focal users or public token matching the ticket
+            if not self._authorize_for_ticket(ticket, kw):
+                return {"error": "Access denied"}
 
             user = request.env.user
             comment = request.env["customer_support.ticket.comment"].sudo().create({
@@ -1133,6 +1273,76 @@ class FocalBoardController(http.Controller):
             return {"success": False, "error": str(e)}
 
     # =========================================================================
+    # ATTACHMENT / DOCUMENT DOWNLOAD FOR PUBLIC BOARD TOKEN
+    # =========================================================================
+
+    @http.route(
+        "/customer_support/attachment/<int:att_id>/download",
+        type="http",
+        auth="public",
+        website=True,
+    )
+    def download_attachment(self, att_id, **kw):
+        try:
+            token = kw.get('board_token') or request.params.get('board_token')
+            att = request.env['ir.attachment'].sudo().browse(att_id)
+            if not att.exists():
+                return request.not_found()
+            if att.res_model != 'customer.support':
+                return request.not_found()
+            ticket = request.env['customer.support'].sudo().browse(att.res_id)
+            if not ticket.exists():
+                return request.not_found()
+            if not self._authorize_for_ticket(ticket, {'board_token': token}):
+                return request.make_response('Access denied', status=403)
+
+            data_b64 = att.sudo().datas or ''
+            if not data_b64:
+                return request.not_found()
+            import base64
+            content = base64.b64decode(data_b64)
+            headers = [
+                ('Content-Type', att.mimetype or 'application/octet-stream'),
+                ('Content-Disposition', f'attachment; filename="{att.name or "attachment"}"'),
+            ]
+            return request.make_response(content, headers)
+        except Exception as e:
+            _logger.error('download_attachment error: %s', e)
+            return request.make_response('Error', status=500)
+
+    @http.route(
+        "/customer_support/document/<int:doc_id>/download",
+        type="http",
+        auth="public",
+        website=True,
+    )
+    def download_document(self, doc_id, **kw):
+        try:
+            token = kw.get('board_token') or request.params.get('board_token')
+            doc = request.env['dc.knowledge.document'].sudo().browse(doc_id)
+            if not doc.exists():
+                return request.not_found()
+            # Find ticket that has this board token and belongs to same project
+            ticket = request.env['customer.support'].sudo().search([('board_token', '=', token)], limit=1) if token else None
+            if not ticket or not ticket.project_id or ticket.project_id.id != doc.project_id.id:
+                return request.make_response('Access denied', status=403)
+            # Try common file fields
+            data_b64 = getattr(doc.sudo(), 'file', None) or getattr(doc.sudo(), 'datas', None) or getattr(doc.sudo(), 'data', None) or ''
+            if not data_b64:
+                return request.not_found()
+            import base64
+            content = base64.b64decode(data_b64)
+            fname = doc.filename or doc.name or f'document_{doc.id}'
+            headers = [
+                ('Content-Type', doc.file_type or 'application/octet-stream'),
+                ('Content-Disposition', f'attachment; filename="{fname}"'),
+            ]
+            return request.make_response(content, headers)
+        except Exception as e:
+            _logger.error('download_document error: %s', e)
+            return request.make_response('Error', status=500)
+
+    # =========================================================================
     # REPLY TO CUSTOMER
     # =========================================================================
 
@@ -1207,7 +1417,7 @@ class FocalBoardController(http.Controller):
     @http.route(
         "/customer_support/ticket/task/<int:task_id>/checklist/add",
         type="jsonrpc",
-        auth="user",
+        auth="public",
         csrf=True,
     )
     def add_checklist_item(self, task_id, **kw):
@@ -1219,6 +1429,10 @@ class FocalBoardController(http.Controller):
             task = request.env["customer_support.ticket.task"].sudo().browse(task_id)
             if not task.exists():
                 return {"error": "Task not found"}
+
+            # Checklist editing is focal-only.
+            if request.env.user.id == request.env.ref('base.public_user').id or not _require_focal(request.env.user):
+                return {"error": "Access denied"}
 
             last = request.env["customer_support.task.checklist"].sudo().search(
                 [("task_id", "=", task_id)], order="sequence desc", limit=1
@@ -1243,7 +1457,7 @@ class FocalBoardController(http.Controller):
     @http.route(
         "/customer_support/ticket/task/checklist/<int:item_id>/toggle",
         type="jsonrpc",
-        auth="user",
+        auth="public",
         csrf=True,
     )
     def toggle_checklist_item(self, item_id, **kw):
@@ -1251,6 +1465,8 @@ class FocalBoardController(http.Controller):
             item = request.env["customer_support.task.checklist"].sudo().browse(item_id)
             if not item.exists():
                 return {"error": "Item not found"}
+            if request.env.user.id == request.env.ref('base.public_user').id or not _require_focal(request.env.user):
+                return {"error": "Access denied"}
             item.write({"is_done": not item.is_done})
             if item.is_done:
                 ticket_id = item.task_id.ticket_id.id
@@ -1265,7 +1481,7 @@ class FocalBoardController(http.Controller):
     @http.route(
         "/customer_support/ticket/task/checklist/<int:item_id>/delete",
         type="jsonrpc",
-        auth="user",
+        auth="public",
         csrf=True,
     )
     def delete_checklist_item(self, item_id, **kw):
@@ -1273,8 +1489,64 @@ class FocalBoardController(http.Controller):
             item = request.env["customer_support.task.checklist"].sudo().browse(item_id)
             if not item.exists():
                 return {"error": "Item not found"}
+            if request.env.user.id == request.env.ref('base.public_user').id or not _require_focal(request.env.user):
+                return {"error": "Access denied"}
             item.unlink()
             return {"success": True}
         except Exception as e:
             _logger.error("delete_checklist_item error: %s", e)
+            return {"error": str(e)}
+
+    @http.route(
+        "/customer_support/ticket/task/<int:task_id>/note/add",
+        type="jsonrpc",
+        auth="public",
+        csrf=True,
+    )
+    def add_task_note(self, task_id, **kw):
+        try:
+            message = (kw.get("message") or "").strip()
+            if not message:
+                return {"error": "Note is required"}
+
+            task = request.env["customer_support.ticket.task"].sudo().browse(task_id)
+            if not task.exists():
+                return {"error": "Task not found"}
+
+            if not self._authorize_for_ticket(task.ticket_id, kw):
+                return {"error": "Access denied"}
+
+            user = request.env.user
+            author_name = (kw.get("author_name") or "").strip()
+            if user.id != request.env.ref("base.public_user").id:
+                author_name = user.name
+
+            note = request.env["customer_support.task.note"].sudo().create({
+                "task_id": task.id,
+                "user_id": user.id if user.id != request.env.ref("base.public_user").id else False,
+                "author_name": author_name or False,
+                "message": message,
+            })
+
+            _log(
+                task.ticket_id.id,
+                "board_task_note",
+                f'{author_name or "Board Member"} added a resolving note to task "{task.name}"',
+                actor=user if user.id != request.env.ref("base.public_user").id else None,
+                detail=message[:120],
+            )
+
+            return {
+                "success": True,
+                "note": {
+                    "id": note.id,
+                    "author": note.user_id.name if note.user_id else (note.author_name or "Board Member"),
+                    "author_id": note.user_id.id if note.user_id else False,
+                    "message": note.message,
+                    "created": note.create_date.strftime("%b %d, %Y %H:%M") if note.create_date else "",
+                },
+            }
+
+        except Exception as e:
+            _logger.error("add_task_note error: %s", e)
             return {"error": str(e)}

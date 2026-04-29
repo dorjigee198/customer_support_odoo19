@@ -13,6 +13,8 @@
     const ticketId     = D.ticketId;
     const currentUserId= D.currentUserId;
     const publicBoard  = D.publicBoard || false;
+    const boardToken   = D.boardToken || null;
+    const canEdit      = (!publicBoard) || (publicBoard && boardToken);
     let   projectMembers = D.projectMembers || [];
     let   customerConversation = D.customerConversation || [];
 
@@ -22,10 +24,15 @@
 
     async function jsonRpc(url, params) {
         try {
+            // include board_token automatically for public-token sessions
+            const bodyParams = Object.assign({}, params || {});
+            if (publicBoard && boardToken) {
+                bodyParams.board_token = boardToken;
+            }
             const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
-                body: JSON.stringify({ jsonrpc: '2.0', method: 'call', id: 1, params }),
+                body: JSON.stringify({ jsonrpc: '2.0', method: 'call', id: 1, params: bodyParams }),
             });
             const data = await res.json();
             // If Odoo returns a framework-level JSON-RPC error (not a controller result),
@@ -182,7 +189,7 @@
     }
 
     async function refreshActivityLog(silent) {
-        if (!activityLogList || publicBoard) return;
+        if (!activityLogList || (publicBoard && !canEdit)) return;
         if (logRefreshBtn) logRefreshBtn.classList.add('spinning');
         try {
             const res = await jsonRpc(
@@ -320,10 +327,10 @@
         const div = document.createElement('div');
         div.className = 'tb-task' + (task.is_done ? ' tb-task-done' : '');
         div.dataset.taskId = task.id;
-        div.draggable = !publicBoard;
+        div.draggable = canEdit;
 
         const membersHtml = (task.members || []).map(m =>
-            `<span class="tb-avatar" title="${escHtml(m.name)}">${escHtml(m.initials)}</span>`
+            `<span class="tb-avatar" title="${escHtml(m.name)}" data-member-id="${escAttr(m.member_id || m.id)}">${escHtml(m.initials)}</span>`
         ).join('');
 
         let footerHtml = '';
@@ -353,7 +360,7 @@
                  <span class="tb-cl-count">${clDone}/${clTotal}</span>
                </div>` : '';
 
-        const actionsHtml = publicBoard ? '' : `
+        const actionsHtml = canEdit ? `
             <div class="tb-task-actions">
                 <button class="tb-task-edit-btn" data-task-id="${task.id}" title="Edit"><i class="bi bi-pencil"></i></button>
                 <button class="tb-task-del-btn" data-task-id="${task.id}" title="Delete"><i class="bi bi-x-lg"></i></button>
@@ -362,8 +369,8 @@
         div.innerHTML = `
             <div class="tb-task-header">
                 <label class="tb-task-check-wrap">
-                    <input type="checkbox" class="tb-task-check" data-task-id="${task.id}"
-                           ${task.is_done ? 'checked' : ''} ${publicBoard ? 'disabled' : ''} />
+                          <input type="checkbox" class="tb-task-check" data-task-id="${task.id}"
+                              ${task.is_done ? 'checked' : ''} ${!canEdit ? 'disabled' : ''} />
                     <span class="tb-task-name">${escHtml(task.name)}</span>
                 </label>
                 ${actionsHtml}
@@ -374,7 +381,7 @@
             ${membersHtml ? `<div class="tb-task-members">${membersHtml}</div>` : ''}
         `;
 
-        if (!publicBoard) {
+        if (canEdit) {
             div.querySelector('.tb-task-check').addEventListener('change', () => toggleTask(task.id, div));
             div.querySelector('.tb-task-edit-btn').addEventListener('click', () => openEditTask(task.id, div));
             div.querySelector('.tb-task-del-btn').addEventListener('click', async () => {
@@ -395,7 +402,7 @@
         div.className = 'tb-column';
         div.dataset.colId = col.id;
 
-        const headerActions = publicBoard ? '' : `
+        const headerActions = canEdit ? `
             <div class="tb-col-actions">
                 <button class="tb-col-edit-btn" data-col-id="${col.id}"
                         data-col-name="${escAttr(col.name)}" data-col-color="${escAttr(col.color)}"
@@ -403,8 +410,8 @@
                 <button class="tb-col-del-btn" data-col-id="${col.id}"
                         title="Delete"><i class="bi bi-trash3"></i></button>
             </div>`;
-        const dragHandle = publicBoard ? '' : `<i class="bi bi-grip-vertical tb-col-drag-handle" title="Drag to reorder"></i>`;
-        const addTaskBtn = publicBoard ? '' : `<button class="tb-add-task-btn" data-col-id="${col.id}"><i class="bi bi-plus me-1"></i>Add Task</button>`;
+        const dragHandle = canEdit ? `<i class="bi bi-grip-vertical tb-col-drag-handle" title="Drag to reorder"></i>` : '';
+        const addTaskBtn = canEdit ? `<button class="tb-add-task-btn" data-col-id="${col.id}"><i class="bi bi-plus me-1"></i>Add Task</button>` : '';
 
         div.innerHTML = `
             <div class="tb-col-header" style="border-top: 3px solid ${escAttr(col.color)}">
@@ -470,7 +477,7 @@
     let draggedColumn = null;
 
     function bindColumnDrag(colEl) {
-        if (publicBoard) return;
+        if (!canEdit) return;
 
         const handle = colEl.querySelector('.tb-col-drag-handle');
         if (!handle) return;
@@ -854,18 +861,18 @@
     function buildMemberPicker(selectedIds = []) {
         const picker = document.getElementById('memberPicker');
         picker.innerHTML = '';
-        // Only assignable members are those linked to a user account (user_id not null)
-        const assignable = projectMembers.filter(m => m.user_id != null);
+        const assignable = projectMembers;
         if (!assignable.length) {
             picker.innerHTML = '<div class="tb-member-empty">No team members configured.</div>';
             return;
         }
         assignable.forEach(m => {
-            const isSel = selectedIds.includes(m.user_id);
+            const memberId = parseInt(m.member_id || m.id);
+            const isSel = selectedIds.includes(memberId);
             const opt = document.createElement('label');
             opt.className = 'tb-member-option' + (isSel ? ' selected' : '');
             opt.innerHTML = `
-                <input type="checkbox" value="${m.user_id}" ${isSel ? 'checked' : ''} />
+                <input type="checkbox" value="${memberId}" ${isSel ? 'checked' : ''} />
                 <div class="tb-member-av">${escHtml(m.initials)}</div>
                 <span class="tb-member-opt-name">${escHtml(m.name)}</span>
                 <span class="tb-member-opt-role">${escHtml(m.role)}</span>
@@ -893,7 +900,9 @@
         document.getElementById('taskModalPriority').value = 'none';
         document.getElementById('taskModalTitle').textContent = 'Add Task';
         const clGroup = document.getElementById('checklistGroup');
+        const notesGroup = document.getElementById('taskNotesGroup');
         if (clGroup) clGroup.style.display = 'none';
+        if (notesGroup) notesGroup.style.display = 'none';
         buildMemberPicker([]);
         openModal('taskModal');
     }
@@ -921,13 +930,16 @@
         document.getElementById('taskModalPriority').value = priority;
 
         const avatars = taskEl.querySelectorAll('.tb-avatar');
-        const currentNames = Array.from(avatars).map(a => a.getAttribute('title'));
-        const currentIds = projectMembers.filter(m => currentNames.includes(m.name)).map(m => m.user_id);
+        const currentIds = Array.from(avatars)
+            .map(a => parseInt(a.dataset.memberId || '0'))
+            .filter(id => Number.isInteger(id) && id > 0);
         buildMemberPicker(currentIds);
 
-        // Show checklist section in edit mode
+        // Show note and checklist sections in edit mode (checklist focal-only)
+        const notesGroup = document.getElementById('taskNotesGroup');
+        if (notesGroup) notesGroup.style.display = '';
         const clGroup = document.getElementById('checklistGroup');
-        if (clGroup) clGroup.style.display = '';
+        if (clGroup) clGroup.style.display = publicBoard ? 'none' : '';
         // Seed cache from BOARD_DATA if not already present
         if (!_checklistCache[taskId]) {
             const colData = (window.BOARD_DATA.boardColumns || []);
@@ -936,7 +948,15 @@
                 if (t && t.checklist) { _checklistCache[taskId] = t.checklist; break; }
             }
         }
+        if (!_taskNotesCache[taskId]) {
+            const colData = (window.BOARD_DATA.boardColumns || []);
+            for (const col of colData) {
+                const t = (col.tasks || []).find(t => t.id === parseInt(taskId));
+                if (t && t.notes) { _taskNotesCache[taskId] = t.notes; break; }
+            }
+        }
         buildChecklistSection(taskId);
+        buildTaskNotesSection(taskId);
 
         openModal('taskModal');
     }
@@ -947,6 +967,7 @@
 
     // Store checklist data keyed by taskId (populated from BOARD_DATA on load)
     const _checklistCache = {};
+    const _taskNotesCache = {};
 
     // Seed cache from initial board render
     document.querySelectorAll('.tb-task[data-task-id]').forEach(el => {
@@ -957,6 +978,10 @@
     function buildChecklistSection(taskId) {
         let container = document.getElementById('checklistSection');
         if (!container) return;
+        if (publicBoard) {
+            container.innerHTML = '<div class="tb-empty-text">Checklist can only be updated by focal users.</div>';
+            return;
+        }
 
         const items = _checklistCache[taskId] || [];
         container.innerHTML = '';
@@ -1004,6 +1029,72 @@
         clBtn.addEventListener('click', addItem);
         clInput.addEventListener('keydown', e => {
             if (e.key === 'Enter') { e.preventDefault(); addItem(); }
+        });
+    }
+
+    function buildTaskNotesSection(taskId) {
+        let container = document.getElementById('taskNotesSection');
+        if (!container) return;
+
+        const items = _taskNotesCache[taskId] || [];
+        container.innerHTML = '';
+
+        const list = document.createElement('div');
+        list.className = 'tb-note-modal-list';
+        list.id = 'taskNotesItems_' + taskId;
+
+        items.forEach(note => {
+            const row = document.createElement('div');
+            row.className = 'tb-note-item';
+            row.innerHTML = `
+                <div class="tb-note-meta"><strong>${escHtml(note.author || 'Board Member')}</strong><span>${escHtml(note.created || '')}</span></div>
+                <div class="tb-note-msg">${escHtml(note.message || '')}</div>
+            `;
+            list.appendChild(row);
+        });
+        container.appendChild(list);
+
+        const addRow = document.createElement('div');
+        addRow.className = 'tb-note-add-row';
+        addRow.innerHTML = `
+            <textarea class="tb-form-textarea tb-note-new-input" id="noteNewInput_${taskId}" rows="2" placeholder="Write a resolving note..."></textarea>
+            <button class="tb-btn-secondary tb-note-add-btn" id="noteAddBtn_${taskId}">Add Note</button>
+        `;
+        container.appendChild(addRow);
+
+        const noteInput = container.querySelector(`#noteNewInput_${taskId}`);
+        const noteBtn = container.querySelector(`#noteAddBtn_${taskId}`);
+
+        async function addNote() {
+            const message = (noteInput.value || '').trim();
+            if (!message) return;
+            noteBtn.disabled = true;
+            const res = await jsonRpc(`/customer_support/ticket/task/${taskId}/note/add`, { message, author_name: '' });
+            noteBtn.disabled = false;
+            if (res.success) {
+                if (!_taskNotesCache[taskId]) _taskNotesCache[taskId] = [];
+                _taskNotesCache[taskId].push(res.note);
+                const listEl = document.getElementById('taskNotesItems_' + taskId);
+                if (listEl) {
+                    const row = document.createElement('div');
+                    row.className = 'tb-note-item';
+                    row.innerHTML = `
+                        <div class="tb-note-meta"><strong>${escHtml(res.note.author || 'Board Member')}</strong><span>${escHtml(res.note.created || '')}</span></div>
+                        <div class="tb-note-msg">${escHtml(res.note.message || '')}</div>
+                    `;
+                    listEl.appendChild(row);
+                }
+                noteInput.value = '';
+                toast('Note added.');
+            } else toast(res.error || 'Failed to add note.', 'error');
+        }
+
+        noteBtn.addEventListener('click', addNote);
+        noteInput.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                addNote();
+            }
         });
     }
 
@@ -1076,6 +1167,9 @@
             (col.tasks || []).forEach(task => {
                 if (task.checklist && task.checklist.length) {
                     _checklistCache[task.id] = task.checklist;
+                }
+                if (task.notes && task.notes.length) {
+                    _taskNotesCache[task.id] = task.notes;
                 }
             });
         });
@@ -1298,7 +1392,7 @@
     }
 
     async function refreshConversation(silent) {
-        if (publicBoard || !customerConversationList) return;
+        if ((publicBoard && !canEdit) || !customerConversationList) return;
         const res = await jsonRpc(`/customer_support/ticket/${ticketId}/conversation/messages`, {});
         if (!res.success) {
             if (!silent) toast(res.error || 'Failed to load conversation.', 'error');
@@ -1437,14 +1531,14 @@
     const tbTeamPanelClose= document.getElementById('tbTeamPanelClose');
 
     // Compute active task count for a member from board DOM
-    function getActiveTasks(userId) {
-        if (!userId) return 0;
+    function getActiveTasks(memberId) {
+        if (!memberId) return 0;
         let count = 0;
         boardArea.querySelectorAll('.tb-task:not(.tb-task-done)').forEach(taskEl => {
             const avatars = taskEl.querySelectorAll('.tb-avatar');
             avatars.forEach(av => {
-                const m = projectMembers.find(pm => pm.initials === av.textContent.trim() && pm.user_id === userId);
-                if (m) count++;
+                const avMemberId = parseInt(av.dataset.memberId || '0');
+                if (avMemberId && avMemberId === memberId) count++;
             });
         });
         return count;
@@ -1485,7 +1579,7 @@
             return;
         }
         projectMembers.forEach((m, idx) => {
-            const activeTasks = getActiveTasks(m.user_id);
+            const activeTasks = getActiveTasks(parseInt(m.member_id || m.id));
             const isWorking   = activeTasks > 0;
             const row = document.createElement('div');
             row.className = 'tb-team-row';

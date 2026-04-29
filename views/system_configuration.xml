@@ -357,10 +357,12 @@
 
                                 <!-- Actions -->
                                 <div class="pc-actions">
-                                    <button type="reset" class="pc-btn pc-btn-secondary">
+                                    <button type="reset" class="pc-btn pc-btn-secondary"
+                                        title="Reset form to default values">
                                         <i class="bi bi-arrow-counterclockwise"></i> Reset
                                     </button>
-                                    <button type="submit" class="pc-btn pc-btn-primary">
+                                    <button type="submit" class="pc-btn pc-btn-primary"
+                                        title="Save project configuration">
                                         <i class="bi bi-check2-circle"></i> Save Project
                                     </button>
                                 </div>
@@ -404,10 +406,12 @@
                                         <select class="pc-select" id="focalSelect" style="max-width:320px">
                                             <option value="">— Select focal person —</option>
                                         </select>
-                                        <button class="pc-btn pc-btn-primary pc-btn-sm" id="assignFocalBtn">
+                                        <button class="pc-btn pc-btn-primary pc-btn-sm" id="assignFocalBtn"
+                                            title="Assign focal person to project">
                                             <i class="bi bi-person-check"></i> Assign
                                         </button>
-                                        <button class="pc-btn pc-btn-danger-soft pc-btn-sm" id="removeFocalBtn" style="display:none">
+                                        <button class="pc-btn pc-btn-danger-soft pc-btn-sm" id="removeFocalBtn" style="display:none"
+                                            title="Remove focal person from project">
                                             <i class="bi bi-person-x"></i> Remove
                                         </button>
                                     </div>
@@ -431,7 +435,8 @@
                                             <option value="qa_engineer">QA Engineer</option>
                                             <option value="other">Other</option>
                                         </select>
-                                        <button class="pc-btn pc-btn-primary pc-btn-sm" id="addMemberBtn">
+                                        <button class="pc-btn pc-btn-primary pc-btn-sm" id="addMemberBtn"
+                                            title="Add new team member">
                                             <i class="bi bi-person-plus"></i> Add
                                         </button>
                                     </div>
@@ -487,13 +492,9 @@
                                         <i class="bi bi-cloud-upload-fill"></i> Upload Document
                                     </div>
                                     <div id="docUploadMsg" style="display:none"></div>
-                                    <form id="docUploadForm"
-                                        action="/customer_support/knowledge/upload"
-                                        method="post"
-                                        enctype="multipart/form-data">
+                                    <form id="docUploadForm" enctype="multipart/form-data">
                                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" />
-                                        <input type="hidden" name="redirect_to"
-                                            value="/customer_support/admin_dashboard/system_configuration" />
+                                        <input type="hidden" name="ajax" value="1" />
                                         <input type="hidden" name="project_id" id="docProjectIdHidden" value="" />
                                         <div class="pc-form-row">
                                             <div class="pc-field">
@@ -501,7 +502,7 @@
                                                     Document Name <span class="pc-required">*</span>
                                                 </label>
                                                 <input type="text" class="pc-input" id="docNameInput"
-                                                    name="name" placeholder="e.g. API Specification v2" required="1" />
+                                                    name="name" placeholder="e.g. API Specification v2" />
                                             </div>
                                             <div class="pc-field">
                                                 <label class="pc-label" for="docCategorySelect">Category</label>
@@ -522,10 +523,10 @@
                                                 <span class="pc-hint">PDF, DOCX, TXT or XLSX</span>
                                             </label>
                                             <input type="file" class="pc-input pc-file-input" id="docFileInput"
-                                                name="file" accept=".pdf,.docx,.txt,.xlsx" required="1" />
+                                                name="file" accept=".pdf,.docx,.txt,.xlsx" />
                                         </div>
                                         <div class="pc-actions" style="margin-top:1.25rem;padding-top:0;border-top:none">
-                                            <button type="submit" class="pc-btn pc-btn-primary" id="docUploadBtn">
+                                            <button type="button" class="pc-btn pc-btn-primary" id="docUploadBtn">
                                                 <i class="bi bi-cloud-upload"></i> Upload Document
                                             </button>
                                         </div>
@@ -610,7 +611,7 @@
 
                 // Restore panel from URL param
                 var _params = new URLSearchParams(window.location.search);
-                if (_params.get('success') === '1') { switchPanel('docs'); }
+                if (_params.get('success') === '1' || _params.get('success') === 'queued') { switchPanel('docs'); }
 
                 // ── SHARED JSON CALL ──────────────────────────────────────
                 function jsonCall(url, body) {
@@ -822,7 +823,7 @@
 
                     var FILE_ICONS  = { pdf: 'bi-file-earmark-pdf-fill', docx: 'bi-file-earmark-word-fill', xlsx: 'bi-file-earmark-excel-fill', txt: 'bi-file-earmark-text-fill' };
                     var FILE_COLORS = { pdf: '#ef4444', docx: '#3b82f6', xlsx: '#16a34a', txt: '#64748b' };
-                    var STATE_LABELS = { pending: 'Pending', ready: 'Ready', error: 'Error' };
+                    var STATE_LABELS = { pending: 'Processing…', ready: 'Done', error: 'Error' };
 
                     function loadDocuments(projectId) {
                         docList.innerHTML = '<div class="pc-members-loading"><i class="bi bi-hourglass-split me-2"></i>Loading documents…</div>';
@@ -882,6 +883,51 @@
                         if (!pid) { docPanel.style.display = 'none'; return; }
                         docPanel.style.display = '';
                         loadDocuments(pid);
+                    });
+
+                    // AJAX upload — no page redirect, stays on Docs panel
+                    var docUploadBtn  = document.getElementById('docUploadBtn');
+                    var docUploadMsg  = document.getElementById('docUploadMsg');
+                    var docNameInput  = document.getElementById('docNameInput');
+                    var docFileInput  = document.getElementById('docFileInput');
+                    var docUploadForm = document.getElementById('docUploadForm');
+
+                    docUploadBtn.addEventListener('click', function () {
+                        var name = docNameInput.value.trim();
+                        if (!name) { showMsg(docUploadMsg, 'Document name is required.', 'danger'); return; }
+                        if (!docFileInput.files.length) { showMsg(docUploadMsg, 'Please select a file.', 'danger'); return; }
+                        if (!docProjectIdHidden.value) { showMsg(docUploadMsg, 'No project selected.', 'danger'); return; }
+
+                        var formData = new FormData(docUploadForm);
+                        docUploadBtn.disabled = true;
+                        docUploadBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Uploading…';
+
+                        fetch('/customer_support/knowledge/upload', {
+                            method: 'POST',
+                            body: formData,
+                            credentials: 'same-origin'
+                        })
+                        .then(function (r) { return r.json(); })
+                        .then(function (res) {
+                            if (res.error) {
+                                showMsg(docUploadMsg, res.error, 'danger');
+                            } else {
+                                docNameInput.value = '';
+                                docFileInput.value = '';
+                                showMsg(docUploadMsg, 'Document uploaded successfully.', 'success');
+                                appendDocRow(res.doc);
+                                if (docsBadge) {
+                                    var cnt = docList.querySelectorAll('.pc-doc-row').length;
+                                    docsBadge.textContent = cnt;
+                                    docsBadge.style.display = '';
+                                }
+                            }
+                        })
+                        .catch(function () { showMsg(docUploadMsg, 'Upload failed. Please try again.', 'danger'); })
+                        .finally(function () {
+                            docUploadBtn.disabled = false;
+                            docUploadBtn.innerHTML = '<i class="bi bi-cloud-upload"></i> Upload Document';
+                        });
                     });
                 })();
 

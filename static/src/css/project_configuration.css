@@ -267,14 +267,14 @@ body {
 
 /* Top bar */
 .pcs-topbar {
-    height: var(--topbar-h);
+    min-height: var(--topbar-h);
     flex-shrink: 0;
     background: var(--p-white);
     border-bottom: 1px solid var(--p-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 2rem;
+    padding: .85rem 2rem;
     box-shadow: var(--p-shadow);
     gap: 1rem;
 }
@@ -315,10 +315,10 @@ body {
     color: var(--p-text-3);
     margin: .15rem 0 0;
     line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 460px;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    max-width: 620px;
 }
 
 .pcs-topbar-right {
@@ -841,7 +841,7 @@ body {
    ================================================================ */
 @media (max-width: 960px) {
     :root { --sidebar-w: 200px; }
-    .pcs-topbar-desc { max-width: 300px; }
+    .pcs-topbar-desc { max-width: 320px; }
     .pc-compliance-grid { grid-template-columns: 1fr 1fr; }
     .pc-add-member-row { grid-template-columns: 1fr 1fr; }
     .pc-add-member-row .pc-btn-sm { grid-column: span 2; }

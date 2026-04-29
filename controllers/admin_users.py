@@ -285,6 +285,12 @@ class CustomerSupportAdminUsers(http.Controller):
             else:
                 deactivated_users_data.append(item)
 
+        projects = (
+            request.env["customer_support.project"]
+            .sudo()
+            .search([("active", "=", True)], order="name asc")
+        )
+
         return request.render(
             "customer_support.admin_dashboard",
             {
@@ -296,6 +302,7 @@ class CustomerSupportAdminUsers(http.Controller):
                 "deactivated_users_data": deactivated_users_data,
                 "analytics": analytics,
                 "performance": performance,
+                "projects": projects,
                 "page_name": "admin_dashboard",
             },
         )

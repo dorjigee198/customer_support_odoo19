@@ -233,6 +233,21 @@
                                                                         </t>
                                                                     </div>
                                                                 </t>
+                                                                <t t-if="task.get('notes')">
+                                                                    <div class="ctd-task-notes">
+                                                                        <t t-foreach="task['notes']" t-as="note">
+                                                                            <div class="ctd-task-note">
+                                                                                <strong><t t-esc="note['author']"/></strong>
+                                                                                <span class="ctd-task-note-time">
+                                                                                    <t t-esc="note['created']"/>
+                                                                                </span>
+                                                                                <div class="ctd-task-note-msg">
+                                                                                    <t t-esc="note['message']"/>
+                                                                                </div>
+                                                                            </div>
+                                                                        </t>
+                                                                    </div>
+                                                                </t>
                                                             </div>
                                                         </t>
                                                     </div>

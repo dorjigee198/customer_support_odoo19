@@ -192,6 +192,14 @@ class CustomerTickets(http.Controller):
                                  "initials": "".join(p[0].upper() for p in m.name.split()[:2])}
                                 for m in task.member_ids
                             ],
+                            "notes": [
+                                {
+                                    "author": n.user_id.name if n.user_id else (n.author_name or "Board Member"),
+                                    "message": n.message or "",
+                                    "created": n.create_date.strftime("%b %d, %Y %H:%M") if n.create_date else "",
+                                }
+                                for n in task.note_ids
+                            ],
                         })
                         board_total += 1
                         if task.is_done:

@@ -179,9 +179,9 @@
                         </div>
                         <!-- View Toggle -->
                         <div class="view-toggle">
-                            <button class="view-btn active" id="listViewBtn" type="button">
+                            <button class="view-btn active" id="listViewBtn" type="button" title="Switch to list view">
                                 <i class="bi bi-list me-1"></i>List </button>
-                            <button class="view-btn" id="kanbanViewBtn" type="button">
+                            <button class="view-btn" id="kanbanViewBtn" type="button" title="Switch to kanban view">
                                 <i class="bi bi-grid-3x3-gap me-1"></i>Kanban </button>
                         </div>
                     </div>
