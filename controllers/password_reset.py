@@ -67,7 +67,12 @@ class CustomerSupportPasswordReset(http.Controller):
                         partner.signup_prepare(signup_type="reset")
                         token = partner._generate_signup_token()
 
-                        base_url = (request.httprequest.url_root or "").rstrip("/")
+                        base_url = (
+                            request.env["ir.config_parameter"]
+                            .sudo()
+                            .get_param("web.base.url", "")
+                            or (request.httprequest.url_root or "")
+                        ).rstrip("/")
                         db = self._current_db()
                         reset_link = (
                             f"{base_url}/customer_support/reset_password?db={quote(db, safe='')}&token="

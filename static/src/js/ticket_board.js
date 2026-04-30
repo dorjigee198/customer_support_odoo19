@@ -1187,38 +1187,47 @@
 
         if (!name) { toast('Task title is required.', 'error'); return; }
 
-        if (_taskMode === 'add') {
-            const colId = document.getElementById('taskModalColId').value;
-            const res = await jsonRpc(
-                `/customer_support/ticket/column/${colId}/task/add`,
-                { name, description: desc, member_ids: members, due_date: due, task_priority: priority }
-            );
-            if (res.success) {
-                const colEl = boardArea.querySelector(`.tb-column[data-col-id="${colId}"]`);
-                if (colEl) {
-                    colEl.querySelector('.tb-task-list').appendChild(buildTaskEl(res.task));
-                    updateColCount(colEl);
-                }
-                closeModal('taskModal'); toast('Task added.');
-            } else toast(res.error || 'Failed to add task.', 'error');
+        const saveBtn = document.getElementById('taskModalSave');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Saving…';
 
-        } else {
-            const taskId = document.getElementById('taskModalTaskId').value;
-            const res = await jsonRpc(
-                `/customer_support/ticket/task/${taskId}/update`,
-                { name, description: desc, member_ids: members, due_date: due, task_priority: priority }
-            );
-            if (res.success) {
-                const taskEl = boardArea.querySelector(`.tb-task[data-task-id="${taskId}"]`);
-                if (taskEl) {
-                    const colEl  = taskEl.closest('.tb-column');
-                    const isDone = taskEl.classList.contains('tb-task-done');
-                    const newEl  = buildTaskEl({ ...res.task, is_done: isDone });
-                    taskEl.replaceWith(newEl);
-                    updateColCount(colEl);
-                }
-                closeModal('taskModal'); toast('Task updated.');
-            } else toast(res.error || 'Failed to update task.', 'error');
+        try {
+            if (_taskMode === 'add') {
+                const colId = document.getElementById('taskModalColId').value;
+                const res = await jsonRpc(
+                    `/customer_support/ticket/column/${colId}/task/add`,
+                    { name, description: desc, member_ids: members, due_date: due, task_priority: priority }
+                );
+                if (res.success) {
+                    const colEl = boardArea.querySelector(`.tb-column[data-col-id="${colId}"]`);
+                    if (colEl) {
+                        colEl.querySelector('.tb-task-list').appendChild(buildTaskEl(res.task));
+                        updateColCount(colEl);
+                    }
+                    closeModal('taskModal'); toast('Task added.');
+                } else toast(res.error || 'Failed to add task.', 'error');
+
+            } else {
+                const taskId = document.getElementById('taskModalTaskId').value;
+                const res = await jsonRpc(
+                    `/customer_support/ticket/task/${taskId}/update`,
+                    { name, description: desc, member_ids: members, due_date: due, task_priority: priority }
+                );
+                if (res.success) {
+                    const taskEl = boardArea.querySelector(`.tb-task[data-task-id="${taskId}"]`);
+                    if (taskEl) {
+                        const colEl  = taskEl.closest('.tb-column');
+                        const isDone = taskEl.classList.contains('tb-task-done');
+                        const newEl  = buildTaskEl({ ...res.task, is_done: isDone });
+                        taskEl.replaceWith(newEl);
+                        updateColCount(colEl);
+                    }
+                    closeModal('taskModal'); toast('Task updated.');
+                } else toast(res.error || 'Failed to update task.', 'error');
+            }
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'Save Task';
         }
     });
 
@@ -1247,15 +1256,69 @@
         return div;
     }
 
+    // ── Poster identity for token-board users ──────────────────
+    const posterRow      = document.getElementById('posterRow');
+    const posterSetup    = document.getElementById('posterSetup');
+    const posterDisplay  = document.getElementById('posterDisplayName');
+    const posterInput    = document.getElementById('posterNameInput');
+    const posterSave     = document.getElementById('posterNameSave');
+    const posterChange   = document.getElementById('posterChange');
+
+    function getPosterName()  { return sessionStorage.getItem('tb_poster_name') || ''; }
+    function emailPrefix(n)   { return n.includes('@') ? n.split('@')[0] : n; }
+
+    function applyPosterName(raw) {
+        sessionStorage.setItem('tb_poster_name', raw);
+        if (posterDisplay) posterDisplay.textContent = emailPrefix(raw);
+        if (posterRow)   posterRow.style.display   = '';
+        if (posterSetup) posterSetup.style.display = 'none';
+    }
+
+    if (publicBoard && boardToken && posterRow) {
+        const saved = getPosterName();
+        if (saved) {
+            applyPosterName(saved);
+        } else {
+            posterSetup.style.display = '';
+        }
+        if (posterSave) {
+            posterSave.addEventListener('click', () => {
+                const n = (posterInput.value || '').trim();
+                if (!n) { toast('Enter your name or email.', 'error'); return; }
+                applyPosterName(n);
+            });
+        }
+        if (posterInput) {
+            posterInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter') posterSave && posterSave.click();
+            });
+        }
+        if (posterChange) {
+            posterChange.addEventListener('click', () => {
+                if (posterInput) posterInput.value = getPosterName();
+                if (posterSetup) posterSetup.style.display = '';
+                if (posterInput) posterInput.focus();
+            });
+        }
+    }
+
     if (commentSend) {
         commentSend.addEventListener('click', async () => {
             const message = (commentInput.value || '').trim();
             if (!message) { toast('Write a message first.', 'error'); return; }
 
+            if (publicBoard && boardToken && !getPosterName()) {
+                toast('Please set your name before posting.', 'error');
+                if (posterSetup) posterSetup.style.display = '';
+                if (posterInput) posterInput.focus();
+                return;
+            }
+
             commentSend.disabled = true;
+            const poster_name = (publicBoard && boardToken) ? getPosterName() : '';
             const res = await jsonRpc(
                 `/customer_support/ticket/${ticketId}/comment/add`,
-                { message, mentioned_users: _mentionedUsers }
+                { message, mentioned_users: _mentionedUsers, poster_name }
             );
             commentSend.disabled = false;
 

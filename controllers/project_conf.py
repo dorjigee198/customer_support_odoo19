@@ -239,6 +239,31 @@ class CustomerSupportProjectController(http.Controller):
                 for t in open_at_closure
             ]
 
+            # Full ticket register — all tickets with complete resolution details
+            def _resolved_on(t):
+                rd = getattr(t, "resolved_date", None)
+                if rd:
+                    return rd.strftime("%Y-%m-%d")
+                if t.state in ("resolved", "closed") and t.write_date:
+                    return t.write_date.strftime("%Y-%m-%d")
+                return "-"
+
+            all_ticket_details = [
+                {
+                    "ticket_id":   t.name,
+                    "subject":     t.subject or "",
+                    "description": (t.description or "")[:100],
+                    "customer":    t.customer_id.name if t.customer_id else "-",
+                    "raised_on":   t.create_date.strftime("%Y-%m-%d") if t.create_date else "-",
+                    "resolved_on": _resolved_on(t),
+                    "solved_by":   t.assigned_to.name if getattr(t, "assigned_to", None) and t.assigned_to else "-",
+                    "sla_status":  t.sla_status or "on_track",
+                    "priority":    (t.priority or "medium").title(),
+                    "state":       t.state.replace("_", " ").title() if t.state else "-",
+                }
+                for t in tickets
+            ]
+
             # Unique customers
             seen = set()
             customers = []
@@ -305,6 +330,7 @@ class CustomerSupportProjectController(http.Controller):
                 "priority_urgent":      priority_counts["urgent"],
                 "state_breakdown":      json.dumps(state_counts),
                 "open_ticket_details":  json.dumps(open_ticket_details),
+                "all_ticket_details":   json.dumps(all_ticket_details),
                 "sla_met":              sla_met,
                 "sla_breached":         sla_breached,
                 "total_tasks":          total_tasks,
@@ -374,6 +400,7 @@ class CustomerSupportProjectController(http.Controller):
                     "priority_urgent":      r.priority_urgent,
                     "state_breakdown":      _json(r.state_breakdown) if r.state_breakdown else {},
                     "open_ticket_details":  _json(r.open_ticket_details),
+                    "all_ticket_details":   _json(r.all_ticket_details),
                     "sla_met":              r.sla_met,
                     "sla_breached":         r.sla_breached,
                     "total_tasks":          r.total_tasks,

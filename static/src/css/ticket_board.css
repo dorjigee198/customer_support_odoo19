@@ -550,6 +550,23 @@ body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #0f172a; color:
 }
 .tb-comment-send:hover { background: #4f46e5; }
 
+/* ── POSTER IDENTITY BANNER (token-board users) ───────────── */
+.tb-poster-row {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.75rem; color: #64748b;
+    background: #0f172a; border: 1px solid #1e293b;
+    border-radius: 6px; padding: 0.35rem 0.6rem;
+}
+.tb-poster-label { color: #475569; }
+.tb-poster-name { color: #94a3b8; font-weight: 600; flex: 1; }
+.tb-poster-change {
+    background: none; border: none; color: #6366f1;
+    font-size: 0.72rem; cursor: pointer; padding: 0;
+}
+.tb-poster-change:hover { text-decoration: underline; }
+.tb-poster-setup { display: flex; flex-direction: column; gap: 0.4rem; }
+.tb-poster-save-btn { font-size: 0.78rem; padding: 0.35rem 0.8rem; }
+
 /* ── ACTIVITY LOG ─────────────────────────────────────────── */
 .tb-log-list { display: flex; flex-direction: column; position: relative; }
 .tb-log-list::before {
@@ -638,6 +655,8 @@ body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #0f172a; color:
     border: 1px solid #334155; width: 100%; max-width: 420px;
     box-shadow: 0 24px 60px rgba(0,0,0,0.6);
     animation: tbModalIn 0.2s ease;
+    display: flex; flex-direction: column;
+    max-height: 90vh;
 }
 .tb-modal-wide { max-width: 520px; }
 .tb-modal-sm   { max-width: 360px; }
@@ -655,7 +674,9 @@ body { font-family: 'Inter', 'Segoe UI', sans-serif; background: #0f172a; color:
 .tb-modal-close { background: none; border: none; color: #64748b; font-size: 1rem; cursor: pointer; padding: 0.2rem; border-radius: 6px; transition: color 0.15s; }
 .tb-modal-close:hover { color: #e2e8f0; }
 
-.tb-modal-body { padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.9rem; }
+.tb-modal-body { padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.9rem; overflow-y: auto; flex: 1; }
+.tb-modal-body::-webkit-scrollbar { width: 3px; }
+.tb-modal-body::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
 
 .tb-form-group { display: flex; flex-direction: column; gap: 0.3rem; }
 .tb-form-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
@@ -706,6 +727,7 @@ select.tb-form-input option { background: #1e293b; }
 }
 .tb-btn-primary   { padding: 0.48rem 1.1rem; border-radius: 8px; background: #6366f1; border: none; color: #fff; font-size: 0.84rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
 .tb-btn-primary:hover { background: #4f46e5; }
+.tb-btn-primary:disabled { background: #3730a3; opacity: 0.6; cursor: not-allowed; }
 .tb-btn-secondary { padding: 0.48rem 1rem;   border-radius: 8px; background: transparent; border: 1px solid #334155; color: #94a3b8; font-size: 0.84rem; cursor: pointer; transition: all 0.2s; }
 .tb-btn-secondary:hover { background: rgba(255,255,255,0.05); color: #e2e8f0; }
 .tb-btn-danger    { padding: 0.48rem 1.1rem; border-radius: 8px; background: #ef4444; border: none; color: #fff; font-size: 0.84rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }

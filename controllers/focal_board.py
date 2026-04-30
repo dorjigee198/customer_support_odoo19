@@ -69,6 +69,19 @@ def _member_payload(member):
     }
 
 
+def _email_prefix(name):
+    """Return the part before @ for email-style names, otherwise return name as-is."""
+    if not name:
+        return "Unknown"
+    return name.split('@')[0] if '@' in name else name
+
+
+def _comment_author(c):
+    """Return the display name for a comment, preferring author_name over user.name."""
+    raw = c.author_name or (c.user_id.name if c.user_id else "Unknown")
+    return _email_prefix(raw)
+
+
 def _task_member_ids(task):
     """Return the assigned project member IDs for a task, including legacy user-only data."""
     if task.project_member_ids:
@@ -501,9 +514,9 @@ class FocalBoardController(http.Controller):
             comments = [
                 {
                     "id": c.id,
-                    "author": c.user_id.name if c.user_id else "Unknown",
+                    "author": _comment_author(c),
                     "author_id": c.user_id.id if c.user_id else 0,
-                    "initials": "".join(p[0].upper() for p in (c.user_id.name or "?").split()[:2]),
+                    "initials": "".join(p[0].upper() for p in _comment_author(c).split()[:2]),
                     "message": c.message,
                     "created": c.create_date.strftime("%b %d, %Y %H:%M") if c.create_date else "",
                 }
@@ -618,6 +631,37 @@ class FocalBoardController(http.Controller):
                     for d in docs
                 ]
 
+            # Load project members so token users can assign tasks
+            project_members = []
+            if ticket.project_id:
+                members = (
+                    request.env["customer_support.project.member"]
+                    .sudo()
+                    .search([("project_id", "=", ticket.project_id.id)])
+                )
+                for m in members:
+                    payload = _member_payload(m)
+                    if payload:
+                        project_members.append(payload)
+
+            # Load internal comments so token users see existing notes
+            comments_recs = (
+                request.env["customer_support.ticket.comment"]
+                .sudo()
+                .search([("ticket_id", "=", ticket_id)])
+            )
+            comments = [
+                {
+                    "id": c.id,
+                    "author": _comment_author(c),
+                    "author_id": c.user_id.id if c.user_id else 0,
+                    "initials": "".join(p[0].upper() for p in _comment_author(c).split()[:2]),
+                    "message": c.message,
+                    "created": c.create_date.strftime("%b %d, %Y %H:%M") if c.create_date else "",
+                }
+                for c in comments_recs
+            ]
+
             return request.render(
                 "customer_support.ticket_board_page",
                 {
@@ -625,11 +669,11 @@ class FocalBoardController(http.Controller):
                     "ticket": ticket,
                     "board_columns": board_columns,
                     "board_columns_json": Markup(json.dumps(board_columns)),
-                    "project_members": [],
-                    "project_members_json": Markup("[]"),
+                    "project_members": project_members,
+                    "project_members_json": Markup(json.dumps(project_members)),
                     "attachments": [],
                     "project_docs": project_docs,
-                    "comments": [],
+                    "comments": comments,
                     "customer_conversation_json": Markup("[]"),
                     "activity_log": [],
                     "page_name": "ticket_board",
@@ -857,6 +901,10 @@ class FocalBoardController(http.Controller):
             # Send assignment emails to selected members
             try:
                 ticket = col.ticket_id
+                # Ensure a board token exists so external members get a direct link
+                has_external = any(not m.user_id for m in selected_members)
+                if has_external and not ticket.board_token:
+                    ticket.sudo().write({"board_token": secrets.token_urlsafe(32)})
                 for member in selected_members:
                     try:
                         EmailService.send_task_assignment(ticket, member, task)
@@ -882,7 +930,7 @@ class FocalBoardController(http.Controller):
             if not task.exists():
                 return {"error": "Task not found"}
             # Checklist completion is focal-only; board members can add notes instead.
-            if not self._authorize_for_ticket(task.ticket_id, kw) or request.env.user.id == request.env.ref('base.public_user').id:
+            if not self._authorize_for_ticket(task.ticket_id, kw):
                 return {"error": "Access denied"}
             task.write({"is_done": not task.is_done})
             ticket_id = task.ticket_id.id
@@ -947,7 +995,12 @@ class FocalBoardController(http.Controller):
                          actor=request.env.user)
                     # Send assignment emails for newly added members
                     try:
-                        for member in request.env["customer_support.project.member"].sudo().browse(list(added)):
+                        new_members = request.env["customer_support.project.member"].sudo().browse(list(added))
+                        # Ensure a board token exists so external members get a direct link
+                        has_external = any(not m.user_id for m in new_members)
+                        if has_external and not task.ticket_id.board_token:
+                            task.ticket_id.sudo().write({"board_token": secrets.token_urlsafe(32)})
+                        for member in new_members:
                             try:
                                 EmailService.send_task_assignment(task.ticket_id, member, task)
                             except Exception as mail_err:
@@ -1068,10 +1121,15 @@ class FocalBoardController(http.Controller):
                 return {"error": "Access denied"}
 
             user = request.env.user
+            public_user_id = request.env.ref("base.public_user").id
+            poster_name = (kw.get("poster_name") or "").strip()
+            author_name = poster_name if (user.id == public_user_id and poster_name) else None
+
             comment = request.env["customer_support.ticket.comment"].sudo().create({
                 "ticket_id": ticket_id,
                 "user_id": user.id,
                 "message": message,
+                "author_name": author_name,
             })
 
             # Send @mention notifications
@@ -1094,20 +1152,21 @@ class FocalBoardController(http.Controller):
                 except Exception as mention_err:
                     _logger.warning("Mention notification failed: %s", mention_err)
 
+            display_name = _email_prefix(author_name or user.name)
             mentions_str = ""
             if mentioned_users:
                 mentions_str = " — mentioned: " + ", ".join(m.get("name", "") for m in mentioned_users)
             short_msg = (message[:60] + "…") if len(message) > 60 else message
             _log(ticket_id, "board_comment",
-                 f'{user.name} posted an internal note{mentions_str}',
+                 f'{display_name} posted an internal note{mentions_str}',
                  actor=user, detail=short_msg)
 
-            initials = "".join(p[0].upper() for p in (user.name or "?").split()[:2])
+            initials = "".join(p[0].upper() for p in display_name.split()[:2])
             return {
                 "success": True,
                 "comment": {
                     "id": comment.id,
-                    "author": user.name,
+                    "author": display_name,
                     "author_id": user.id,
                     "initials": initials,
                     "message": comment.message,

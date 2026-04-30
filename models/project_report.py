@@ -47,6 +47,10 @@ class CustomerSupportProjectReport(models.Model):
     # Open tickets at closure (JSON: [{name, subject, priority, state}])
     open_ticket_details = fields.Text(string="Open Ticket Details (JSON)")
 
+    # Full ticket register (JSON: [{ticket_id, subject, description, customer, raised_on,
+    #                                resolved_on, solved_by, sla_status, priority, state}])
+    all_ticket_details  = fields.Text(string="All Ticket Details (JSON)")
+
     # SLA
     sla_met             = fields.Integer(string="SLA Met")
     sla_breached        = fields.Integer(string="SLA Breached")

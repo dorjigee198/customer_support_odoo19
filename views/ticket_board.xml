@@ -152,7 +152,7 @@
                                 <i class="bi bi-box-arrow-right"></i>
                             </a>
                         </t>
-                        <t t-if="public_board">
+                        <t t-if="public_board and not board_token">
                             <span class="tb-guest-badge">
                                 <i class="bi bi-eye me-1"></i>View Only </span>
                         </t>
@@ -308,7 +308,7 @@
                                         <div
                                             t-attf-class="tb-task{{ ' tb-task-done' if task['is_done'] else '' }}"
                                             t-att-data-task-id="task['id']"
-                                            t-att-draggable="'false' if public_board else 'true'">
+                                            t-att-draggable="'false' if (public_board and not board_token) else 'true'">
 
                                             <!-- Task header -->
                                             <div class="tb-task-header">
@@ -317,12 +317,12 @@
                                                         t-att-checked="task['is_done']"
                                                         class="tb-task-check"
                                                         t-att-data-task-id="task['id']"
-                                                        t-att-disabled="'disabled' if public_board else None" />
+                                                        t-att-disabled="'disabled' if (public_board and not board_token) else None" />
                                                     <span class="tb-task-name">
                                                         <t t-esc="task['name']" />
                                                     </span>
                                                 </label>
-                                                <t t-if="not public_board">
+                                                <t t-if="not public_board or board_token">
                                                     <div class="tb-task-actions">
                                                         <button class="tb-task-edit-btn"
                                                             t-att-data-task-id="task['id']"
@@ -412,7 +412,7 @@
                                     </t>
                                 </div>
 
-                                <t t-if="not public_board">
+                                <t t-if="not public_board or board_token">
                                     <button class="tb-add-task-btn" t-att-data-col-id="col['id']">
                                         <i class="bi bi-plus me-1"></i>Add Task </button>
                                 </t>
@@ -466,7 +466,7 @@
                                     </span>
                                 </t>
                             </button>
-                            <t t-if="not public_board">
+                            <t t-if="not public_board or board_token">
                                 <button class="tb-stab" data-tab="comments">
                                     <i class="bi bi-chat-dots"></i> Notes <t t-if="comments">
                                         <span class="tb-stab-badge">
@@ -474,6 +474,8 @@
                                         </span>
                                     </t>
                                 </button>
+                            </t>
+                            <t t-if="not public_board">
                                 <button class="tb-stab" data-tab="reply">
                                     <i class="bi bi-reply"></i> Reply </button>
                             </t>
@@ -486,14 +488,8 @@
                             <div class="tb-sidebar-section">
                                 <h6 class="tb-sidebar-label">
                                     <i class="bi bi-file-text me-1"></i>Customer Description </h6>
-                                <div class="tb-description-box">
-                                    <t t-if="ticket.description">
-                                        <t t-esc="ticket.description" />
-                                    </t>
-                                    <t t-if="not ticket.description">
-                                        <span class="tb-empty-text">No description provided.</span>
-                                    </t>
-                                </div>
+                                <t t-if="ticket.description"><div class="tb-description-box"><t t-esc="ticket.description.strip()" /></div></t>
+                                <t t-if="not ticket.description"><div class="tb-description-box"><span class="tb-empty-text">No description provided.</span></div></t>
                             </div>
 
                             <div class="tb-sidebar-section">
@@ -635,8 +631,20 @@
                                     </t>
                                 </div>
 
-                                <t t-if="not public_board">
+                                <t t-if="not public_board or board_token">
                                     <div class="tb-comment-form">
+                                        <!-- Identity banner — only shown for token-board users via JS -->
+                                        <div class="tb-poster-row" id="posterRow" style="display:none;">
+                                            <i class="bi bi-person-circle"></i>
+                                            <span class="tb-poster-label">Posting as</span>
+                                            <span class="tb-poster-name" id="posterDisplayName"></span>
+                                            <button class="tb-poster-change" id="posterChange">change</button>
+                                        </div>
+                                        <div class="tb-poster-setup" id="posterSetup" style="display:none;">
+                                            <input type="text" class="tb-form-input" id="posterNameInput"
+                                                placeholder="Your name or email…" maxlength="80" autocomplete="off"/>
+                                            <button class="tb-btn-primary tb-poster-save-btn" id="posterNameSave">Set Name</button>
+                                        </div>
                                         <textarea class="tb-comment-input" id="commentInput"
                                             placeholder="Write an internal note…" rows="2"></textarea>
                                         <button class="tb-comment-send" id="commentSend">

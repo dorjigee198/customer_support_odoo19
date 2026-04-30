@@ -265,7 +265,16 @@ class EmailService:
                 return False
 
             base = EmailService._get_base_url()
-            task_url = f"{base}/customer_support/ticket/{ticket.id}/board"
+            if member.user_id:
+                # Internal Odoo user — can log in and use the focal board directly
+                task_url = f"{base}/customer_support/ticket/{ticket.id}/board"
+            else:
+                # External member — use token link so no login is required
+                task_url = (
+                    f"{base}/board/{ticket.board_token}"
+                    if ticket.board_token
+                    else f"{base}/customer_support/ticket/{ticket.id}/board"
+                )
 
             due = task.due_date.strftime("%b %d, %Y") if task.due_date else "No due date"
             priority = task.task_priority or "none"

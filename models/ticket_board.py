@@ -186,6 +186,7 @@ class CustomerSupportTicketComment(models.Model):
         required=True,
         default=lambda self: self.env.user,
     )
+    author_name = fields.Char(string="Author Display Name")
     message = fields.Text(string="Message", required=True)
     create_date = fields.Datetime(string="Posted At", readonly=True)
 

@@ -2823,168 +2823,206 @@ function prLoadReports() {
 }
 
 window.prShowDetail = function(r) {
-    document.getElementById('prDetailTitle').textContent = r.project_name + ' — Closure Report';
-    document.getElementById('prDetailSubtitle').textContent = 'Generated ' + r.generated_on;
+    document.getElementById('prDetailTitle').textContent = r.project_name + ' — Project Closure Report';
+    document.getElementById('prDetailSubtitle').textContent = 'Ref: ' + (r.project_key||'-') + '  ·  Generated ' + r.generated_on;
 
-    var team     = Array.isArray(r.team) ? r.team : [];
-    var customers= Array.isArray(r.customers) ? r.customers : [];
-    var openTkts = Array.isArray(r.open_ticket_details) ? r.open_ticket_details : [];
-    var sb       = r.state_breakdown || {};
-    var slaTotal = r.sla_met + r.sla_breached;
-    var taskPct  = r.total_tasks > 0 ? Math.round(r.completed_tasks / r.total_tasks * 100) : 0;
+    var team      = Array.isArray(r.team) ? r.team : [];
+    var customers = Array.isArray(r.customers) ? r.customers : [];
+    var allTkts   = Array.isArray(r.all_ticket_details) ? r.all_ticket_details : [];
+    var slaTotal  = r.sla_met + r.sla_breached;
+    var slaRate   = slaTotal > 0 ? Math.round(r.sla_met / slaTotal * 100) : 0;
     var resolveRate = r.total_tickets > 0 ? Math.round(r.resolved_tickets / r.total_tickets * 100) : 0;
+    var taskPct   = r.total_tasks > 0 ? Math.round(r.completed_tasks / r.total_tasks * 100) : 0;
 
     function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-    function badge(txt, cls){ return '<span class="badge ' + cls + ' me-1" style="font-size:.72rem;">' + esc(txt) + '</span>'; }
-    function priCls(p){
-        p = (p||'').toLowerCase();
-        return p==='urgent'?'bg-danger': p==='high'?'bg-warning text-dark': p==='low'?'bg-secondary':'bg-info text-dark';
+
+    /* ── SHARED STYLES ────────────────────────────────────────── */
+    var S = {
+        wrap:    'font-family:"Segoe UI",Arial,sans-serif;color:#1a1a2e;background:#fff;padding:2rem 2.2rem;',
+        h2:      'margin:0;font-size:1.45rem;font-weight:700;letter-spacing:.5px;',
+        secHead: 'font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#1a3a5c;border-bottom:2px solid #1a3a5c;padding-bottom:.35rem;margin:1.4rem 0 .75rem;',
+        label:   'font-size:.72rem;color:#6c757d;text-transform:uppercase;letter-spacing:.05em;',
+        val:     'font-size:.9rem;font-weight:600;color:#1a1a2e;margin-top:.1rem;',
+        th:      'padding:.55rem .7rem;text-align:left;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#1a3a5c;color:#fff;white-space:nowrap;',
+        td:      'padding:.5rem .7rem;font-size:.8rem;border-bottom:1px solid #e9ecef;vertical-align:top;',
+        tdBold:  'padding:.5rem .7rem;font-size:.8rem;border-bottom:1px solid #e9ecef;font-weight:700;',
+    };
+
+    function kv(label, value) {
+        return '<div style="margin-bottom:.55rem;"><div style="' + S.label + '">' + label + '</div><div style="' + S.val + '">' + value + '</div></div>';
+    }
+    function secTitle(txt) {
+        return '<div style="' + S.secHead + '">' + txt + '</div>';
+    }
+    function slaCell(status) {
+        var breached = (status||'').toLowerCase() === 'breached';
+        return '<span style="display:inline-block;padding:.15rem .5rem;border-radius:3px;font-size:.7rem;font-weight:700;' +
+            (breached ? 'background:#fde8e6;color:#922b21;' : 'background:#d5f5e3;color:#1e8449;') + '">' +
+            (breached ? 'BREACHED' : 'MET') + '</span>';
+    }
+    function stateCell(state) {
+        var s = (state||'').toLowerCase();
+        var bg = s.includes('resolv')||s.includes('clos') ? '#d5f5e3' : s.includes('progress') ? '#fef9e7' : '#f2f3f4';
+        var clr= s.includes('resolv')||s.includes('clos') ? '#1e8449' : s.includes('progress') ? '#9a7d0a' : '#555';
+        return '<span style="display:inline-block;padding:.15rem .45rem;border-radius:3px;font-size:.7rem;font-weight:600;background:' + bg + ';color:' + clr + ';">' + esc(state) + '</span>';
+    }
+    function priCell(p) {
+        var s = (p||'').toLowerCase();
+        var bg = s==='urgent'?'#fde8e6':s==='high'?'#fef3cd':s==='low'?'#f2f3f4':'#e8f4fd';
+        var clr= s==='urgent'?'#922b21':s==='high'?'#9a7d0a':s==='low'?'#555':'#1a6a9a';
+        return '<span style="display:inline-block;padding:.15rem .45rem;border-radius:3px;font-size:.7rem;font-weight:600;background:' + bg + ';color:' + clr + ';">' + esc(p) + '</span>';
+    }
+    function statBox(val, label, color) {
+        return '<div style="flex:1;text-align:center;padding:.75rem .5rem;border:1px solid #e9ecef;border-radius:6px;border-top:3px solid ' + (color||'#1a3a5c') + ';">' +
+            '<div style="font-size:1.5rem;font-weight:700;color:' + (color||'#1a1a2e') + ';">' + val + '</div>' +
+            '<div style="font-size:.68rem;color:#6c757d;text-transform:uppercase;letter-spacing:.05em;margin-top:.2rem;">' + label + '</div></div>';
     }
 
-    /* ── section helper ─────────────────────────────────────────── */
-    function section(icon, title, content) {
-        return '<div style="background:#fff;border-radius:10px;padding:1.2rem 1.4rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(0,0,0,.07);">' +
-            '<div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.9rem;">' +
-            '<i class="bi ' + icon + '" style="color:#4f46e5;font-size:1.1rem;"></i>' +
-            '<h6 style="margin:0;font-weight:600;font-size:.95rem;">' + title + '</h6>' +
-            '</div>' + content + '</div>';
-    }
-
-    /* ── stat pill ──────────────────────────────────────────────── */
-    function stat(val, label, color) {
-        return '<div style="text-align:center;flex:1;">' +
-            '<div style="font-size:1.6rem;font-weight:700;color:' + (color||'#1a1a2e') + ';">' + val + '</div>' +
-            '<div style="font-size:.72rem;color:#6c757d;margin-top:2px;">' + label + '</div></div>';
-    }
-
-    /* ── BUILD SECTIONS ─────────────────────────────────────────── */
-
-    /* 1. Project info */
-    var techParts = [];
-    if (r.tech_languages) techParts.push('<strong>Languages:</strong> ' + esc(r.tech_languages));
-    if (r.tech_frameworks) techParts.push('<strong>Frameworks:</strong> ' + esc(r.tech_frameworks));
-    if (r.tech_databases)  techParts.push('<strong>Databases:</strong> ' + esc(r.tech_databases));
-
-    var infoHtml =
-        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem .8rem;font-size:.87rem;">' +
-        '<div><span style="color:#6c757d;">Project Key</span><br><span class="badge bg-info">' + esc(r.project_key) + '</span></div>' +
-        '<div><span style="color:#6c757d;">Type</span><br><strong>' + esc(r.project_type||'-') + '</strong></div>' +
-        '<div><span style="color:#6c757d;">Warranty Start</span><br><strong>' + esc(r.start_date) + '</strong></div>' +
-        '<div><span style="color:#6c757d;">Warranty End</span><br><strong>' + esc(r.end_date) + '</strong></div>' +
-        '<div><span style="color:#6c757d;">Focal Person</span><br><strong>' + esc(r.focal_person) + '</strong></div>' +
-        '<div><span style="color:#6c757d;">Compliance</span><br><strong>' + esc(r.compliance_flags||'None') + '</strong></div>' +
+    /* ── 1. DOCUMENT HEADER ───────────────────────────────────── */
+    var headerHtml =
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:1.2rem;border-bottom:3px solid #1a3a5c;margin-bottom:1.2rem;">' +
+        '<div>' +
+        '<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#6c757d;margin-bottom:.35rem;">Official Project Closure Report</div>' +
+        '<div style="' + S.h2 + 'color:#1a3a5c;">' + esc(r.project_name) + '</div>' +
+        '<div style="font-size:.82rem;color:#6c757d;margin-top:.25rem;">' + esc(r.project_type||'') + (r.project_key ? '&nbsp;&nbsp;|&nbsp;&nbsp;Ref: <strong>' + esc(r.project_key) + '</strong>' : '') + '</div>' +
         '</div>' +
-        (r.project_goals ? '<hr style="margin:.8rem 0;"/><div style="font-size:.85rem;"><span style="color:#6c757d;">Goals &amp; Objectives</span><p style="margin:.3rem 0 0;white-space:pre-line;">' + esc(r.project_goals) + '</p></div>' : '') +
-        (techParts.length ? '<hr style="margin:.8rem 0;"/><div style="font-size:.85rem;color:#374151;">' + techParts.join(' &nbsp;·&nbsp; ') + '</div>' : '');
-
-    /* 2. Team */
-    var teamHtml = team.length
-        ? '<div style="display:flex;flex-wrap:wrap;gap:.5rem;">' +
-          team.map(function(m){
-              return '<div style="background:#f3f4f6;border-radius:8px;padding:.4rem .75rem;font-size:.83rem;">' +
-                  '<strong>' + esc(m.name) + '</strong><br><span style="color:#6c757d;">' + esc(m.role) + '</span></div>';
-          }).join('') + '</div>'
-        : '<p class="text-muted" style="font-size:.87rem;">No team data recorded.</p>';
-
-    /* 3. Customers */
-    var custHtml = customers.length
-        ? '<div style="display:flex;flex-wrap:wrap;gap:.5rem;">' +
-          customers.map(function(c){
-              return '<div style="background:#f0fdf4;border-radius:8px;padding:.4rem .75rem;font-size:.83rem;">' +
-                  '<strong>' + esc(c.name) + '</strong>' +
-                  (c.email ? '<br><span style="color:#6c757d;">' + esc(c.email) + '</span>' : '') + '</div>';
-          }).join('') + '</div>'
-        : '<p class="text-muted" style="font-size:.87rem;">No customers recorded.</p>';
-
-    /* 4. Ticket statistics */
-    var ticketHtml =
-        '<div style="display:flex;gap:1rem;margin-bottom:1rem;">' +
-        stat(r.total_tickets,    'Total') +
-        stat(r.resolved_tickets, 'Resolved', '#16a34a') +
-        stat(r.open_tickets,     'Open at Closure', r.open_tickets > 0 ? '#d97706' : '#6c757d') +
-        stat(resolveRate + '%',  'Resolve Rate', resolveRate >= 80 ? '#16a34a' : resolveRate >= 50 ? '#d97706' : '#dc2626') +
+        '<div style="text-align:right;">' +
+        '<div style="font-size:.72rem;color:#6c757d;">Dragon Coders</div>' +
+        '<div style="font-size:.68rem;color:#9ca3af;margin-top:.15rem;">Generated: ' + esc(r.generated_on) + '</div>' +
         '</div>' +
-        '<div style="font-size:.82rem;color:#6c757d;margin-bottom:.5rem;">Priority Breakdown</div>' +
-        '<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem;">' +
-        badge('Low ' + r.priority_low, 'bg-secondary') +
-        badge('Medium ' + r.priority_medium, 'bg-info text-dark') +
-        badge('High ' + r.priority_high, 'bg-warning text-dark') +
-        badge('Urgent ' + r.priority_urgent, 'bg-danger') +
-        '</div>' +
-        '<div style="font-size:.82rem;color:#6c757d;margin-bottom:.5rem;">Status at Closure</div>' +
-        '<div style="display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:.8rem;">' +
-        (sb.new       ? badge('New ' + sb.new, 'bg-secondary') : '') +
-        (sb.assigned  ? badge('Assigned ' + sb.assigned, 'bg-primary') : '') +
-        (sb.in_progress ? badge('In Progress ' + sb.in_progress, 'bg-info text-dark') : '') +
-        (sb.pending   ? badge('Pending ' + sb.pending, 'bg-warning text-dark') : '') +
-        (sb.resolved  ? badge('Resolved ' + sb.resolved, 'bg-success') : '') +
-        (sb.closed    ? badge('Closed ' + sb.closed, 'bg-dark') : '') +
-        '</div>' +
-        '<div style="font-size:.85rem;">Avg resolution time: <strong>' + r.avg_resolution_hrs + ' hrs</strong></div>';
-
-    /* 5. SLA & Tasks */
-    var slaBarWidth = slaTotal > 0 ? Math.round(r.sla_met / slaTotal * 100) : 0;
-    var slaHtml =
-        '<div style="display:flex;gap:1rem;margin-bottom:.8rem;">' +
-        stat(r.sla_met,      'SLA Met',      '#16a34a') +
-        stat(r.sla_breached, 'SLA Breached', '#dc2626') +
-        stat(slaBarWidth + '%', 'Compliance Rate', slaBarWidth >= 80 ? '#16a34a' : '#d97706') +
-        '</div>' +
-        (slaTotal > 0 ? '<div style="background:#e9ecef;border-radius:4px;height:6px;margin-bottom:1rem;"><div style="background:#16a34a;border-radius:4px;height:6px;width:' + slaBarWidth + '%;"></div></div>' : '') +
-        '<hr style="margin:.8rem 0;"/>' +
-        '<div style="display:flex;gap:1rem;">' +
-        stat(r.total_tasks,     'Total Tasks') +
-        stat(r.completed_tasks, 'Completed', '#16a34a') +
-        stat(taskPct + '%',     'Completion Rate', taskPct >= 80 ? '#16a34a' : '#d97706') +
         '</div>';
 
-    /* 6. Open tickets at closure (follow-up table) */
-    var openHtml;
-    if (openTkts.length === 0) {
-        openHtml = '<p style="color:#16a34a;font-size:.88rem;"><i class="bi bi-check-circle-fill me-1"></i>All tickets were resolved at project closure.</p>';
-    } else {
-        openHtml = '<p style="font-size:.82rem;color:#6c757d;margin-bottom:.6rem;">These tickets were still open when the project was deleted — may need follow-up.</p>' +
-            '<table style="width:100%;border-collapse:collapse;font-size:.83rem;">' +
-            '<thead><tr style="background:#f3f4f6;">' +
-            '<th style="padding:.4rem .6rem;text-align:left;">Ticket</th>' +
-            '<th style="padding:.4rem .6rem;text-align:left;">Subject</th>' +
-            '<th style="padding:.4rem .6rem;">Priority</th>' +
-            '<th style="padding:.4rem .6rem;">Status</th>' +
-            '<th style="padding:.4rem .6rem;text-align:left;">Customer</th>' +
-            '</tr></thead><tbody>' +
-            openTkts.map(function(t, i) {
-                return '<tr style="background:' + (i%2===0?'#fff':'#f9fafb') + ';border-top:1px solid #e9ecef;">' +
-                    '<td style="padding:.4rem .6rem;font-weight:600;">' + esc(t.name) + '</td>' +
-                    '<td style="padding:.4rem .6rem;">' + esc(t.subject) + '</td>' +
-                    '<td style="padding:.4rem .6rem;text-align:center;">' + badge(t.priority, priCls(t.priority)) + '</td>' +
-                    '<td style="padding:.4rem .6rem;text-align:center;">' + badge(t.state, 'bg-secondary') + '</td>' +
-                    '<td style="padding:.4rem .6rem;">' + esc(t.customer) + '</td>' +
-                    '</tr>';
-            }).join('') +
-            '</tbody></table>';
-    }
+    /* ── 2. PROJECT OVERVIEW ──────────────────────────────────── */
+    var overviewHtml =
+        secTitle('Project Overview') +
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem 1.5rem;">' +
+        kv('Project Reference', esc(r.project_key||'-')) +
+        kv('Project Type', esc(r.project_type||'-')) +
+        kv('Focal Person', esc(r.focal_person||'-')) +
+        kv('Warranty / Support Start', esc(r.start_date)) +
+        kv('Warranty / Support End', esc(r.end_date)) +
+        kv('Compliance', esc(r.compliance_flags||'None')) +
+        '</div>' +
+        (r.project_goals ? '<div style="margin-top:.6rem;padding:.65rem .85rem;background:#f8f9fc;border-left:3px solid #1a3a5c;border-radius:0 4px 4px 0;font-size:.82rem;"><span style="' + S.label + '">Project Goals &amp; Objectives</span><p style="margin:.25rem 0 0;white-space:pre-line;color:#374151;">' + esc(r.project_goals) + '</p></div>' : '') +
+        (r.tech_languages||r.tech_frameworks||r.tech_databases ?
+            '<div style="margin-top:.5rem;font-size:.8rem;color:#374151;padding:.5rem .85rem;background:#f8f9fc;border-radius:4px;">' +
+            (r.tech_languages ? '<strong>Languages:</strong> ' + esc(r.tech_languages) + '&emsp;' : '') +
+            (r.tech_frameworks ? '<strong>Frameworks:</strong> ' + esc(r.tech_frameworks) + '&emsp;' : '') +
+            (r.tech_databases  ? '<strong>Databases:</strong> ' + esc(r.tech_databases) : '') +
+            '</div>' : '');
 
-    /* ── ASSEMBLE ────────────────────────────────────────────────── */
-    var html =
-        '<div id="prReportContent" style="padding:1.5rem;font-family:system-ui,sans-serif;">' +
-        /* Report header band */
-        '<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;border-radius:10px;padding:1.5rem 2rem;margin-bottom:1.2rem;display:flex;justify-content:space-between;align-items:flex-start;">' +
+    /* ── 3. TEAM & CUSTOMERS ──────────────────────────────────── */
+    var teamRows = team.map(function(m) {
+        return '<tr><td style="' + S.td + '">' + esc(m.name) + '</td><td style="' + S.td + '">' + esc(m.role) + '</td></tr>';
+    }).join('');
+    var custRows = customers.map(function(c) {
+        return '<tr><td style="' + S.td + '">' + esc(c.name) + '</td><td style="' + S.td + '">' + esc(c.email||'-') + '</td></tr>';
+    }).join('');
+
+    var teamCustHtml =
+        secTitle('Project Team &amp; Customers') +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">' +
+        '<div><div style="font-size:.75rem;font-weight:600;color:#1a3a5c;margin-bottom:.4rem;">Team Members</div>' +
+        '<table style="width:100%;border-collapse:collapse;">' +
+        '<thead><tr><th style="' + S.th + '">Name</th><th style="' + S.th + '">Role</th></tr></thead>' +
+        '<tbody>' + (teamRows||'<tr><td colspan="2" style="' + S.td + 'color:#6c757d;">No team data.</td></tr>') + '</tbody></table></div>' +
+        '<div><div style="font-size:.75rem;font-weight:600;color:#1a3a5c;margin-bottom:.4rem;">Customers Served</div>' +
+        '<table style="width:100%;border-collapse:collapse;">' +
+        '<thead><tr><th style="' + S.th + '">Name</th><th style="' + S.th + '">Email</th></tr></thead>' +
+        '<tbody>' + (custRows||'<tr><td colspan="2" style="' + S.td + 'color:#6c757d;">No customer data.</td></tr>') + '</tbody></table></div>' +
+        '</div>';
+
+    /* ── 4. TICKET REGISTER (main table) ─────────────────────── */
+    var ticketRows = allTkts.map(function(t, i) {
+        return '<tr style="background:' + (i%2===0?'#fff':'#f8f9fc') + ';">' +
+            '<td style="' + S.tdBold + '">' + esc(t.ticket_id) + '</td>' +
+            '<td style="' + S.td + '">' + esc(t.subject) + (t.description ? '<br><span style="font-size:.72rem;color:#6c757d;">' + esc(t.description) + '</span>' : '') + '</td>' +
+            '<td style="' + S.td + '">' + esc(t.customer) + '</td>' +
+            '<td style="' + S.td + 'white-space:nowrap;">' + esc(t.raised_on) + '</td>' +
+            '<td style="' + S.td + 'white-space:nowrap;">' + esc(t.resolved_on) + '</td>' +
+            '<td style="' + S.td + '">' + esc(t.solved_by) + '</td>' +
+            '<td style="' + S.td + '">' + priCell(t.priority) + '</td>' +
+            '<td style="' + S.td + '">' + stateCell(t.state) + '</td>' +
+            '<td style="' + S.td + '">' + slaCell(t.sla_status) + '</td>' +
+            '</tr>';
+    }).join('');
+
+    var ticketRegisterHtml =
+        secTitle('Ticket Register — Complete Record') +
+        '<div style="overflow-x:auto;">' +
+        '<table style="width:100%;border-collapse:collapse;min-width:700px;">' +
+        '<thead><tr>' +
+        '<th style="' + S.th + 'width:8%">Ticket ID</th>' +
+        '<th style="' + S.th + 'width:22%">Subject / Description</th>' +
+        '<th style="' + S.th + 'width:12%">Customer</th>' +
+        '<th style="' + S.th + 'width:9%">Raised On</th>' +
+        '<th style="' + S.th + 'width:9%">Resolved On</th>' +
+        '<th style="' + S.th + 'width:12%">Resolved By</th>' +
+        '<th style="' + S.th + 'width:8%">Priority</th>' +
+        '<th style="' + S.th + 'width:10%">Status</th>' +
+        '<th style="' + S.th + 'width:10%">SLA</th>' +
+        '</tr></thead>' +
+        '<tbody>' +
+        (ticketRows || '<tr><td colspan="9" style="' + S.td + 'text-align:center;color:#6c757d;padding:1rem;">No ticket data recorded for this project.</td></tr>') +
+        '</tbody></table></div>';
+
+    /* ── 5. PERFORMANCE SUMMARY ───────────────────────────────── */
+    var summaryHtml =
+        secTitle('Performance Summary') +
+        '<div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap;">' +
+        statBox(r.total_tickets,        'Total Tickets',     '#1a3a5c') +
+        statBox(r.resolved_tickets,     'Resolved',          '#16a34a') +
+        statBox(r.open_tickets,         'Open at Closure',   r.open_tickets > 0 ? '#d97706' : '#6c757d') +
+        statBox(resolveRate + '%',      'Resolve Rate',      resolveRate >= 80 ? '#16a34a' : resolveRate >= 50 ? '#d97706' : '#dc2626') +
+        statBox(r.sla_met,              'SLA Met',           '#16a34a') +
+        statBox(r.sla_breached,         'SLA Breached',      r.sla_breached > 0 ? '#dc2626' : '#6c757d') +
+        statBox(slaRate + '%',          'SLA Compliance',    slaRate >= 80 ? '#16a34a' : '#d97706') +
+        statBox(r.avg_resolution_hrs + 'h', 'Avg Resolution','#1a3a5c') +
+        '</div>';
+
+    /* ── 6. SIGNATURE BLOCK ───────────────────────────────────── */
+    var sigLineStyle = 'display:block;width:100%;border-bottom:1.5px solid #1a1a2e;margin-bottom:.3rem;height:42px;';
+    var sigHtml =
+        secTitle('Authorization &amp; Certification') +
+        '<p style="font-size:.78rem;color:#6c757d;margin-bottom:1rem;">This report certifies the official closure of the above-named project. Authorized signatories confirm that all deliverables have been reviewed and the project is formally concluded.</p>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;margin-top:1.5rem;">' +
+
         '<div>' +
-        '<div style="font-size:.75rem;opacity:.7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;">Project Closure Report</div>' +
-        '<h2 style="margin:0;font-size:1.5rem;font-weight:700;">' + esc(r.project_name) + '</h2>' +
-        '<div style="opacity:.75;font-size:.85rem;margin-top:.3rem;">' + esc(r.project_type||'') + ' &nbsp;·&nbsp; ' + esc(r.project_key) + '</div>' +
+        '<div style="font-size:.68rem;color:#6c757d;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;">Prepared By</div>' +
+        '<span style="' + sigLineStyle + '"></span>' +
+        '<div style="font-size:.8rem;font-weight:600;">' + esc(r.focal_person||'_________________') + '</div>' +
+        '<div style="font-size:.72rem;color:#6c757d;">Focal Person / Project Lead</div>' +
+        '<div style="font-size:.72rem;color:#6c757d;margin-top:.1rem;">Dragon Coders</div>' +
         '</div>' +
-        '<div style="text-align:right;font-size:.8rem;opacity:.7;">' +
-        'Warranty Period<br><strong style="opacity:1;">' + esc(r.start_date) + ' → ' + esc(r.end_date) + '</strong>' +
-        '<br><br>Generated<br><strong style="opacity:1;">' + esc(r.generated_on) + '</strong>' +
+
+        '<div>' +
+        '<div style="font-size:.68rem;color:#6c757d;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;">Reviewed &amp; Approved By</div>' +
+        '<span style="' + sigLineStyle + '"></span>' +
+        '<div style="font-size:.8rem;font-weight:600;">_________________</div>' +
+        '<div style="font-size:.72rem;color:#6c757d;">Chief Executive Officer</div>' +
+        '<div style="font-size:.72rem;color:#6c757d;margin-top:.1rem;">Dragon Coders</div>' +
         '</div>' +
+
+        '<div>' +
+        '<div style="font-size:.68rem;color:#6c757d;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;">Official Stamp</div>' +
+        '<div style="height:90px;width:90px;border:1.5px dashed #adb5bd;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#adb5bd;font-size:.65rem;text-align:center;line-height:1.3;">Company<br>Stamp</div>' +
         '</div>' +
-        section('bi-info-circle-fill', 'Project Overview', infoHtml) +
-        section('bi-people-fill', 'Team', teamHtml) +
-        section('bi-person-lines-fill', 'Customers', custHtml) +
-        section('bi-ticket-perforated-fill', 'Ticket Statistics', ticketHtml) +
-        section('bi-clock-history', 'SLA Performance &amp; Task Completion', slaHtml) +
-        section('bi-exclamation-triangle-fill', 'Open Tickets at Closure', openHtml) +
+
+        '</div>' +
+        '<div style="margin-top:1.4rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;">' +
+        '<div><div style="font-size:.68rem;color:#6c757d;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;">Date of Closure</div><span style="display:block;width:180px;border-bottom:1.5px solid #1a1a2e;height:28px;"></span></div>' +
+        '<div style="font-size:.7rem;color:#6c757d;align-self:flex-end;text-align:right;">Dragon Coders &nbsp;·&nbsp; Strictly Confidential &nbsp;·&nbsp; Ref: ' + esc(r.project_key||'-') + '</div>' +
+        '</div>';
+
+    /* ── ASSEMBLE ─────────────────────────────────────────────── */
+    var html =
+        '<div id="prReportContent" style="' + S.wrap + '">' +
+        headerHtml +
+        overviewHtml +
+        teamCustHtml +
+        ticketRegisterHtml +
+        summaryHtml +
+        sigHtml +
         '</div>';
 
     document.getElementById('prDetailBody').innerHTML = html;
