@@ -67,7 +67,7 @@ Cannot:
 Can:
 - Access support dashboard with analytics and ticket views
 - View tickets assigned to self
-- Update ticket progress/phase and add notes
+- Update ticket progress/phase and add notesdd
 - See SLA/assignment alerts and mark-read state
 - Work via project-centric views (`My Projects`, project tickets, ticket board)
 - Manage board structures and tasks (columns/tasks/checklists/member assignment)

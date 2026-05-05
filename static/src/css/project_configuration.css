@@ -4,12 +4,12 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* ── Design tokens — matched to admin dashboard (#1e5a8e palette) ── */
+/* ── Design tokens — matched to admin dashboard (#065f46 palette) ── */
 :root {
-    --p-navy:       #164a73;   /* --primary-dark */
-    --p-navy-mid:   #1a3a5c;   /* admin sidebar hover */
-    --p-navy-soft:  #1e5a8e;   /* --header-bg / --primary-color */
-    --p-blue:       #1e5a8e;
+    --p-navy:       #047857;   /* --primary-dark */
+    --p-navy-mid:   #064e3b;   /* admin sidebar hover */
+    --p-navy-soft:  #065f46;   /* --header-bg / --primary-color */
+    --p-blue:       #065f46;
     --p-blue-light: #2a72b0;
     --p-sky:        rgba(255,255,255,.18);   /* active highlight on dark bg */
     --p-sky-faint:  rgba(30,90,142,.08);
@@ -63,7 +63,7 @@ body {
 .pcs-sidebar {
     width: var(--sidebar-w);
     flex-shrink: 0;
-    background: #1e5a8e;   /* exact admin dashboard header-bg */
+    background: #065f46;   /* exact admin dashboard header-bg */
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -290,7 +290,7 @@ body {
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: #1e5a8e;
+    background: #065f46;
     color: #fff;
     font-size: .75rem;
     font-weight: 700;
@@ -344,10 +344,10 @@ body {
     transition: all var(--p-dur) var(--p-ease);
 }
 
-.pcs-dot:hover { background: #1e5a8e; transform: scale(1.2); }
+.pcs-dot:hover { background: #065f46; transform: scale(1.2); }
 
 .pcs-dot.pcs-dot-active {
-    background: #1e5a8e;
+    background: #065f46;
     width: 22px;
     border-radius: 4px;
 }
@@ -590,13 +590,13 @@ body {
 }
 
 .pc-btn-primary {
-    background: #1e5a8e;
+    background: #065f46;
     color: #fff;
     box-shadow: 0 2px 6px rgba(30,90,142,.3);
 }
 
 .pc-btn-primary:hover {
-    background: #164a73;
+    background: #047857;
     box-shadow: 0 4px 12px rgba(30,90,142,.4);
     transform: translateY(-1px);
 }

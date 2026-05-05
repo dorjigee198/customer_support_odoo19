@@ -1553,3 +1553,86 @@ class CustomerSupportAdminUsers(http.Controller):
         except Exception as e:
             _logger.exception(f"Delete user error: {str(e)}")
             return self._redirect_user_management_tab(error="Error deleting user")
+
+    @http.route(
+        "/customer_support/admin_dashboard/user/<int:user_id>/detail",
+        type="jsonrpc",
+        auth="user",
+        csrf=False,
+    )
+    def user_detail(self, user_id, **kw):
+        if not request.env.user.has_group("base.group_system"):
+            return {"error": "Access denied"}
+        try:
+            user = (
+                request.env["res.users"]
+                .with_context(active_test=False)
+                .sudo()
+                .browse(user_id)
+            )
+            if not user.exists():
+                return {"error": "User not found"}
+
+            if user.has_group("base.group_system"):
+                role = "Admin"
+            elif user.has_group("base.group_user"):
+                role = "Focal Person"
+            elif user.has_group("base.group_portal"):
+                role = "Customer"
+            else:
+                role = "User"
+
+            projects = []
+
+            if role == "Customer":
+                partner = user.partner_id.sudo()
+                if partner.project_id:
+                    proj = partner.project_id
+                    projects.append({
+                        "name": proj.name,
+                        "key": proj.code or "",
+                        "association": "Assigned Project",
+                    })
+                ticket_projects = (
+                    request.env["customer.support"]
+                    .sudo()
+                    .search([("customer_id", "=", partner.id)])
+                    .mapped("project_id")
+                )
+                seen = {partner.project_id.id} if partner.project_id else set()
+                for proj in ticket_projects:
+                    if proj.id not in seen:
+                        seen.add(proj.id)
+                        projects.append({
+                            "name": proj.name,
+                            "key": proj.code or "",
+                            "association": "Has Tickets",
+                        })
+
+            elif role == "Focal Person":
+                members = (
+                    request.env["customer_support.project.member"]
+                    .sudo()
+                    .search([("user_id", "=", user_id)])
+                )
+                for m in members:
+                    projects.append({
+                        "name": m.project_id.name,
+                        "key": m.project_id.code or "",
+                        "association": m.role_label or m.role.replace("_", " ").title(),
+                    })
+
+            return {
+                "success": True,
+                "user": {
+                    "id": user.id,
+                    "name": user.name,
+                    "email": user.email or user.login,
+                    "role": role,
+                    "active": user.active,
+                    "projects": projects,
+                },
+            }
+        except Exception as e:
+            _logger.exception("user_detail error: %s", e)
+            return {"error": str(e)}

@@ -7,17 +7,17 @@
    CSS VARIABLES
    ======================================== */
 :root {
-    --primary-color: #1e5a8e;
-    --primary-dark: #164a73;
+    --primary-color: #065f46;
+    --primary-dark: #047857;
     --secondary-color: #6b7280;
     --success-color: #10b981;
     --warning-color: #f59e0b;
     --danger-color: #ef4444;
     --info-color: #06b6d4;
-    --light-bg: #f0f4f8;
+    --light-bg: #f8fafc;
     --dark-bg: #111827;
     --card-bg: #ffffff;
-    --header-bg: #1e5a8e;
+    --header-bg: #065f46;
     --border-color: #e5e7eb;
     --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     --card-shadow-hover: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -94,7 +94,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #1a3a5c;
+    border: 2px solid #064e3b;
     padding: 0 3px;
     line-height: 1;
     transition: transform 0.2s;
@@ -144,12 +144,12 @@ body {
     font-size: 0.875rem;
     font-weight: 700;
     margin: 0;
-    color: #1a3a5c;
+    color: #064e3b;
 }
 
 .admin-notif-mark-read {
     font-size: 0.72rem;
-    color: #3b82f6;
+    color: #059669;
     cursor: pointer;
     background: none;
     border: none;
@@ -239,8 +239,8 @@ body {
 }
 
 .admin-notif-icon.unassigned {
-    background: #dbeafe;
-    color: #3b82f6;
+    background: #dcfce7;
+    color: #059669;
 }
 
 .admin-notif-icon.status-chg {
@@ -287,7 +287,7 @@ body {
 }
 
 .admin-notif-dot.unassigned {
-    background: #3b82f6;
+    background: #059669;
 }
 
 .admin-notif-dot.status-chg {
@@ -310,7 +310,7 @@ body {
 
 .admin-notif-footer a {
     font-size: 0.78rem;
-    color: #3b82f6;
+    color: #059669;
     text-decoration: none;
     font-weight: 600;
 }
@@ -355,7 +355,7 @@ body {
 }
 
 .workload-panel-header {
-    background: #1a3a5c;
+    background: #064e3b;
     color: #fff;
     padding: 1.1rem 1.4rem;
     display: flex;
@@ -413,7 +413,7 @@ body {
     font-size: 1.4rem;
     font-weight: 800;
     font-family: 'Rajdhani', sans-serif;
-    color: #1a3a5c;
+    color: #064e3b;
     line-height: 1;
 }
 
@@ -534,7 +534,7 @@ body {
 .workload-stat-val {
     font-size: 1.1rem;
     font-weight: 800;
-    color: #1a3a5c;
+    color: #064e3b;
     line-height: 1;
 }
 
@@ -594,7 +594,7 @@ body {
     background: none;
     border: none;
     font-size: 0.72rem;
-    color: #3b82f6;
+    color: #059669;
     cursor: pointer;
     padding: 0;
     font-weight: 600;
@@ -661,10 +661,10 @@ body {
    DASHBOARD HEADER
    ======================================== */
 .dashboard-header {
-    background: var(--header-bg);
+    background: linear-gradient(130deg, #022c22 0%, #064e3b 46%, #065f46 100%);
     padding: 0.75rem 2rem;
     margin: 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(2,44,34,0.18);
     position: sticky;
     top: 0;
     z-index: 1000;
@@ -765,11 +765,11 @@ body {
 .dashboard-card {
     width: 100%;
     min-width: 0;
-    background: #f0f9ff;
+    background: #f0fdf4;
     border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 4px 15px rgba(12, 74, 110, 0.1);
-    border: 1px solid rgba(12, 74, 110, 0.1);
+    box-shadow: 0 4px 15px rgba(5,150,105, 0.1);
+    border: 1px solid rgba(5,150,105, 0.1);
     transition: var(--transition);
     box-sizing: border-box;
     margin-bottom: 1.5rem;
@@ -777,24 +777,24 @@ body {
 
 .dashboard-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(12, 74, 110, 0.15);
+    box-shadow: 0 8px 25px rgba(5,150,105, 0.15);
 }
 
 .performance-card {
     flex: 1 1 0;
     min-width: 0;
-    background: #f0f9ff;
+    background: #f0fdf4;
     border-radius: 12px;
     padding: 1.5rem;
-    box-shadow: 0 4px 15px rgba(12, 74, 110, 0.1);
-    border: 1px solid rgba(12, 74, 110, 0.1);
+    box-shadow: 0 4px 15px rgba(5,150,105, 0.1);
+    border: 1px solid rgba(5,150,105, 0.1);
     transition: var(--transition);
     box-sizing: border-box;
 }
 
 .performance-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(12, 74, 110, 0.15);
+    box-shadow: 0 8px 25px rgba(5,150,105, 0.15);
 }
 
 /* ========================================
@@ -803,7 +803,7 @@ body {
 .card-header {
     margin-bottom: 1rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(12, 74, 110, 0.1);
+    border-bottom: 1px solid rgba(5,150,105, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -812,7 +812,7 @@ body {
 .card-title {
     font-size: 1.1rem;
     font-weight: 600;
-    color: #0c4a6e;
+    color: #065f46;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -820,7 +820,7 @@ body {
 }
 
 .card-title i {
-    color: #0c4a6e;
+    color: #065f46;
 }
 
 .card-actions {
@@ -850,13 +850,13 @@ body {
 }
 
 .score-badge {
-    background: linear-gradient(135deg, #0c4a6e 0%, #075985 100%);
+    background: linear-gradient(135deg, #065f46 0%, #047857 100%);
     color: white;
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-weight: 600;
     font-size: 0.85rem;
-    box-shadow: 0 2px 4px rgba(12, 74, 110, 0.2);
+    box-shadow: 0 2px 4px rgba(5,150,105, 0.2);
 }
 
 /* ========================================
@@ -877,31 +877,31 @@ body {
     background: white;
     border-radius: 8px;
     padding: 1.25rem;
-    border: 1px solid rgba(12, 74, 110, 0.1);
+    border: 1px solid rgba(5,150,105, 0.1);
     transition: all 0.3s ease;
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    box-shadow: 0 2px 5px rgba(12, 74, 110, 0.05);
+    box-shadow: 0 2px 5px rgba(5,150,105, 0.05);
     min-width: 0;
 }
 
 .stat-box:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(12, 74, 110, 0.12);
-    border-color: rgba(12, 74, 110, 0.2);
+    box-shadow: 0 6px 15px rgba(5,150,105, 0.12);
+    border-color: rgba(5,150,105, 0.2);
 }
 
 .stat-icon {
     width: 40px;
     height: 40px;
     border-radius: 8px;
-    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    background: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.25rem;
-    color: #0c4a6e;
+    color: #065f46;
     flex-shrink: 0;
 }
 
@@ -921,7 +921,7 @@ body {
 .stat-value {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #0c4a6e;
+    color: #065f46;
     margin-bottom: 0.25rem;
     line-height: 1.2;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -947,31 +947,31 @@ body {
     background: white;
     border-radius: 8px;
     padding: 1.25rem;
-    border: 1px solid rgba(12, 74, 110, 0.1);
+    border: 1px solid rgba(5,150,105, 0.1);
     transition: all 0.3s ease;
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    box-shadow: 0 2px 5px rgba(12, 74, 110, 0.05);
+    box-shadow: 0 2px 5px rgba(5,150,105, 0.05);
     min-width: 0;
 }
 
 .performance-stat:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(12, 74, 110, 0.12);
-    border-color: rgba(12, 74, 110, 0.2);
+    box-shadow: 0 6px 15px rgba(5,150,105, 0.12);
+    border-color: rgba(5,150,105, 0.2);
 }
 
 .performance-icon {
     width: 40px;
     height: 40px;
     border-radius: 8px;
-    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    background: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.25rem;
-    color: #0c4a6e;
+    color: #065f46;
     flex-shrink: 0;
 }
 
@@ -990,7 +990,7 @@ body {
 .performance-value {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #0c4a6e;
+    color: #065f46;
     margin-bottom: 0.25rem;
     line-height: 1.2;
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -1009,7 +1009,7 @@ body {
 .performance-progress {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid rgba(12, 74, 110, 0.1);
+    border-top: 1px solid rgba(5,150,105, 0.1);
 }
 
 .progress-label {
@@ -1017,24 +1017,24 @@ body {
     justify-content: space-between;
     margin-bottom: 0.75rem;
     font-size: 0.9rem;
-    color: #0c4a6e;
+    color: #065f46;
     font-weight: 600;
 }
 
 .progress {
     height: 10px;
     border-radius: 5px;
-    background: #e0f2fe;
+    background: #f0fdf4;
     overflow: hidden;
-    box-shadow: inset 0 1px 2px rgba(12, 74, 110, 0.1);
+    box-shadow: inset 0 1px 2px rgba(5,150,105, 0.1);
 }
 
 .progress-bar {
     height: 100%;
     border-radius: 5px;
     transition: width 0.6s ease;
-    background: linear-gradient(90deg, #0c4a6e 0%, #0284c7 100%);
-    box-shadow: 0 1px 3px rgba(12, 74, 110, 0.2);
+    background: linear-gradient(90deg, #065f46 0%, #059669 100%);
+    box-shadow: 0 1px 3px rgba(5,150,105, 0.2);
 }
 
 .progress-bar.bg-success {
@@ -1062,21 +1062,21 @@ body {
     background: white;
     border-radius: 8px;
     padding: 1.25rem;
-    border: 1px solid rgba(12, 74, 110, 0.1);
+    border: 1px solid rgba(5,150,105, 0.1);
     text-decoration: none;
     color: inherit;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 1rem;
-    box-shadow: 0 2px 5px rgba(12, 74, 110, 0.05);
+    box-shadow: 0 2px 5px rgba(5,150,105, 0.05);
     min-width: 0;
 }
 
 .action-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(12, 74, 110, 0.15);
-    border-color: #0c4a6e;
+    box-shadow: 0 6px 15px rgba(5,150,105, 0.15);
+    border-color: #065f46;
     background: #f8fafc;
 }
 
@@ -1084,20 +1084,20 @@ body {
     width: 48px;
     height: 48px;
     border-radius: 8px;
-    background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 100%);
+    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.25rem;
     color: white;
     flex-shrink: 0;
-    box-shadow: 0 2px 5px rgba(12, 74, 110, 0.2);
+    box-shadow: 0 2px 5px rgba(5,150,105, 0.2);
 }
 
 .action-content h4 {
     font-size: 1rem;
     margin-bottom: 0.25rem;
-    color: #0c4a6e;
+    color: #065f46;
     font-weight: 600;
 }
 
@@ -1292,8 +1292,8 @@ body {
 }
 
 .priority-medium {
-    background: #dbeafe;
-    color: #1e40af;
+    background: #dcfce7;
+    color: #065f46;
 }
 
 .priority-high {
@@ -1333,11 +1333,11 @@ body {
 }
 
 .status-new {
-    color: #1e40af;
+    color: #065f46;
 }
 
 .status-new::before {
-    background: #3b82f6;
+    background: #059669;
 }
 
 .status-assigned {
@@ -1353,7 +1353,7 @@ body {
 }
 
 .status-in_progress::before {
-    background: #6366f1;
+    background: #059669;
 }
 
 .status-resolved {
@@ -1652,15 +1652,15 @@ body {
     border-radius: 8px;
     padding: 0.4rem 0.6rem;
     text-decoration: none;
-    color: #1e3a8a;
+    color: #065f46;
     font-size: 0.78rem;
     font-weight: 600;
 }
 
 .aqv-attach-item:hover {
-    background: #eef4ff;
-    border-color: #bfd3ff;
-    color: #1d4ed8;
+    background: #f0fdf4;
+    border-color: #a7f3d0;
+    color: #065f46;
 }
 
 .modal-backdrop.show {
@@ -1677,25 +1677,25 @@ body {
     box-shadow: var(--card-shadow-hover);
     padding: 0.5rem 0;
     margin-top: 0.5rem;
-    background-color: #f0f9ff !important;
+    background-color: #f0fdf4 !important;
 }
 
 .dropdown-item {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
     transition: var(--transition);
-    color: #0c4a6e !important;
+    color: #065f46 !important;
     font-weight: 500 !important;
 }
 
 .dropdown-item:hover {
-    background-color: #e0f2fe !important;
-    color: #0c4a6e !important;
+    background-color: #f0fdf4 !important;
+    color: #065f46 !important;
 }
 
 .dropdown-divider {
     margin: 0.5rem 0;
-    border-color: #e0f2fe !important;
+    border-color: #f0fdf4 !important;
 }
 
 .auto-assign-dot {
@@ -1780,7 +1780,7 @@ body {
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    background: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1823,8 +1823,8 @@ body {
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border-bottom: 2px solid #e0f2fe;
+    background: linear-gradient(135deg, #f0fdf4 0%, #f0fdf4 100%);
+    border-bottom: 2px solid #f0fdf4;
 }
 
 .modal-title {

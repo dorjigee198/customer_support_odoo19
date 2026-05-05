@@ -3,10 +3,10 @@
    ============================================================ */
 
 :root {
-    --cs-primary: #0f3555;
-    --cs-accent: #1f6e8c;
-    --cs-gold: #c9a45c;
-    --cs-border: rgba(15, 53, 85, 0.14);
+    --cs-primary: #065f46;
+    --cs-accent: #059669;
+    --cs-gold: #059669;
+    --cs-border: rgba(5,150,105,0.12);
 }
 
 .dashboard-content {
@@ -44,12 +44,12 @@
     align-items: center;
     gap: .4rem;
     background: rgba(255,255,255,.85);
-    border: 1px solid rgba(12,74,110,.18);
+    border: 1px solid rgba(5,150,105,.18);
     border-radius: 8px;
     padding: .3rem .75rem;
     font-size: .8rem;
     font-weight: 600;
-    color: #0c4a6e;
+    color: #065f46;
 }
 
 .stat-badge i { font-size: .8rem; }
@@ -63,7 +63,7 @@
     gap: .3rem;
     padding: .38rem .85rem;
     border-radius: 8px;
-    border: 1px solid rgba(15,53,85,.2);
+    border: 1px solid rgba(5,150,105,.2);
     background: rgba(255,255,255,.6);
     color: var(--cs-primary);
     font-size: .82rem;
@@ -72,11 +72,11 @@
     transition: all .15s;
 }
 
-.view-btn:hover { background: rgba(255,255,255,.9); border-color: rgba(12,74,110,.35); }
+.view-btn:hover { background: rgba(255,255,255,.9); border-color: rgba(5,150,105,.35); }
 .view-btn.active {
-    background: linear-gradient(140deg, #103b5f 0%, #1f6e8c 100%);
+    background: linear-gradient(140deg, #047857 0%, #059669 100%);
     color: #fff;
-    border-color: #154869;
+    border-color: #047857;
 }
 
 /* ── Search bar ──────────────────────────────────────────── */
@@ -85,22 +85,22 @@
     border-radius: 10px;
     padding: .75rem 1rem;
     border: 1px solid var(--cs-border);
-    box-shadow: 0 8px 20px rgba(8, 27, 43, 0.08);
+    box-shadow: 0 8px 20px rgba(5,150,105,0.06);
     margin-bottom: 1rem;
 }
 
 .input-group { border-radius: 8px; overflow: hidden; }
 
 .input-group-text {
-    background: #f0f9ff;
-    border: 1px solid rgba(12,74,110,.18);
+    background: #f0fdf4;
+    border: 1px solid rgba(5,150,105,.18);
     border-right: none;
-    color: #0c4a6e;
+    color: #065f46;
     font-size: .9rem;
 }
 
 .form-control {
-    border: 1px solid rgba(12,74,110,.18);
+    border: 1px solid rgba(5,150,105,.18);
     border-left: none;
     padding: .55rem .9rem;
     font-size: .875rem;
@@ -108,24 +108,24 @@
 
 .form-control:focus {
     box-shadow: none;
-    border-color: #0284c7;
+    border-color: #059669;
 }
 
 #clear-search {
-    background: #f0f9ff;
-    border: 1px solid rgba(12,74,110,.18);
-    color: #0c4a6e;
+    background: #f0fdf4;
+    border: 1px solid rgba(5,150,105,.18);
+    color: #065f46;
     font-weight: 500;
     border-left: none;
     font-size: .875rem;
     transition: all .15s;
 }
 
-#clear-search:hover { background: #0c4a6e; color: #fff; border-color: #0c4a6e; }
+#clear-search:hover { background: #065f46; color: #fff; border-color: #065f46; }
 #clear-search:hover {
-    background: linear-gradient(140deg, #103b5f 0%, #1f6e8c 100%);
+    background: linear-gradient(140deg, #047857 0%, #059669 100%);
     color: #fff;
-    border-color: #154869;
+    border-color: #047857;
 }
 
 /* ── Filter bar ──────────────────────────────────────────── */
@@ -138,7 +138,7 @@
     border-radius: 10px;
     padding: .6rem 1rem;
     border: 1px solid var(--cs-border);
-    box-shadow: 0 8px 20px rgba(8, 27, 43, 0.08);
+    box-shadow: 0 8px 20px rgba(5,150,105,0.06);
     margin-bottom: 1.25rem;
 }
 
@@ -152,7 +152,7 @@
 }
 
 .form-select {
-    border: 1px solid rgba(12,74,110,.18);
+    border: 1px solid rgba(5,150,105,.18);
     border-radius: 7px;
     padding: .38rem .85rem;
     font-size: .82rem;
@@ -162,8 +162,8 @@
 }
 
 .form-select:focus {
-    border-color: #0284c7;
-    box-shadow: 0 0 0 3px rgba(2,132,199,.1);
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5,150,105,.1);
 }
 
 /* ── Tickets container ───────────────────────────────────── */
@@ -171,7 +171,7 @@
     background: rgba(255, 255, 255, 0.96);
     border-radius: 12px;
     border: 1px solid var(--cs-border);
-    box-shadow: 0 12px 30px rgba(8, 27, 43, 0.1);
+    box-shadow: 0 12px 30px rgba(5,150,105,0.07);
     overflow: hidden;
 }
 
@@ -193,7 +193,7 @@
     grid-template-columns: 120px 1fr 110px 90px 160px 140px;
     gap: 0 1rem;
     padding: .6rem 1.25rem;
-    background: linear-gradient(90deg, rgba(31, 110, 140, 0.08) 0%, rgba(201, 164, 92, 0.12) 100%);
+    background: linear-gradient(90deg, rgba(5,150,105,0.08) 0%, rgba(5,150,105,0.08) 100%);
     border-bottom: 2px solid #e2e8f0;
     font-size: .72rem;
     font-weight: 700;
@@ -216,7 +216,7 @@
 
 .ticket-card:last-child { border-bottom: none; }
 .ticket-card:hover {
-    background: linear-gradient(90deg, rgba(31, 110, 140, 0.08) 0%, rgba(201, 164, 92, 0.08) 100%);
+    background: linear-gradient(90deg, rgba(5,150,105,0.08) 0%, rgba(5,150,105,0.06) 100%);
 }
 
 /* ── Columns ─────────────────────────────────────────────── */
@@ -232,7 +232,7 @@
     font-size: .78rem;
     font-weight: 700;
     color: var(--cs-primary);
-    background: linear-gradient(90deg, rgba(31, 110, 140, 0.12) 0%, rgba(201, 164, 92, 0.16) 100%);
+    background: linear-gradient(90deg, rgba(5,150,105,0.12) 0%, rgba(5,150,105,0.12) 100%);
     padding: .18rem .55rem;
     border-radius: 5px;
     white-space: nowrap;

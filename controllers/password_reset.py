@@ -87,7 +87,7 @@ class CustomerSupportPasswordReset(http.Controller):
                             template.sudo().with_context(
                                 cs_reset_link=reset_link,
                                 cs_user_name=users.name or users.login,
-                            ).send_mail(users.id, force_send=True)
+                            ).send_mail(users.id, force_send=False)
                         else:
                             _logger.error("Password reset template not found.")
 

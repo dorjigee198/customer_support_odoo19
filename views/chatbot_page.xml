@@ -15,15 +15,15 @@
 
                 <!-- Custom CSS -->
                 <link rel="stylesheet"
-                    href="/customer_support/static/src/css/portal_dashboard.css?v=3" />
+                    href="/customer_support/static/src/css/portal_dashboard.css?v=4" />
                 <link rel="stylesheet" href="/customer_support/static/src/css/chatbot.css" />
                 <link rel="stylesheet"
-                    href="/customer_support/static/src/css/portal_dashboard_mobile.css?v=4" />
+                    href="/customer_support/static/src/css/portal_dashboard_mobile.css?v=5" />
 
                 <style>
                     .notif-item {
                     display: flex; align-items: flex-start; gap: 0.75rem;
-                    padding: 0.75rem 1rem; border-bottom: 1px solid rgba(12,74,110,0.07);
+                    padding: 0.75rem 1rem; border-bottom: 1px solid rgba(5,150,105,0.07);
                     cursor: default;
                     }
                     .notif-item:last-child { border-bottom: none; }
@@ -31,12 +31,12 @@
                     width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
                     display: flex; align-items: center; justify-content: center; font-size: .9rem;
                     }
-                    .notif-icon-wrap.status { background: rgba(2,132,199,.12); color: #0284c7; }
+                    .notif-icon-wrap.status { background: rgba(5,150,105,.12); color: #059669; }
                     .notif-icon-wrap.assigned { background: rgba(22,163,74,.12); color: #16a34a; }
                     .notif-icon-wrap.breach { background: rgba(239,68,68,.12); color: #ef4444; }
                     .notif-body { flex: 1; min-width: 0; }
                     .notif-title {
-                    font-size: .8rem; font-weight: 700; color: #0c4a6e;
+                    font-size: .8rem; font-weight: 700; color: #065f46;
                     margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow:
                     ellipsis;
                     }
@@ -47,7 +47,7 @@
                     .notif-time-text { font-size: .7rem; color: #94a3b8; margin-top: 3px; }
                     .notif-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
                     margin-top: 6px; }
-                    .notif-dot.status { background: #0284c7; }
+                    .notif-dot.status { background: #059669; }
                     .notif-dot.assigned { background: #16a34a; }
                     .notif-dot.breach { background: #ef4444; }
                 </style>
@@ -67,8 +67,8 @@
                                 <i class="bi bi-speedometer2 me-2"></i>Overview </a>
                             <a href="/customer_support/tickets/list" class="nav-link">
                                 <i class="bi bi-ticket-detailed me-2"></i>Tickets </a>
-                            <a href="/customer_support/dashboard?tab=reporting" class="nav-link">
-                                <i class="bi bi-graph-up me-2"></i>Reporting </a>
+                            <a href="/customer_support/dashboard#reporting" class="nav-link">
+                                <i class="bi bi-folder-fill me-2"></i>Reports </a>
                             <a href="/customer_support/chatbot" class="nav-link active">
                                 <i class="bi bi-chat-dots me-2"></i>FAQ </a>
                         </div>
@@ -89,7 +89,7 @@
                                     </button>
                                     <div class="notif-dropdown" id="chatbotNotifDropdown">
                                         <div class="notif-header">
-                                            <h6><i class="bi bi-bell me-2" style="color:#0284c7;"></i>
+                                            <h6><i class="bi bi-bell me-2" style="color:#059669;"></i>
                                                 Notifications</h6>
                                             <button class="notif-mark-read" id="chatbotMarkRead">Mark
                                                 all read</button>

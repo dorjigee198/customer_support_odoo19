@@ -137,11 +137,19 @@
                     var(--border); display: flex; justify-content: space-between; font-size: 10px;
                     color: var(--muted); }
 
+                    /* Page break control */
+                    .report-header  { break-inside: avoid; }
+                    .health-hero    { break-inside: avoid; page-break-inside: avoid; }
+                    .kpi-grid       { break-inside: avoid; page-break-inside: avoid; }
+                    .two-col        { break-inside: avoid; page-break-inside: avoid; }
+                    .section-title  { break-after:  avoid; page-break-after:  avoid; }
+                    .report-footer  { break-inside: avoid; page-break-inside: avoid; }
+                    tbody tr        { break-inside: avoid; page-break-inside: avoid; }
+
                     @media print {
                     .print-bar { display: none !important; }
                     body { font-size: 11px; }
                     .report-wrapper { padding: 0; max-width: 100%; }
-                    .kpi-box, .health-hero { break-inside: avoid; }
                     @page { margin: 15mm 12mm; size: A4 portrait; }
                     }
                 </style>
@@ -153,8 +161,8 @@
                     <a href="/customer_support/admin_dashboard#reporting" class="btn-back">
                         ← Back
                     </a>
-                    <button class="btn-print" onclick="window.print()">
-                        🖨 Print / Save as PDF
+                    <button class="btn-print" id="rptDownloadBtn" onclick="downloadPdf()">
+                        ⬇ Download PDF
                     </button>
                 </div>
 
@@ -373,6 +381,31 @@
                             t-esc="generated_at" /></span>
                 </div>
             </div>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+            <script>
+            function downloadPdf() {
+                var bar = document.querySelector('.print-bar');
+                var btn = document.getElementById('rptDownloadBtn');
+                if (bar) bar.style.display = 'none';
+                if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+                /* mirror @media print font reduction that html2canvas never sees */
+                document.body.style.fontSize = '11px';
+                var el   = document.querySelector('.report-wrapper');
+                var name = (document.title || 'report').replace(/[^a-z0-9_\-]/gi, '_').toLowerCase();
+                html2pdf().set({
+                    margin:      [12, 10, 12, 10],
+                    filename:    name + '.pdf',
+                    image:       { type: 'jpeg', quality: 0.97 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
+                    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak:   { mode: ['css', 'legacy'] }
+                }).from(el).save().then(function () {
+                    document.body.style.fontSize = '';
+                    if (bar) bar.style.display = '';
+                    if (btn) { btn.disabled = false; btn.textContent = '⬇ Download PDF'; }
+                });
+            }
+            </script>
         </t>
     </template>
 
@@ -485,6 +518,15 @@
                     var(--border); display: flex; justify-content: space-between; font-size: 10px;
                     color: var(--muted); }
 
+                    /* Page break control */
+                    .report-header  { break-inside: avoid; }
+                    .agent-hero     { break-inside: avoid; page-break-inside: avoid; }
+                    .kpi-grid       { break-inside: avoid; page-break-inside: avoid; }
+                    .two-col        { break-inside: avoid; page-break-inside: avoid; }
+                    .section-title  { break-after:  avoid; page-break-after:  avoid; }
+                    .report-footer  { break-inside: avoid; page-break-inside: avoid; }
+                    tbody tr        { break-inside: avoid; page-break-inside: avoid; }
+
                     @media print {
                     .print-bar { display: none !important; }
                     body { font-size: 11px; }
@@ -496,7 +538,7 @@
             <div class="report-wrapper">
                 <div class="print-bar">
                     <a href="/customer_support/admin_dashboard#reporting" class="btn-back">← Back</a>
-                    <button class="btn-print" onclick="window.print()">🖨 Print / Save as PDF</button>
+                    <button class="btn-print" id="rptDownloadBtn" onclick="downloadPdf()">⬇ Download PDF</button>
                 </div>
 
                 <div class="report-header">
@@ -708,6 +750,31 @@
                             t-esc="generated_at" /></span>
                 </div>
             </div>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+            <script>
+            function downloadPdf() {
+                var bar = document.querySelector('.print-bar');
+                var btn = document.getElementById('rptDownloadBtn');
+                if (bar) bar.style.display = 'none';
+                if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+                /* mirror @media print font reduction that html2canvas never sees */
+                document.body.style.fontSize = '11px';
+                var el   = document.querySelector('.report-wrapper');
+                var name = (document.title || 'report').replace(/[^a-z0-9_\-]/gi, '_').toLowerCase();
+                html2pdf().set({
+                    margin:      [12, 10, 12, 10],
+                    filename:    name + '.pdf',
+                    image:       { type: 'jpeg', quality: 0.97 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
+                    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak:   { mode: ['css', 'legacy'] }
+                }).from(el).save().then(function () {
+                    document.body.style.fontSize = '';
+                    if (bar) bar.style.display = '';
+                    if (btn) { btn.disabled = false; btn.textContent = '⬇ Download PDF'; }
+                });
+            }
+            </script>
         </t>
     </template>
 
@@ -802,6 +869,15 @@
                     var(--border); display: flex; justify-content: space-between; font-size: 10px;
                     color: var(--muted); }
 
+                    /* Page break control */
+                    .report-header  { break-inside: avoid; }
+                    .exec-kpis      { break-inside: avoid; page-break-inside: avoid; }
+                    .section-title  { break-after:  avoid; page-break-after:  avoid; }
+                    .report-footer  { break-inside: avoid; page-break-inside: avoid; }
+                    tbody tr        { break-inside: avoid; page-break-inside: avoid; }
+                    /* Second section starts on a new page in the executive report */
+                    .section + .section { break-before: page; page-break-before: always; }
+
                     @media print {
                     .print-bar { display: none !important; }
                     .exec-kpis { grid-template-columns: repeat(3, 1fr); }
@@ -814,7 +890,7 @@
             <div class="report-wrapper">
                 <div class="print-bar">
                     <a href="/customer_support/admin_dashboard#reporting" class="btn-back">← Back</a>
-                    <button class="btn-print" onclick="window.print()">🖨 Print / Save as PDF</button>
+                    <button class="btn-print" id="rptDownloadBtn" onclick="downloadPdf()">⬇ Download PDF</button>
                 </div>
 
                 <div class="report-header">
@@ -1016,6 +1092,34 @@
                     <span>Executive Summary · Generated <t t-esc="generated_at" /></span>
                 </div>
             </div>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+            <script>
+            function downloadPdf() {
+                var bar  = document.querySelector('.print-bar');
+                var btn  = document.getElementById('rptDownloadBtn');
+                var kpis = document.querySelector('.exec-kpis');
+                if (bar)  bar.style.display  = 'none';
+                if (btn)  { btn.disabled = true; btn.textContent = 'Generating…'; }
+                /* mirror @media print rules that html2canvas never sees */
+                if (kpis) kpis.style.gridTemplateColumns = 'repeat(3, 1fr)';
+                document.body.style.fontSize = '11px';
+                var el   = document.querySelector('.report-wrapper');
+                var name = (document.title || 'report').replace(/[^a-z0-9_\-]/gi, '_').toLowerCase();
+                html2pdf().set({
+                    margin:      [12, 10, 12, 10],
+                    filename:    name + '.pdf',
+                    image:       { type: 'jpeg', quality: 0.97 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
+                    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak:   { mode: ['css', 'legacy'] }
+                }).from(el).save().then(function () {
+                    if (kpis) kpis.style.gridTemplateColumns = '';
+                    document.body.style.fontSize = '';
+                    if (bar)  bar.style.display  = '';
+                    if (btn)  { btn.disabled = false; btn.textContent = '⬇ Download PDF'; }
+                });
+            }
+            </script>
         </t>
     </template>
 

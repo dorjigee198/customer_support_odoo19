@@ -9,9 +9,9 @@
                 <link
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css?v=2" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/support_dashboard.css?v=5" />
                 <link rel="stylesheet"
-                    href="/customer_support/static/src/css/support_dashboard_mobile.css?v=2" />
+                    href="/customer_support/static/src/css/support_dashboard_mobile.css?v=4" />
                 <style>
                     /* ── NOTIFICATION BELL DROPDOWN ── */
                     .notif-wrap { position: relative; }
@@ -26,29 +26,29 @@
                     1; }
                     .notif-badge.d-none { display: none !important; }
                     .notif-dropdown { position: absolute; top: calc(100% + 12px); right: 0; width:
-                    360px; background: #ffffff; border: 1px solid rgba(12,74,110,0.15);
-                    border-radius: 14px; box-shadow: 0 16px 48px rgba(12,74,110,0.18); z-index: 300;
+                    360px; background: #ffffff; border: 1px solid rgba(5,150,105,0.15);
+                    border-radius: 14px; box-shadow: 0 16px 48px rgba(5,150,105,0.18); z-index: 300;
                     overflow: hidden; opacity: 0; pointer-events: none; transform: translateY(-8px);
                     transition: opacity 0.18s ease, transform 0.18s ease; }
                     .notif-dropdown.open { opacity: 1; pointer-events: all; transform:
                     translateY(0); }
                     .notif-header { padding: 0.9rem 1.25rem; border-bottom: 1px solid
-                    rgba(12,74,110,0.08); display: flex; justify-content: space-between;
-                    align-items: center; background: #f0f9ff; }
+                    rgba(5,150,105,0.08); display: flex; justify-content: space-between;
+                    align-items: center; background: #f0fdf4; }
                     .notif-header h6 { font-size: 0.875rem; font-weight: 600; margin: 0; color:
-                    #0c4a6e; }
-                    .notif-mark-read { font-size: 0.75rem; color: #1e5a8e; cursor: pointer;
+                    #065f46; }
+                    .notif-mark-read { font-size: 0.75rem; color: #065f46; cursor: pointer;
                     background: none; border: none; padding: 0; font-weight: 500; }
                     .notif-list { max-height: 360px; overflow-y: auto; }
                     .notif-list::-webkit-scrollbar { width: 4px; }
-                    .notif-list::-webkit-scrollbar-thumb { background: rgba(12,74,110,0.1);
+                    .notif-list::-webkit-scrollbar-thumb { background: rgba(5,150,105,0.1);
                     border-radius: 4px; }
                     .notif-item { display: flex; align-items: flex-start; gap: 0.85rem; padding:
-                    0.9rem 1.25rem; border-bottom: 1px solid rgba(12,74,110,0.06); cursor: pointer;
+                    0.9rem 1.25rem; border-bottom: 1px solid rgba(5,150,105,0.06); cursor: pointer;
                     transition: background 0.15s; text-decoration: none; }
                     .notif-item:last-child { border-bottom: none; }
-                    .notif-item:hover { background: #f0f9ff; }
-                    .notif-item.unread { background: rgba(30,90,142,0.04); }
+                    .notif-item:hover { background: #f0fdf4; }
+                    .notif-item.unread { background: rgba(5,150,105,0.04); }
                     .notif-icon-wrap { width: 36px; height: 36px; border-radius: 10px; flex-shrink:
                     0; display: flex; align-items: center; justify-content: center; font-size: 1rem;
                     }
@@ -66,8 +66,8 @@
                     .notif-empty { padding: 2rem; text-align: center; color: #64748b; font-size:
                     0.85rem; }
                     .notif-footer { padding: 0.75rem 1.25rem; border-top: 1px solid
-                    rgba(12,74,110,0.08); text-align: center; background: #f8fafc; }
-                    .notif-footer a { font-size: 0.8rem; color: #1e5a8e; text-decoration: none;
+                    rgba(5,150,105,0.08); text-align: center; background: #f8fafc; }
+                    .notif-footer a { font-size: 0.8rem; color: #065f46; text-decoration: none;
                     font-weight: 500; }
 
                     /* ── KANBAN ── */
@@ -103,11 +103,11 @@
                     .kanban-card { background: white; border: 1px solid #e5e7eb; border-radius: 8px;
                     padding: 0.9rem; cursor: grab; transition: all 0.2s; user-select: none;
                     box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-                    .kanban-card:hover { border-color: rgba(12,74,110,0.3); transform:
-                    translateY(-2px); box-shadow: 0 6px 15px rgba(12,74,110,0.1); }
+                    .kanban-card:hover { border-color: rgba(5,150,105,0.3); transform:
+                    translateY(-2px); box-shadow: 0 6px 15px rgba(5,150,105,0.1); }
                     .kanban-card.dragging { opacity: 0.5; transform: rotate(2deg) scale(1.02);
                     cursor: grabbing; }
-                    .kanban-card-id { font-size: 0.68rem; color: #0c4a6e; font-weight: 700;
+                    .kanban-card-id { font-size: 0.68rem; color: #065f46; font-weight: 700;
                     font-family: monospace; margin-bottom: 0.4rem; }
                     .kanban-card-subject { font-size: 0.82rem; font-weight: 600; color: #1f2937;
                     margin-bottom: 0.6rem; line-height: 1.3; display: -webkit-box;
@@ -121,14 +121,14 @@
                     .kanban-priority { font-size: 0.65rem; font-weight: 700; padding: 2px 7px;
                     border-radius: 5px; text-transform: uppercase; letter-spacing: 0.04em; }
                     .kanban-priority.priority-low { background: #d1fae5; color: #065f46; }
-                    .kanban-priority.priority-medium { background: #dbeafe; color: #1e40af; }
+                    .kanban-priority.priority-medium { background: #dcfce7; color: #1e40af; }
                     .kanban-priority.priority-high { background: #fee2e2; color: #991b1b; }
                     .kanban-priority.priority-urgent { background: #fef3c7; color: #92400e; }
-                    .kanban-drop-zone { border: 2px dashed rgba(12,74,110,0.3); border-radius: 8px;
-                    padding: 1rem; text-align: center; font-size: 0.75rem; color: #0c4a6e; display:
+                    .kanban-drop-zone { border: 2px dashed rgba(5,150,105,0.3); border-radius: 8px;
+                    padding: 1rem; text-align: center; font-size: 0.75rem; color: #065f46; display:
                     none; margin-top: 0.5rem; }
                     .kanban-col.drag-over .kanban-drop-zone { display: block; }
-                    .kanban-col.drag-over { background: rgba(12,74,110,0.03); }
+                    .kanban-col.drag-over { background: rgba(5,150,105,0.03); }
 
                     /* ── VIEW TOGGLE ── */
                     .view-toggle-btn { background: none; border: none; color:
@@ -150,8 +150,8 @@
 
                     /* ── NEW TICKET FLASH ── */
                     @keyframes ticketNewFlash {
-                    0% { border-color: #0c4a6e; box-shadow: 0 0 0 0 rgba(12,74,110,0.4); }
-                    50% { border-color: #0284c7; box-shadow: 0 0 0 6px rgba(12,74,110,0); }
+                    0% { border-color: #065f46; box-shadow: 0 0 0 0 rgba(5,150,105,0.4); }
+                    50% { border-color: #059669; box-shadow: 0 0 0 6px rgba(5,150,105,0); }
                     100% { border-color: #e5e7eb; box-shadow: none; }
                     }
                     .kanban-card.ticket-new-flash { animation: ticketNewFlash 1.2s ease-out
@@ -165,7 +165,7 @@
                     .mobile-view-pill-btn { border: none; background: transparent; border-radius:
                     999px; padding: 0.4rem 1.1rem; font-size: 0.82rem; font-weight: 500; color:
                     #64748b; cursor: pointer; transition: all 0.18s; }
-                    .mobile-view-pill-btn.active { background: white; color: #0c4a6e; font-weight:
+                    .mobile-view-pill-btn.active { background: white; color: #065f46; font-weight:
                     600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
                     }
                     /* ── BACK BUTTON WARNING MODAL ── */
@@ -180,7 +180,7 @@
                     .focal-logout-modal-box {
                     background: #ffffff; border-radius: 20px;
                     padding: 2.5rem 2rem; max-width: 420px; width: 90%;
-                    box-shadow: 0 24px 60px rgba(12,74,110,0.25);
+                    box-shadow: 0 24px 60px rgba(5,150,105,0.25);
                     text-align: center;
                     animation: focalModalPop 0.25s ease;
                     }
@@ -196,52 +196,51 @@
                     }
                     .focal-logout-modal-icon i { font-size: 1.9rem; color: #d97706; }
                     .focal-logout-modal-box h5 {
-                    color: #0c4a6e; font-weight: 700; font-size: 1.2rem; margin-bottom: 0.6rem;
+                    color: #065f46; font-weight: 700; font-size: 1.2rem; margin-bottom: 0.6rem;
                     }
                     .focal-logout-modal-box p {
                     color: #475569; font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.75rem;
                     }
-                    .focal-logout-modal-box p strong { color: #0c4a6e; }
+                    .focal-logout-modal-box p strong { color: #065f46; }
                     .focal-logout-modal-btns { display: flex; gap: 0.85rem; justify-content: center;
                     }
                     .focal-btn-stay {
                     padding: 0.6rem 1.4rem; border-radius: 10px;
-                    border: 1.5px solid rgba(12,74,110,0.2); background: #f0f9ff;
-                    color: #0c4a6e; font-weight: 600; font-size: 0.9rem;
+                    border: 1.5px solid rgba(5,150,105,0.2); background: #f0fdf4;
+                    color: #065f46; font-weight: 600; font-size: 0.9rem;
                     cursor: pointer; transition: background 0.2s, border-color 0.2s;
                     }
-                    .focal-btn-stay:hover { background: #e0f2fe; border-color: #0c4a6e; }
+                    .focal-btn-stay:hover { background: #f0fdf4; border-color: #065f46; }
                     .focal-btn-logout-now {
                     padding: 0.6rem 1.4rem; border-radius: 10px; border: none;
-                    background: #0c4a6e; color: #ffffff; font-weight: 600;
+                    background: #065f46; color: #ffffff; font-weight: 600;
                     font-size: 0.9rem; cursor: pointer; transition: background 0.2s;
                     }
-                    .focal-btn-logout-now:hover { background: #075985; }
+                    .focal-btn-logout-now:hover { background: #047857; }
 
-                    /* ── PREMIUM CONSISTENCY LAYER (match customer dashboard) ── */
+                    /* ── EMERALD CONSISTENCY LAYER ── */
                     .dashboard-wrapper {
                     background:
-                    radial-gradient(circle at 14% 6%, rgba(201, 164, 92, 0.14) 0%, transparent 34%),
-                    radial-gradient(circle at 92% 92%, rgba(31, 110, 140, 0.11) 0%, transparent 36%),
-                    linear-gradient(160deg, #edf3f9 0%, #e6eef6 50%, #eff4f9 100%) !important;
+                    radial-gradient(circle at 14% 6%, rgba(5, 150, 105, 0.07) 0%, transparent 34%),
+                    radial-gradient(circle at 92% 92%, rgba(5, 150, 105, 0.05) 0%, transparent 36%),
+                    linear-gradient(160deg, #f8fafc 0%, #f0fdf4 50%, #f8fafc 100%) !important;
                     }
                     .dashboard-header {
-                    background: linear-gradient(130deg, #071a2d 0%, #0d3253 46%, #18486e 100%) !important;
-                    border-bottom: 1px solid rgba(233, 214, 172, 0.22) !important;
-                    box-shadow: 0 8px 24px rgba(7, 24, 40, 0.26) !important;
+                    background: linear-gradient(130deg, #022c22 0%, #064e3b 46%, #065f46 100%) !important;
+                    border-bottom: 1px solid rgba(5, 150, 105, 0.15) !important;
+                    box-shadow: 0 8px 24px rgba(2, 44, 34, 0.22) !important;
                     }
                     .nav-link.active {
                     background: rgba(255, 255, 255, 0.08) !important;
-                    border-bottom: 2px solid #e9d6ac !important;
+                    border-bottom: 2px solid rgba(255, 255, 255, 0.6) !important;
                     }
                     .dashboard-card,
                     .ticket-table-wrapper,
                     .action-card,
                     .kanban-col {
-                    background: rgba(255, 255, 255, 0.9) !important;
-                    border: 1px solid rgba(15, 53, 85, 0.14) !important;
-                    box-shadow: 0 12px 30px rgba(8, 27, 43, 0.12) !important;
-                    backdrop-filter: blur(8px);
+                    background: rgba(255, 255, 255, 0.92) !important;
+                    border: 1px solid rgba(5, 150, 105, 0.12) !important;
+                    box-shadow: 0 8px 24px rgba(5, 150, 105, 0.08) !important;
                     }
                     .card-title,
                     .action-content h4,
@@ -250,43 +249,46 @@
                     .kanban-col-title,
                     .tkt-ref,
                     .tkt-subject {
-                    color: #0f3555 !important;
+                    color: #065f46 !important;
                     }
                     .card-title i,
                     .action-icon i,
-                    .stat-icon,
-                    .performance-icon,
                     .kanban-card-id {
-                    color: #1f6e8c !important;
+                    color: #059669 !important;
+                    }
+                    .stat-icon,
+                    .performance-icon {
+                    background: linear-gradient(135deg, #f0fdf4 0%, #d1fae5 100%) !important;
+                    color: #065f46 !important;
                     }
                     .action-icon,
                     .score-badge,
                     .view-btn.active,
                     .filter-pill.active,
                     .focal-btn-logout-now {
-                    background: linear-gradient(140deg, #103b5f 0%, #1f6e8c 100%) !important;
+                    background: linear-gradient(140deg, #047857 0%, #059669 100%) !important;
                     color: #ffffff !important;
-                    border-color: #154869 !important;
+                    border-color: #047857 !important;
                     }
                     .notif-dropdown {
-                    border: 1px solid rgba(15, 53, 85, 0.14) !important;
-                    box-shadow: 0 16px 36px rgba(8, 27, 43, 0.2) !important;
+                    border: 1px solid rgba(5, 150, 105, 0.15) !important;
+                    box-shadow: 0 16px 36px rgba(5, 150, 105, 0.18) !important;
                     border-radius: 14px !important;
                     }
                     .notif-header {
-                    background: linear-gradient(90deg, rgba(31, 110, 140, 0.11) 0%, rgba(201, 164, 92, 0.13) 100%) !important;
+                    background: #f0fdf4 !important;
                     }
                     .notif-item:hover,
                     .ticket-table tbody tr:hover {
-                    background: linear-gradient(90deg, rgba(31, 110, 140, 0.08) 0%, rgba(201, 164, 92, 0.08) 100%) !important;
+                    background: rgba(5, 150, 105, 0.04) !important;
                     }
                     .kanban-card:hover {
-                    border-color: rgba(31, 110, 140, 0.45) !important;
-                    box-shadow: 0 10px 24px rgba(8, 27, 43, 0.2) !important;
+                    border-color: rgba(5, 150, 105, 0.35) !important;
+                    box-shadow: 0 8px 20px rgba(5, 150, 105, 0.12) !important;
                     }
                     .focal-logout-modal-box {
-                    border: 1px solid rgba(15, 53, 85, 0.14) !important;
-                    box-shadow: 0 22px 60px rgba(8, 27, 43, 0.28) !important;
+                    border: 1px solid rgba(5, 150, 105, 0.12) !important;
+                    box-shadow: 0 22px 60px rgba(5, 150, 105, 0.2) !important;
                     }
                 </style>
             </t>
@@ -875,7 +877,7 @@ var P=[
     {key:'sample_performance',sel:'[data-key="sample_performance"] .score-badge',sfx:'%'}
 ];
 function upd(sel,val,sfx){var el=document.querySelector(sel);if(el)el.textContent=val+(sfx||'');}
-function flash(sel){var el=document.querySelector(sel);if(el){el.style.transition='color 0.3s';el.style.color='#0284c7';setTimeout(function(){el.style.color='';},600);}}
+function flash(sel){var el=document.querySelector(sel);if(el){el.style.transition='color 0.3s';el.style.color='#059669';setTimeout(function(){el.style.color='';},600);}}
 function updBar(v){var b=document.querySelector('.progress-bar');if(b){b.style.width=v+'%';b.className='progress-bar '+(v>=80?'bg-success':'bg-warning');}}
 function updBarLabel(v){var ls=document.querySelectorAll('.progress-label span');if(ls.length>=2)ls[1].textContent=v+'%';}
 function updTime(){var t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});document.querySelectorAll('.last-updated').forEach(function(el){el.innerHTML='<i class="bi bi-clock me-1"></i>Updated at '+t;});}
@@ -1104,7 +1106,7 @@ document.addEventListener('DOMContentLoaded',function(){
     }
 
     /* Avatar colours keyed by first char */
-    var AVATAR_COLORS=['#0c4a6e','#1e5a8e','#185fa5','#0f6e56','#854f0b','#712b13','#534ab7','#3b6d11'];
+    var AVATAR_COLORS=['#065f46','#065f46','#185fa5','#0f6e56','#854f0b','#712b13','#534ab7','#3b6d11'];
     function avatarColor(name){
         var c=(name||'?').charCodeAt(0)%AVATAR_COLORS.length;
         return AVATAR_COLORS[c];

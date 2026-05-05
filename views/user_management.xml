@@ -12,7 +12,7 @@
                 <link
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/user_management.css" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/user_management.css?v=2" />
             </t>
 
             <div class="um-wrapper">
@@ -503,32 +503,10 @@
                 <link
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/user_management.css" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/user_management.css?v=2" />
             </t>
 
             <div class="um-wrapper">
-
-                <!-- ── Page Header ── -->
-                <div class="um-header">
-                    <div class="um-header-content">
-                        <div class="um-header-left">
-                            <a href="/customer_support/admin_dashboard?tab=user-management"
-                                class="um-back-btn" title="Back to User Management">
-                                <i class="bi bi-arrow-left"></i>
-                            </a>
-                            <nav class="um-breadcrumb">
-                                <a href="/customer_support/admin_dashboard"
-                                    class="um-breadcrumb-link">
-                                    <i class="bi bi-speedometer2 me-1"></i>Dashboard </a>
-                                <i class="bi bi-chevron-right um-breadcrumb-sep"></i>
-                                <a href="/customer_support/admin_dashboard?tab=user-management"
-                                    class="um-breadcrumb-link">User Management</a>
-                                <i class="bi bi-chevron-right um-breadcrumb-sep"></i>
-                                <span class="um-breadcrumb-current">Create User</span>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- ── Content ── -->
                 <div class="um-content">
@@ -636,32 +614,10 @@
                 <link
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/user_management.css" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/user_management.css?v=2" />
             </t>
 
             <div class="um-wrapper">
-
-                <!-- ── Page Header ── -->
-                <div class="um-header">
-                    <div class="um-header-content">
-                        <div class="um-header-left">
-                            <a href="/customer_support/admin_dashboard?tab=user-management"
-                                class="um-back-btn" title="Back to User Management">
-                                <i class="bi bi-arrow-left"></i>
-                            </a>
-                            <nav class="um-breadcrumb">
-                                <a href="/customer_support/admin_dashboard"
-                                    class="um-breadcrumb-link">
-                                    <i class="bi bi-speedometer2 me-1"></i>Dashboard </a>
-                                <i class="bi bi-chevron-right um-breadcrumb-sep"></i>
-                                <a href="/customer_support/admin_dashboard?tab=user-management"
-                                    class="um-breadcrumb-link">User Management</a>
-                                <i class="bi bi-chevron-right um-breadcrumb-sep"></i>
-                                <span class="um-breadcrumb-current">Edit User</span>
-                            </nav>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- ── Content ── -->
                 <div class="um-content">

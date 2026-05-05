@@ -9,14 +9,14 @@
                 <link
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/portal_dashboard.css?v=3" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/portal_tickets.css?v=3" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/portal_dashboard.css?v=4" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/portal_tickets.css?v=4" />
                 <link rel="stylesheet"
-                    href="/customer_support/static/src/css/portal_dashboard_mobile.css?v=4" />
+                    href="/customer_support/static/src/css/portal_dashboard_mobile.css?v=5" />
                 <style>
                     .notif-item {
                     display: flex; align-items: flex-start; gap: 0.75rem;
-                    padding: 0.75rem 1rem; border-bottom: 1px solid rgba(12,74,110,0.07);
+                    padding: 0.75rem 1rem; border-bottom: 1px solid rgba(5,150,105,0.07);
                     cursor: default;
                     }
                     .notif-item:last-child { border-bottom: none; }
@@ -24,12 +24,12 @@
                     width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
                     display: flex; align-items: center; justify-content: center; font-size: .9rem;
                     }
-                    .notif-icon-wrap.status { background: rgba(2,132,199,.12); color: #0284c7; }
+                    .notif-icon-wrap.status { background: rgba(5,150,105,.12); color: #059669; }
                     .notif-icon-wrap.assigned { background: rgba(22,163,74,.12); color: #16a34a; }
                     .notif-icon-wrap.breach { background: rgba(239,68,68,.12); color: #ef4444; }
                     .notif-body { flex: 1; min-width: 0; }
                     .notif-title {
-                    font-size: .8rem; font-weight: 700; color: #0c4a6e;
+                    font-size: .8rem; font-weight: 700; color: #065f46;
                     margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow:
                     ellipsis;
                     }
@@ -40,36 +40,36 @@
                     .notif-time-text { font-size: .7rem; color: #94a3b8; margin-top: 3px; }
                     .notif-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
                     margin-top: 6px; }
-                    .notif-dot.status { background: #0284c7; }
+                    .notif-dot.status { background: #059669; }
                     .notif-dot.assigned { background: #16a34a; }
                     .notif-dot.breach { background: #ef4444; }
 
                     /* Premium palette alignment */
-                    .notif-title { color: #0f3555; }
+                    .notif-title { color: #065f46; }
                     .notif-sub { color: #5b6f83; }
                     .notif-icon-wrap.status {
-                    background: rgba(31,110,140,.14);
-                    color: #1f6e8c;
+                    background: rgba(5,150,105,.12);
+                    color: #059669;
                     }
-                    .notif-dot.status { background: #1f6e8c; }
+                    .notif-dot.status { background: #059669; }
 
                     #portal-kanban-page {
                     background:
-                    radial-gradient(circle at 14% 6%, rgba(201, 164, 92, 0.14) 0%, transparent 34%),
-                    radial-gradient(circle at 92% 92%, rgba(31, 110, 140, 0.11) 0%, transparent 36%),
-                    linear-gradient(160deg, #edf3f9 0%, #e6eef6 50%, #eff4f9 100%);
+                    radial-gradient(circle at 14% 6%, rgba(5,150,105,0.06) 0%, transparent 34%),
+                    radial-gradient(circle at 92% 92%, rgba(5,150,105,0.04) 0%, transparent 36%),
+                    linear-gradient(160deg, #f0fdf4 0%, #f8fafc 50%, #f0fdf4 100%);
                     min-height: 100vh;
                     }
                     .kanban-board { background: transparent; }
                     .kanban-col {
                     background: rgba(255,255,255,0.9);
-                    border-color: rgba(15,53,85,0.14);
-                    box-shadow: 0 10px 24px rgba(8,27,43,0.1);
+                    border-color: rgba(5,150,105,0.1);
+                    box-shadow: 0 10px 24px rgba(5,150,105,0.07);
                     }
                     .view-btn {
                     background: rgba(255,255,255,0.6);
                     border: 1px solid rgba(15,53,85,0.2);
-                    color: #0f3555;
+                    color: #065f46;
                     padding: 6px 12px;
                     border-radius: 8px;
                     cursor: pointer;
@@ -77,11 +77,11 @@
                     transition: all 0.2s;
                     }
                     .view-btn:hover { background: rgba(255,255,255,0.85); border-color:
-                    rgba(12,74,110,0.35); }
+                    rgba(5,150,105,0.35); }
                     .view-btn.active {
-                    background: linear-gradient(140deg, #103b5f 0%, #1f6e8c 100%);
+                    background: #059669;
                     color: #ffffff;
-                    border-color: #154869;
+                    border-color: #047857;
                     }
 
                     /* ── Board Progress Bar ───────────────────────────────── */
@@ -104,7 +104,7 @@
                     .kc-progress-pct {
                         font-size: 11px;
                         font-weight: 700;
-                        color: #0f3555;
+                        color: #065f46;
                     }
                     .kc-progress-bar-bg {
                         height: 5px;
@@ -115,7 +115,7 @@
                     .kc-progress-bar-fill {
                         height: 100%;
                         border-radius: 99px;
-                        background: linear-gradient(90deg, #1f6e8c 0%, #2c7a9b 100%);
+                        background: linear-gradient(90deg, #059669 0%, #2c7a9b 100%);
                         transition: width 0.4s ease;
                     }
                     .kc-progress-bar-fill.is-done {
@@ -149,7 +149,7 @@
                             <a href="/customer_support/tickets" class="nav-link active">
                                 <i class="bi bi-ticket-detailed me-2"></i>Tickets</a>
                             <a href="/customer_support/dashboard#reporting" class="nav-link">
-                                <i class="bi bi-graph-up me-2"></i>Reporting</a>
+                                <i class="bi bi-folder-fill me-2"></i>Reports</a>
                             <a href="/customer_support/chatbot" class="nav-link">
                                 <i class="bi bi-question-circle me-2"></i>FAQ</a>
                         </div>
@@ -168,7 +168,7 @@
                                     </button>
                                     <div class="notif-dropdown" id="kanbanNotifDropdown">
                                         <div class="notif-header">
-                                            <h6><i class="bi bi-bell me-2" style="color:#0284c7;"></i>
+                                            <h6><i class="bi bi-bell me-2" style="color:#059669;"></i>
                                                 Notifications</h6>
                                             <button class="notif-mark-read" id="kanbanMarkRead">Mark
                                                 all read</button>
@@ -652,7 +652,7 @@
             .tdm-ticket-num {
                 font-family: 'Courier New', monospace;
                 font-size: 0.78rem; font-weight: 700;
-                color: #0284c7; background: #e0f2fe;
+                color: #059669; background: #e0f2fe;
                 padding: 0.18rem 0.6rem; border-radius: 6px;
                 white-space: nowrap;
             }
@@ -699,14 +699,14 @@
             }
             .tdm-spinner {
                 width: 32px; height: 32px; border-radius: 50%;
-                border: 3px solid #e2e8f0; border-top-color: #0284c7;
+                border: 3px solid #e2e8f0; border-top-color: #059669;
                 animation: tdmSpin 0.7s linear infinite;
             }
             @keyframes tdmSpin { to { transform: rotate(360deg); } }
 
             /* Subject */
             .tdm-subject {
-                font-size: 1.15rem; font-weight: 700; color: #0c4a6e;
+                font-size: 1.15rem; font-weight: 700; color: #065f46;
                 margin: 0 0 0.85rem; line-height: 1.35;
             }
 
@@ -731,13 +731,13 @@
 
             .tdm-section-title {
                 display: flex; align-items: center;
-                font-size: 0.78rem; font-weight: 700; color: #0c4a6e;
+                font-size: 0.78rem; font-weight: 700; color: #065f46;
                 text-transform: uppercase; letter-spacing: 0.06em;
                 margin-bottom: 0.65rem;
             }
             .tdm-progress-pct {
                 margin-left: auto;
-                font-size: 0.8rem; font-weight: 700; color: #0284c7;
+                font-size: 0.8rem; font-weight: 700; color: #059669;
             }
 
             /* Description */
@@ -830,7 +830,7 @@
             .tdm-msg-author {
                 font-size: 0.76rem;
                 font-weight: 700;
-                color: #0c4a6e;
+                color: #065f46;
             }
             .tdm-msg-time {
                 font-size: 0.7rem;

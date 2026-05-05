@@ -5,8 +5,8 @@
 
 /* ── CSS Variables (matches admin_dashboard.css) ── */
 :root {
-    --um-primary:      #1e5a8e;
-    --um-primary-dark: #164a73;
+    --um-primary:      #065f46;
+    --um-primary-dark: #047857;
     --um-secondary:    #6b7280;
     --um-success:      #10b981;
     --um-danger:       #ef4444;
@@ -16,7 +16,7 @@
     --um-dark-text:    #111827;
     --um-muted:        #475569;
     --um-shadow:       0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-    --um-shadow-hover: 0 6px 20px rgba(12,74,110,0.12);
+    --um-shadow-hover: 0 6px 20px rgba(5,150,105,0.12);
     --um-transition:   all 0.25s ease;
 }
 
@@ -206,7 +206,7 @@ body {
     font-size: 1.15rem;
     flex-shrink: 0;
 }
-.um-icon-blue   { background: linear-gradient(135deg,#e0f2fe,#bae6fd); color: #0c4a6e; }
+.um-icon-blue   { background: linear-gradient(135deg,#f0fdf4,#d1fae5); color: #065f46; }
 .um-icon-indigo { background: linear-gradient(135deg,#ede9fe,#ddd6fe); color: #4c1d95; }
 .um-icon-teal   { background: linear-gradient(135deg,#ccfbf1,#99f6e4); color: #0f766e; }
 .um-icon-green  { background: linear-gradient(135deg,#dcfce7,#bbf7d0); color: #14532d; }
@@ -225,7 +225,7 @@ body {
 .um-stat-value {
     font-size: 1.75rem;
     font-weight: 700;
-    color: #0c4a6e;
+    color: #065f46;
     line-height: 1.1;
 }
 
@@ -353,8 +353,8 @@ body {
     min-width: 22px;
     height: 20px;
     padding: 0 6px;
-    background: #e0f2fe;
-    color: #0c4a6e;
+    background: #f0fdf4;
+    color: #065f46;
     border-radius: 999px;
     font-size: 0.7rem;
     font-weight: 700;
@@ -442,7 +442,7 @@ body {
     height: 36px;
 }
 .um-avatar-agent    { background: linear-gradient(135deg, var(--um-primary) 0%, var(--um-primary-dark) 100%); }
-.um-avatar-customer { background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%); }
+.um-avatar-customer { background: linear-gradient(135deg, #047857 0%, #059669 100%); }
 
 .um-user-info {
     display: flex;
@@ -453,7 +453,7 @@ body {
 .um-user-name {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #0c4a6e;
+    color: #065f46;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -500,7 +500,7 @@ body {
     font-weight: 600;
     text-decoration: none;
     background: #eff6ff;
-    color: #1e40af;
+    color: #065f46;
     border: 1.5px solid #bfdbfe;
     transition: var(--um-transition);
     white-space: nowrap;
@@ -521,7 +521,7 @@ body {
     font-weight: 600;
     white-space: nowrap;
 }
-.um-role-agent    { background: #dbeafe; color: #1e40af; }
+.um-role-agent    { background: #dcfce7; color: #065f46; }
 .um-role-customer { background: #ccfbf1; color: #0f766e; }
 
 /* ── Empty state ── */
@@ -590,7 +590,7 @@ body {
     flex-shrink: 0;
     box-shadow: 0 4px 12px rgba(30,90,142,0.28);
 }
-.um-form-title    { font-size: 1.05rem; font-weight: 700; color: #0c4a6e; margin: 0 0 0.2rem; }
+.um-form-title    { font-size: 1.05rem; font-weight: 700; color: #065f46; margin: 0 0 0.2rem; }
 .um-form-subtitle { font-size: 0.875rem; color: var(--um-secondary); margin: 0; }
 
 /* Form body (fields) */
@@ -662,7 +662,7 @@ body {
     transition: var(--um-transition);
 }
 .um-btn-primary:hover {
-    background: linear-gradient(135deg, var(--um-primary-dark) 0%, #0f3a5c 100%);
+    background: linear-gradient(135deg, #022c22 0%, #064e3b 100%);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(30,90,142,0.3);
     color: #fff;
@@ -722,7 +722,7 @@ body {
 .um-edit-name {
     font-size: 1.1rem;
     font-weight: 700;
-    color: #0c4a6e;
+    color: #065f46;
     margin: 0 0 0.3rem;
     white-space: nowrap;
     overflow: hidden;
@@ -835,7 +835,7 @@ body {
         display: block;
         font-size: 0.9rem;
         font-weight: 700;
-        color: #0c4a6e;
+        color: #065f46;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -890,7 +890,7 @@ body {
         font-weight: 600;
         text-decoration: none;
         background: #eff6ff;
-        color: #1e40af;
+        color: #065f46;
         border: 1.5px solid #bfdbfe;
         transition: var(--um-transition);
     }

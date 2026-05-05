@@ -25,7 +25,7 @@
 .ctd-board-title {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #0c4a6e;
+    color: #065f46;
     display: flex;
     align-items: center;
 }
@@ -46,8 +46,8 @@
     font-weight: 700;
     padding: 0.18rem 0.55rem;
     border-radius: 999px;
-    background: #e0f2fe;
-    color: #0369a1;
+    background: #d1fae5;
+    color: #065f46;
 }
 
 .ctd-board-pct-badge.ctd-all-done {
@@ -67,7 +67,7 @@
 .ctd-progress-fill {
     height: 100%;
     border-radius: 999px;
-    background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+    background: linear-gradient(90deg, #059669, #34d399);
     transition: width 0.4s ease;
 }
 
@@ -175,7 +175,7 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #0c4a6e, #0284c7);
+    background: linear-gradient(135deg, #065f46, #059669);
     color: #fff;
     font-size: 0.55rem;
     font-weight: 700;

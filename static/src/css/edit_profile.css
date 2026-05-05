@@ -6,14 +6,14 @@
 
 /* ========== COLOR VARIABLES ========== */
 :root {
-    --primary-dark: #0c4a6e;
-    --light-bg: #f0f9ff;
-    --hover-blue: #e0f2fe;
-    --border-blue: #bae6fd;
+    --primary-dark: #065f46;
+    --light-bg: #f0fdf4;
+    --hover-blue: #d1fae5;
+    --border-blue: #a7f3d0;
     --text-muted: #64748b;
     --white: #ffffff;
     --text-dark: #1e293b;
-    --cyan-blue: #0891b2;
+    --cyan-blue: #059669;
 }
 
 /* ========== BASE STYLES ========== */
@@ -24,7 +24,7 @@
 }
 
 body {
-    background-color: #e0f2fe;
+    background-color: #f0fdf4;
     ;
     color: var(--text-dark);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
@@ -96,7 +96,7 @@ body {
 .avatar-text {
     width: 70px;
     height: 70px;
-    background: linear-gradient(135deg, var(--primary-dark), #0284c7);
+    background: linear-gradient(135deg, #065f46, #059669);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -152,7 +152,7 @@ body {
 }
 
 .btn-profile:hover {
-    background-color: #0a3d57;
+    background-color: #047857;
     transform: translateY(-1px);
     color: var(--white);
 }
@@ -353,7 +353,7 @@ body {
 .progress-bar-wrapper,
 .progress-bar-custom {
     height: 8px;
-    background-color: #dbeafe;
+    background-color: #d1fae5;
     border-radius: 4px;
     overflow: hidden;
 }
@@ -361,7 +361,7 @@ body {
 .progress-bar-fill,
 .progress-fill {
     height: 100%;
-    background-color: var(--cyan-blue);
+    background-color: #059669;
     border-radius: 4px;
     transition: width 0.3s ease;
 }
@@ -369,7 +369,7 @@ body {
 /* ========== LOG OUT BUTTON (NEW) ========== */
 .btn-logout {
     width: 100%;
-    background-color: var(--cyan-blue);
+    background-color: #059669;
     color: var(--white);
     border: none;
     padding: 0.75rem;
@@ -381,7 +381,7 @@ body {
 }
 
 .btn-logout:hover {
-    background-color: #0e7490;
+    background-color: #047857;
     transform: translateY(-1px);
 }
 
@@ -569,7 +569,7 @@ hr {
 
 .form-control:focus {
     border-color: var(--primary-dark);
-    box-shadow: 0 0 0 3px rgba(12, 74, 110, 0.1);
+    box-shadow: 0 0 0 3px rgba(5,150,105,0.15);
     outline: none;
 }
 
@@ -603,7 +603,7 @@ hr {
 }
 
 .btn-primary:hover {
-    background-color: #0a3d57;
+    background-color: #047857;
     border-color: #0a3d57;
     color: var(--white);
 }

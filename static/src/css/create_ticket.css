@@ -1,15 +1,15 @@
 :root {
-    --primary-color: #0f3555;
-    --primary-light: #f2f7fc;
-    --primary-lighter: #e7f0f8;
-    --accent-color: #1f6e8c;
-    --gold-color: #c9a45c;
+    --primary-color: #065f46;
+    --primary-light: #f0fdf4;
+    --primary-lighter: #d1fae5;
+    --accent-color: #059669;
+    --gold-color: #059669;
     --secondary-color: #6c757d;
-    --border-color: rgba(15, 53, 85, 0.18);
+    --border-color: rgba(5,150,105,0.18);
     --text-light: #64748b;
     --text-dark: #1e293b;
-    --shadow-sm: 0 8px 20px rgba(8, 27, 43, 0.12);
-    --shadow-md: 0 16px 34px rgba(8, 27, 43, 0.16);
+    --shadow-sm: 0 4px 12px rgba(5,150,105,0.1);
+    --shadow-md: 0 8px 24px rgba(5,150,105,0.12);
     --radius-md: 8px;
     --radius-lg: 12px;
     --error-color: #dc3545;
@@ -18,9 +18,9 @@
 
 body {
     background:
-        radial-gradient(circle at 12% 6%, rgba(201, 164, 92, 0.12) 0%, transparent 34%),
-        radial-gradient(circle at 88% 94%, rgba(31, 110, 140, 0.11) 0%, transparent 34%),
-        linear-gradient(160deg, #edf3f9 0%, #e6eef6 50%, #eff4f9 100%);
+        radial-gradient(circle at 12% 6%, rgba(5,150,105,0.05) 0%, transparent 34%),
+        radial-gradient(circle at 88% 94%, rgba(5,150,105,0.04) 0%, transparent 34%),
+        background: #f8fafc;
     font-family: 'Manrope', 'Segoe UI', sans-serif;
     color: var(--text-dark);
     line-height: 1.6;
@@ -34,16 +34,16 @@ body {
     overflow: hidden;
     background: rgba(255, 255, 255, 0.92);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid rgba(233, 214, 172, 0.32);
+    border: 1px solid rgba(5,150,105,0.15);
     backdrop-filter: blur(10px);
 }
 
 .support-card:hover {
-    box-shadow: 0 6px 20px rgba(12, 74, 110, 0.15);
+    box-shadow: 0 6px 20px rgba(5,150,105,0.12);
 }
 
 .card-header {
-    background: linear-gradient(130deg, #071a2d 0%, #0d3253 46%, #18486e 100%);
+    background: linear-gradient(130deg, #022c22 0%, #064e3b 46%, #065f46 100%);
     border-bottom: none;
     padding: 1.5rem 2rem;
 }
@@ -80,7 +80,7 @@ body {
 .form-control:focus,
 .form-select:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 0.22rem rgba(31, 110, 140, 0.2);
+    box-shadow: 0 0 0 0.22rem rgba(5,150,105,0.2);
     background-color: var(--primary-light);
 }
 
@@ -106,7 +106,7 @@ textarea.form-control {
 
 /* Attachment Area */
 .attachment-area {
-    border: 2px dashed rgba(15, 53, 85, 0.28);
+    border: 2px dashed rgba(5,150,105,0.2);
     border-radius: var(--radius-md);
     background-color: var(--primary-light);
     padding: 2.5rem 1.5rem;
@@ -179,7 +179,7 @@ textarea.form-control {
 
 .browse-link:hover {
     border-bottom: 2px solid var(--primary-color);
-    background-color: rgba(12, 74, 110, 0.05);
+    background-color: rgba(5,150,105,0.05);
     border-radius: 4px;
 }
 
@@ -256,8 +256,8 @@ textarea.form-control {
 
 /* Buttons */
 .btn-primary {
-    background: linear-gradient(145deg, #f0d8a5 0%, #cba461 45%, #b18947 100%);
-    border-color: #b89253;
+    background: #059669;
+    border-color: #047857;
     border-radius: var(--radius-md);
     padding: 0.75rem 2rem;
     font-weight: 600;
@@ -266,22 +266,22 @@ textarea.form-control {
 }
 
 .btn-primary:hover {
-    background: linear-gradient(145deg, #f3dfb7 0%, #d1ad6f 45%, #ba9558 100%);
-    border-color: #b89253;
+    background: #047857;
+    border-color: #047857;
     transform: translateY(-2px);
     box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:active {
-    background-color: #082f49;
+    background-color: #022c22;
     border-color: #082f49;
     transform: translateY(0);
 }
 
 .btn-primary:focus {
-    background: linear-gradient(145deg, #f0d8a5 0%, #cba461 45%, #b18947 100%);
-    border-color: #b89253;
-    box-shadow: 0 0 0 0.22rem rgba(201, 164, 92, 0.28);
+    background: #059669;
+    border-color: #047857;
+    box-shadow: 0 0 0 0.22rem rgba(5,150,105,0.25);
 }
 
 .btn-secondary {

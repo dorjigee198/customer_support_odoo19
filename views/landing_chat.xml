@@ -7,11 +7,6 @@
             <t t-set="head">
                 <title>Dragon Chat — Dragon Coders AI</title>
 
-                <!-- Google Fonts -->
-                <link
-                    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&amp;family=DM+Sans:wght@300;400;500;600&amp;display=swap"
-                    rel="stylesheet" />
-
                 <!-- Desktop CSS -->
                 <link rel="stylesheet" href="/customer_support/static/src/css/landing_chat.css" />
                 <!-- Mobile CSS -->
@@ -31,12 +26,10 @@
 
                         <!-- Brand -->
                         <div class="sidebar-brand">
-                            <div class="brand-avatar" id="sidebar-logo">
-                                <!-- Replace src with your logo:
-                                /customer_support/static/src/img/logo.png --> 🐉 </div>
+                            <div class="brand-avatar" id="sidebar-logo"><span>DC</span></div>
                             <div class="brand-text">
                                 <span class="brand-name">Dragon Coders</span>
-                                <span class="brand-tagline">AI Assistant</span>
+                                <span class="brand-tagline">Chat</span>
                             </div>
                         </div>
 
@@ -83,9 +76,7 @@
                             </svg>
                         </button>
 
-                        <div class="chat-header-avatar" id="header-logo">
-                            🐉
-                        </div>
+                        <div class="chat-header-avatar" id="header-logo">DC</div>
                         <div class="chat-header-info">
                             <div class="chat-header-name">Dragon Chat</div>
                             <div class="chat-header-status">
@@ -100,10 +91,10 @@
 
                     <!-- Quick Replies -->
                     <div class="quick-replies" id="quick-replies">
-                        <button class="quick-reply-btn" data-msg="Services">🚀 Services</button>
-                        <button class="quick-reply-btn" data-msg="Pricing">💰 Pricing</button>
-                        <button class="quick-reply-btn" data-msg="Request Demo">🎯 Request Demo</button>
-                        <button class="quick-reply-btn" data-msg="Contact Support">💬 Contact
+                        <button class="quick-reply-btn" data-msg="Services">Services</button>
+                        <button class="quick-reply-btn" data-msg="Pricing">Pricing</button>
+                        <button class="quick-reply-btn" data-msg="Request Demo">Request Demo</button>
+                        <button class="quick-reply-btn" data-msg="Contact Support">Contact
                             Support</button>
                     </div>
 

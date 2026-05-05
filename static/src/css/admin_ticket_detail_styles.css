@@ -4,10 +4,10 @@
 
 :root {
     /* Brand Colors */
-    --primary-color: #1e5a8e;
-    --primary-dark: #164a73;
-    --primary-light: #2d7bb8;
-    --primary-lighter: #e8f1f8;
+    --primary-color: #065f46;
+    --primary-dark: #047857;
+    --primary-light: #34d399;
+    --primary-lighter: #f0fdf4;
 
     /* Semantic Colors */
     --secondary-color: #6b7280;
@@ -412,15 +412,15 @@ body.bg-light {
 
 /* Status Badges */
 .status-new {
-    background: #dbeafe;
-    color: #1e40af;
+    background: #dcfce7;
+    color: #065f46;
     border: 1px solid #93c5fd;
 }
 
 .status-open {
     background: #e0e7ff;
     color: #4338ca;
-    border: 1px solid #a5b4fc;
+    border: 1px solid #6ee7b7;
 }
 
 .status-in_progress {

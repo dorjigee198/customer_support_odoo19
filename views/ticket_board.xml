@@ -10,7 +10,7 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 <link rel="stylesheet" href="/customer_support/static/src/vendor/bootstrap.min.css" />
                 <link rel="stylesheet" href="/customer_support/static/src/vendor/bootstrap-icons.css" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/ticket_board.css" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/ticket_board.css?v=4" />
             </t>
 
             <!-- Inject board data as JS variables -->
@@ -265,6 +265,10 @@
 
                 <!-- ── MAIN BODY: board + sidebar ── -->
                 <div class="tb-body" id="tbBody">
+
+                    <!-- Mobile sidebar overlay (closes sidebar when tapped) -->
+                    <div class="tb-sidebar-overlay" id="tbSidebarOverlay"
+                        onclick="document.getElementById('sidebarToggle').click()"></div>
 
                     <!-- BOARD AREA -->
                     <div class="tb-board" id="boardArea">
@@ -948,7 +952,7 @@
                     rgba(239,68,68,0.2); border-radius: 8px; padding: 0.75rem 1rem; color: #fca5a5;
                     font-size: 0.82rem; margin-bottom: 1.5rem; }
                     .inv-help { color: #64748b; font-size: 0.8rem; }
-                    .inv-help a { color: #1e5a8e; text-decoration: none; }
+                    .inv-help a { color: #065f46; text-decoration: none; }
                 </style>
             </t>
             <div class="inv-card">

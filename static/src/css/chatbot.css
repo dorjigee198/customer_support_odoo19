@@ -3,29 +3,29 @@
 /* ============================================= */
 
 :root {
-    --primary: #0c4a6e;
+    --primary: #059669;
     /* Dark blue - primary color */
-    --primary-dark: #075985;
+    --primary-dark: #047857;
     /* Darker blue */
-    --primary-light: #38bdf8;
+    --primary-light: #6ee7b7;
     /* Light blue for accents */
-    --background: #e0f2fe;
+    --background: #f0fdf4;
     /* Main background color */
     --card-bg: #ffffff;
     /* White for cards */
     --surface: #ffffff;
     /* White surfaces */
-    --surface-light: #f0f9ff;
+    --surface-light: #f0fdf4;
     /* Very light blue */
-    --text-primary: #0c4a6e;
+    --text-primary: #065f46;
     /* Dark blue for text */
     --text-secondary: #475569;
     /* Medium gray for secondary text */
     --text-light: #64748b;
     /* Light gray text */
-    --border-light: #bae6fd;
+    --border-light: #a7f3d0;
     /* Light blue border */
-    --border-medium: #7dd3fc;
+    --border-medium: #6ee7b7;
     /* Medium blue border */
     --success: #10b981;
     /* Green for online status */
@@ -44,9 +44,9 @@
     --radius-full: 50px;
 
     /* Shadows */
-    --shadow-sm: 0 1px 3px rgba(12, 74, 110, 0.1);
-    --shadow-md: 0 4px 6px rgba(12, 74, 110, 0.1);
-    --shadow-lg: 0 10px 15px rgba(12, 74, 110, 0.1);
+    --shadow-sm: 0 1px 3px rgba(5,150,105, 0.1);
+    --shadow-md: 0 4px 6px rgba(5,150,105, 0.1);
+    --shadow-lg: 0 10px 15px rgba(5,150,105, 0.1);
 }
 
 * {
@@ -174,7 +174,7 @@ body {
 }
 
 .chat-box::-webkit-scrollbar-track {
-    background: rgba(12, 74, 110, 0.05);
+    background: rgba(5,150,105, 0.05);
     border-radius: 3px;
 }
 
@@ -257,7 +257,7 @@ body {
 /* ============================================= */
 .quick-replies {
     padding: 1.25rem 2rem;
-    background: #e0f2fe;
+    background: #f0fdf4;
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
@@ -288,7 +288,7 @@ body {
 /* ============================================= */
 .input-area {
     padding: 1.25rem 2rem;
-    background: #e0f2fe;
+    background: #f0fdf4;
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -297,7 +297,7 @@ body {
     /* Lighter border */
     border-radius: 30px;
     /* Moderately rounded */
-    box-shadow: 0 2px 8px rgba(12, 74, 110, 0.15);
+    box-shadow: 0 2px 8px rgba(5,150,105, 0.15);
     /* Softer shadow */
     margin: 0.75rem 2rem;
 }
@@ -311,16 +311,16 @@ body {
     padding: 0.875rem 1.25rem;
     border: none;
     border-radius: var(--radius-full);
-    background: #e0f2fe;
+    background: #f0fdf4;
     font-size: 0.9375rem;
-    color: #0c4a6e;
+    color: #065f46;
     outline: none;
     transition: all 0.2s ease;
 }
 
 .input-area input:focus {
     border-color: var(--primary);
-    background: #e0f2fe;
+    background: #f0fdf4;
 
 }
 
@@ -345,18 +345,18 @@ body {
     min-width: 120px;
     font-family: var(--font-accent);
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(12, 74, 110, 0.25);
+    box-shadow: 0 4px 12px rgba(5,150,105, 0.25);
 }
 
 #send-msg-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(12, 74, 110, 0.35);
+    box-shadow: 0 6px 20px rgba(5,150,105, 0.35);
 }
 
 #send-msg-btn:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(12, 74, 110, 0.25);
+    box-shadow: 0 2px 8px rgba(5,150,105, 0.25);
 }
 
 /* ============================================= */

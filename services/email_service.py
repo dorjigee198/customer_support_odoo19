@@ -48,25 +48,8 @@ class EmailService:
 
     @staticmethod
     def _send(subject, body_html, email_to, force_send=False):
-        """Create a mail.mail record. If force_send=True, deliver via SMTP immediately."""
-        mail = (
-            request.env["mail.mail"]
-            .sudo()
-            .create(
-                {
-                    "subject": subject,
-                    "body_html": body_html,
-                    "email_to": email_to,
-                    "email_from": EmailService._get_default_email_from(),
-                    "auto_delete": False,
-                }
-            )
-        )
-        if force_send:
-            mail.send()
-            _logger.info("Mail sent immediately to %s (mail_id=%s)", email_to, mail.id)
-        else:
-            _logger.info("Mail queued for %s (mail_id=%s)", email_to, mail.id)
+        """Email sending disabled — SMTP is not configured on this server."""
+        _logger.info("Email suppressed (SMTP disabled) for %s: %s", email_to, subject)
         return True
 
     # ── Public send methods ───────────────────────────────────────────────────

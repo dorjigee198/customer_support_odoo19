@@ -12,9 +12,9 @@
                 <link
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
                     rel="stylesheet" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard.css" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard.css?v=3" />
                 <link rel="stylesheet"
-                    href="/customer_support/static/src/css/admin_dashboard_mobile.css" />
+                    href="/customer_support/static/src/css/admin_dashboard_mobile.css?v=3" />
                 <script
                     src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
                 <style>
@@ -60,7 +60,7 @@
                     color: #d97706;
                     }
                     .admin-logout-modal-box h5 {
-                    color: #1a3a5c;
+                    color: #064e3b;
                     font-weight: 700;
                     font-size: 1.2rem;
                     margin-bottom: 0.6rem;
@@ -72,7 +72,7 @@
                     margin-bottom: 1.75rem;
                     }
                     .admin-logout-modal-box p strong {
-                    color: #1a3a5c;
+                    color: #064e3b;
                     }
                     .admin-logout-modal-btns {
                     display: flex;
@@ -84,21 +84,21 @@
                     border-radius: 10px;
                     border: 1.5px solid rgba(26,58,92,0.2);
                     background: #f0f6ff;
-                    color: #1a3a5c;
+                    color: #064e3b;
                     font-weight: 600;
                     font-size: 0.9rem;
                     cursor: pointer;
                     transition: background 0.2s, border-color 0.2s;
                     }
                     .admin-btn-stay:hover {
-                    background: #dbeafe;
-                    border-color: #1a3a5c;
+                    background: #dcfce7;
+                    border-color: #064e3b;
                     }
                     .admin-btn-logout-now {
                     padding: 0.6rem 1.4rem;
                     border-radius: 10px;
                     border: none;
-                    background: #1a3a5c;
+                    background: #064e3b;
                     color: #ffffff;
                     font-weight: 600;
                     font-size: 0.9rem;
@@ -108,6 +108,436 @@
                     .admin-btn-logout-now:hover {
                     background: #0f2440;
                     }
+
+
+                    /* ══════════════════════════════════════════════════════
+                       PROJECT MANAGEMENT DRAWER
+                    ══════════════════════════════════════════════════════ */
+                    .proj-drawer-overlay {
+                        display: none;
+                        position: fixed;
+                        inset: 0;
+                        background: rgba(15,36,64,.48);
+                        z-index: 1060;
+                        backdrop-filter: blur(3px);
+                    }
+                    .proj-drawer-overlay.pdOpen {
+                        display: block;
+                        animation: pdFadeIn .22s ease both;
+                    }
+                    @keyframes pdFadeIn { from { opacity:0; } to { opacity:1; } }
+
+                    .proj-drawer {
+                        position: fixed;
+                        top: 0; right: 0;
+                        height: 100dvh;
+                        width: 520px;
+                        max-width: 100vw;
+                        background: #f8fafc;
+                        z-index: 1061;
+                        display: flex;
+                        flex-direction: column;
+                        box-shadow: -6px 0 40px rgba(0,0,0,.18);
+                        transform: translateX(100%);
+                        transition: transform .28s cubic-bezier(.4,0,.2,1);
+                    }
+                    .proj-drawer.pdOpen { transform: translateX(0); }
+
+                    .pd-header {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        padding: 1.1rem 1.4rem;
+                        background: linear-gradient(135deg, #064e3b, #065f46);
+                        color: #fff;
+                        flex-shrink: 0;
+                        gap: 1rem;
+                        border-bottom: 1px solid rgba(255,255,255,.08);
+                    }
+                    .pd-header-left { display:flex; align-items:center; gap:.85rem; min-width:0; }
+                    .pd-code-badge {
+                        padding: .28rem .65rem;
+                        border-radius: 7px;
+                        background: rgba(255,255,255,.16);
+                        font-size: .69rem;
+                        font-weight: 700;
+                        font-family: 'JetBrains Mono', 'Courier New', monospace;
+                        color: #fff;
+                        white-space: nowrap;
+                        flex-shrink: 0;
+                        letter-spacing: .04em;
+                        border: 1px solid rgba(255,255,255,.15);
+                    }
+                    .pd-header-title { min-width:0; }
+                    .pd-project-name {
+                        font-size: .95rem;
+                        font-weight: 700;
+                        color: #fff;
+                        margin: 0;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        line-height: 1.2;
+                    }
+                    .pd-project-type {
+                        font-size: .69rem;
+                        color: rgba(255,255,255,.45);
+                        margin-top: .12rem;
+                        display: block;
+                    }
+                    .pd-close-btn {
+                        width: 32px; height: 32px;
+                        border-radius: 8px;
+                        background: rgba(255,255,255,.1);
+                        border: 1px solid rgba(255,255,255,.15);
+                        color: #fff;
+                        font-size: .88rem;
+                        display: flex; align-items:center; justify-content:center;
+                        cursor: pointer;
+                        flex-shrink: 0;
+                        transition: background .18s;
+                    }
+                    .pd-close-btn:hover { background: rgba(255,255,255,.22); }
+
+                    .pd-tabs {
+                        display: flex;
+                        background: #fff;
+                        border-bottom: 1px solid #e5e7eb;
+                        padding: 0 1.4rem;
+                        flex-shrink: 0;
+                        gap: 0;
+                        box-shadow: 0 1px 4px rgba(0,0,0,.04);
+                    }
+                    .pd-tab {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: .45rem;
+                        padding: .82rem 1.1rem;
+                        font-size: .82rem;
+                        font-weight: 600;
+                        color: #64748b;
+                        background: none;
+                        border: none;
+                        border-bottom: 2.5px solid transparent;
+                        cursor: pointer;
+                        transition: all .18s;
+                        margin-bottom: -1px;
+                        white-space: nowrap;
+                    }
+                    .pd-tab:hover { color: #065f46; }
+                    .pd-tab.pdTabActive { color: #065f46; border-bottom-color: #065f46; }
+                    .pd-tab i { font-size: .88rem; }
+                    .pd-tab-badge {
+                        display: inline-flex; align-items:center; justify-content:center;
+                        min-width: 18px; height: 18px; padding: 0 5px;
+                        border-radius: 999px;
+                        background: #e0e7ff; color: #3730a3;
+                        font-size: .63rem; font-weight: 700;
+                    }
+                    .pd-tab.pdTabActive .pd-tab-badge { background: #dcfce7; color: #065f46; }
+
+                    .pd-body {
+                        flex: 1;
+                        overflow-y: auto;
+                        padding: 1.25rem;
+                        scrollbar-width: thin;
+                        scrollbar-color: #d1d5db transparent;
+                    }
+                    .pd-body::-webkit-scrollbar { width: 5px; }
+                    .pd-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 10px; }
+
+                    .pd-card {
+                        background: #fff;
+                        border: 1px solid #e5e7eb;
+                        border-radius: 12px;
+                        padding: 1.1rem 1.2rem;
+                        margin-bottom: .85rem;
+                        box-shadow: 0 1px 4px rgba(0,0,0,.04);
+                    }
+                    .pd-card-label {
+                        display: flex; align-items:center; gap:.45rem;
+                        font-size: .68rem; font-weight:700; color:#047857;
+                        text-transform: uppercase; letter-spacing:.08em;
+                        margin-bottom: .9rem; padding-bottom:.6rem;
+                        border-bottom: 1px solid #f0f4f8;
+                    }
+                    .pd-card-label i { color: #065f46; font-size:.78rem; }
+
+                    .pd-input {
+                        width: 100%; padding: .5rem .75rem;
+                        border: 1.5px solid #e5e7eb; border-radius:8px;
+                        font-size: .84rem; font-family:inherit; color:#111827;
+                        background: #fff; outline: none; appearance: none;
+                        transition: border-color .18s, box-shadow .18s;
+                    }
+                    .pd-input:focus { border-color:#065f46; box-shadow:0 0 0 3px rgba(5,150,105,.1); }
+                    .pd-input::placeholder { color:#9ca3af; }
+
+                    .pd-select {
+                        width: 100%; padding: .5rem .75rem; padding-right:2rem;
+                        border: 1.5px solid #e5e7eb; border-radius:8px;
+                        font-size:.84rem; font-family:inherit; color:#111827;
+                        background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E") no-repeat right .75rem center;
+                        background-size:10px; appearance:none; outline:none; cursor:pointer;
+                        transition: border-color .18s;
+                    }
+                    .pd-select:focus { border-color:#065f46; box-shadow:0 0 0 3px rgba(5,150,105,.1); }
+
+                    .pd-label {
+                        display:block; font-size:.75rem; font-weight:600;
+                        color:#4b5563; margin-bottom:.3rem;
+                    }
+                    .pd-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; }
+                    .pd-field { display:flex; flex-direction:column; }
+
+                    .pd-btn {
+                        display:inline-flex; align-items:center; gap:.4rem;
+                        padding:.5rem 1rem; border-radius:8px; font-size:.8rem; font-weight:600;
+                        font-family:inherit; cursor:pointer; border:none;
+                        transition:all .18s; white-space:nowrap;
+                    }
+                    .pd-btn-primary { background:#065f46; color:#fff; box-shadow:0 2px 6px rgba(5,150,105,.22); }
+                    .pd-btn-primary:hover { background:#047857; box-shadow:0 3px 10px rgba(5,150,105,.3); transform:translateY(-1px); }
+                    .pd-btn-primary:disabled { background:#94a3b8; cursor:not-allowed; box-shadow:none; transform:none; }
+                    .pd-btn-danger { background:rgba(239,68,68,.08); color:#ef4444; border:1.5px solid rgba(239,68,68,.22); }
+                    .pd-btn-danger:hover { background:rgba(239,68,68,.15); }
+                    .pd-btn-ghost { background:transparent; color:#64748b; border:1.5px solid #e5e7eb; }
+                    .pd-btn-ghost:hover { background:#f8fafc; border-color:#065f46; color:#065f46; }
+                    .pd-btn-sm { padding:.35rem .75rem; font-size:.75rem; }
+                    .pd-btn-full { width:100%; justify-content:center; margin-top:.5rem; }
+
+                    .pd-focal-row { display:flex; align-items:center; gap:.65rem; flex-wrap:wrap; }
+
+                    .pd-member-row {
+                        display:flex; align-items:center; gap:.65rem;
+                        padding:.6rem .8rem; border-radius:9px;
+                        background:#f8fafc; border:1px solid #e5e7eb;
+                        margin-bottom:.45rem; transition:background .15s;
+                    }
+                    .pd-member-row:hover { background:#eef3fb; }
+                    .pd-member-row:last-child { margin-bottom:0; }
+
+                    .pd-avatar {
+                        width:32px; height:32px; border-radius:50%;
+                        background:linear-gradient(135deg,#065f46,#059669);
+                        color:#fff; font-size:.66rem; font-weight:700;
+                        display:flex; align-items:center; justify-content:center; flex-shrink:0;
+                    }
+                    .pd-avatar-focal { background:linear-gradient(135deg,#7c3aed,#a78bfa); box-shadow:0 2px 8px rgba(124,58,237,.28); }
+                    .pd-member-info { flex:1; min-width:0; }
+                    .pd-member-name { font-size:.82rem; font-weight:600; color:#111827; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+                    .pd-member-email { font-size:.69rem; color:#9ca3af; display:block; }
+                    .pd-role-tag { font-size:.62rem; font-weight:700; padding:.16rem .52rem; border-radius:999px; background:rgba(5,150,105,.08); color:#065f46; white-space:nowrap; flex-shrink:0; }
+                    .pd-role-focal { background:rgba(124,58,237,.1); color:#7c3aed; }
+                    .pd-rm-btn {
+                        background:none; border:1px solid #e5e7eb; border-radius:7px;
+                        color:#9ca3af; padding:.24rem .42rem; font-size:.75rem; cursor:pointer; flex-shrink:0; transition:all .18s;
+                    }
+                    .pd-rm-btn:hover { background:rgba(239,68,68,.08); border-color:rgba(239,68,68,.28); color:#ef4444; }
+
+                    .pd-empty {
+                        display:flex; align-items:center; gap:.55rem;
+                        padding:1.1rem; border-radius:9px;
+                        background:#f8fafc; border:1.5px dashed #e5e7eb;
+                        font-size:.8rem; color:#9ca3af;
+                    }
+                    .pd-empty i { font-size:1.1rem; }
+                    .pd-loading { display:flex; align-items:center; gap:.5rem; font-size:.8rem; color:#9ca3af; padding:.6rem 0; }
+
+                    .pd-msg { display:none; margin-top:.6rem; }
+                    .pd-alert { display:flex; align-items:center; gap:.5rem; padding:.6rem .85rem; border-radius:8px; font-size:.79rem; font-weight:500; }
+                    .pd-alert-success { background:rgba(16,185,129,.1); color:#065f46; border:1px solid rgba(16,185,129,.2); }
+                    .pd-alert-danger  { background:rgba(239,68,68,.08); color:#991b1b; border:1px solid rgba(239,68,68,.18); }
+
+                    .pd-doc-row {
+                        display:flex; align-items:center; gap:.75rem;
+                        padding:.65rem .85rem; border-radius:9px;
+                        background:#f8fafc; border:1px solid #e5e7eb;
+                        margin-bottom:.45rem; transition:background .15s;
+                    }
+                    .pd-doc-row:hover { background:#eef3fb; }
+                    .pd-doc-icon { font-size:1.4rem; flex-shrink:0; width:28px; text-align:center; }
+                    .pd-doc-info { flex:1; min-width:0; }
+                    .pd-doc-name { font-size:.83rem; font-weight:600; color:#047857; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+                    .pd-doc-meta { font-size:.69rem; color:#9ca3af; display:block; }
+                    .pd-doc-state { font-size:.62rem; font-weight:700; padding:.16rem .52rem; border-radius:999px; white-space:nowrap; flex-shrink:0; }
+                    .pd-state-ready   { background:#dcfce7; color:#15803d; }
+                    .pd-state-pending { background:#fef3c7; color:#b45309; }
+                    .pd-state-error   { background:#fee2e2; color:#b91c1c; }
+                    .pd-del-btn {
+                        background:none; border:1px solid #e5e7eb; border-radius:7px;
+                        color:#9ca3af; padding:.26rem .44rem; font-size:.75rem; cursor:pointer; flex-shrink:0; transition:all .18s;
+                    }
+                    .pd-del-btn:hover { background:rgba(239,68,68,.08); border-color:rgba(239,68,68,.28); color:#ef4444; }
+
+                    .pd-upload-zone {
+                        border: 2px dashed #d1d5db; border-radius:10px;
+                        padding:1.4rem 1rem; text-align:center; background:#f8fafc;
+                        cursor:pointer; transition:all .2s; margin-bottom:.75rem;
+                    }
+                    .pd-upload-zone:hover, .pd-upload-zone.pdDragOver { border-color:#065f46; background:rgba(5,150,105,.04); }
+                    .pd-upload-icon { font-size:1.8rem; color:#94a3b8; display:block; margin-bottom:.35rem; }
+                    .pd-upload-hint  { font-size:.77rem; color:#9ca3af; margin:0; }
+                    .pd-upload-hint strong { color:#065f46; }
+
+                    .pd-file-preview {
+                        display:flex; align-items:center; gap:.6rem;
+                        padding:.6rem .9rem; border-radius:8px;
+                        background:#f0f4f8; border:1px solid #e5e7eb;
+                        margin-bottom:.65rem;
+                    }
+                    .pd-file-preview-name { font-size:.8rem; font-weight:600; color:#047857; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+                    .pd-file-preview-size { font-size:.71rem; color:#9ca3af; white-space:nowrap; }
+                    .pd-file-preview-rm { background:none; border:none; color:#9ca3af; cursor:pointer; padding:0; font-size:.85rem; line-height:1; flex-shrink:0; }
+                    .pd-file-preview-rm:hover { color:#ef4444; }
+
+                    @media (max-width: 600px) {
+                        .proj-drawer { width:100vw; }
+                        .pd-grid-2 { grid-template-columns:1fr; }
+                    }
+
+                    /* ══ INLINE PROJECT CARDS ══════════════════════════════════ */
+                    .pj-section {
+                        background:#fff;
+                        border-radius:14px;
+                        border:1.5px solid #e5e7eb;
+                        padding:1.4rem;
+                        box-shadow:0 2px 8px rgba(0,0,0,.04);
+                        margin-bottom:1.5rem;
+                    }
+                    .pj-section-header {
+                        display:flex;
+                        align-items:center;
+                        justify-content:space-between;
+                        margin-bottom:1.2rem;
+                        flex-wrap:wrap;
+                        gap:.75rem;
+                    }
+                    .pj-section-title {
+                        display:flex;
+                        align-items:center;
+                        font-size:.95rem;
+                        font-weight:700;
+                        color:#064e3b;
+                        gap:.4rem;
+                    }
+                    .pj-card {
+                        background:#fff;
+                        border:1.5px solid #e5e7eb;
+                        border-radius:12px;
+                        padding:1.1rem 1.1rem 1rem;
+                        position:relative;
+                        transition:border-color .18s,box-shadow .18s;
+                        overflow:visible;
+                        height:100%;
+                        display:flex;
+                        flex-direction:column;
+                        gap:.5rem;
+                    }
+                    .pj-card:hover {
+                        border-color:#93c5fd;
+                        box-shadow:0 4px 16px rgba(26,58,92,.1);
+                    }
+                    .pj-card--active {
+                        border-color:#064e3b !important;
+                        box-shadow:0 6px 24px rgba(26,58,92,.18) !important;
+                        background:#f0f6ff;
+                    }
+                    .pj-card-connector {
+                        display:none;
+                        position:absolute;
+                        right:-14px;
+                        top:50%;
+                        transform:translateY(-50%);
+                        width:0; height:0;
+                        border-top:8px solid transparent;
+                        border-bottom:8px solid transparent;
+                        border-left:10px solid #064e3b;
+                        z-index:1062;
+                    }
+                    .pj-card--active .pj-card-connector { display:block; }
+                    .pj-card-top {
+                        display:flex;
+                        align-items:center;
+                        gap:.5rem;
+                        flex-wrap:wrap;
+                    }
+                    .pj-code-badge {
+                        background:linear-gradient(135deg,#064e3b,#065f46);
+                        color:#fff;
+                        font-family:'JetBrains Mono','Courier New',monospace;
+                        font-size:.68rem;
+                        font-weight:700;
+                        padding:.2rem .55rem;
+                        border-radius:5px;
+                        letter-spacing:.04em;
+                        white-space:nowrap;
+                    }
+                    .pj-type-badge {
+                        background:#eff6ff;
+                        color:#065f46;
+                        font-size:.7rem;
+                        font-weight:600;
+                        padding:.18rem .55rem;
+                        border-radius:5px;
+                        border:1px solid #bfdbfe;
+                    }
+                    .pj-name {
+                        font-size:.95rem;
+                        font-weight:700;
+                        color:#064e3b;
+                        margin:0;
+                    }
+                    .pj-timeline {
+                        font-size:.75rem;
+                        color:#6b7280;
+                        display:flex;
+                        align-items:center;
+                    }
+                    .pj-card-actions {
+                        display:flex;
+                        gap:.5rem;
+                        margin-top:auto;
+                        padding-top:.75rem;
+                        border-top:1px solid #f3f4f6;
+                        align-items:center;
+                    }
+                    .pj-btn-manage {
+                        flex:1;
+                        background:linear-gradient(135deg,#064e3b,#065f46);
+                        color:#fff;
+                        border:none;
+                        border-radius:8px;
+                        padding:.45rem .9rem;
+                        font-size:.82rem;
+                        font-weight:600;
+                        cursor:pointer;
+                        transition:opacity .18s,transform .12s;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                    }
+                    .pj-btn-manage:hover { opacity:.88; transform:translateY(-1px); }
+                    .pj-btn-delete {
+                        background:#fff;
+                        color:#dc2626;
+                        border:1.5px solid #fca5a5;
+                        border-radius:8px;
+                        padding:.42rem .65rem;
+                        font-size:.85rem;
+                        cursor:pointer;
+                        transition:background .18s,border-color .18s;
+                        display:flex;
+                        align-items:center;
+                    }
+                    .pj-btn-delete:hover { background:#fef2f2; border-color:#dc2626; }
+                    .pj-empty {
+                        text-align:center;
+                        padding:2.5rem 1rem;
+                        color:#9ca3af;
+                    }
+                    .pj-empty-icon { font-size:2.5rem; display:block; margin-bottom:.75rem; }
+                    .pj-empty-text { font-size:.9rem; margin:0; }
                 </style>
             </t>
 
@@ -182,7 +612,7 @@
                                 </button>
                                 <div class="admin-notif-dropdown" id="adminNotifDropdown">
                                     <div class="admin-notif-header">
-                                        <h6><i class="bi bi-bell-fill me-2" style="color:#1a3a5c;"></i>
+                                        <h6><i class="bi bi-bell-fill me-2" style="color:#064e3b;"></i>
                                             Notifications</h6>
                                         <button class="admin-notif-mark-read" id="adminMarkAllRead">Mark
                                             all read</button>
@@ -677,7 +1107,7 @@
                                                             </td>
                                                             <td>
                                                                 <t
-                                                                    t-esc="ticket.create_date.strftime('%Y-%m-%d %H:%M') if ticket.create_date else ''" />
+                                                                    t-esc="ticket.create_date.strftime('%d %b %Y %I:%M %p') if ticket.create_date else ''" />
                                                             </td>
                                                             <td>
                                                                 <t t-if="ticket.assigned_to">
@@ -1011,6 +1441,12 @@
                                                                     </t>
                                                                 </td>
                                                                 <td>
+                                                                    <button type="button"
+                                                                        class="btn btn-sm btn-outline-info me-1"
+                                                                        title="View details"
+                                                                        t-att-onclick="'showUserDetail(%s)' % user_item['id']">
+                                                                        <i class="bi bi-eye"></i>
+                                                                    </button>
                                                                     <a
                                                                         t-att-href="'/customer_support/admin_dashboard/user/%s/edit' % user_item['id']"
                                                                         class="btn btn-sm btn-outline-primary me-1"
@@ -1077,6 +1513,12 @@
                                                                         Inactive</span>
                                                                 </td>
                                                                 <td>
+                                                                    <button type="button"
+                                                                        class="btn btn-sm btn-outline-info me-1"
+                                                                        title="View details"
+                                                                        t-att-onclick="'showUserDetail(%s)' % inactive_user['id']">
+                                                                        <i class="bi bi-eye"></i>
+                                                                    </button>
                                                                     <form
                                                                         t-att-action="'/customer_support/admin_dashboard/user/%s/toggle_active' % inactive_user['id']"
                                                                         method="post"
@@ -1137,17 +1579,47 @@
                             </div>
                         </div>
 
+                            <!-- User Detail Modal -->
+                            <div class="modal fade" id="userDetailModal" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content border-0 shadow">
+                                        <div class="modal-header text-white" id="userDetailModalHeader" style="background:linear-gradient(135deg,#1a1a2e,#16213e);">
+                                            <h5 class="modal-title"><i class="bi bi-person-circle me-2"></i><span id="userDetailName"></span></h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body" id="userDetailBody">
+                                            <div class="text-center py-4"><div class="spinner-border spinner-border-sm text-secondary"></div></div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         <!-- ═══ SYSTEM CONFIGURATION TAB ═══ -->
                         <div class="tab-pane fade" id="system-configuration" role="tabpanel"
                             aria-labelledby="system-configuration-tab">
+                            <t t-if="request.params.get('project_created')">
+                                <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    <strong>Project created.</strong> Click <strong>Manage</strong> on the project row to add team members and upload documents.
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
+                            <t t-if="request.params.get('project_updated')">
+                                <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    <strong>Project updated successfully.</strong>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            </t>
                             <t t-if="request.params.get('project_deleted')">
                                 <div class="alert alert-success alert-dismissible fade show mb-3"
                                     role="alert">
                                     <i class="bi bi-check-circle-fill me-2"></i>
-                                    <strong>Project
-                                    deleted.</strong> A closure report has been saved under Project
-                                    Reports. <button type="button" class="btn-close"
-                                        data-bs-dismiss="alert"></button>
+                                    <strong>Project deleted.</strong> A closure report has been saved under Project Reports.
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
                             </t>
                             <div class="row g-4 mb-4">
@@ -1184,21 +1656,6 @@
                                     <div class="config-option-card">
                                         <div class="config-icon-wrapper">
                                             <div class="config-icon">
-                                                <i class="bi bi-folder-fill"></i>
-                                            </div>
-                                        </div>
-                                        <h3 class="config-title">Project Configuration</h3>
-                                        <p class="config-description">Define and manage software
-                                            projects</p>
-                                        <button class="btn btn-config" data-bs-toggle="modal"
-                                            data-bs-target="#projectConfigModal"><i
-                                                class="bi bi-folder-plus me-2"></i>View Projects</button>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="config-option-card">
-                                        <div class="config-icon-wrapper">
-                                            <div class="config-icon">
                                                 <i class="bi bi-database-fill"></i>
                                             </div>
                                         </div>
@@ -1227,45 +1684,187 @@
                                 </div>
                             </div>
 
+                            <!-- ══ INLINE PROJECT CARDS ══════════════════════════ -->
+                            <div class="pj-section">
+                                <div class="pj-section-header">
+                                    <div class="pj-section-title">
+                                        <i class="bi bi-folder-fill"></i>
+                                        <span>Configured Projects</span>
+                                        <span class="badge bg-secondary ms-1">
+                                            <t t-esc="len(request.env['customer_support.project'].sudo().search([]))" />
+                                        </span>
+                                    </div>
+                                    <a href="/customer_support/admin_dashboard/system_configuration?tab=project"
+                                        class="btn btn-primary btn-sm"
+                                        onclick="history.replaceState(null,'','/customer_support/admin_dashboard?tab=system-configuration')">
+                                        <i class="bi bi-plus-circle me-2"></i>Configure New Project
+                                    </a>
+                                </div>
+
+                                <t t-set="pj_configs"
+                                    t-value="dict((c.project_id.id, c) for c in request.env['customer_support.project.config'].sudo().search([]))" />
+                                <t t-set="pj_projects"
+                                    t-value="request.env['customer_support.project'].sudo().search([], order='name asc')" />
+
+                                <t t-if="pj_projects">
+                                    <div class="row g-3">
+                                        <t t-foreach="pj_projects" t-as="pj_proj">
+                                            <t t-set="pj_conf" t-value="pj_configs.get(pj_proj.id)" />
+                                            <div class="col-xl-3 col-lg-4 col-md-6">
+                                                <div class="pj-card"
+                                                    t-att-id="'pjCard-' + str(pj_proj.id)"
+                                                    t-att-data-project-id="pj_proj.id"
+                                                    t-att-data-project-name="pj_proj.name"
+                                                    t-att-data-project-code="pj_proj.code or ''"
+                                                    t-att-data-project-type="(pj_conf.project_type or '').replace('_',' ').title() if pj_conf else ''">
+
+                                                    <div class="pj-card-top">
+                                                        <span class="pj-code-badge">
+                                                            <t t-esc="pj_proj.code or '—'" />
+                                                        </span>
+                                                        <span class="pj-type-badge">
+                                                            <t t-esc="(pj_conf.project_type or '').replace('_',' ').title() if pj_conf else 'Unconfigured'" />
+                                                        </span>
+                                                    </div>
+
+                                                    <h6 class="pj-name">
+                                                        <t t-esc="pj_proj.name" />
+                                                    </h6>
+
+                                                    <div class="pj-timeline">
+                                                        <i class="bi bi-calendar3 me-1"></i>
+                                                        <t t-esc="(pj_conf.start_date.strftime('%b %Y') if pj_conf and pj_conf.start_date else '—') + ' → ' + (pj_conf.end_date.strftime('%b %Y') if pj_conf and pj_conf.end_date else '—')" />
+                                                    </div>
+
+                                                    <div class="pj-card-actions">
+                                                        <button type="button" class="pj-btn-manage"
+                                                            onclick="openProjDrawer(this.closest('.pj-card').dataset)">
+                                                            <i class="bi bi-sliders me-1"></i>Manage
+                                                        </button>
+                                                        <button type="button" class="pj-btn-delete"
+                                                            t-att-data-project-id="pj_proj.id"
+                                                            t-att-data-project-name="pj_proj.name"
+                                                            onclick="openDeleteProjectModal(this.dataset.projectId, this.dataset.projectName)">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </div>
+
+                                                    <div class="pj-card-connector"></div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="pj-empty">
+                                        <i class="bi bi-folder-x pj-empty-icon"></i>
+                                        <p class="pj-empty-text">No projects configured yet.</p>
+                                        <a href="/customer_support/admin_dashboard/system_configuration?tab=project"
+                                            class="btn btn-primary btn-sm mt-2">
+                                            <i class="bi bi-plus-circle me-2"></i>Add First Project
+                                        </a>
+                                    </div>
+                                </t>
+                            </div>
+                            <!-- /pj-section -->
+
                             <!-- General Settings Modal -->
+                            <t t-set="gs_name" t-value="request.env['ir.config_parameter'].sudo().get_param('customer_support.system_name', 'Customer Support System')" />
+                            <t t-set="gs_tz"   t-value="request.env['ir.config_parameter'].sudo().get_param('customer_support.timezone', 'UTC')" />
                             <div class="modal fade" id="generalSettingsModal" tabindex="-1"
                                 aria-hidden="true">
                                 <div class="modal-dialog modal-lg">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title"><i class="bi bi-sliders me-2"></i>General
-                                                Settings</h5>
-                                            <button type="button" class="btn-close"
-                                                data-bs-dismiss="modal"></button>
+                                            <h5 class="modal-title"><i class="bi bi-sliders me-2"></i>General Settings</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form>
-                                                <div class="mb-3">
-                                                    <label class="form-label">System Name</label>
-                                                    <input type="text" class="form-control"
-                                                        value="Customer Support System" />
+                                            <div id="gsAlert" class="d-none mb-3"></div>
+                                            <div class="mb-4">
+                                                <label class="form-label fw-semibold">System Name <span class="text-danger">*</span></label>
+                                                <input type="text" class="form-control" id="gsSystemName"
+                                                    t-att-value="gs_name"
+                                                    placeholder="Customer Support System"
+                                                    maxlength="80" />
+                                                <div class="form-text">Shown in email notifications and the dashboard title.</div>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label fw-semibold">Time Zone</label>
+                                                <div class="input-group mb-1">
+                                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                                    <input type="text" class="form-control" id="gsTzSearch"
+                                                        placeholder="Filter timezones…"
+                                                        oninput="filterGsTz(this.value)" />
                                                 </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Time Zone</label>
-                                                    <select class="form-select">
-                                                        <option>UTC-05:00 (Eastern Time)</option>
-                                                        <option>UTC-08:00 (Pacific Time)</option>
-                                                    </select>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label class="form-label">Default Language</label>
-                                                    <select class="form-select">
-                                                        <option>English</option>
-                                                        <option>Spanish</option>
-                                                    </select>
-                                                </div>
-                                            </form>
+                                                <select class="form-select" id="gsTimezone" size="7" style="height:auto;">
+                                                    <optgroup label="UTC">
+                                                        <option value="UTC" t-att-selected="'selected' if gs_tz == 'UTC' else False">UTC</option>
+                                                    </optgroup>
+                                                    <optgroup label="Africa">
+                                                        <option value="Africa/Cairo"         t-att-selected="'selected' if gs_tz == 'Africa/Cairo'         else False">Africa/Cairo (EET +02:00)</option>
+                                                        <option value="Africa/Johannesburg"  t-att-selected="'selected' if gs_tz == 'Africa/Johannesburg'  else False">Africa/Johannesburg (SAST +02:00)</option>
+                                                        <option value="Africa/Lagos"         t-att-selected="'selected' if gs_tz == 'Africa/Lagos'         else False">Africa/Lagos (WAT +01:00)</option>
+                                                        <option value="Africa/Nairobi"       t-att-selected="'selected' if gs_tz == 'Africa/Nairobi'       else False">Africa/Nairobi (EAT +03:00)</option>
+                                                    </optgroup>
+                                                    <optgroup label="Americas">
+                                                        <option value="America/Anchorage"    t-att-selected="'selected' if gs_tz == 'America/Anchorage'    else False">America/Anchorage (AKST −09:00)</option>
+                                                        <option value="America/Chicago"      t-att-selected="'selected' if gs_tz == 'America/Chicago'      else False">America/Chicago (CST −06:00)</option>
+                                                        <option value="America/Denver"       t-att-selected="'selected' if gs_tz == 'America/Denver'       else False">America/Denver (MST −07:00)</option>
+                                                        <option value="America/Los_Angeles"  t-att-selected="'selected' if gs_tz == 'America/Los_Angeles'  else False">America/Los_Angeles (PST −08:00)</option>
+                                                        <option value="America/New_York"     t-att-selected="'selected' if gs_tz == 'America/New_York'     else False">America/New_York (EST −05:00)</option>
+                                                        <option value="America/Sao_Paulo"    t-att-selected="'selected' if gs_tz == 'America/Sao_Paulo'    else False">America/Sao_Paulo (BRT −03:00)</option>
+                                                        <option value="America/Toronto"      t-att-selected="'selected' if gs_tz == 'America/Toronto'      else False">America/Toronto (EST −05:00)</option>
+                                                        <option value="America/Vancouver"    t-att-selected="'selected' if gs_tz == 'America/Vancouver'    else False">America/Vancouver (PST −08:00)</option>
+                                                    </optgroup>
+                                                    <optgroup label="Asia">
+                                                        <option value="Asia/Bangkok"         t-att-selected="'selected' if gs_tz == 'Asia/Bangkok'         else False">Asia/Bangkok (ICT +07:00)</option>
+                                                        <option value="Asia/Dhaka"           t-att-selected="'selected' if gs_tz == 'Asia/Dhaka'           else False">Asia/Dhaka (BST +06:00)</option>
+                                                        <option value="Asia/Dubai"           t-att-selected="'selected' if gs_tz == 'Asia/Dubai'           else False">Asia/Dubai (GST +04:00)</option>
+                                                        <option value="Asia/Hong_Kong"       t-att-selected="'selected' if gs_tz == 'Asia/Hong_Kong'       else False">Asia/Hong_Kong (HKT +08:00)</option>
+                                                        <option value="Asia/Jakarta"         t-att-selected="'selected' if gs_tz == 'Asia/Jakarta'         else False">Asia/Jakarta (WIB +07:00)</option>
+                                                        <option value="Asia/Karachi"         t-att-selected="'selected' if gs_tz == 'Asia/Karachi'         else False">Asia/Karachi (PKT +05:00)</option>
+                                                        <option value="Asia/Kathmandu"       t-att-selected="'selected' if gs_tz == 'Asia/Kathmandu'       else False">Asia/Kathmandu (NPT +05:45)</option>
+                                                        <option value="Asia/Kolkata"         t-att-selected="'selected' if gs_tz == 'Asia/Kolkata'         else False">Asia/Kolkata (IST +05:30)</option>
+                                                        <option value="Asia/Kuala_Lumpur"    t-att-selected="'selected' if gs_tz == 'Asia/Kuala_Lumpur'    else False">Asia/Kuala_Lumpur (MYT +08:00)</option>
+                                                        <option value="Asia/Manila"          t-att-selected="'selected' if gs_tz == 'Asia/Manila'          else False">Asia/Manila (PST +08:00)</option>
+                                                        <option value="Asia/Riyadh"          t-att-selected="'selected' if gs_tz == 'Asia/Riyadh'          else False">Asia/Riyadh (AST +03:00)</option>
+                                                        <option value="Asia/Seoul"           t-att-selected="'selected' if gs_tz == 'Asia/Seoul'           else False">Asia/Seoul (KST +09:00)</option>
+                                                        <option value="Asia/Shanghai"        t-att-selected="'selected' if gs_tz == 'Asia/Shanghai'        else False">Asia/Shanghai (CST +08:00)</option>
+                                                        <option value="Asia/Singapore"       t-att-selected="'selected' if gs_tz == 'Asia/Singapore'       else False">Asia/Singapore (SGT +08:00)</option>
+                                                        <option value="Asia/Thimphu"         t-att-selected="'selected' if gs_tz == 'Asia/Thimphu'         else False">Asia/Thimphu (BTT +06:00)</option>
+                                                        <option value="Asia/Tokyo"           t-att-selected="'selected' if gs_tz == 'Asia/Tokyo'           else False">Asia/Tokyo (JST +09:00)</option>
+                                                    </optgroup>
+                                                    <optgroup label="Australia &amp; Pacific">
+                                                        <option value="Australia/Adelaide"   t-att-selected="'selected' if gs_tz == 'Australia/Adelaide'   else False">Australia/Adelaide (ACST +09:30)</option>
+                                                        <option value="Australia/Brisbane"   t-att-selected="'selected' if gs_tz == 'Australia/Brisbane'   else False">Australia/Brisbane (AEST +10:00)</option>
+                                                        <option value="Australia/Melbourne"  t-att-selected="'selected' if gs_tz == 'Australia/Melbourne'  else False">Australia/Melbourne (AEDT +11:00)</option>
+                                                        <option value="Australia/Perth"      t-att-selected="'selected' if gs_tz == 'Australia/Perth'      else False">Australia/Perth (AWST +08:00)</option>
+                                                        <option value="Australia/Sydney"     t-att-selected="'selected' if gs_tz == 'Australia/Sydney'     else False">Australia/Sydney (AEDT +11:00)</option>
+                                                        <option value="Pacific/Auckland"     t-att-selected="'selected' if gs_tz == 'Pacific/Auckland'     else False">Pacific/Auckland (NZDT +13:00)</option>
+                                                        <option value="Pacific/Honolulu"     t-att-selected="'selected' if gs_tz == 'Pacific/Honolulu'     else False">Pacific/Honolulu (HST −10:00)</option>
+                                                    </optgroup>
+                                                    <optgroup label="Europe">
+                                                        <option value="Europe/Amsterdam"     t-att-selected="'selected' if gs_tz == 'Europe/Amsterdam'     else False">Europe/Amsterdam (CET +01:00)</option>
+                                                        <option value="Europe/Athens"        t-att-selected="'selected' if gs_tz == 'Europe/Athens'        else False">Europe/Athens (EET +02:00)</option>
+                                                        <option value="Europe/Berlin"        t-att-selected="'selected' if gs_tz == 'Europe/Berlin'        else False">Europe/Berlin (CET +01:00)</option>
+                                                        <option value="Europe/Istanbul"      t-att-selected="'selected' if gs_tz == 'Europe/Istanbul'      else False">Europe/Istanbul (TRT +03:00)</option>
+                                                        <option value="Europe/London"        t-att-selected="'selected' if gs_tz == 'Europe/London'        else False">Europe/London (GMT +00:00)</option>
+                                                        <option value="Europe/Madrid"        t-att-selected="'selected' if gs_tz == 'Europe/Madrid'        else False">Europe/Madrid (CET +01:00)</option>
+                                                        <option value="Europe/Moscow"        t-att-selected="'selected' if gs_tz == 'Europe/Moscow'        else False">Europe/Moscow (MSK +03:00)</option>
+                                                        <option value="Europe/Paris"         t-att-selected="'selected' if gs_tz == 'Europe/Paris'         else False">Europe/Paris (CET +01:00)</option>
+                                                        <option value="Europe/Warsaw"        t-att-selected="'selected' if gs_tz == 'Europe/Warsaw'        else False">Europe/Warsaw (CET +01:00)</option>
+                                                        <option value="Europe/Zurich"        t-att-selected="'selected' if gs_tz == 'Europe/Zurich'        else False">Europe/Zurich (CET +01:00)</option>
+                                                    </optgroup>
+                                                </select>
+                                                <div class="form-text mt-1">Used for ticket timestamps and SLA deadline display.</div>
+                                            </div>
                                         </div>
                                         <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
-                                            <button type="button" class="btn btn-primary"><i
-                                                    class="bi bi-save me-2"></i>Save Changes</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-primary" id="gsSaveBtn" onclick="saveGeneralSettings()">
+                                                <i class="bi bi-save me-2"></i>Save Changes
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -1501,116 +2100,168 @@
                                 </div>
                             </div>
 
-                            <!-- Project Config Modal -->
-                            <div class="modal fade" id="projectConfigModal" tabindex="-1"
-                                aria-hidden="true">
-                                <div class="modal-dialog modal-xl">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title"><i
-                                                    class="bi bi-folder-fill me-2"></i>Project
-                                                Configuration</h5>
-                                            <button type="button" class="btn-close"
-                                                data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div
-                                                class="d-flex justify-content-between align-items-center mb-4">
-                                                <h6 class="mb-0"><i class="bi bi-list-ul me-2"></i>Configured
-                                                    Projects</h6>
-                                                <a
-                                                    href="/customer_support/admin_dashboard/system_configuration?tab=project"
-                                                    class="btn btn-primary btn-sm"><i
-                                                        class="bi bi-plus-circle me-2"></i>Configure
-                                                    New Project</a>
-                                            </div>
-                                            <div class="table-responsive">
-                                                <table class="table table-hover">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>ID</th>
-                                                            <th>Project Name</th>
-                                                            <th>Identifier</th>
-                                                            <th>Type</th>
-                                                            <th>Timeline</th>
-                                                            <th>Status</th>
-                                                            <th>Actions</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <t t-set="configs"
-                                                            t-value="dict((c.project_id.id, c) for c in request.env['customer_support.project.config'].sudo().search([]))" />
-                                                        <t
-                                                            t-foreach="request.env['customer_support.project'].sudo().search([])"
-                                                            t-as="project">
-                                                            <t t-set="config"
-                                                                t-value="configs.get(project.id)" />
-                                                            <tr>
-                                                                <td>
-                                                                    <t t-esc="project.id" />
-                                                                </td>
-                                                                <td>
-                                                                    <t t-esc="project.name" />
-                                                                </td>
-                                                                <td>
-                                                                    <span class="badge bg-info">
-                                                                        <t t-esc="project.code" />
-                                                                    </span>
-                                                                </td>
-                                                                <td>
-                                                                    <t
-                                                                        t-esc="config.project_type.replace('_',' ').title() if config else '-'" />
-                                                                </td>
-                                                                <td>
-                                                                    <small class="text-muted">
-                                                                        <t
-                                                                            t-esc="(config.start_date.strftime('%b %Y') if config and config.start_date else '-') + ' - ' + (config.end_date.strftime('%b %Y') if config and config.end_date else '-')" />
-                                                                    </small>
-                                                                </td>
-                                                                <td>
-                                                                    <t t-set="today"
-                                                                        t-value="datetime.date.today()" />
-                                                                    <t
-                                                                        t-if="config and config.start_date and config.end_date and config.start_date &lt;= today and today &lt;= config.end_date">
-                                                                        <span
-                                                                            class="badge bg-success">
-                                                                            Active</span>
-                                                                    </t>
-                                                                    <t
-                                                                        t-if="config and config.start_date and config.start_date &gt; today">
-                                                                        <span
-                                                                            class="badge bg-warning">
-                                                                            Planning</span>
-                                                                    </t>
-                                                                    <t t-if="not config">
-                                                                        <span
-                                                                            class="badge bg-secondary">No
-                                                                            Config</span>
-                                                                    </t>
-                                                                </td>
-                                                                <td>
-                                                                    <button type="button"
-                                                                        class="btn btn-sm btn-outline-danger"
-                                                                        t-att-data-project-id="project.id"
-                                                                        t-att-data-project-name="project.name"
-                                                                        title="Delete project"
-                                                                        onclick="openDeleteProjectModal(this.dataset.projectId, this.dataset.projectName)">
-                                                                        <i class="bi bi-trash"></i>
-                                                                    </button>
-                                                                </td>
-                                                            </tr>
-                                                        </t>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Close</button>
+                            <!-- PROJECT MANAGEMENT DRAWER -->
+                            <div id="projDrawerOverlay" class="proj-drawer-overlay" onclick="closeProjDrawer()"></div>
+                            <div id="projDrawer" class="proj-drawer" role="dialog" aria-modal="true">
+
+                                <!-- Header -->
+                                <div class="pd-header">
+                                    <div class="pd-header-left">
+                                        <span class="pd-code-badge" id="pdCode"></span>
+                                        <div class="pd-header-title">
+                                            <p class="pd-project-name" id="pdName"></p>
+                                            <span class="pd-project-type" id="pdType"></span>
                                         </div>
                                     </div>
+                                    <button class="pd-close-btn" onclick="closeProjDrawer()" aria-label="Close">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
                                 </div>
-                            </div>
+
+                                <!-- Tabs -->
+                                <div class="pd-tabs" role="tablist">
+                                    <button class="pd-tab pdTabActive" id="pdTabTeam" onclick="switchPdTab('team')" role="tab">
+                                        <i class="bi bi-people-fill"></i> Team
+                                        <span class="pd-tab-badge" id="pdTeamBadge" style="display:none"></span>
+                                    </button>
+                                    <button class="pd-tab" id="pdTabDocs" onclick="switchPdTab('docs')" role="tab">
+                                        <i class="bi bi-file-earmark-text-fill"></i> Documents
+                                        <span class="pd-tab-badge" id="pdDocsBadge" style="display:none"></span>
+                                    </button>
+                                </div>
+
+                                <!-- Body -->
+                                <div class="pd-body">
+
+                                    <!-- ── TEAM TAB ─────────────────────── -->
+                                    <div id="pdPanelTeam">
+
+                                        <!-- Focal Person -->
+                                        <div class="pd-card">
+                                            <div class="pd-card-label">
+                                                <i class="bi bi-person-badge-fill"></i> Focal Person
+                                            </div>
+                                            <div class="pd-focal-row">
+                                                <select class="pd-select" id="pdFocalSelect" style="flex:1;min-width:0">
+                                                    <option value="">— Select focal person —</option>
+                                                </select>
+                                                <button class="pd-btn pd-btn-primary pd-btn-sm" id="pdAssignFocalBtn">
+                                                    <i class="bi bi-person-check"></i> Assign
+                                                </button>
+                                                <button class="pd-btn pd-btn-danger pd-btn-sm" id="pdRemoveFocalBtn" style="display:none">
+                                                    <i class="bi bi-person-x"></i> Remove
+                                                </button>
+                                            </div>
+                                            <div id="pdFocalCurrent" style="margin-top:.75rem"></div>
+                                            <div id="pdFocalMsg" class="pd-msg"></div>
+                                        </div>
+
+                                        <!-- Add Member -->
+                                        <div class="pd-card">
+                                            <div class="pd-card-label">
+                                                <i class="bi bi-person-plus-fill"></i> Add Team Member
+                                            </div>
+                                            <div class="pd-grid-2" style="margin-bottom:.65rem">
+                                                <div class="pd-field">
+                                                    <label class="pd-label" for="pdMemberName">Full Name <span style="color:#ef4444">*</span></label>
+                                                    <input type="text" class="pd-input" id="pdMemberName" placeholder="e.g. Jane Smith" />
+                                                </div>
+                                                <div class="pd-field">
+                                                    <label class="pd-label" for="pdMemberEmail">Email Address</label>
+                                                    <input type="email" class="pd-input" id="pdMemberEmail" placeholder="e.g. jane@company.com" />
+                                                </div>
+                                            </div>
+                                            <div class="pd-field" style="margin-bottom:.65rem">
+                                                <label class="pd-label" for="pdMemberRole">Role</label>
+                                                <select class="pd-select" id="pdMemberRole">
+                                                    <option value="frontend_dev">Frontend Developer</option>
+                                                    <option value="backend_dev">Backend Developer</option>
+                                                    <option value="network_manager">Network Manager</option>
+                                                    <option value="designer">UI/UX Designer</option>
+                                                    <option value="qa_engineer">QA Engineer</option>
+                                                    <option value="other">Other</option>
+                                                </select>
+                                            </div>
+                                            <button class="pd-btn pd-btn-primary pd-btn-full" id="pdAddMemberBtn">
+                                                <i class="bi bi-person-plus"></i> Add Member
+                                            </button>
+                                            <div id="pdMemberMsg" class="pd-msg"></div>
+                                        </div>
+
+                                        <!-- Member List -->
+                                        <div class="pd-card">
+                                            <div class="pd-card-label">
+                                                <i class="bi bi-people-fill"></i> Current Team
+                                            </div>
+                                            <div id="pdMemberList"></div>
+                                            <div id="pdMemberEmpty" class="pd-empty" style="display:none">
+                                                <i class="bi bi-person-x"></i>
+                                                <span>No team members yet. Add the first member above.</span>
+                                            </div>
+                                        </div>
+
+                                    </div><!-- /pdPanelTeam -->
+
+                                    <!-- ── DOCUMENTS TAB ────────────────── -->
+                                    <div id="pdPanelDocs" style="display:none">
+
+                                        <!-- Upload -->
+                                        <div class="pd-card">
+                                            <div class="pd-card-label">
+                                                <i class="bi bi-cloud-upload-fill"></i> Upload Document
+                                            </div>
+                                            <div id="pdUploadZone" class="pd-upload-zone"
+                                                 onclick="document.getElementById('pdFileInput').click()"
+                                                 ondragover="event.preventDefault();this.classList.add('pdDragOver')"
+                                                 ondragleave="this.classList.remove('pdDragOver')"
+                                                 ondrop="pdHandleDrop(event)">
+                                                <i class="bi bi-cloud-arrow-up pd-upload-icon"></i>
+                                                <p class="pd-upload-hint">Drag &amp; drop a file here, or <strong>click to browse</strong></p>
+                                                <p class="pd-upload-hint" style="font-size:.7rem;margin-top:.2rem;opacity:.7">PDF, DOCX, TXT or XLSX — max 10 MB</p>
+                                            </div>
+                                            <input type="file" id="pdFileInput" accept=".pdf,.docx,.txt,.xlsx"
+                                                   style="display:none" onchange="pdFileSelected(this)" />
+                                            <div id="pdFilePreview" style="display:none"></div>
+                                            <div class="pd-grid-2" style="margin-bottom:.65rem">
+                                                <div class="pd-field">
+                                                    <label class="pd-label" for="pdDocName">Document Name <span style="color:#ef4444">*</span></label>
+                                                    <input type="text" class="pd-input" id="pdDocName" placeholder="e.g. API Specification v2" />
+                                                </div>
+                                                <div class="pd-field">
+                                                    <label class="pd-label" for="pdDocCategory">Category</label>
+                                                    <select class="pd-select" id="pdDocCategory">
+                                                        <option value="projects">Projects</option>
+                                                        <option value="technical">Technical</option>
+                                                        <option value="services">Services</option>
+                                                        <option value="pricing">Pricing</option>
+                                                        <option value="company">Company</option>
+                                                        <option value="faq">FAQ</option>
+                                                        <option value="other">Other</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <button class="pd-btn pd-btn-primary pd-btn-full" id="pdUploadBtn">
+                                                <i class="bi bi-cloud-upload"></i> Upload Document
+                                            </button>
+                                            <div id="pdUploadMsg" class="pd-msg"></div>
+                                        </div>
+
+                                        <!-- Document List -->
+                                        <div class="pd-card">
+                                            <div class="pd-card-label">
+                                                <i class="bi bi-folder2-open"></i> Project Documents
+                                            </div>
+                                            <div id="pdDocList"></div>
+                                            <div id="pdDocEmpty" class="pd-empty" style="display:none">
+                                                <i class="bi bi-file-earmark-x"></i>
+                                                <span>No documents uploaded for this project yet.</span>
+                                            </div>
+                                        </div>
+
+                                    </div><!-- /pdPanelDocs -->
+
+                                </div><!-- /pd-body -->
+                            </div><!-- /proj-drawer -->
 
                             <!-- ══════════════════════════════════════
                                  DELETE PROJECT CONFIRMATION MODAL
@@ -1709,20 +2360,20 @@
                                                 </h5>
                                                 <small style="opacity:.7;" id="prDetailSubtitle"></small>
                                             </div>
-                                            <div class="d-flex gap-2 align-items-center">
-                                                <button type="button" class="btn btn-sm btn-light"
-                                                    id="prDownloadBtn">
-                                                    <i class="bi bi-download me-1"></i>Download PDF </button>
-                                                <button type="button"
-                                                    class="btn-close btn-close-white"
-                                                    data-bs-dismiss="modal"></button>
-                                            </div>
+                                            <button type="button"
+                                                class="btn-close btn-close-white"
+                                                data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body p-0" id="prDetailBody"
                                             style="background:#f8f9fa;"></div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary"
                                                 data-bs-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-outline-success"
+                                                id="prForwardBtn"
+                                                onclick="prForwardReport()">
+                                                <i class="bi bi-send me-1"></i>Forward to Customer
+                                            </button>
                                             <button type="button" class="btn btn-primary"
                                                 id="prDownloadBtn2">
                                                 <i class="bi bi-download me-1"></i>Download PDF </button>
@@ -1748,10 +2399,10 @@
                                             <div class="row g-3 mb-4">
                                                 <div class="col-6 col-md-3">
                                                     <div class="card border-0 shadow-sm text-center"
-                                                        style="border-top:3px solid #1a3a5c!important;border-radius:10px;">
+                                                        style="border-top:3px solid #064e3b!important;border-radius:10px;">
                                                         <div class="card-body py-3">
                                                             <div class="fw-bold" id="kbTotalDocs"
-                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                style="font-size:1.8rem;color:#064e3b;">
                                                                 —</div>
                                                             <div class="text-muted"
                                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Total
@@ -1764,7 +2415,7 @@
                                                         style="border-top:3px solid #22c55e!important;border-radius:10px;">
                                                         <div class="card-body py-3">
                                                             <div class="fw-bold" id="kbReadyDocs"
-                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                style="font-size:1.8rem;color:#064e3b;">
                                                                 —</div>
                                                             <div class="text-muted"
                                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
@@ -1777,7 +2428,7 @@
                                                         style="border-top:3px solid #f59e0b!important;border-radius:10px;">
                                                         <div class="card-body py-3">
                                                             <div class="fw-bold" id="kbPendingDocs"
-                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                style="font-size:1.8rem;color:#064e3b;">
                                                                 —</div>
                                                             <div class="text-muted"
                                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
@@ -1790,7 +2441,7 @@
                                                         style="border-top:3px solid #ef4444!important;border-radius:10px;">
                                                         <div class="card-body py-3">
                                                             <div class="fw-bold" id="kbErrorDocs"
-                                                                style="font-size:1.8rem;color:#1a3a5c;">
+                                                                style="font-size:1.8rem;color:#064e3b;">
                                                                 —</div>
                                                             <div class="text-muted"
                                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
@@ -1914,7 +2565,7 @@
                                 class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                                 <div>
                                     <h4 class="mb-0"
-                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;letter-spacing:1px;">
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#064e3b;letter-spacing:1px;">
                                         <i class="bi bi-graph-up-arrow me-2"></i>Analytics &amp;
                                         Reports </h4>
                                     <small class="text-muted">Live data from the system</small>
@@ -1935,10 +2586,10 @@
                             <div class="row g-3 mb-4" id="reportKpiRow">
                                 <div class="col-6 col-md-2">
                                     <div class="card text-center border-0 shadow-sm h-100"
-                                        style="border-top:3px solid #1a3a5c!important;border-radius:10px;">
+                                        style="border-top:3px solid #064e3b!important;border-radius:10px;">
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
-                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#064e3b;"
                                                 id="r-total-period">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">New
@@ -1951,7 +2602,7 @@
                                         style="border-top:3px solid #2ecc71!important;border-radius:10px;">
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
-                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#064e3b;"
                                                 id="r-resolved">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
@@ -1964,7 +2615,7 @@
                                         style="border-top:3px solid #3498db!important;border-radius:10px;">
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
-                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#064e3b;"
                                                 id="r-open">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">
@@ -1977,7 +2628,7 @@
                                         style="border-top:3px solid #e74c3c!important;border-radius:10px;">
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
-                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#064e3b;"
                                                 id="r-breached">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">SLA
@@ -1990,7 +2641,7 @@
                                         style="border-top:3px solid #2ecc71!important;border-radius:10px;">
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
-                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#064e3b;"
                                                 id="r-sla-compliance">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">SLA
@@ -2003,7 +2654,7 @@
                                         style="border-top:3px solid #e8b84b!important;border-radius:10px;">
                                         <div class="card-body py-3">
                                             <div class="fw-bold"
-                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#1a3a5c;"
+                                                style="font-size:1.8rem;font-family:'Rajdhani',sans-serif;color:#064e3b;"
                                                 id="r-resolve-rate">&#x2014;</div>
                                             <div class="text-muted"
                                                 style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Resolve
@@ -2018,7 +2669,7 @@
                                         style="border-radius:12px;">
                                         <div class="card-header bg-white border-0 pt-3 pb-0">
                                             <h6 class="mb-0"
-                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#064e3b;"><i
                                                     class="bi bi-bar-chart-line me-2"></i>Ticket
                                                 Volume Trend</h6>
                                         </div>
@@ -2032,7 +2683,7 @@
                                         style="border-radius:12px;">
                                         <div class="card-header bg-white border-0 pt-3 pb-0">
                                             <h6 class="mb-0"
-                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#064e3b;"><i
                                                     class="bi bi-pie-chart me-2"></i>Status
                                                 Breakdown</h6>
                                         </div>
@@ -2049,7 +2700,7 @@
                                         style="border-radius:12px;">
                                         <div class="card-header bg-white border-0 pt-3 pb-0">
                                             <h6 class="mb-0"
-                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#064e3b;"><i
                                                     class="bi bi-exclamation-triangle me-2"></i>Priority
                                                 Distribution (Open)</h6>
                                         </div>
@@ -2064,7 +2715,7 @@
                                         style="border-radius:12px;">
                                         <div class="card-header bg-white border-0 pt-3 pb-0">
                                             <h6 class="mb-0"
-                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                                style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#064e3b;"><i
                                                     class="bi bi-people me-2"></i>Top Customers by
                                                 Volume</h6>
                                         </div>
@@ -2078,7 +2729,7 @@
                                 <div
                                     class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3">
                                     <h6 class="mb-0"
-                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#064e3b;"><i
                                             class="bi bi-folder2-open me-2"></i>Project Health</h6>
                                     <small class="text-muted">Sorted by health score (worst first)</small>
                                 </div>
@@ -2086,7 +2737,7 @@
                                     <div class="table-responsive">
                                         <table class="table table-hover mb-0"
                                             style="font-size:13px;">
-                                            <thead style="background:#1a3a5c;color:#fff;">
+                                            <thead style="background:#064e3b;color:#fff;">
                                                 <tr>
                                                     <th class="ps-3">Project</th>
                                                     <th>Total</th>
@@ -2114,20 +2765,20 @@
                                 <div
                                     class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3">
                                     <h6 class="mb-0"
-                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#1a3a5c;"><i
+                                        style="font-family:'Rajdhani',sans-serif;font-weight:700;color:#064e3b;"><i
                                             class="bi bi-trophy me-2"></i>Focal Person Leaderboard</h6>
                                     <a id="execReportLink"
                                         href="/customer_support/admin/report/executive?days=30"
                                         target="_blank"
                                         class="btn btn-sm"
-                                        style="background:#1a3a5c;color:#fff;border-radius:6px;font-size:12px;">
-                                        <i class="bi bi-printer me-1"></i>Print Executive Report </a>
+                                        style="background:#064e3b;color:#fff;border-radius:6px;font-size:12px;">
+                                        <i class="bi bi-download me-1"></i>Download Report </a>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive">
                                         <table class="table table-hover mb-0"
                                             style="font-size:13px;">
-                                            <thead style="background:#1a3a5c;color:#fff;">
+                                            <thead style="background:#064e3b;color:#fff;">
                                                 <tr>
                                                     <th class="ps-3" style="width:5%">#</th>
                                                     <th>Name</th>
@@ -2400,7 +3051,7 @@ document.getElementById('adminMarkAllRead').addEventListener('click',function(){
 document.getElementById('notifViewAllTickets').addEventListener('click',function(e){e.preventDefault();dropdown.classList.remove('open');var t=document.getElementById('ticket-assignment-tab');if(t)new bootstrap.Tab(t).show();});
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function loadNotifications(){fetch('/customer_support/admin/notifications',{method:'GET',credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){renderNotifications(d);}).catch(function(e){console.warn('Admin notifications failed:',e);});}
-function renderNotifications(data){var sla=data.sla_breaches||[],unassigned=data.unassigned||[],sc=data.status_changes||[];var total=sla.length+unassigned.length+sc.length;if(total===0){badge.classList.add('hidden');}else{badge.textContent=total>99?'99+':total;badge.classList.remove('hidden');if(total>prevTotal){bellIcon.classList.add('bell-ring');badge.classList.add('bump');setTimeout(function(){bellIcon.classList.remove('bell-ring');badge.classList.remove('bump');},600);}}prevTotal=total;if(total===0){list.innerHTML='<div class="admin-notif-empty"><i class="bi bi-check-circle-fill" style="font-size:2rem;color:#22c55e;display:block;margin-bottom:.5rem;"></i>All clear &#x2014; no active alerts!</div>';return;}var html='';if(sla.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-x-octagon-fill me-1" style="color:#ef4444;"></i>SLA Breaches</span><span class="section-count">'+sla.length+'</span></div>';html+=sla.map(function(a){return'<a class="admin-notif-item unread" href="/customer_support/admin_view/ticket/'+a.ticket_id+'"><div class="admin-notif-icon sla-breach"><i class="bi bi-x-octagon-fill"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(a.ticket_name)+' &#x2014; '+esc(a.subject)+'</div><div class="admin-notif-sub">Agent: '+esc(a.agent_name)+' &middot; '+esc(a.time_display)+'</div><div class="admin-notif-time">Priority: '+esc(a.priority)+'</div></div><div class="admin-notif-dot sla-breach"></div></a>';}).join('');}if(unassigned.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-inbox-fill me-1" style="color:#3b82f6;"></i>Unassigned Tickets</span><span class="section-count">'+unassigned.length+'</span></div>';html+=unassigned.map(function(t){return'<a class="admin-notif-item unread" href="/customer_support/admin_view/ticket/'+t.ticket_id+'"><div class="admin-notif-icon unassigned"><i class="bi bi-inbox-fill"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(t.ticket_name)+' &#x2014; '+esc(t.subject)+'</div><div class="admin-notif-sub">Waiting '+esc(t.waiting)+' &middot; Priority: '+esc(t.priority)+'</div><div class="admin-notif-time">Created: '+esc(t.create_date)+'</div></div><div class="admin-notif-dot unassigned"></div></a>';}).join('');}if(sc.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-arrow-left-right me-1" style="color:#10b981;"></i>Recent Status Changes</span><span class="section-count">'+sc.length+'</span></div>';html+=sc.map(function(s){return'<a class="admin-notif-item" href="/customer_support/admin_view/ticket/'+s.ticket_id+'"><div class="admin-notif-icon status-chg"><i class="bi bi-arrow-left-right"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(s.ticket_name)+' &#x2014; '+esc(s.subject)+'</div><div class="admin-notif-sub">&#x2192; '+esc(s.new_state)+' &middot; Agent: '+esc(s.agent_name)+'</div><div class="admin-notif-time">'+esc(s.changed_at)+'</div></div><div class="admin-notif-dot status-chg"></div></a>';}).join('');}list.innerHTML=html;}
+function renderNotifications(data){var sla=data.sla_breaches||[],unassigned=data.unassigned||[],sc=data.status_changes||[];var total=sla.length+unassigned.length+sc.length;if(total===0){badge.classList.add('hidden');}else{badge.textContent=total>99?'99+':total;badge.classList.remove('hidden');if(total>prevTotal){bellIcon.classList.add('bell-ring');badge.classList.add('bump');setTimeout(function(){bellIcon.classList.remove('bell-ring');badge.classList.remove('bump');},600);}}prevTotal=total;if(total===0){list.innerHTML='<div class="admin-notif-empty"><i class="bi bi-check-circle-fill" style="font-size:2rem;color:#22c55e;display:block;margin-bottom:.5rem;"></i>All clear &#x2014; no active alerts!</div>';return;}var html='';if(sla.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-x-octagon-fill me-1" style="color:#ef4444;"></i>SLA Breaches</span><span class="section-count">'+sla.length+'</span></div>';html+=sla.map(function(a){return'<a class="admin-notif-item unread" href="/customer_support/admin_view/ticket/'+a.ticket_id+'"><div class="admin-notif-icon sla-breach"><i class="bi bi-x-octagon-fill"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(a.ticket_name)+' &#x2014; '+esc(a.subject)+'</div><div class="admin-notif-sub">Agent: '+esc(a.agent_name)+' &middot; '+esc(a.time_display)+'</div><div class="admin-notif-time">Priority: '+esc(a.priority)+'</div></div><div class="admin-notif-dot sla-breach"></div></a>';}).join('');}if(unassigned.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-inbox-fill me-1" style="color:#059669;"></i>Unassigned Tickets</span><span class="section-count">'+unassigned.length+'</span></div>';html+=unassigned.map(function(t){return'<a class="admin-notif-item unread" href="/customer_support/admin_view/ticket/'+t.ticket_id+'"><div class="admin-notif-icon unassigned"><i class="bi bi-inbox-fill"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(t.ticket_name)+' &#x2014; '+esc(t.subject)+'</div><div class="admin-notif-sub">Waiting '+esc(t.waiting)+' &middot; Priority: '+esc(t.priority)+'</div><div class="admin-notif-time">Created: '+esc(t.create_date)+'</div></div><div class="admin-notif-dot unassigned"></div></a>';}).join('');}if(sc.length>0){html+='<div class="admin-notif-section-label"><span><i class="bi bi-arrow-left-right me-1" style="color:#10b981;"></i>Recent Status Changes</span><span class="section-count">'+sc.length+'</span></div>';html+=sc.map(function(s){return'<a class="admin-notif-item" href="/customer_support/admin_view/ticket/'+s.ticket_id+'"><div class="admin-notif-icon status-chg"><i class="bi bi-arrow-left-right"></i></div><div class="admin-notif-body"><div class="admin-notif-title">'+esc(s.ticket_name)+' &#x2014; '+esc(s.subject)+'</div><div class="admin-notif-sub">&#x2192; '+esc(s.new_state)+' &middot; Agent: '+esc(s.agent_name)+'</div><div class="admin-notif-time">'+esc(s.changed_at)+'</div></div><div class="admin-notif-dot status-chg"></div></a>';}).join('');}list.innerHTML=html;}
 document.addEventListener('DOMContentLoaded',function(){loadNotifications();setInterval(loadNotifications,30000);});
 })();
 //]]>
@@ -2489,6 +3140,88 @@ document.addEventListener('DOMContentLoaded',function(){
 //]]>
             </script>
 
+            <!-- GENERAL SETTINGS -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function () {
+'use strict';
+
+function gsAlert(msg, type) {
+    var el = document.getElementById('gsAlert');
+    if (!el) return;
+    el.className = 'alert alert-' + (type || 'success') + ' mb-3';
+    el.textContent = msg;
+    if (type === 'success') setTimeout(function () { el.className = 'd-none'; }, 3500);
+}
+
+window.saveGeneralSettings = function () {
+    var nameEl = document.getElementById('gsSystemName');
+    var tzEl   = document.getElementById('gsTimezone');
+    var btn    = document.getElementById('gsSaveBtn');
+    if (!nameEl || !tzEl || !btn) return;
+
+    var name = nameEl.value.trim();
+    var tz   = tzEl.value;
+
+    if (!name) { gsAlert('System name cannot be empty.', 'danger'); nameEl.focus(); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Saving…';
+
+    jsonCall('/customer_support/admin_dashboard/general_settings/save', {
+        system_name: name,
+        timezone: tz
+    }).then(function (res) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-save me-2"></i>Save Changes';
+        if (res && res.success) {
+            gsAlert('Settings saved successfully.', 'success');
+            var brandEl = document.querySelector('.drawer-brand-text strong');
+            if (brandEl) brandEl.textContent = name;
+            document.title = name + ' — Admin Dashboard';
+        } else {
+            gsAlert((res && res.error) || 'Failed to save settings.', 'danger');
+        }
+    }).catch(function () {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-save me-2"></i>Save Changes';
+        gsAlert('Network error. Please try again.', 'danger');
+    });
+};
+
+window.filterGsTz = function (query) {
+    var sel = document.getElementById('gsTimezone');
+    if (!sel) return;
+    var q = query.toLowerCase().replace(/\s+/g, '_');
+    Array.prototype.forEach.call(sel.options, function (opt) {
+        var match = opt.value.toLowerCase().indexOf(q) !== -1 ||
+                    opt.text.toLowerCase().indexOf(query.toLowerCase()) !== -1;
+        opt.style.display = match ? '' : 'none';
+    });
+    Array.prototype.forEach.call(sel.querySelectorAll('optgroup'), function (og) {
+        var anyVisible = Array.prototype.some.call(og.querySelectorAll('option'), function (o) {
+            return o.style.display !== 'none';
+        });
+        og.style.display = anyVisible ? '' : 'none';
+    });
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    var gsModal = document.getElementById('generalSettingsModal');
+    if (gsModal) {
+        gsModal.addEventListener('show.bs.modal', function () {
+            var el = document.getElementById('gsAlert');
+            if (el) el.className = 'd-none';
+            var search = document.getElementById('gsTzSearch');
+            if (search) { search.value = ''; filterGsTz(''); }
+        });
+    }
+});
+
+})();
+//]]>
+            </script>
+
             <!-- 4. LIVE ANALYTICS -->
             <script type="text/javascript">
                 //<![CDATA[
@@ -2529,8 +3262,9 @@ function _initTabs(){
   var tabParam=urlParams.get('tab');
   var hashParam=window.location.hash.substring(1);
   var targetTab=tabParam||hashParam;
-  var modalParam=urlParams.get('modal');
   var ticketModal=urlParams.get('ticket_modal'); // kept for the ticket-modal IIFE that reads it
+  var projCreated=urlParams.get('project_created');
+  var projCreatedId=urlParams.get('project_id');
   // Activate tab via manual class manipulation (no shown.bs.tab fires here)
   if(targetTab)activateTabOnly(targetTab);
   // Fully clean the URL — strip ALL server-redirect params (success, error, tab, modal, etc.)
@@ -2539,8 +3273,8 @@ function _initTabs(){
   if(ticketModal)kept.set('ticket_modal',ticketModal);
   var clean=kept.toString();
   history.replaceState({tab:targetTab||'overview'},'',window.location.pathname+(clean?('?'+clean):''));
-  // Handle ?modal=projects (read before URL was cleaned)
-  if(modalParam==='projects'){var m=document.getElementById('projectConfigModal');if(m)setTimeout(function(){new bootstrap.Modal(m).show();},300);}
+  // After project creation, auto-open the drawer for the new project card
+    if(projCreated&&projCreatedId){setTimeout(function(){var card=document.getElementById('pjCard-'+projCreatedId);if(card&&typeof openProjDrawer==='function')openProjDrawer(card.dataset);},400);}
   // Wire tab button clicks — use capture phase so our handler fires before Bootstrap's own handler,
   // preventing Bootstrap from also calling show() and firing shown.bs.tab a second time
   var tl=[].slice.call(document.querySelectorAll('.header-left button[data-bs-toggle="tab"]'));
@@ -2701,6 +3435,71 @@ document.addEventListener('DOMContentLoaded',function(){
         });
     }
 });
+
+window.showUserDetail = function(userId) {
+    var modalEl = document.getElementById('userDetailModal');
+    var bodyEl  = document.getElementById('userDetailBody');
+    var nameEl  = document.getElementById('userDetailName');
+    if (!modalEl) return;
+    nameEl.textContent = 'Loading…';
+    bodyEl.innerHTML   = '<div class="text-center py-4"><div class="spinner-border spinner-border-sm text-secondary"></div></div>';
+    new bootstrap.Modal(modalEl).show();
+
+    fetch('/customer_support/admin_dashboard/user/' + userId + '/detail', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'call', id: 1, params: {} })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(resp) {
+        var d = resp.result || {};
+        if (!d.success || !d.user) {
+            bodyEl.innerHTML = '<div class="alert alert-danger">' + (d.error || 'Failed to load user details.') + '</div>';
+            return;
+        }
+        var u = d.user;
+        nameEl.textContent = u.name;
+
+        var roleBadgeClass = u.role === 'Focal Person' ? 'bg-info' : u.role === 'Admin' ? 'bg-primary' : 'bg-secondary';
+        var statusBadge    = u.active
+            ? '<span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Active</span>'
+            : '<span class="badge bg-secondary"><i class="bi bi-x-circle me-1"></i>Inactive</span>';
+
+        var projectsHtml = '';
+        if (u.projects && u.projects.length) {
+            var rows = u.projects.map(function(p) {
+                return '<tr><td class="fw-semibold">' + (p.name || '') + '</td>'
+                    + '<td><span class="badge bg-light text-dark border">' + (p.key || '-') + '</span></td>'
+                    + '<td class="text-muted" style="font-size:.82rem;">' + (p.association || '') + '</td></tr>';
+            }).join('');
+            projectsHtml = '<div class="mt-3">'
+                + '<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#064e3b;border-bottom:2px solid #064e3b;padding-bottom:.3rem;margin-bottom:.6rem;">Associated Projects</div>'
+                + '<table class="table table-sm table-hover mb-0"><thead><tr>'
+                + '<th style="font-size:.75rem;">Project</th><th style="font-size:.75rem;">Key</th><th style="font-size:.75rem;">Association</th>'
+                + '</tr></thead><tbody>' + rows + '</tbody></table></div>';
+        } else {
+            projectsHtml = '<p class="text-muted mt-3 mb-0" style="font-size:.85rem;"><i class="bi bi-info-circle me-1"></i>No projects associated.</p>';
+        }
+
+        bodyEl.innerHTML =
+            '<div class="d-flex align-items-center gap-3 mb-3">'
+            + '<div style="width:48px;height:48px;border-radius:50%;background:#e9ecef;display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:#6c757d;"><i class="bi bi-person-fill"></i></div>'
+            + '<div>'
+            + '<div class="fw-bold fs-6">' + u.name + '</div>'
+            + '<div class="text-muted" style="font-size:.85rem;">' + u.email + '</div>'
+            + '</div>'
+            + '</div>'
+            + '<div class="d-flex gap-2 mb-1">'
+            + '<span class="badge ' + roleBadgeClass + '">' + u.role + '</span>'
+            + statusBadge
+            + '</div>'
+            + projectsHtml;
+    })
+    .catch(function() {
+        bodyEl.innerHTML = '<div class="alert alert-danger">Network error loading user details.</div>';
+    });
+};
 })();
 //]]>
             </script>
@@ -2716,7 +3515,7 @@ var currentDays=30,charts={};
 var SC={new:'#3498db',assigned:'#9b59b6',in_progress:'#e8b84b',resolved:'#2ecc71',closed:'#95a5a6'};
 var PC={urgent:'#e74c3c',high:'#e67e22',medium:'#3498db',low:'#2ecc71'};
 function dc(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
-function bVC(trend){dc('volume');var ctx=document.getElementById('volumeChart');if(!ctx)return;charts['volume']=new Chart(ctx,{type:'bar',data:{labels:trend.map(function(d){return d.date;}),datasets:[{label:'Tickets',data:trend.map(function(d){return d.count;}),backgroundColor:'rgba(26,58,92,0.75)',borderColor:'#1a3a5c',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}},x:{ticks:{maxTicksLimit:14,maxRotation:45}}}}});}
+function bVC(trend){dc('volume');var ctx=document.getElementById('volumeChart');if(!ctx)return;charts['volume']=new Chart(ctx,{type:'bar',data:{labels:trend.map(function(d){return d.date;}),datasets:[{label:'Tickets',data:trend.map(function(d){return d.count;}),backgroundColor:'rgba(26,58,92,0.75)',borderColor:'#064e3b',borderWidth:1,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}},x:{ticks:{maxTicksLimit:14,maxRotation:45}}}}});}
 function bSC(bd){dc('status');var ctx=document.getElementById('statusChart');if(!ctx)return;var l=Object.keys(bd);charts['status']=new Chart(ctx,{type:'doughnut',data:{labels:l.map(function(x){return x.replace('_',' ').replace(/\b\w/g,function(c){return c.toUpperCase();});}),datasets:[{data:Object.values(bd),backgroundColor:l.map(function(x){return SC[x]||'#aaa';}),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}},cutout:'60%'}});}
 function bPC(dist){dc('priority');var ctx=document.getElementById('priorityChart');if(!ctx)return;var l=['urgent','high','medium','low'];charts['priority']=new Chart(ctx,{type:'pie',data:{labels:['Urgent','High','Medium','Low'],datasets:[{data:l.map(function(x){return dist[x]||0;}),backgroundColor:l.map(function(x){return PC[x];}),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11}}}}}});}
 function bCC(customers){dc('customers');var ctx=document.getElementById('customersChart');if(!ctx)return;charts['customers']=new Chart(ctx,{type:'bar',data:{labels:customers.map(function(c){return c.name;}),datasets:[{label:'Tickets',data:customers.map(function(c){return c.count;}),backgroundColor:'rgba(232,184,75,0.85)',borderColor:'#e8b84b',borderWidth:1,borderRadius:4}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,ticks:{stepSize:1}}}}});}
@@ -2724,8 +3523,8 @@ function hB(h){return{green:'<span class="badge bg-success">Good</span>',amber:'
 function tI(t){if(t==='up')return'<span class="text-danger"><i class="bi bi-arrow-up-right-circle-fill"></i> Up</span>';if(t==='down')return'<span class="text-success"><i class="bi bi-arrow-down-right-circle-fill"></i> Down</span>';return'<span class="text-muted"><i class="bi bi-dash-circle"></i> Stable</span>';}
 function sB(v,c){return'<div style="display:flex;align-items:center;gap:6px;"><div style="flex:1;background:#e9ecef;border-radius:4px;height:8px;overflow:hidden;"><div style="width:'+v+'%;height:100%;background:'+c+';border-radius:4px;"></div></div><span style="font-size:11px;font-weight:600;width:36px;">'+v+'%</span></div>';}
 function rC(v){return v>=80?'#2ecc71':v>=60?'#f39c12':'#e74c3c';}
-function bPT(rows,days){var tb=document.getElementById('projectHealthBody');if(!tb)return;if(!rows||!rows.length){tb.innerHTML='<tr><td colspan="8" class="text-center text-muted py-4">No projects found.</td></tr>';return;}tb.innerHTML=rows.map(function(p){return'<tr><td class="ps-3"><strong>'+p.name+'</strong>'+(p.code?'<span class="badge bg-secondary ms-1" style="font-size:10px;">'+p.code+'</span>':'')+'</td><td>'+p.total+'</td><td>'+p.resolved+'</td><td>'+p.open+'</td><td>'+(p.breached>0?'<span class="text-danger fw-bold">'+p.breached+'</span>':p.breached)+'</td><td>'+hB(p.health)+'</td><td>'+tI(p.trend)+'</td><td class="pe-3"><a href="/customer_support/admin/report/project/'+p.id+'?days='+days+'" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-printer me-1"></i>Print</a></td></tr>';}).join('');}
-function bFT(rows,days){var tb=document.getElementById('focalLeaderboardBody');if(!tb)return;if(!rows||!rows.length){tb.innerHTML='<tr><td colspan="9" class="text-center text-muted py-4">No focal persons found.</td></tr>';return;}var m=['🥇','🥈','🥉'];tb.innerHTML=rows.map(function(fp,i){return'<tr><td class="ps-3">'+(m[i]||(i+1))+'</td><td><strong>'+fp.name+'</strong></td><td>'+fp.assigned+'</td><td>'+fp.resolved+'</td><td>'+fp.open+'</td><td>'+(fp.breached>0?'<span class="text-danger fw-bold">'+fp.breached+'</span>':fp.breached)+'</td><td>'+sB(fp.resolve_rate,rC(fp.resolve_rate))+'</td><td>'+sB(fp.sla_rate,rC(fp.sla_rate))+'</td><td class="pe-3"><a href="/customer_support/admin/report/focal/'+fp.id+'?days='+days+'" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-printer me-1"></i>Print</a></td></tr>';}).join('');}
+function bPT(rows,days){var tb=document.getElementById('projectHealthBody');if(!tb)return;if(!rows||!rows.length){tb.innerHTML='<tr><td colspan="8" class="text-center text-muted py-4">No projects found.</td></tr>';return;}tb.innerHTML=rows.map(function(p){return'<tr><td class="ps-3"><strong>'+p.name+'</strong>'+(p.code?'<span class="badge bg-secondary ms-1" style="font-size:10px;">'+p.code+'</span>':'')+'</td><td>'+p.total+'</td><td>'+p.resolved+'</td><td>'+p.open+'</td><td>'+(p.breached>0?'<span class="text-danger fw-bold">'+p.breached+'</span>':p.breached)+'</td><td>'+hB(p.health)+'</td><td>'+tI(p.trend)+'</td><td class="pe-3"><a href="/customer_support/admin/report/project/'+p.id+'?days='+days+'" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-download me-1"></i>Download</a></td></tr>';}).join('');}
+function bFT(rows,days){var tb=document.getElementById('focalLeaderboardBody');if(!tb)return;if(!rows||!rows.length){tb.innerHTML='<tr><td colspan="9" class="text-center text-muted py-4">No focal persons found.</td></tr>';return;}var m=['🥇','🥈','🥉'];tb.innerHTML=rows.map(function(fp,i){return'<tr><td class="ps-3">'+(m[i]||(i+1))+'</td><td><strong>'+fp.name+'</strong></td><td>'+fp.assigned+'</td><td>'+fp.resolved+'</td><td>'+fp.open+'</td><td>'+(fp.breached>0?'<span class="text-danger fw-bold">'+fp.breached+'</span>':fp.breached)+'</td><td>'+sB(fp.resolve_rate,rC(fp.resolve_rate))+'</td><td>'+sB(fp.sla_rate,rC(fp.sla_rate))+'</td><td class="pe-3"><a href="/customer_support/admin/report/focal/'+fp.id+'?days='+days+'" target="_blank" class="btn btn-sm btn-outline-primary" style="font-size:11px;"><i class="bi bi-download me-1"></i>Download</a></td></tr>';}).join('');}
 function loadReportData(days){fetch('/customer_support/admin/reporting/data?days='+days,{credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).then(function(d){if(!d.success)return;var s=d.summary||{};document.getElementById('r-total-period').textContent=s.total_period||0;document.getElementById('r-resolved').textContent=s.resolved_period||0;document.getElementById('r-open').textContent=s.open_tickets||0;document.getElementById('r-breached').textContent=s.breached_period||0;document.getElementById('r-sla-compliance').textContent=(s.sla_compliance||0)+'%';document.getElementById('r-resolve-rate').textContent=(s.resolve_rate||0)+'%';bVC(d.volume_trend||[]);bSC(d.status_breakdown||{});bPC(d.priority_dist||{});bCC(d.top_customers||[]);bPT(d.project_health||[],days);bFT(d.focal_leaderboard||[],days);var el=document.getElementById('execReportLink');if(el)el.href='/customer_support/admin/report/executive?days='+days;}).catch(function(e){console.warn('Report data load failed:',e);});}
 document.addEventListener('DOMContentLoaded',function(){
   var grp=document.getElementById('reportDaysGroup');if(grp){grp.addEventListener('click',function(e){var b=e.target.closest('button[data-days]');if(!b)return;grp.querySelectorAll('button').forEach(function(x){x.classList.remove('active');});b.classList.add('active');currentDays=parseInt(b.getAttribute('data-days'));loadReportData(currentDays);});}
@@ -2822,7 +3621,12 @@ function prLoadReports() {
     });
 }
 
+window._prCurrentReportId = null;
+
 window.prShowDetail = function(r) {
+    window._prCurrentReportId = r.id || null;
+    var fwdBtn = document.getElementById('prForwardBtn');
+    if (fwdBtn) { fwdBtn.disabled = false; fwdBtn.innerHTML = '<i class="bi bi-send me-1"></i>Forward to Customer'; fwdBtn.className = 'btn btn-outline-success'; }
     document.getElementById('prDetailTitle').textContent = r.project_name + ' — Project Closure Report';
     document.getElementById('prDetailSubtitle').textContent = 'Ref: ' + (r.project_key||'-') + '  ·  Generated ' + r.generated_on;
 
@@ -2840,10 +3644,10 @@ window.prShowDetail = function(r) {
     var S = {
         wrap:    'font-family:"Segoe UI",Arial,sans-serif;color:#1a1a2e;background:#fff;padding:2rem 2.2rem;',
         h2:      'margin:0;font-size:1.45rem;font-weight:700;letter-spacing:.5px;',
-        secHead: 'font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#1a3a5c;border-bottom:2px solid #1a3a5c;padding-bottom:.35rem;margin:1.4rem 0 .75rem;',
+        secHead: 'font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#064e3b;border-bottom:2px solid #064e3b;padding-bottom:.35rem;margin:1.4rem 0 .75rem;',
         label:   'font-size:.72rem;color:#6c757d;text-transform:uppercase;letter-spacing:.05em;',
         val:     'font-size:.9rem;font-weight:600;color:#1a1a2e;margin-top:.1rem;',
-        th:      'padding:.55rem .7rem;text-align:left;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#1a3a5c;color:#fff;white-space:nowrap;',
+        th:      'padding:.55rem .7rem;text-align:left;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;background:#064e3b;color:#fff;white-space:nowrap;',
         td:      'padding:.5rem .7rem;font-size:.8rem;border-bottom:1px solid #e9ecef;vertical-align:top;',
         tdBold:  'padding:.5rem .7rem;font-size:.8rem;border-bottom:1px solid #e9ecef;font-weight:700;',
     };
@@ -2851,8 +3655,9 @@ window.prShowDetail = function(r) {
     function kv(label, value) {
         return '<div style="margin-bottom:.55rem;"><div style="' + S.label + '">' + label + '</div><div style="' + S.val + '">' + value + '</div></div>';
     }
-    function secTitle(txt) {
-        return '<div style="' + S.secHead + '">' + txt + '</div>';
+    function secTitle(txt, newPage) {
+        var pb = newPage ? 'page-break-before:always;break-before:page;' : '';
+        return '<div style="' + S.secHead + pb + '">' + txt + '</div>';
     }
     function slaCell(status) {
         var breached = (status||'').toLowerCase() === 'breached';
@@ -2873,17 +3678,17 @@ window.prShowDetail = function(r) {
         return '<span style="display:inline-block;padding:.15rem .45rem;border-radius:3px;font-size:.7rem;font-weight:600;background:' + bg + ';color:' + clr + ';">' + esc(p) + '</span>';
     }
     function statBox(val, label, color) {
-        return '<div style="flex:1;text-align:center;padding:.75rem .5rem;border:1px solid #e9ecef;border-radius:6px;border-top:3px solid ' + (color||'#1a3a5c') + ';">' +
+        return '<div style="flex:1;text-align:center;padding:.75rem .5rem;border:1px solid #e9ecef;border-radius:6px;border-top:3px solid ' + (color||'#064e3b') + ';">' +
             '<div style="font-size:1.5rem;font-weight:700;color:' + (color||'#1a1a2e') + ';">' + val + '</div>' +
             '<div style="font-size:.68rem;color:#6c757d;text-transform:uppercase;letter-spacing:.05em;margin-top:.2rem;">' + label + '</div></div>';
     }
 
     /* ── 1. DOCUMENT HEADER ───────────────────────────────────── */
     var headerHtml =
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:1.2rem;border-bottom:3px solid #1a3a5c;margin-bottom:1.2rem;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:1.2rem;border-bottom:3px solid #064e3b;margin-bottom:1.2rem;page-break-inside:avoid;break-inside:avoid;">' +
         '<div>' +
         '<div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#6c757d;margin-bottom:.35rem;">Official Project Closure Report</div>' +
-        '<div style="' + S.h2 + 'color:#1a3a5c;">' + esc(r.project_name) + '</div>' +
+        '<div style="' + S.h2 + 'color:#064e3b;">' + esc(r.project_name) + '</div>' +
         '<div style="font-size:.82rem;color:#6c757d;margin-top:.25rem;">' + esc(r.project_type||'') + (r.project_key ? '&nbsp;&nbsp;|&nbsp;&nbsp;Ref: <strong>' + esc(r.project_key) + '</strong>' : '') + '</div>' +
         '</div>' +
         '<div style="text-align:right;">' +
@@ -2895,7 +3700,7 @@ window.prShowDetail = function(r) {
     /* ── 2. PROJECT OVERVIEW ──────────────────────────────────── */
     var overviewHtml =
         secTitle('Project Overview') +
-        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem 1.5rem;">' +
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem 1.5rem;page-break-inside:avoid;break-inside:avoid;">' +
         kv('Project Reference', esc(r.project_key||'-')) +
         kv('Project Type', esc(r.project_type||'-')) +
         kv('Focal Person', esc(r.focal_person||'-')) +
@@ -2903,7 +3708,7 @@ window.prShowDetail = function(r) {
         kv('Warranty / Support End', esc(r.end_date)) +
         kv('Compliance', esc(r.compliance_flags||'None')) +
         '</div>' +
-        (r.project_goals ? '<div style="margin-top:.6rem;padding:.65rem .85rem;background:#f8f9fc;border-left:3px solid #1a3a5c;border-radius:0 4px 4px 0;font-size:.82rem;"><span style="' + S.label + '">Project Goals &amp; Objectives</span><p style="margin:.25rem 0 0;white-space:pre-line;color:#374151;">' + esc(r.project_goals) + '</p></div>' : '') +
+        (r.project_goals ? '<div style="margin-top:.6rem;padding:.65rem .85rem;background:#f8f9fc;border-left:3px solid #064e3b;border-radius:0 4px 4px 0;font-size:.82rem;"><span style="' + S.label + '">Project Goals &amp; Objectives</span><p style="margin:.25rem 0 0;white-space:pre-line;color:#374151;">' + esc(r.project_goals) + '</p></div>' : '') +
         (r.tech_languages||r.tech_frameworks||r.tech_databases ?
             '<div style="margin-top:.5rem;font-size:.8rem;color:#374151;padding:.5rem .85rem;background:#f8f9fc;border-radius:4px;">' +
             (r.tech_languages ? '<strong>Languages:</strong> ' + esc(r.tech_languages) + '&emsp;' : '') +
@@ -2922,11 +3727,11 @@ window.prShowDetail = function(r) {
     var teamCustHtml =
         secTitle('Project Team &amp; Customers') +
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">' +
-        '<div><div style="font-size:.75rem;font-weight:600;color:#1a3a5c;margin-bottom:.4rem;">Team Members</div>' +
+        '<div><div style="font-size:.75rem;font-weight:600;color:#064e3b;margin-bottom:.4rem;">Team Members</div>' +
         '<table style="width:100%;border-collapse:collapse;">' +
         '<thead><tr><th style="' + S.th + '">Name</th><th style="' + S.th + '">Role</th></tr></thead>' +
         '<tbody>' + (teamRows||'<tr><td colspan="2" style="' + S.td + 'color:#6c757d;">No team data.</td></tr>') + '</tbody></table></div>' +
-        '<div><div style="font-size:.75rem;font-weight:600;color:#1a3a5c;margin-bottom:.4rem;">Customers Served</div>' +
+        '<div><div style="font-size:.75rem;font-weight:600;color:#064e3b;margin-bottom:.4rem;">Customers Served</div>' +
         '<table style="width:100%;border-collapse:collapse;">' +
         '<thead><tr><th style="' + S.th + '">Name</th><th style="' + S.th + '">Email</th></tr></thead>' +
         '<tbody>' + (custRows||'<tr><td colspan="2" style="' + S.td + 'color:#6c757d;">No customer data.</td></tr>') + '</tbody></table></div>' +
@@ -2934,7 +3739,7 @@ window.prShowDetail = function(r) {
 
     /* ── 4. TICKET REGISTER (main table) ─────────────────────── */
     var ticketRows = allTkts.map(function(t, i) {
-        return '<tr style="background:' + (i%2===0?'#fff':'#f8f9fc') + ';">' +
+        return '<tr style="background:' + (i%2===0?'#fff':'#f8f9fc') + ';page-break-inside:avoid;break-inside:avoid;">' +
             '<td style="' + S.tdBold + '">' + esc(t.ticket_id) + '</td>' +
             '<td style="' + S.td + '">' + esc(t.subject) + (t.description ? '<br><span style="font-size:.72rem;color:#6c757d;">' + esc(t.description) + '</span>' : '') + '</td>' +
             '<td style="' + S.td + '">' + esc(t.customer) + '</td>' +
@@ -2948,7 +3753,7 @@ window.prShowDetail = function(r) {
     }).join('');
 
     var ticketRegisterHtml =
-        secTitle('Ticket Register — Complete Record') +
+        secTitle('Ticket Register — Complete Record', true) +
         '<div style="overflow-x:auto;">' +
         '<table style="width:100%;border-collapse:collapse;min-width:700px;">' +
         '<thead><tr>' +
@@ -2968,21 +3773,22 @@ window.prShowDetail = function(r) {
 
     /* ── 5. PERFORMANCE SUMMARY ───────────────────────────────── */
     var summaryHtml =
-        secTitle('Performance Summary') +
-        '<div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap;">' +
-        statBox(r.total_tickets,        'Total Tickets',     '#1a3a5c') +
+        secTitle('Performance Summary', true) +
+        '<div style="display:flex;gap:.6rem;margin-bottom:1rem;flex-wrap:wrap;page-break-inside:avoid;break-inside:avoid;">' +
+        statBox(r.total_tickets,        'Total Tickets',     '#064e3b') +
         statBox(r.resolved_tickets,     'Resolved',          '#16a34a') +
         statBox(r.open_tickets,         'Open at Closure',   r.open_tickets > 0 ? '#d97706' : '#6c757d') +
         statBox(resolveRate + '%',      'Resolve Rate',      resolveRate >= 80 ? '#16a34a' : resolveRate >= 50 ? '#d97706' : '#dc2626') +
         statBox(r.sla_met,              'SLA Met',           '#16a34a') +
         statBox(r.sla_breached,         'SLA Breached',      r.sla_breached > 0 ? '#dc2626' : '#6c757d') +
         statBox(slaRate + '%',          'SLA Compliance',    slaRate >= 80 ? '#16a34a' : '#d97706') +
-        statBox(r.avg_resolution_hrs + 'h', 'Avg Resolution','#1a3a5c') +
+        statBox(r.avg_resolution_hrs + 'h', 'Avg Resolution','#064e3b') +
         '</div>';
 
     /* ── 6. SIGNATURE BLOCK ───────────────────────────────────── */
     var sigLineStyle = 'display:block;width:100%;border-bottom:1.5px solid #1a1a2e;margin-bottom:.3rem;height:42px;';
     var sigHtml =
+        '<div style="page-break-inside:avoid;break-inside:avoid;">' +
         secTitle('Authorization &amp; Certification') +
         '<p style="font-size:.78rem;color:#6c757d;margin-bottom:1rem;">This report certifies the official closure of the above-named project. Authorized signatories confirm that all deliverables have been reviewed and the project is formally concluded.</p>' +
         '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;margin-top:1.5rem;">' +
@@ -3012,7 +3818,8 @@ window.prShowDetail = function(r) {
         '<div style="margin-top:1.4rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;">' +
         '<div><div style="font-size:.68rem;color:#6c757d;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem;">Date of Closure</div><span style="display:block;width:180px;border-bottom:1.5px solid #1a1a2e;height:28px;"></span></div>' +
         '<div style="font-size:.7rem;color:#6c757d;align-self:flex-end;text-align:right;">Dragon Coders &nbsp;·&nbsp; Strictly Confidential &nbsp;·&nbsp; Ref: ' + esc(r.project_key||'-') + '</div>' +
-        '</div>';
+        '</div>' +
+        '</div>';  /* end break-inside:avoid wrapper */
 
     /* ── ASSEMBLE ─────────────────────────────────────────────── */
     var html =
@@ -3029,20 +3836,25 @@ window.prShowDetail = function(r) {
 
     /* ── PDF download handler ────────────────────────────────────── */
     function doPdfDownload() {
-        var el = document.getElementById('prReportContent');
+        var el  = document.getElementById('prReportContent');
         var filename = (r.project_name + '_closure_report').replace(/\s+/g,'_') + '.pdf';
+        if (btn1) { btn1.disabled = true; btn1.textContent = 'Generating…'; }
+        if (btn2) { btn2.disabled = true; btn2.textContent = 'Generating…'; }
         var opt = {
             margin:       [10, 10, 10, 10],
             filename:     filename,
             image:        { type: 'jpeg', quality: 0.97 },
             html2canvas:  { scale: 2, useCORS: true, logging: false },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:    { mode: ['css', 'legacy'] }
         };
-        html2pdf().set(opt).from(el).save();
+        html2pdf().set(opt).from(el).save().then(function () {
+            if (btn1) { btn1.disabled = false; btn1.innerHTML = '<i class="bi bi-download me-1"></i>Download PDF'; }
+            if (btn2) { btn2.disabled = false; btn2.innerHTML = '<i class="bi bi-download me-1"></i>Download PDF'; }
+        });
     }
-    var btn1 = document.getElementById('prDownloadBtn');
+    var btn1 = null;
     var btn2 = document.getElementById('prDownloadBtn2');
-    if (btn1) { btn1.onclick = doPdfDownload; }
     if (btn2) { btn2.onclick = doPdfDownload; }
 
     /* ── Show modal (stacked over reports list) ──────────────────── */
@@ -3051,6 +3863,40 @@ window.prShowDetail = function(r) {
     setTimeout(function() {
         new bootstrap.Modal(document.getElementById('prDetailModal')).show();
     }, 300);
+};
+
+window.prForwardReport = function() {
+    var id = window._prCurrentReportId;
+    var btn = document.getElementById('prForwardBtn');
+    if (!id) {
+        if (btn) { btn.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>No report selected (id=' + id + ')'; btn.className = 'btn btn-outline-danger'; }
+        return;
+    }
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Forwarding…'; }
+    jsonCall('/customer_support/admin_dashboard/report/forward', { report_id: id })
+    .then(function(res) {
+        if (res.error) {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>' + res.error; btn.className = 'btn btn-outline-danger'; }
+            return;
+        }
+        var fwd = res.forwarded || 0;
+        var dup = res.already_forwarded || 0;
+        var msg, cls;
+        if (fwd > 0) {
+            msg = '<i class="bi bi-check-circle me-1"></i>Forwarded (' + fwd + ')';
+            cls = 'btn btn-success';
+        } else if (dup > 0) {
+            msg = '<i class="bi bi-check-circle me-1"></i>Already forwarded';
+            cls = 'btn btn-outline-secondary';
+        } else {
+            msg = '<i class="bi bi-exclamation-circle me-1"></i>No portal accounts found';
+            cls = 'btn btn-outline-warning';
+        }
+        if (btn) { btn.disabled = true; btn.innerHTML = msg; btn.className = cls; }
+    })
+    .catch(function() {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-send me-1"></i>Forward to Customer'; btn.className = 'btn btn-outline-success'; }
+    });
 };
 
 })();
@@ -3360,6 +4206,416 @@ document.addEventListener('DOMContentLoaded',function(){
 })();
 //]]>
             </script>
+
+            <!-- PROJECT MANAGEMENT DRAWER — JS -->
+            <script type="text/javascript">
+                //<![CDATA[
+(function () {
+'use strict';
+
+var _projId   = null;
+var _docsLoaded = false;
+
+function getCSRF() {
+    var el = document.querySelector('input[name="csrf_token"]');
+    return el ? el.value : '';
+}
+
+var jsonCall = window.jsonCall || function(url, body) {
+    return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRF() },
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: body || {} })
+    }).then(function (r) { return r.json(); }).then(function (d) { return d.result || d; });
+};
+window.jsonCall = jsonCall;
+
+function esc(s) {
+    var d = document.createElement('span');
+    d.textContent = String(s || '');
+    return d.innerHTML;
+}
+
+function showMsg(elId, text, type) {
+    var el = document.getElementById(elId);
+    if (!el) return;
+    el.innerHTML = '<div class="pd-alert pd-alert-' + type + '"><i class="bi bi-' + (type === 'success' ? 'check-circle' : 'exclamation-triangle') + '"></i>' + esc(text) + '</div>';
+    el.style.display = '';
+    setTimeout(function () { el.style.display = 'none'; }, 3800);
+}
+
+// ── Open / Close ──────────────────────────────────────────────────────────
+window.openProjDrawer = function (dataset) {
+    _projId     = dataset.projectId || null;
+    _docsLoaded = false;
+
+    var codeEl = document.getElementById('pdCode');
+    var nameEl = document.getElementById('pdName');
+    var typeEl = document.getElementById('pdType');
+    if (codeEl) codeEl.textContent = dataset.projectCode || '';
+    if (nameEl) nameEl.textContent = dataset.projectName || 'Project';
+    if (typeEl) typeEl.textContent = dataset.projectType || '';
+
+    // Highlight the active project card so the drawer appears to extend from it
+    document.querySelectorAll('.pj-card--active').forEach(function (c) {
+        c.classList.remove('pj-card--active');
+    });
+    var activeCard = document.getElementById('pjCard-' + dataset.projectId);
+    if (activeCard) activeCard.classList.add('pj-card--active');
+
+    switchPdTab('team');
+    loadTeam();
+
+    document.getElementById('projDrawerOverlay').classList.add('pdOpen');
+    document.getElementById('projDrawer').classList.add('pdOpen');
+    document.body.style.overflow = 'hidden';
+};
+
+window.closeProjDrawer = function () {
+    document.getElementById('projDrawerOverlay').classList.remove('pdOpen');
+    document.getElementById('projDrawer').classList.remove('pdOpen');
+    document.body.style.overflow = '';
+    document.querySelectorAll('.pj-card--active').forEach(function (c) {
+        c.classList.remove('pj-card--active');
+    });
+};
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && document.getElementById('projDrawer').classList.contains('pdOpen')) {
+        closeProjDrawer();
+    }
+});
+
+// ── Tab Switcher ──────────────────────────────────────────────────────────
+window.switchPdTab = function (tab) {
+    ['team', 'docs'].forEach(function (t) {
+        var capT = t.charAt(0).toUpperCase() + t.slice(1);
+        var btn   = document.getElementById('pdTab' + capT);
+        var panel = document.getElementById('pdPanel' + capT);
+        var active = (t === tab);
+        if (btn)   { btn.classList[active ? 'add' : 'remove']('pdTabActive'); btn.setAttribute('aria-selected', active); }
+        if (panel) panel.style.display = active ? '' : 'none';
+    });
+    if (tab === 'docs' && !_docsLoaded) { loadDocs(); _docsLoaded = true; }
+};
+
+// ═════════════════════════════════════════════════════════════════════════
+// TEAM
+// ═════════════════════════════════════════════════════════════════════════
+function loadTeam() {
+    if (!_projId) return;
+    var list  = document.getElementById('pdMemberList');
+    var empty = document.getElementById('pdMemberEmpty');
+    if (list)  list.innerHTML  = '<div class="pd-loading"><div class="spinner-border spinner-border-sm me-2" style="width:14px;height:14px"></div>Loading team…</div>';
+    if (empty) empty.style.display = 'none';
+
+    jsonCall('/customer_support/admin_dashboard/focal_persons', {}).then(function (res) {
+        var sel = document.getElementById('pdFocalSelect');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">— Select focal person —</option>';
+        (res.users || []).forEach(function (u) {
+            var opt = document.createElement('option');
+            opt.value = u.id;
+            opt.textContent = u.name + (u.email ? ' (' + u.email + ')' : '');
+            sel.appendChild(opt);
+        });
+    });
+
+    jsonCall('/customer_support/admin_dashboard/projects/' + _projId + '/members', {}).then(function (res) {
+        if (!list) return;
+        list.innerHTML = '';
+        if (res.error) { showMsg('pdMemberMsg', res.error, 'danger'); return; }
+        renderFocal(res.focal || null);
+        var focal = res.focal;
+        var fSel  = document.getElementById('pdFocalSelect');
+        if (focal && focal.user_id && fSel) fSel.value = focal.user_id;
+
+        var members = res.members || [];
+        if (!members.length) { if (empty) empty.style.display = ''; }
+        else members.forEach(appendMemberRow);
+
+        updateTeamBadge(members.length + (focal ? 1 : 0));
+    });
+}
+
+function renderFocal(m) {
+    var cur       = document.getElementById('pdFocalCurrent');
+    var removeBtn = document.getElementById('pdRemoveFocalBtn');
+    if (!cur) return;
+    if (!m) {
+        cur.innerHTML = '<p style="font-size:.78rem;color:#9ca3af;margin:0;font-style:italic">No focal person assigned yet.</p>';
+        if (removeBtn) removeBtn.style.display = 'none';
+        return;
+    }
+    cur.innerHTML =
+        '<div class="pd-member-row" style="margin-bottom:0">' +
+            '<div class="pd-avatar pd-avatar-focal">' + esc(m.initials) + '</div>' +
+            '<div class="pd-member-info">' +
+                '<span class="pd-member-name">' + esc(m.name) + '</span>' +
+                '<span class="pd-member-email">' + esc(m.email || '') + '</span>' +
+            '</div>' +
+            '<span class="pd-role-tag pd-role-focal">Focal Person</span>' +
+        '</div>';
+    if (removeBtn) removeBtn.style.display = '';
+}
+
+function appendMemberRow(m) {
+    var list  = document.getElementById('pdMemberList');
+    var empty = document.getElementById('pdMemberEmpty');
+    if (!list) return;
+    if (empty) empty.style.display = 'none';
+
+    var row = document.createElement('div');
+    row.className = 'pd-member-row';
+    row.dataset.memberId = m.id;
+    row.innerHTML =
+        '<div class="pd-avatar">' + esc(m.initials) + '</div>' +
+        '<div class="pd-member-info">' +
+            '<span class="pd-member-name">' + esc(m.name) + '</span>' +
+            '<span class="pd-member-email">' + esc(m.email || '') + '</span>' +
+        '</div>' +
+        '<span class="pd-role-tag">' + esc(m.role_label) + '</span>' +
+        '<button class="pd-rm-btn" data-member-id="' + m.id + '" title="Remove member"><i class="bi bi-person-dash"></i></button>';
+
+    row.querySelector('.pd-rm-btn').addEventListener('click', function () {
+        var mid = this.dataset.memberId;
+        jsonCall('/customer_support/admin_dashboard/projects/members/' + mid + '/remove', {})
+            .then(function (res) {
+                if (res.success) {
+                    row.remove();
+                    if (list && !list.querySelector('.pd-member-row') && empty) empty.style.display = '';
+                    showMsg('pdMemberMsg', 'Member removed.', 'success');
+                    reCountTeamBadge();
+                } else {
+                    showMsg('pdMemberMsg', res.error || 'Failed to remove.', 'danger');
+                }
+            });
+    });
+    list.appendChild(row);
+}
+
+function updateTeamBadge(count) {
+    var badge = document.getElementById('pdTeamBadge');
+    if (!badge) return;
+    if (count > 0) { badge.textContent = count; badge.style.display = ''; }
+    else badge.style.display = 'none';
+}
+
+function reCountTeamBadge() {
+    var rows  = (document.getElementById('pdMemberList') || {}).querySelectorAll ? document.getElementById('pdMemberList').querySelectorAll('.pd-member-row').length : 0;
+    var focal = (document.getElementById('pdRemoveFocalBtn') || {}).style && document.getElementById('pdRemoveFocalBtn').style.display !== 'none' ? 1 : 0;
+    updateTeamBadge(rows + focal);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var assignBtn  = document.getElementById('pdAssignFocalBtn');
+    var removeBtn  = document.getElementById('pdRemoveFocalBtn');
+    var addMbrBtn  = document.getElementById('pdAddMemberBtn');
+
+    if (assignBtn) {
+        assignBtn.addEventListener('click', function () {
+            var uid = document.getElementById('pdFocalSelect').value;
+            if (!uid) { showMsg('pdFocalMsg', 'Please select a focal person.', 'danger'); return; }
+            jsonCall('/customer_support/admin_dashboard/projects/' + _projId + '/focal/assign', { user_id: parseInt(uid) })
+                .then(function (res) {
+                    if (res.success) { renderFocal(res.member); showMsg('pdFocalMsg', 'Focal person assigned.', 'success'); reCountTeamBadge(); }
+                    else showMsg('pdFocalMsg', res.error || 'Failed to assign.', 'danger');
+                });
+        });
+    }
+
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function () {
+            jsonCall('/customer_support/admin_dashboard/projects/' + _projId + '/focal/remove', {})
+                .then(function (res) {
+                    if (res.success) { renderFocal(null); showMsg('pdFocalMsg', 'Focal person removed.', 'success'); reCountTeamBadge(); }
+                    else showMsg('pdFocalMsg', res.error || 'Failed.', 'danger');
+                });
+        });
+    }
+
+    if (addMbrBtn) {
+        addMbrBtn.addEventListener('click', function () {
+            var name  = (document.getElementById('pdMemberName').value || '').trim();
+            var email = (document.getElementById('pdMemberEmail').value || '').trim();
+            var role  = document.getElementById('pdMemberRole').value;
+            if (!name) { showMsg('pdMemberMsg', 'Full name is required.', 'danger'); return; }
+            jsonCall('/customer_support/admin_dashboard/projects/' + _projId + '/members/add', { name: name, email: email, role: role })
+                .then(function (res) {
+                    if (res.success) {
+                        appendMemberRow(res.member);
+                        document.getElementById('pdMemberName').value  = '';
+                        document.getElementById('pdMemberEmail').value = '';
+                        showMsg('pdMemberMsg', 'Member added successfully.', 'success');
+                        reCountTeamBadge();
+                    } else {
+                        showMsg('pdMemberMsg', res.error || 'Failed to add member.', 'danger');
+                    }
+                });
+        });
+    }
+});
+
+// ═════════════════════════════════════════════════════════════════════════
+// DOCUMENTS
+// ═════════════════════════════════════════════════════════════════════════
+var FILE_ICONS  = { pdf:'bi-file-earmark-pdf-fill', docx:'bi-file-earmark-word-fill', xlsx:'bi-file-earmark-excel-fill', txt:'bi-file-earmark-text-fill' };
+var FILE_COLORS = { pdf:'#ef4444', docx:'#059669', xlsx:'#16a34a', txt:'#64748b' };
+var STATE_LABELS = { pending:'Processing…', ready:'Ready', error:'Error' };
+
+function loadDocs() {
+    if (!_projId) return;
+    var docList  = document.getElementById('pdDocList');
+    var docEmpty = document.getElementById('pdDocEmpty');
+    if (docList)  docList.innerHTML  = '<div class="pd-loading"><div class="spinner-border spinner-border-sm me-2" style="width:14px;height:14px"></div>Loading documents…</div>';
+    if (docEmpty) docEmpty.style.display = 'none';
+
+    jsonCall('/customer_support/admin_dashboard/projects/' + _projId + '/documents', {}).then(function (res) {
+        if (!docList) return;
+        docList.innerHTML = '';
+        if (res.error) { docList.innerHTML = '<p style="color:#ef4444;font-size:.8rem;margin:0">' + esc(res.error) + '</p>'; return; }
+        var docs = res.documents || [];
+        updateDocsBadge(docs.length);
+        if (!docs.length) { if (docEmpty) docEmpty.style.display = ''; return; }
+        docs.forEach(appendDocRow);
+    });
+}
+
+function appendDocRow(doc) {
+    var docList  = document.getElementById('pdDocList');
+    var docEmpty = document.getElementById('pdDocEmpty');
+    if (!docList) return;
+    if (docEmpty) docEmpty.style.display = 'none';
+
+    var icon       = FILE_ICONS[doc.file_type]  || 'bi-file-earmark-fill';
+    var color      = FILE_COLORS[doc.file_type] || '#64748b';
+    var stateLabel = STATE_LABELS[doc.state]    || doc.state;
+    var stateClass = doc.state === 'ready' ? 'pd-state-ready' : (doc.state === 'error' ? 'pd-state-error' : 'pd-state-pending');
+
+    var row = document.createElement('div');
+    row.className = 'pd-doc-row';
+    row.dataset.docId = doc.id;
+    row.innerHTML =
+        '<div class="pd-doc-icon" style="color:' + color + '"><i class="bi ' + icon + '"></i></div>' +
+        '<div class="pd-doc-info">' +
+            '<span class="pd-doc-name">' + esc(doc.name) + '</span>' +
+            '<span class="pd-doc-meta">' + esc(doc.filename) + ' · ' + esc(doc.created) + '</span>' +
+        '</div>' +
+        '<span class="pd-doc-state ' + stateClass + '">' + stateLabel + '</span>' +
+        '<button class="pd-del-btn" data-doc-id="' + doc.id + '" title="Delete document"><i class="bi bi-trash3"></i></button>';
+
+    row.querySelector('.pd-del-btn').addEventListener('click', function () {
+        if (!confirm('Delete "' + doc.name + '"?\nThis cannot be undone.')) return;
+        jsonCall('/customer_support/admin_dashboard/documents/' + doc.id + '/delete', {})
+            .then(function (res) {
+                if (res.success) {
+                    row.remove();
+                    var remaining = docList.querySelectorAll('.pd-doc-row').length;
+                    if (!remaining && docEmpty) docEmpty.style.display = '';
+                    updateDocsBadge(remaining);
+                    showMsg('pdUploadMsg', 'Document deleted.', 'success');
+                } else {
+                    showMsg('pdUploadMsg', res.error || 'Failed to delete.', 'danger');
+                }
+            });
+    });
+    docList.appendChild(row);
+}
+
+function updateDocsBadge(count) {
+    var badge = document.getElementById('pdDocsBadge');
+    if (!badge) return;
+    if (count > 0) { badge.textContent = count; badge.style.display = ''; }
+    else badge.style.display = 'none';
+}
+
+// Drag-and-drop
+window.pdHandleDrop = function (e) {
+    e.preventDefault();
+    var zone = document.getElementById('pdUploadZone');
+    if (zone) zone.classList.remove('pdDragOver');
+    var files = e.dataTransfer && e.dataTransfer.files;
+    if (files && files.length) {
+        var input = document.getElementById('pdFileInput');
+        try { var dt = new DataTransfer(); dt.items.add(files[0]); input.files = dt.files; } catch (ex) {}
+        pdFileSelected(input);
+    }
+};
+
+// File selected — show preview + auto-fill name
+window.pdFileSelected = function (input) {
+    var preview = document.getElementById('pdFilePreview');
+    if (!preview) return;
+    if (!input.files || !input.files.length) { preview.style.display = 'none'; return; }
+    var f = input.files[0];
+    var size = f.size > 1048576 ? (f.size / 1048576).toFixed(1) + ' MB' : Math.round(f.size / 1024) + ' KB';
+    preview.className = 'pd-file-preview';
+    preview.innerHTML =
+        '<i class="bi bi-file-earmark" style="font-size:1.1rem;color:#065f46;flex-shrink:0"></i>' +
+        '<span class="pd-file-preview-name">' + esc(f.name) + '</span>' +
+        '<span class="pd-file-preview-size">' + size + '</span>' +
+        '<button class="pd-file-preview-rm" title="Remove file" onclick="document.getElementById(\'pdFileInput\').value=\'\';document.getElementById(\'pdFilePreview\').style.display=\'none\'"><i class="bi bi-x-lg"></i></button>';
+    preview.style.display = '';
+    var nameEl = document.getElementById('pdDocName');
+    if (nameEl && !nameEl.value.trim()) {
+        nameEl.value = f.name.replace(/\.[^.]+$/, '');
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    var uploadBtn = document.getElementById('pdUploadBtn');
+    if (!uploadBtn) return;
+
+    uploadBtn.addEventListener('click', function () {
+        var name      = (document.getElementById('pdDocName').value || '').trim();
+        var fileInput = document.getElementById('pdFileInput');
+        var category  = document.getElementById('pdDocCategory').value;
+
+        if (!name)                        { showMsg('pdUploadMsg', 'Document name is required.', 'danger');    return; }
+        if (!fileInput || !fileInput.files.length) { showMsg('pdUploadMsg', 'Please select or drop a file.', 'danger'); return; }
+        if (!_projId)                     { showMsg('pdUploadMsg', 'No project selected.', 'danger');           return; }
+
+        var formData = new FormData();
+        formData.append('name', name);
+        formData.append('category', category);
+        formData.append('project_id', _projId);
+        formData.append('file', fileInput.files[0]);
+        var csrf = document.querySelector('input[name="csrf_token"]');
+        if (csrf) formData.append('csrf_token', csrf.value);
+
+        var btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" style="width:13px;height:13px"></span>Uploading…';
+
+        fetch('/customer_support/knowledge/upload', { method: 'POST', credentials: 'same-origin', body: formData })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res.error) {
+                    showMsg('pdUploadMsg', res.error, 'danger');
+                } else {
+                    document.getElementById('pdDocName').value      = '';
+                    document.getElementById('pdDocCategory').value  = 'projects';
+                    fileInput.value                                  = '';
+                    var prev = document.getElementById('pdFilePreview');
+                    if (prev) prev.style.display = 'none';
+                    showMsg('pdUploadMsg', 'Document uploaded. Processing has started in the background.', 'success');
+                    appendDocRow(res.doc);
+                    var cnt = document.getElementById('pdDocList').querySelectorAll('.pd-doc-row').length;
+                    updateDocsBadge(cnt);
+                }
+            })
+            .catch(function () { showMsg('pdUploadMsg', 'Upload failed. Please try again.', 'danger'); })
+            .finally(function () {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-cloud-upload"></i> Upload Document';
+            });
+    });
+});
+
+})();
+                //]]>
+            </script>
+
         </t>
     </template>
 </odoo>

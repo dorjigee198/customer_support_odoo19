@@ -16,3 +16,5 @@ from . import sla_controller
 from . import focal_board
 from . import auto_assignment
 from . import password_reset
+from . import general_settings
+from . import customer_reports

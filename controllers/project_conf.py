@@ -93,7 +93,7 @@ class CustomerSupportProjectController(http.Controller):
             _logger.info(f"Project + Config created: {project.name} (ID: {project.id})")
 
             return request.redirect(
-                f"/customer_support/admin_dashboard?tab=system-configuration&modal=projects&project_created=1&project_id={project.id}"
+                f"/customer_support/admin_dashboard?tab=system-configuration&project_created=1&project_id={project.id}"
             )
 
         except Exception as e:
@@ -158,7 +158,7 @@ class CustomerSupportProjectController(http.Controller):
             _logger.info(f"Project + Config updated: {project.name} (ID: {project.id})")
 
             return request.redirect(
-                f"/customer_support/admin_dashboard?tab=system-configuration&modal=projects&project_updated=1&project_id={project.id}"
+                f"/customer_support/admin_dashboard?tab=system-configuration&project_updated=1&project_id={project.id}"
             )
 
         except Exception as e:
@@ -271,6 +271,7 @@ class CustomerSupportProjectController(http.Controller):
                 if t.customer_id and t.customer_id.id not in seen:
                     seen.add(t.customer_id.id)
                     customers.append({
+                        "id":    t.customer_id.id,
                         "name":  t.customer_id.name,
                         "email": t.customer_id.email or "",
                     })
@@ -345,7 +346,7 @@ class CustomerSupportProjectController(http.Controller):
 
             return request.redirect(
                 "/customer_support/admin_dashboard"
-                "?tab=system-configuration&modal=projects&project_deleted=1"
+                "?tab=system-configuration&project_deleted=1"
             )
 
         except Exception as e:
@@ -354,7 +355,7 @@ class CustomerSupportProjectController(http.Controller):
             _logger.error(traceback.format_exc())
             return request.redirect(
                 "/customer_support/admin_dashboard"
-                f"?tab=system-configuration&modal=projects&error={str(e)}"
+                f"?tab=system-configuration&error={str(e)}"
             )
 
     @http.route(

@@ -13,7 +13,7 @@
                 <link
                     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
                     rel="stylesheet" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/focal_projects.css?v=2" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/focal_projects.css?v=5" />
                 <script
                     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
             </t>
@@ -22,6 +22,14 @@
                 <!-- NAVBAR -->
                 <header class="dashboard-header">
                     <div class="header-content">
+
+                        <!-- Mobile hamburger -->
+                        <button class="fp-hamburger" id="fpHamburger"
+                            onclick="this.classList.toggle('active'); this.closest('.header-content').classList.toggle('nav-open')"
+                            aria-label="Toggle navigation">
+                            <span></span><span></span><span></span>
+                        </button>
+
                         <div class="header-nav">
                             <a href="/customer_support/support_dashboard" class="nav-link-external">
                                 <i class="bi bi-speedometer2"></i>
