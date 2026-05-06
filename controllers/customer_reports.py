@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import json
 import logging
+import os
+import tempfile
 import time
 from datetime import datetime
 from odoo import http
@@ -8,6 +10,7 @@ from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 _tlog = logging.getLogger("customer_support.timing")
+_FWD_TIMING_LOG = os.path.join(tempfile.gettempdir(), "fwd_timing.log")
 
 
 class CustomerReportsController(http.Controller):
@@ -44,12 +47,12 @@ class CustomerReportsController(http.Controller):
     def forward_report(self, report_id=None, **kw):
         t0 = time.time()
         _logger.warning("FORWARD HIT report_id=%s uid=%s", report_id, request.env.user.id)
-        with open("/tmp/fwd_timing.log", "a") as _f:
+        with open(_FWD_TIMING_LOG, "a") as _f:
             _f.write(f"[{datetime.utcnow()}] FORWARD START report_id={report_id}\n")
         try:
             def _flog(msg):
                 _logger.warning("FWD %s", msg)
-                with open("/tmp/fwd_timing.log", "a") as _f:
+                with open(_FWD_TIMING_LOG, "a") as _f:
                     _f.write(f"[{time.time()-t0:.3f}s] {msg}\n")
 
             if not request.env.user.has_group("base.group_system"):
@@ -164,7 +167,7 @@ class CustomerReportsController(http.Controller):
 
         except Exception as e:
             _tlog.info("FORWARD ERROR %.3fs: %s", time.time()-t0, e)
-            with open("/tmp/fwd_timing.log", "a") as _f:
+            with open(_FWD_TIMING_LOG, "a") as _f:
                 _f.write(f"[{time.time()-t0:.3f}s] ERROR: {e}\n")
             _logger.error("forward_report error: %s", e)
             return {"error": str(e)}

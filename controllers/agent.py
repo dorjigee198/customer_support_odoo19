@@ -44,7 +44,7 @@ class CustomerSupportAgent(http.Controller):
             if isinstance(keys, list):
                 return set(keys)
         except Exception:
-            pass
+            _logger.warning("Failed to parse support notification read-state payload; using empty set.")
         return set()
 
     def _save_support_read_keys(self, keys):

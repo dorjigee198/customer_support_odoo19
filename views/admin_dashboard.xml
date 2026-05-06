@@ -12,7 +12,7 @@
                 <link
                     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
                     rel="stylesheet" />
-                <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard.css?v=3" />
+                <link rel="stylesheet" href="/customer_support/static/src/css/admin_dashboard.css?v=4" />
                 <link rel="stylesheet"
                     href="/customer_support/static/src/css/admin_dashboard_mobile.css?v=3" />
                 <script
@@ -274,11 +274,10 @@
                     .pd-input::placeholder { color:#9ca3af; }
 
                     .pd-select {
-                        width: 100%; padding: .5rem .75rem; padding-right:2rem;
+                        width: 100%; padding: .5rem .75rem;
                         border: 1.5px solid #e5e7eb; border-radius:8px;
                         font-size:.84rem; font-family:inherit; color:#111827;
-                        background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2394a3b8'/%3E%3C/svg%3E") no-repeat right .75rem center;
-                        background-size:10px; appearance:none; outline:none; cursor:pointer;
+                        background:#fff; appearance:auto; outline:none; cursor:pointer;
                         transition: border-color .18s;
                     }
                     .pd-select:focus { border-color:#065f46; box-shadow:0 0 0 3px rgba(5,150,105,.1); }
@@ -1012,6 +1011,42 @@
                                         Assignment Management</h5>
                                 </div>
                                 <div class="card-body">
+                                    <div class="ta-project-filter mb-3">
+                                        <div class="ta-project-filter-row">
+                                            <span class="ta-project-filter-label">Project:</span>
+                                            <div class="ta-project-filter-form">
+                                                <select id="taProjectFilterSelect"
+                                                    class="form-select form-select-sm">
+                                                    <option value="">All Projects (<t
+                                                            t-esc="all_projects_ticket_count or 0" />)</option>
+                                                    <t t-foreach="projects" t-as="proj">
+                                                        <option t-att-value="proj.id"
+                                                            t-att-selected="'selected' if (selected_project_id or 0) == proj.id else None">
+                                                            <t t-esc="proj.name" /> (<t
+                                                                t-esc="project_ticket_counts.get(proj.id, 0)" />)
+                                                        </option>
+                                                    </t>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="ta-project-filter-tabs">
+                                            <a t-attf-class="btn btn-sm ta-project-chip js-ta-assignment-tab {{ 'btn-success ta-project-chip-active' if (assignment_filter or 'all') == 'all' else 'btn-outline-success' }}"
+                                                data-assignment="all" href="#">
+                                                All Tickets (<span id="taCountAll"><t
+                                                            t-esc="assignment_counts.get('all', 0)" /></span>)
+                                            </a>
+                                            <a t-attf-class="btn btn-sm ta-project-chip js-ta-assignment-tab {{ 'btn-success ta-project-chip-active' if (assignment_filter or 'all') == 'assigned' else 'btn-outline-success' }}"
+                                                data-assignment="assigned" href="#">
+                                                Assigned (<span id="taCountAssigned"><t
+                                                            t-esc="assignment_counts.get('assigned', 0)" /></span>)
+                                            </a>
+                                            <a t-attf-class="btn btn-sm ta-project-chip js-ta-assignment-tab {{ 'btn-success ta-project-chip-active' if (assignment_filter or 'all') == 'unassigned' else 'btn-outline-success' }}"
+                                                data-assignment="unassigned" href="#">
+                                                Unassigned (<span id="taCountUnassigned"><t
+                                                            t-esc="assignment_counts.get('unassigned', 0)" /></span>)
+                                            </a>
+                                        </div>
+                                    </div>
                                     <div class="ticket-table-container">
                                         <div class="table-responsive">
                                             <table class="table table-hover ticket-table">
@@ -1070,7 +1105,10 @@
                                                 </thead>
                                                 <tbody>
                                                     <t t-foreach="tickets" t-as="ticket">
-                                                        <tr class="position-relative">
+                                                        <tr class="position-relative ta-ticket-row"
+                                                            t-att-data-ticket-id="ticket.id"
+                                                            t-att-data-project-id="ticket.project_id.id if ticket.project_id else 0"
+                                                            t-att-data-assigned="1 if ticket.assigned_to else 0">
                                                             <td>
                                                                 <a
                                                                     t-att-href="'/customer_support/admin_view/ticket/%s' % ticket.id"
@@ -1213,6 +1251,11 @@
                                                             </td>
                                                         </tr>
                                                     </t>
+                                                    <tr id="taNoResultsRow" class="d-none">
+                                                        <td colspan="8" class="text-center text-muted py-4">
+                                                            No tickets found for this filter.
+                                                        </td>
+                                                    </tr>
                                                 </tbody>
                                             </table>
                                         </div>
@@ -1221,7 +1264,10 @@
                                     <!-- MOBILE TICKET CARDS -->
                                     <div class="mobile-ticket-cards">
                                         <t t-foreach="tickets" t-as="ticket">
-                                            <div class="mobile-ticket-card">
+                                            <div class="mobile-ticket-card ta-ticket-card"
+                                                t-att-data-ticket-id="ticket.id"
+                                                t-att-data-project-id="ticket.project_id.id if ticket.project_id else 0"
+                                                t-att-data-assigned="1 if ticket.assigned_to else 0">
                                                 <div class="mtc-top">
                                                     <span class="mtc-id">#<t t-esc="ticket.id" /></span>
                                                     <span
@@ -1326,10 +1372,9 @@
                                                 </t>
                                             </div>
                                         </t>
-                                        <t t-if="not tickets">
-                                            <div class="mobile-ticket-empty">
-                                                <i class="bi bi-inbox"></i> No tickets to display </div>
-                                        </t>
+                                        <div id="taMobileNoResults" class="mobile-ticket-empty d-none">
+                                            <i class="bi bi-inbox"></i> No tickets found for this filter.
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -3542,8 +3587,8 @@ document.addEventListener('DOMContentLoaded',function(){
 'use strict';
 var CAT_LABELS={company:'Company Info',services:'Services & Products',projects:'Projects',pricing:'Pricing',technical:'Technical Docs',faq:'FAQ',other:'Other'};
 function kbAlert(msg,type){var el=document.getElementById('kbAlert');if(!el)return;el.className='alert alert-'+(type||'success')+' mb-3';el.textContent=msg;el.classList.remove('d-none');setTimeout(function(){el.classList.add('d-none');},4000);}
-function kbLoadDocs(){fetch('/customer_support/knowledge/list',{credentials:'same-origin',headers:{'Accept':'application/json'}}).then(function(r){return r.json();}).then(function(data){var docs=data.documents||[];document.getElementById('kbTotalDocs').textContent=docs.length;document.getElementById('kbReadyDocs').textContent=docs.filter(function(d){return d.state==='ready';}).length;document.getElementById('kbPendingDocs').textContent=docs.filter(function(d){return d.state==='pending';}).length;document.getElementById('kbErrorDocs').textContent=docs.filter(function(d){return d.state==='error';}).length;var tb=document.getElementById('kbDocsBody');if(!docs.length){tb.innerHTML='<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-folder2-open me-2"></i>No documents uploaded yet. Upload your first document above.</td></tr>';return;}tb.innerHTML=docs.map(function(d){var stateBadge=d.state==='ready'?'<span class="badge bg-success">&#x2705; Ready</span>':d.state==='error'?'<span class="badge bg-danger" title="'+(d.error_msg||'')+'">&#x274C; Error</span>':'<span class="badge bg-warning text-dark">&#x23F3; Pending</span>';var typeBadge={pdf:'<span class="badge bg-danger">PDF</span>',docx:'<span class="badge bg-primary">DOCX</span>',txt:'<span class="badge bg-success">TXT</span>',xlsx:'<span class="badge bg-info text-dark">XLSX</span>'}[d.file_type]||'<span class="badge bg-secondary">FILE</span>';var projectBadge=d.project_name?'<span class="badge bg-info text-dark">'+d.project_name+'</span>':'<span class="text-muted" style="font-size:0.75rem;">—</span>';return'<tr><td><strong>'+d.name+'</strong>'+(d.description?'<br><small class="text-muted">'+d.description+'</small>':'')+'</td><td>'+projectBadge+'</td><td><span class="badge bg-secondary">'+(CAT_LABELS[d.category]||d.category)+'</span></td><td>'+typeBadge+'</td><td>'+stateBadge+'</td><td class="text-center fw-bold text-primary">'+(d.chunk_count||0)+'</td><td><small class="text-muted">'+(d.create_date||'')+'</small></td><td><button class="btn btn-sm btn-outline-danger" onclick="kbDelete('+d.id+',\''+d.name.replace(/'/g,"\\'")+'\')" title="Delete"><i class="bi bi-trash3"></i></button></td></tr>';}).join('');}).catch(function(e){console.warn('KB load failed:',e);});}
-window.kbUpload=function(){var name=document.getElementById('kbDocName').value.trim();var category=document.getElementById('kbCategory').value;var desc=document.getElementById('kbDescription').value.trim();var fileEl=document.getElementById('kbFile');var projectId=document.getElementById('kbProjectSelect').value;if(!name||!fileEl.files.length){kbAlert('Please fill in the document name and select a file.','warning');return;}var allowed=['.pdf','.docx','.txt','.xlsx'];var filename=fileEl.files[0].name.toLowerCase();if(!allowed.some(function(ext){return filename.endsWith(ext);})){kbAlert('Invalid file type. Allowed: PDF, DOCX, TXT, XLSX','danger');return;}var formData=new FormData();formData.append('name',name);formData.append('category',category);formData.append('description',desc);formData.append('file',fileEl.files[0]);if(projectId)formData.append('project_id',projectId);var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);var btn=document.getElementById('kbUploadBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Uploading...';}fetch('/customer_support/knowledge/upload',{method:'POST',credentials:'same-origin',body:formData}).then(function(){var msg=projectId?'Document uploaded and linked to project. It will appear on the ticket board once processed.':'Document uploaded. Processing has started in the background.';kbAlert(msg,'success');document.getElementById('kbDocName').value='';document.getElementById('kbDescription').value='';document.getElementById('kbFile').value='';document.getElementById('kbProjectSelect').value='';kbLoadDocs();}).catch(function(){kbAlert('Upload failed. Please try again.','danger');}).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="bi bi-upload me-2"></i>Upload &amp; Process';}});};
+function kbLoadDocs(){var url='/customer_support/knowledge/list?_ts='+Date.now();fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Accept':'application/json','Cache-Control':'no-cache'}}).then(function(r){return r.json();}).then(function(data){var docs=data.documents||[];document.getElementById('kbTotalDocs').textContent=docs.length;document.getElementById('kbReadyDocs').textContent=docs.filter(function(d){return d.state==='ready';}).length;document.getElementById('kbPendingDocs').textContent=docs.filter(function(d){return d.state==='pending';}).length;document.getElementById('kbErrorDocs').textContent=docs.filter(function(d){return d.state==='error';}).length;var tb=document.getElementById('kbDocsBody');if(!docs.length){tb.innerHTML='<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-folder2-open me-2"></i>No documents uploaded yet. Upload your first document above.</td></tr>';return;}tb.innerHTML=docs.map(function(d){var stateBadge=d.state==='ready'?'<span class="badge bg-success">&#x2705; Ready</span>':d.state==='error'?'<span class="badge bg-danger" title="'+(d.error_msg||'')+'">&#x274C; Error</span>':'<span class="badge bg-warning text-dark">&#x23F3; Pending</span>';var typeBadge={pdf:'<span class="badge bg-danger">PDF</span>',docx:'<span class="badge bg-primary">DOCX</span>',txt:'<span class="badge bg-success">TXT</span>',xlsx:'<span class="badge bg-info text-dark">XLSX</span>'}[d.file_type]||'<span class="badge bg-secondary">FILE</span>';var projectBadge=d.project_name?'<span class="badge bg-info text-dark">'+d.project_name+'</span>':'<span class="text-muted" style="font-size:0.75rem;">—</span>';return'<tr><td><strong>'+d.name+'</strong>'+(d.description?'<br><small class="text-muted">'+d.description+'</small>':'')+'</td><td>'+projectBadge+'</td><td><span class="badge bg-secondary">'+(CAT_LABELS[d.category]||d.category)+'</span></td><td>'+typeBadge+'</td><td>'+stateBadge+'</td><td class="text-center fw-bold text-primary">'+(d.chunk_count||0)+'</td><td><small class="text-muted">'+(d.create_date||'')+'</small></td><td><button class="btn btn-sm btn-outline-danger" onclick="kbDelete('+d.id+',\''+d.name.replace(/'/g,"\\'")+'\')" title="Delete"><i class="bi bi-trash3"></i></button></td></tr>';}).join('');}).catch(function(e){console.warn('KB load failed:',e);});}
+window.kbUpload=function(){var name=document.getElementById('kbDocName').value.trim();var category=document.getElementById('kbCategory').value;var desc=document.getElementById('kbDescription').value.trim();var fileEl=document.getElementById('kbFile');var projectId=document.getElementById('kbProjectSelect').value;if(!name||!fileEl.files.length){kbAlert('Please fill in the document name and select a file.','warning');return;}var allowed=['.pdf','.docx','.txt','.xlsx'];var filename=fileEl.files[0].name.toLowerCase();if(!allowed.some(function(ext){return filename.endsWith(ext);})){kbAlert('Invalid file type. Allowed: PDF, DOCX, TXT, XLSX','danger');return;}var formData=new FormData();formData.append('name',name);formData.append('category',category);formData.append('description',desc);formData.append('file',fileEl.files[0]);formData.append('ajax','1');if(projectId)formData.append('project_id',projectId);var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);var btn=document.getElementById('kbUploadBtn');if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Uploading...';}fetch('/customer_support/knowledge/upload',{method:'POST',credentials:'same-origin',cache:'no-store',body:formData}).then(function(r){return r.json();}).then(function(res){if(!res||res.error){throw new Error((res&&res.error)||'Upload failed.');}var msg=projectId?'Document uploaded and linked to project. It will appear on the ticket board once processed.':'Document uploaded. Processing has started in the background.';kbAlert(msg,'success');document.getElementById('kbDocName').value='';document.getElementById('kbDescription').value='';document.getElementById('kbFile').value='';document.getElementById('kbProjectSelect').value='';kbLoadDocs();setTimeout(kbLoadDocs,400);}).catch(function(){kbAlert('Upload failed. Please try again.','danger');}).finally(function(){if(btn){btn.disabled=false;btn.innerHTML='<i class="bi bi-upload me-2"></i>Upload &amp; Process';}});};
 window.kbDelete=function(id,name){if(!confirm('Delete "'+name+'"?\nThe AI will no longer use this document.'))return;var formData=new FormData();var csrf=document.querySelector('input[name="csrf_token"]');if(csrf)formData.append('csrf_token',csrf.value);fetch('/customer_support/knowledge/delete/'+id,{method:'POST',credentials:'same-origin',body:formData}).then(function(){kbAlert('Document deleted.','success');kbLoadDocs();}).catch(function(){kbAlert('Delete failed.','danger');});};
 document.addEventListener('DOMContentLoaded',function(){var modal=document.getElementById('knowledgeBaseModal');if(modal)modal.addEventListener('shown.bs.modal',function(){kbLoadDocs();});});
 
@@ -4145,6 +4190,60 @@ document.addEventListener('DOMContentLoaded', function () {
 (function(){
 'use strict';
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+var TA_DONE_KEY='cs_ticket_action_done_v1';
+function taGetDoneSet(){
+    try{
+        var raw=localStorage.getItem(TA_DONE_KEY)||'[]';
+        var arr=JSON.parse(raw);
+        return new Set(Array.isArray(arr)?arr:[]);
+    }catch(_e){
+        return new Set();
+    }
+}
+function taSaveDoneSet(setObj){
+    try{
+        localStorage.setItem(TA_DONE_KEY, JSON.stringify(Array.from(setObj)));
+    }catch(_e){}
+}
+function taRemoveAttention(ticketId){
+    if(!ticketId){return;}
+    document.querySelectorAll('.ta-ticket-row[data-ticket-id="'+ticketId+'"], .ta-ticket-card[data-ticket-id="'+ticketId+'"]').forEach(function(el){
+        el.classList.remove('ta-ticket-attn');
+        var dot=el.querySelector('.ta-attn-dot');
+        if(dot){dot.remove();}
+    });
+}
+function taMarkLatestThree(){
+    var done=taGetDoneSet();
+    var rows=Array.prototype.slice.call(document.querySelectorAll('.ta-ticket-row'));
+    var marked=0;
+    rows.forEach(function(row){
+        if(marked>=3){return;}
+        var hasAction=!!row.querySelector('form.assign-form, form.mtc-assign-form');
+        var ticketId=row.getAttribute('data-ticket-id');
+        if(!hasAction||!ticketId||done.has(ticketId)){return;}
+        row.classList.add('ta-ticket-attn');
+        if(!row.querySelector('.ta-attn-dot')){
+            var subjectLink=row.querySelector('td:nth-child(2) a')||row.querySelector('a.admin-ticket-open');
+            if(subjectLink){
+                var dot=document.createElement('span');
+                dot.className='ta-attn-dot';
+                subjectLink.appendChild(dot);
+            }
+        }
+        var card=document.querySelector('.ta-ticket-card[data-ticket-id="'+ticketId+'"]');
+        if(card){
+            card.classList.add('ta-ticket-attn');
+            if(!card.querySelector('.ta-attn-dot')){
+                var cardTop=card.querySelector('.mtc-top')||card;
+                var dot2=document.createElement('span');
+                dot2.className='ta-attn-dot';
+                cardTop.appendChild(dot2);
+            }
+        }
+        marked+=1;
+    });
+}
 
 function handleAssignForm(form){
     form.addEventListener('submit',function(e){
@@ -4179,6 +4278,16 @@ function handleAssignForm(form){
                 // Re-attach handler after revert
                 var newForm=cell&&cell.querySelector('form');
                 if(newForm){handleAssignForm(newForm);}
+            }else{
+                var ticketRow=form.closest('.ta-ticket-row');
+                var ticketCard=form.closest('.ta-ticket-card');
+                var ticketId=(ticketRow&&ticketRow.getAttribute('data-ticket-id'))||(ticketCard&&ticketCard.getAttribute('data-ticket-id'));
+                if(ticketId){
+                    var done=taGetDoneSet();
+                    done.add(String(ticketId));
+                    taSaveDoneSet(done);
+                    taRemoveAttention(String(ticketId));
+                }
             }
         })
         .catch(function(){
@@ -4202,6 +4311,99 @@ function showToast(msg,type){
 
 document.addEventListener('DOMContentLoaded',function(){
     document.querySelectorAll('.assign-form,.mtc-assign-form').forEach(handleAssignForm);
+    taMarkLatestThree();
+});
+})();
+//]]>
+            </script>
+
+            <script type="text/javascript">
+                //<![CDATA[
+(function(){
+'use strict';
+function setChipState(active){
+    document.querySelectorAll('.js-ta-assignment-tab').forEach(function(el){
+        var isActive = el.getAttribute('data-assignment') === active;
+        el.classList.toggle('btn-success', isActive);
+        el.classList.toggle('ta-project-chip-active', isActive);
+        el.classList.toggle('btn-outline-success', !isActive);
+    });
+}
+function applyTicketFilters(projectId, assignment){
+    var rows = document.querySelectorAll('.ta-ticket-row');
+    var cards = document.querySelectorAll('.ta-ticket-card');
+    var visibleRows = 0;
+    var visibleCards = 0;
+    var countAll = 0;
+    var countAssigned = 0;
+    var countUnassigned = 0;
+    function isVisible(el){
+        var rowProjectId = String(el.getAttribute('data-project-id') || '0');
+        var rowAssigned = String(el.getAttribute('data-assigned') || '0');
+        var matchProject = !projectId || rowProjectId === String(projectId);
+        var matchAssignment = assignment === 'all' || (assignment === 'assigned' && rowAssigned === '1') || (assignment === 'unassigned' && rowAssigned === '0');
+        return matchProject && matchAssignment;
+    }
+    rows.forEach(function(row){
+        var rowProjectId = String(row.getAttribute('data-project-id') || '0');
+        var rowAssigned = String(row.getAttribute('data-assigned') || '0');
+        if(!projectId || rowProjectId === String(projectId)){
+            countAll += 1;
+            if(rowAssigned === '1'){ countAssigned += 1; } else { countUnassigned += 1; }
+        }
+        var show = isVisible(row);
+        row.style.display = show ? '' : 'none';
+        if(show) visibleRows += 1;
+    });
+    cards.forEach(function(card){
+        var show = isVisible(card);
+        card.style.display = show ? '' : 'none';
+        if(show) visibleCards += 1;
+    });
+    var noRow = document.getElementById('taNoResultsRow');
+    if(noRow){ noRow.classList.toggle('d-none', visibleRows !== 0); }
+    var noMobile = document.getElementById('taMobileNoResults');
+    if(noMobile){ noMobile.classList.toggle('d-none', visibleCards !== 0); }
+    var cAll = document.getElementById('taCountAll');
+    var cAssigned = document.getElementById('taCountAssigned');
+    var cUnassigned = document.getElementById('taCountUnassigned');
+    if(cAll){ cAll.textContent = String(countAll); }
+    if(cAssigned){ cAssigned.textContent = String(countAssigned); }
+    if(cUnassigned){ cUnassigned.textContent = String(countUnassigned); }
+}
+function syncUrl(projectId, assignment){
+    var p = new URLSearchParams(window.location.search || '');
+    p.set('tab','ticket-assignment');
+    if(projectId){ p.set('project_id', String(projectId)); } else { p.delete('project_id'); }
+    if(assignment && assignment !== 'all'){ p.set('assignment', assignment); } else { p.delete('assignment'); }
+    var next = window.location.pathname + '?' + p.toString();
+    history.replaceState({tab:'ticket-assignment'}, '', next);
+}
+document.addEventListener('DOMContentLoaded', function(){
+    var projectSel = document.getElementById('taProjectFilterSelect');
+    var chips = document.querySelectorAll('.js-ta-assignment-tab');
+    if(!projectSel || !chips.length){ return; }
+    var params = new URLSearchParams(window.location.search || '');
+    var selectedProjectId = (params.get('project_id') || projectSel.value || '').trim();
+    var assignment = (params.get('assignment') || 'all').trim().toLowerCase();
+    if(['all','assigned','unassigned'].indexOf(assignment) === -1){ assignment = 'all'; }
+    if(selectedProjectId !== projectSel.value){ projectSel.value = selectedProjectId; }
+    setChipState(assignment);
+    applyTicketFilters(selectedProjectId, assignment);
+    projectSel.addEventListener('change', function(){
+        selectedProjectId = (this.value || '').trim();
+        applyTicketFilters(selectedProjectId, assignment);
+        syncUrl(selectedProjectId, assignment);
+    });
+    chips.forEach(function(chip){
+        chip.addEventListener('click', function(e){
+            e.preventDefault();
+            assignment = this.getAttribute('data-assignment') || 'all';
+            setChipState(assignment);
+            applyTicketFilters(selectedProjectId, assignment);
+            syncUrl(selectedProjectId, assignment);
+        });
+    });
 });
 })();
 //]]>
@@ -4580,6 +4782,7 @@ document.addEventListener('DOMContentLoaded', function () {
         formData.append('category', category);
         formData.append('project_id', _projId);
         formData.append('file', fileInput.files[0]);
+        formData.append('ajax', '1');
         var csrf = document.querySelector('input[name="csrf_token"]');
         if (csrf) formData.append('csrf_token', csrf.value);
 
@@ -4587,7 +4790,7 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" style="width:13px;height:13px"></span>Uploading…';
 
-        fetch('/customer_support/knowledge/upload', { method: 'POST', credentials: 'same-origin', body: formData })
+        fetch('/customer_support/knowledge/upload', { method: 'POST', credentials: 'same-origin', cache: 'no-store', body: formData })
             .then(function (r) { return r.json(); })
             .then(function (res) {
                 if (res.error) {
@@ -4599,9 +4802,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     var prev = document.getElementById('pdFilePreview');
                     if (prev) prev.style.display = 'none';
                     showMsg('pdUploadMsg', 'Document uploaded. Processing has started in the background.', 'success');
-                    appendDocRow(res.doc);
-                    var cnt = document.getElementById('pdDocList').querySelectorAll('.pd-doc-row').length;
-                    updateDocsBadge(cnt);
+                    loadDocs();
+                    setTimeout(loadDocs, 400);
                 }
             })
             .catch(function () { showMsg('pdUploadMsg', 'Upload failed. Please try again.', 'danger'); })

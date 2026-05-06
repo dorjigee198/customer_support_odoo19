@@ -5,11 +5,11 @@
     --accent-color: #059669;
     --gold-color: #059669;
     --secondary-color: #6c757d;
-    --border-color: rgba(5,150,105,0.18);
+    --border-color: rgb(5,150,105,0.18);
     --text-light: #64748b;
     --text-dark: #1e293b;
-    --shadow-sm: 0 4px 12px rgba(5,150,105,0.1);
-    --shadow-md: 0 8px 24px rgba(5,150,105,0.12);
+    --shadow-sm: 0 4px 12px rgb(5,150,105,0.1);
+    --shadow-md: 0 8px 24px rgb(5,150,105,0.12);
     --radius-md: 8px;
     --radius-lg: 12px;
     --error-color: #dc3545;
@@ -18,28 +18,27 @@
 
 body {
     background:
-        radial-gradient(circle at 12% 6%, rgba(5,150,105,0.05) 0%, transparent 34%),
-        radial-gradient(circle at 88% 94%, rgba(5,150,105,0.04) 0%, transparent 34%),
-        background: #f8fafc;
-    font-family: 'Manrope', 'Segoe UI', sans-serif;
+        radial-gradient(circle at 12% 6%, rgb(5,150,105,0.05) 0%, transparent 34%),
+        radial-gradient(circle at 88% 94%, rgb(5,150,105,0.04) 0%, transparent 34%),
+        #f8fafc;
+    font-family: Manrope, 'Segoe UI', sans-serif;
     color: var(--text-dark);
     line-height: 1.6;
 }
 
 /* Card Styling */
 .support-card {
-    border: none;
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-md);
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.92);
+    background: rgb(255, 255, 255, 0.92);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid rgba(5,150,105,0.15);
+    border: 1px solid rgb(5,150,105,0.15);
     backdrop-filter: blur(10px);
 }
 
 .support-card:hover {
-    box-shadow: 0 6px 20px rgba(5,150,105,0.12);
+    box-shadow: 0 6px 20px rgb(5,150,105,0.12);
 }
 
 .card-header {
@@ -80,7 +79,7 @@ body {
 .form-control:focus,
 .form-select:focus {
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 0.22rem rgba(5,150,105,0.2);
+    box-shadow: 0 0 0 0.22rem rgb(5,150,105,0.2);
     background-color: var(--primary-light);
 }
 
@@ -106,7 +105,7 @@ textarea.form-control {
 
 /* Attachment Area */
 .attachment-area {
-    border: 2px dashed rgba(5,150,105,0.2);
+    border: 2px dashed rgb(5,150,105,0.2);
     border-radius: var(--radius-md);
     background-color: var(--primary-light);
     padding: 2.5rem 1.5rem;
@@ -115,6 +114,7 @@ textarea.form-control {
     transition: all 0.3s ease;
     margin-top: 0.5rem;
     position: relative;
+
     /* Ensure it is visible by default */
     display: block;
 }
@@ -179,7 +179,7 @@ textarea.form-control {
 
 .browse-link:hover {
     border-bottom: 2px solid var(--primary-color);
-    background-color: rgba(5,150,105,0.05);
+    background-color: rgb(5,150,105,0.05);
     border-radius: 4px;
 }
 
@@ -251,7 +251,7 @@ textarea.form-control {
 }
 
 .file-remove:hover {
-    background-color: rgba(220, 53, 69, 0.1);
+    background-color: rgb(220, 53, 69, 0.1);
 }
 
 /* Buttons */
@@ -281,7 +281,7 @@ textarea.form-control {
 .btn-primary:focus {
     background: #059669;
     border-color: #047857;
-    box-shadow: 0 0 0 0.22rem rgba(5,150,105,0.25);
+    box-shadow: 0 0 0 0.22rem rgb(5,150,105,0.25);
 }
 
 .btn-secondary {
@@ -335,7 +335,7 @@ textarea.form-control {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .card-body {
         padding: 1.5rem;
     }
@@ -358,7 +358,7 @@ textarea.form-control {
     }
 }
 
-@media (max-width: 576px) {
+@media (width <= 576px) {
     .container {
         padding-left: 1rem;
         padding-right: 1rem;

@@ -29,7 +29,7 @@ class AdminTicketController(http.Controller):
                 return request.render("website.404")
 
             return request.redirect(
-                f"/customer_support/admin_dashboard?tab=ticket-assignment&ticket_modal={ticket.id}"
+                f"/customer_support/admin_dashboard?tab=ticket-assignment&project_id={ticket.project_id.id if ticket.project_id else 0}&ticket_modal={ticket.id}"
             )
 
         except Exception as e:

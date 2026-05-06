@@ -1,8 +1,11 @@
 from odoo import http
 from odoo.http import request
+import logging
 import werkzeug
 from datetime import datetime, timedelta
 import json
+
+_logger = logging.getLogger(__name__)
 
 
 class SupportDashboard(http.Controller):
@@ -32,8 +35,8 @@ class SupportDashboard(http.Controller):
                     message_type="notification",
                     subtype_xmlid="mail.mt_note",
                 )
-            except:
-                pass
+            except Exception:
+                _logger.warning("Phase change chatter post failed; phase update already persisted.")
 
             return {
                 "success": True,
@@ -66,8 +69,8 @@ class SupportDashboard(http.Controller):
                     subtype_xmlid="mail.mt_note",
                     author_id=request.env.user.partner_id.id,
                 )
-            except:
-                pass
+            except Exception:
+                _logger.warning("Dashboard note post failed; continuing without chatter note.")
 
             return {
                 "success": True,
@@ -104,12 +107,12 @@ class SupportDashboard(http.Controller):
                 customer_name = (
                     ticket.partner_id.name if ticket.partner_id else "Unknown"
                 )
-            except:
+            except Exception:
                 customer_name = "Unknown"
 
             try:
                 status = ticket.state
-            except:
+            except Exception:
                 status = "new"
 
             try:
@@ -118,12 +121,12 @@ class SupportDashboard(http.Controller):
                     if ticket.create_date
                     else ""
                 )
-            except:
+            except Exception:
                 created = ""
 
             try:
                 project = ticket.team_id.name if ticket.team_id else ""
-            except:
+            except Exception:
                 project = ""
 
             tickets_data.append(
@@ -171,7 +174,7 @@ class SupportDashboard(http.Controller):
             open_tickets = len(
                 tickets.filtered(lambda t: t.state not in ["closed", "resolved"])
             )
-        except:
+        except Exception:
             open_tickets = len(
                 tickets.filtered(lambda t: t.state not in ["closed", "done"])
             )
@@ -188,7 +191,7 @@ class SupportDashboard(http.Controller):
             failed_tickets = len(
                 tickets.filtered(lambda t: t.state in ["failed", "cancelled"])
             )
-        except:
+        except Exception:
             failed_tickets = 0
 
         failed_rate = (failed_tickets / len(tickets)) * 100 if len(tickets) > 0 else 0.0
@@ -243,7 +246,7 @@ class SupportDashboard(http.Controller):
                     and t.close_date.date() == today
                 )
             )
-        except:
+        except Exception:
             today_closed = 0
 
         try:
@@ -254,7 +257,7 @@ class SupportDashboard(http.Controller):
                     and t.close_date.date() >= week_ago
                 )
             )
-        except:
+        except Exception:
             last_7_days_closed = 0
 
         avg_last_7_days = (
@@ -282,7 +285,7 @@ class SupportDashboard(http.Controller):
             open_tickets = tickets.filtered(
                 lambda t: t.state not in ["closed", "resolved"]
             )
-        except:
+        except Exception:
             open_tickets = tickets.filtered(lambda t: t.state not in ["closed", "done"])
 
         if not open_tickets:
@@ -306,7 +309,7 @@ class SupportDashboard(http.Controller):
             if ticket.create_date:
                 try:
                     end_date = ticket.close_date or datetime.now()
-                except:
+                except Exception:
                     end_date = datetime.now()
 
                 delta = end_date - ticket.create_date
@@ -329,7 +332,7 @@ class SupportDashboard(http.Controller):
             if ticket.create_date:
                 try:
                     end_date = ticket.close_date or datetime.now()
-                except:
+                except Exception:
                     end_date = datetime.now()
 
                 delta = end_date - ticket.create_date

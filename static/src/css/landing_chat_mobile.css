@@ -1,16 +1,21 @@
 /* ============================================= */
+
 /* MOBILE STYLES — landing_chat_mobile.css       */
+
 /* Import this AFTER landing_chat.css            */
+
 /* ============================================= */
 
 /* ============================================= */
+
 /* GLOBAL MOBILE FOUNDATION                      */
+
 /* Prevent text scaling, enable safe areas       */
+
 /* ============================================= */
 
 html {
     /* Stop iOS from auto-bumping font sizes */
-    -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
 }
 
@@ -29,10 +34,12 @@ html {
 }
 
 /* ============================================= */
+
 /* TABLET — up to 1024px                         */
+
 /* ============================================= */
 
-@media (max-width: 1024px) {
+@media (width <= 1024px) {
     :root {
         --sidebar-width: 260px;
     }
@@ -55,28 +62,33 @@ html {
 }
 
 /* ============================================= */
+
 /* MOBILE — up to 768px                          */
+
 /* Sidebar becomes a full overlay drawer         */
+
 /* ============================================= */
 
-@media (max-width: 768px) {
-
+@media (width <= 768px) {
     /* ── Sidebar: fixed overlay drawer ── */
     .sidebar {
         position: fixed;
         top: 0;
         left: 0;
+
         /* Use dvh for accurate full-screen height on mobile */
         height: 100dvh;
         height: 100vh; /* fallback */
         width: 82vw;
         max-width: 300px;
         min-width: 0;
+
         /* Slide via transform instead of width — much smoother on mobile */
         transform: translateX(-110%);
         transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         z-index: 100;
-        box-shadow: 6px 0 48px rgba(0, 0, 0, 0.45);
+        box-shadow: 6px 0 48px rgb(0, 0, 0, 0.45);
+
         /* Override desktop collapsed/open width logic */
         border-right: none;
     }
@@ -106,9 +118,8 @@ html {
         display: block;
         position: fixed;
         inset: 0;
-        background: rgba(10, 15, 30, 0.55);
+        background: rgb(10, 15, 30, 0.55);
         backdrop-filter: blur(3px);
-        -webkit-backdrop-filter: blur(3px);
         z-index: 99;
         opacity: 0;
         pointer-events: none;
@@ -123,6 +134,7 @@ html {
     /* ── Main chat takes full width ── */
     .main-chat {
         width: 100%;
+
         /* Safe area padding for notched phones */
         padding-top: env(safe-area-inset-top);
     }
@@ -130,6 +142,7 @@ html {
     /* ── Chat Header ── */
     .chat-header {
         padding: 0.8rem 1.1rem;
+
         /* Ensure header stays behind sidebar toggle */
         gap: 0.75rem;
     }
@@ -228,6 +241,7 @@ html {
     /* ── Input area ── */
     .input-area {
         padding: 0.8rem 0.9rem;
+
         /* Safe area bottom padding for home bar on iPhone */
         padding-bottom: max(0.9rem, env(safe-area-inset-bottom));
     }
@@ -307,11 +321,12 @@ html {
 }
 
 /* ============================================= */
+
 /* SMALL MOBILE — up to 480px                    */
+
 /* ============================================= */
 
-@media (max-width: 480px) {
-
+@media (width <= 480px) {
     .chat-messages {
         padding: 0.9rem 0.85rem;
         gap: 0.95rem;
@@ -380,11 +395,12 @@ html {
 }
 
 /* ============================================= */
+
 /* VERY SMALL — up to 360px (Galaxy S8 etc.)     */
+
 /* ============================================= */
 
-@media (max-width: 360px) {
-
+@media (width <= 360px) {
     .chat-messages {
         padding: 0.8rem 0.75rem;
     }
@@ -409,11 +425,12 @@ html {
 }
 
 /* ============================================= */
+
 /* LANDSCAPE MOBILE — short viewport             */
+
 /* ============================================= */
 
-@media (max-height: 500px) and (orientation: landscape) {
-
+@media (height <= 500px) and (orientation: landscape) {
     .chat-header {
         padding: 0.55rem 1rem;
     }
@@ -467,12 +484,14 @@ html {
 }
 
 /* ============================================= */
+
 /* TOUCH TARGETS — all interactive elements      */
+
 /* min 44px tap target per Apple HIG / WCAG      */
+
 /* ============================================= */
 
-@media (max-width: 768px) {
-
+@media (width <= 768px) {
     .quick-reply-btn,
     .new-chat-btn,
     .sidebar-toggle-btn,
@@ -493,10 +512,12 @@ html {
 }
 
 /* ============================================= */
+
 /* HIDE desktop-only elements on mobile          */
+
 /* ============================================= */
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     /* The old mobile-menu-btn is fully replaced by sidebar-toggle-btn */
     .mobile-menu-btn {
         display: none !important;

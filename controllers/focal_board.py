@@ -41,7 +41,6 @@ Routes for the project-based ticket management flow:
 import json
 import logging
 import secrets
-from markupsafe import Markup
 from odoo import http
 from odoo.http import request
 import werkzeug
@@ -233,7 +232,7 @@ class FocalBoardController(http.Controller):
             if token and ticket and ticket.board_token and token == ticket.board_token:
                 return True
         except Exception:
-            pass
+            _logger.warning("Board access check failed; denying access by default.")
         return False
 
 
@@ -548,16 +547,16 @@ class FocalBoardController(http.Controller):
                     "user": user,
                     "ticket": ticket,
                     "board_columns": board_columns,
-                    "board_columns_json": Markup(json.dumps(board_columns)),
+                    "board_columns_json": json.dumps(board_columns),
                     "project_members": project_members,
-                    "project_members_json": Markup(json.dumps(project_members)),
+                    "project_members_json": json.dumps(project_members),
                     "attachments": attachment_list,
                     "project_docs": project_docs,
                     "comments": comments,
-                    "customer_conversation_json": Markup(json.dumps(customer_conversation)),
+                    "customer_conversation_json": json.dumps(customer_conversation),
                     "activity_log": activity_log,
                     "page_name": "ticket_board",
-                    "board_bg_json": Markup(json.dumps(ticket.board_bg or '')),
+                    "board_bg_json": json.dumps(ticket.board_bg or ''),
                 },
             )
 
@@ -668,18 +667,18 @@ class FocalBoardController(http.Controller):
                     "user": None,
                     "ticket": ticket,
                     "board_columns": board_columns,
-                    "board_columns_json": Markup(json.dumps(board_columns)),
+                    "board_columns_json": json.dumps(board_columns),
                     "project_members": project_members,
-                    "project_members_json": Markup(json.dumps(project_members)),
+                    "project_members_json": json.dumps(project_members),
                     "attachments": [],
                     "project_docs": project_docs,
                     "comments": comments,
-                    "customer_conversation_json": Markup("[]"),
+                    "customer_conversation_json": "[]",
                     "activity_log": [],
                     "page_name": "ticket_board",
                     "public_board": True,
                     "board_token": token,
-                    "board_bg_json": Markup(json.dumps(ticket.board_bg or '')),
+                    "board_bg_json": json.dumps(ticket.board_bg or ''),
                 },
             )
 
@@ -911,7 +910,7 @@ class FocalBoardController(http.Controller):
                     except Exception as mail_err:
                         _logger.warning("Task assignment email failed: %s", mail_err)
             except Exception:
-                pass
+                _logger.warning("Post-create task assignment/update block failed; continuing task creation flow.")
             return {"success": True, "task": _build_task_dict(task)}
 
         except Exception as e:
@@ -1006,7 +1005,7 @@ class FocalBoardController(http.Controller):
                             except Exception as mail_err:
                                 _logger.warning("Task assignment email failed: %s", mail_err)
                     except Exception:
-                        pass
+                        _logger.warning("Post-assignee update notification block failed; continuing update flow.")
                 if removed:
                     names = ", ".join(
                         member.user_id.name if member.user_id else (member.member_name or "")
@@ -1270,7 +1269,13 @@ class FocalBoardController(http.Controller):
             base_url = request.env["ir.config_parameter"].sudo().get_param("web.base.url", "").rstrip("/")
             board_url = f"{base_url}/board/{ticket.board_token}"
             try:
-                EmailService.send_board_invite(name, email, ticket, board_url)
+                sent = EmailService.send_board_invite(name, email, ticket, board_url)
+                if not sent:
+                    _logger.warning(
+                        "Board invite email was not sent for ticket %s to %s",
+                        ticket.id,
+                        email,
+                    )
             except Exception as mail_err:
                 _logger.warning("Board invite email failed: %s", mail_err)
 

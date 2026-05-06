@@ -316,7 +316,7 @@ class CustomerTickets(http.Controller):
                         "from_customer": bool(customer_partner_id and author_partner_id == customer_partner_id),
                     })
             except Exception:
-                pass
+                _logger.warning("Failed to serialize one ticket message; skipping that message entry.")
 
             state_labels = {
                 "new": "New", "assigned": "Assigned", "in_progress": "In Progress",

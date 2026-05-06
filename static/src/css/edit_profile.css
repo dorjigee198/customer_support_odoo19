@@ -11,7 +11,7 @@
     --hover-blue: #d1fae5;
     --border-blue: #a7f3d0;
     --text-muted: #64748b;
-    --white: #ffffff;
+    --white: #fff;
     --text-dark: #1e293b;
     --cyan-blue: #059669;
 }
@@ -63,7 +63,8 @@ body {
     background-color: var(--white);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgb(0, 0, 0, 0.1);
+
     /* Removed old padding and border */
     padding: 0;
     margin-bottom: 0;
@@ -123,6 +124,7 @@ body {
     color: var(--text-muted);
     font-size: 0.9375rem;
     font-weight: 400;
+
     /* Removed old background and padding */
     background-color: transparent;
     padding: 0;
@@ -194,6 +196,7 @@ body {
     background-color: var(--light-bg);
     padding: 1.5rem 1.25rem;
     border-radius: 6px;
+
     /* Removed old border-bottom */
     border-bottom: none;
 }
@@ -220,7 +223,8 @@ body {
     background-color: var(--white);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px rgb(0, 0, 0, 0.1);
+
     /* Removed old padding and border */
     padding: 0;
     border: none;
@@ -237,6 +241,7 @@ body {
     color: var(--primary-dark);
     margin-bottom: 1.5rem;
     display: none;
+
     /* Hidden as we use card header now */
 }
 
@@ -477,22 +482,22 @@ body {
     padding-left: 0.75rem;
 }
 
-@media (min-width: 992px) {
+@media (width >= 992px) {
     .col-lg-8 {
-        flex: 0 0 66.666667%;
-        max-width: 66.666667%;
+        flex: 0 0 66.6667%;
+        max-width: 66.6667%;
     }
 
     .col-lg-4 {
-        flex: 0 0 33.333333%;
-        max-width: 33.333333%;
+        flex: 0 0 33.3333%;
+        max-width: 33.3333%;
     }
 }
 
 hr {
     margin: 1rem 0;
     color: inherit;
-    background-color: currentColor;
+    background-color: currentcolor;
     border: 0;
     opacity: 0.25;
     height: 1px;
@@ -544,7 +549,7 @@ hr {
 .modal-content {
     border-radius: 8px;
     border: none;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 20px rgb(0, 0, 0, 0.15);
 }
 
 .form-label {
@@ -569,7 +574,7 @@ hr {
 
 .form-control:focus {
     border-color: var(--primary-dark);
-    box-shadow: 0 0 0 3px rgba(5,150,105,0.15);
+    box-shadow: 0 0 0 3px rgb(5,150,105,0.15);
     outline: none;
 }
 
@@ -632,7 +637,7 @@ hr {
 }
 
 /* ========== RESPONSIVE STYLES (PRESERVED) ========== */
-@media (max-width: 992px) {
+@media (width <= 992px) {
     .profile-layout-grid {
         grid-template-columns: 1fr;
     }
@@ -648,7 +653,7 @@ hr {
     }
 }
 
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .container {
         padding: 1rem;
     }

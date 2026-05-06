@@ -1,40 +1,57 @@
 /* ============================================= */
+
 /* MODERN CHAT INTERFACE - SEAMLESS DESIGN */
+
 /* ============================================= */
 
 :root {
     --primary: #059669;
+
     /* Dark blue - primary color */
     --primary-dark: #047857;
+
     /* Darker blue */
     --primary-light: #6ee7b7;
+
     /* Light blue for accents */
     --background: #f0fdf4;
+
     /* Main background color */
-    --card-bg: #ffffff;
+    --card-bg: #fff;
+
     /* White for cards */
-    --surface: #ffffff;
+    --surface: #fff;
+
     /* White surfaces */
     --surface-light: #f0fdf4;
+
     /* Very light blue */
     --text-primary: #065f46;
+
     /* Dark blue for text */
     --text-secondary: #475569;
+
     /* Medium gray for secondary text */
     --text-light: #64748b;
+
     /* Light gray text */
     --border-light: #a7f3d0;
+
     /* Light blue border */
     --border-medium: #6ee7b7;
+
     /* Medium blue border */
     --success: #10b981;
+
     /* Green for online status */
     --danger: #ef4444;
+
     /* Red for clear button */
 
     /* Typography */
-    --font-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-primary: -apple-system, blinkmacsystemfont, 'Segoe UI', roboto, sans-serif;
     --font-accent: 'Segoe UI', system-ui, -apple-system, sans-serif;
+
     /* For buttons */
 
     /* Border radius */
@@ -44,9 +61,9 @@
     --radius-full: 50px;
 
     /* Shadows */
-    --shadow-sm: 0 1px 3px rgba(5,150,105, 0.1);
-    --shadow-md: 0 4px 6px rgba(5,150,105, 0.1);
-    --shadow-lg: 0 10px 15px rgba(5,150,105, 0.1);
+    --shadow-sm: 0 1px 3px rgb(5,150,105, 0.1);
+    --shadow-md: 0 4px 6px rgb(5,150,105, 0.1);
+    --shadow-lg: 0 10px 15px rgb(5,150,105, 0.1);
 }
 
 * {
@@ -65,7 +82,9 @@ body {
 }
 
 /* ============================================= */
+
 /* CHAT CONTAINER - SEAMLESS WITH BACKGROUND */
+
 /* ============================================= */
 .chat-container {
     width: 100%;
@@ -78,7 +97,9 @@ body {
 }
 
 /* ============================================= */
+
 /* HEADER - MATCHING DASHBOARD */
+
 /* ============================================= */
 .chat-header {
     background: var(--primary);
@@ -87,12 +108,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-start;
+
     /* Align to left */
     flex-shrink: 0;
     box-shadow: var(--shadow-md);
     position: relative;
     z-index: 10;
     gap: 1.5rem;
+
     /* Add gap between all header items */
 }
 
@@ -113,10 +136,13 @@ body {
     border-radius: 50%;
     padding: 0;
     border: none;
+
     /* Remove border if logo has its own design */
     object-fit: contain;
+
     /* or 'cover' depending on your logo */
     background: transparent;
+
     /* Make background transparent */
 }
 
@@ -132,7 +158,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgb(255, 255, 255, 0.9);
 }
 
 .status-dot {
@@ -144,7 +170,6 @@ body {
 }
 
 @keyframes pulse {
-
     0%,
     100% {
         opacity: 1;
@@ -156,7 +181,9 @@ body {
 }
 
 /* ============================================= */
+
 /* CHAT BOX - SEAMLESS BACKGROUND */
+
 /* ============================================= */
 .chat-box {
     flex: 1;
@@ -174,7 +201,7 @@ body {
 }
 
 .chat-box::-webkit-scrollbar-track {
-    background: rgba(5,150,105, 0.05);
+    background: rgb(5,150,105, 0.05);
     border-radius: 3px;
 }
 
@@ -188,7 +215,9 @@ body {
 }
 
 /* ============================================= */
+
 /* MESSAGE BUBBLES - CLEAR & READABLE */
+
 /* ============================================= */
 .message {
     padding: 1rem 1.25rem;
@@ -245,7 +274,7 @@ body {
 }
 
 .user .message-time {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgb(255, 255, 255, 0.8);
 }
 
 .bot .message-time {
@@ -253,7 +282,9 @@ body {
 }
 
 /* ============================================= */
+
 /* QUICK REPLIES - VISIBLE WITH BACKGROUND */
+
 /* ============================================= */
 .quick-replies {
     padding: 1.25rem 2rem;
@@ -284,7 +315,9 @@ body {
 }
 
 /* ============================================= */
+
 /* INPUT AREA - CLEAR VISIBILITY */
+
 /* ============================================= */
 .input-area {
     padding: 1.25rem 2rem;
@@ -294,10 +327,13 @@ body {
     gap: 1rem;
     flex-shrink: 0;
     border: 1px solid #7dd3fc;
+
     /* Lighter border */
     border-radius: 30px;
+
     /* Moderately rounded */
-    box-shadow: 0 2px 8px rgba(5,150,105, 0.15);
+    box-shadow: 0 2px 8px rgb(5,150,105, 0.15);
+
     /* Softer shadow */
     margin: 0.75rem 2rem;
 }
@@ -325,8 +361,11 @@ body {
 }
 
 /* ============================================= */
+
 /* SEND BUTTON - CLEAR VISIBILITY */
+
 /* ============================================= */
+
 /* Style by ID instead of class */
 #send-msg-btn {
     padding: 0.875rem 2rem;
@@ -345,22 +384,24 @@ body {
     min-width: 120px;
     font-family: var(--font-accent);
     letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(5,150,105, 0.25);
+    box-shadow: 0 4px 12px rgb(5,150,105, 0.25);
 }
 
 #send-msg-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(5,150,105, 0.35);
+    box-shadow: 0 6px 20px rgb(5,150,105, 0.35);
 }
 
 #send-msg-btn:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(5,150,105, 0.25);
+    box-shadow: 0 2px 8px rgb(5,150,105, 0.25);
 }
 
 /* ============================================= */
+
 /* CLEAR BUTTON - DISTINCT VISIBILITY */
+
 /* ============================================= */
 .clear-btn {
     padding: 0.75rem 1.5rem;
@@ -386,7 +427,9 @@ body {
 }
 
 /* ============================================= */
+
 /* TYPING INDICATOR */
+
 /* ============================================= */
 .typing-indicator {
     display: flex;
@@ -409,7 +452,6 @@ body {
 }
 
 @keyframes typing {
-
     0%,
     60%,
     100% {
@@ -422,7 +464,9 @@ body {
 }
 
 /* ============================================= */
+
 /* WELCOME MESSAGE */
+
 /* ============================================= */
 .welcome-message {
     text-align: center;
@@ -449,7 +493,9 @@ body {
 }
 
 /* ============================================= */
+
 /* LOADING MESSAGE */
+
 /* ============================================= */
 .message.loading {
     background: var(--surface);
@@ -471,7 +517,6 @@ body {
 }
 
 @keyframes loading {
-
     0%,
     80%,
     100% {
@@ -484,18 +529,20 @@ body {
 }
 
 /* ============================================= */
+
 /* RESPONSIVE DESIGN */
+
 /* ============================================= */
 
 /* Desktop */
-@media (min-width: 1024px) {
+@media (width >= 1024px) {
     .message {
         max-width: 65%;
     }
 }
 
 /* Tablet */
-@media (max-width: 768px) {
+@media (width <= 768px) {
     .chat-header {
         padding: 1rem 1.5rem;
     }
@@ -515,7 +562,7 @@ body {
 }
 
 /* Mobile */
-@media (max-width: 480px) {
+@media (width <= 480px) {
     body {
         overflow: auto;
     }
@@ -565,8 +612,7 @@ body {
 }
 
 /* Remove speech bubble tails on mobile */
-@media (max-width: 480px) {
-
+@media (width <= 480px) {
     .user::after,
     .bot::before {
         display: none;

@@ -65,7 +65,7 @@ class CustomerSupportAdminUsers(http.Controller):
             if isinstance(keys, list):
                 return set(keys)
         except Exception:
-            pass
+            _logger.warning("Failed to parse admin notification read-state payload; using empty set.")
         return set()
 
     def _save_admin_read_keys(self, keys):
@@ -196,11 +196,36 @@ class CustomerSupportAdminUsers(http.Controller):
         if not user.has_group("base.group_system"):
             return werkzeug.utils.redirect("/customer_support/dashboard")
 
-        tickets = (
-            request.env["customer.support"]
-            .search([])
-            .sorted(key=lambda r: r.create_date, reverse=True)
-        )
+        Ticket = request.env["customer.support"]
+        selected_project_id = 0
+        raw_project_id = (request.params.get("project_id") or "").strip()
+        if raw_project_id.isdigit():
+            selected_project_id = int(raw_project_id)
+        assignment_filter = (request.params.get("assignment") or "all").strip().lower()
+        if assignment_filter not in {"all", "assigned", "unassigned"}:
+            assignment_filter = "all"
+
+        base_tickets = Ticket.search([])
+        all_projects_ticket_count = len(base_tickets)
+        project_ticket_counts = {}
+        for t in base_tickets:
+            pid = t.project_id.id if t.project_id else 0
+            project_ticket_counts[pid] = project_ticket_counts.get(pid, 0) + 1
+
+        if selected_project_id:
+            scoped_tickets = base_tickets.filtered(
+                lambda t: t.project_id and t.project_id.id == selected_project_id
+            )
+        else:
+            scoped_tickets = base_tickets
+
+        assignment_counts = {
+            "all": len(scoped_tickets),
+            "assigned": len(scoped_tickets.filtered(lambda t: bool(t.assigned_to))),
+            "unassigned": len(scoped_tickets.filtered(lambda t: not t.assigned_to)),
+        }
+
+        tickets = Ticket.search([]).sorted(key=lambda r: r.create_date, reverse=True)
 
         ticket_counts = {
             "new": len(tickets.filtered(lambda t: t.state == "new")),
@@ -303,6 +328,11 @@ class CustomerSupportAdminUsers(http.Controller):
                 "analytics": analytics,
                 "performance": performance,
                 "projects": projects,
+                "selected_project_id": selected_project_id,
+                "assignment_filter": assignment_filter,
+                "all_projects_ticket_count": all_projects_ticket_count,
+                "project_ticket_counts": project_ticket_counts,
+                "assignment_counts": assignment_counts,
                 "page_name": "admin_dashboard",
             },
         )

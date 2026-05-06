@@ -1,11 +1,10 @@
 :root {
     --sidebar-width: 280px;
     --sidebar-bg: #064e3b;
-    --sidebar-border: rgba(255, 255, 255, 0.12);
+    --sidebar-border: rgb(255, 255, 255, 0.12);
     --chat-bg: #f8fafc;
-    --chat-surface: #ffffff;
+    --chat-surface: #fff;
     --chat-border: #e2e8f0;
-
     --brand-900: #022c22;
     --brand-800: #064e3b;
     --brand-700: #065f46;
@@ -14,11 +13,10 @@
     --brand-400: #10b981;
     --brand-100: #d1fae5;
     --brand-050: #f0fdf4;
-
     --text-primary: #0f172a;
     --text-secondary: #64748b;
-    --text-sidebar: rgba(255, 255, 255, 0.88);
-    --text-sidebar-muted: rgba(255, 255, 255, 0.64);
+    --text-sidebar: rgb(255, 255, 255, 0.88);
+    --text-sidebar-muted: rgb(255, 255, 255, 0.64);
 }
 
 *, *::before, *::after {
@@ -33,7 +31,7 @@ html, body {
 }
 
 body {
-    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-family: Inter, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     background: var(--chat-bg);
     color: var(--text-primary);
 }
@@ -86,9 +84,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.16);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    color: #ffffff;
+    background: rgb(255, 255, 255, 0.16);
+    border: 1px solid rgb(255, 255, 255, 0.22);
+    color: #fff;
     font-size: 0.78rem;
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -108,7 +106,7 @@ body {
 }
 
 .brand-name {
-    color: #ffffff;
+    color: #fff;
     font-size: 0.93rem;
     font-weight: 700;
 }
@@ -126,7 +124,7 @@ body {
     border: 0;
     border-radius: 10px;
     background: linear-gradient(135deg, var(--brand-500) 0%, var(--brand-600) 100%);
-    color: #ffffff;
+    color: #fff;
     font-size: 0.86rem;
     font-weight: 600;
     display: flex;
@@ -170,14 +168,14 @@ body {
 }
 
 .chat-history::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.26);
+    background: rgb(255, 255, 255, 0.26);
     border-radius: 999px;
 }
 
 .history-empty {
     margin: 0.5rem 0.4rem 0;
     padding: 0.85rem 0.7rem;
-    border: 1px dashed rgba(255, 255, 255, 0.22);
+    border: 1px dashed rgb(255, 255, 255, 0.22);
     border-radius: 10px;
     color: var(--text-sidebar-muted);
     font-size: 0.78rem;
@@ -201,8 +199,8 @@ body {
 
 .history-item:hover,
 .history-item.active {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: rgb(255, 255, 255, 0.1);
+    border-color: rgb(255, 255, 255, 0.2);
 }
 
 .history-item svg {
@@ -231,7 +229,7 @@ body {
 .chat-header {
     height: 62px;
     padding: 0 1rem;
-    background: #ffffff;
+    background: #fff;
     border-bottom: 1px solid var(--chat-border);
     display: flex;
     align-items: center;
@@ -244,7 +242,7 @@ body {
     height: 36px;
     border: 1px solid var(--chat-border);
     border-radius: 10px;
-    background: #ffffff;
+    background: #fff;
     color: var(--brand-700);
     display: flex;
     align-items: center;
@@ -268,7 +266,7 @@ body {
     height: 34px;
     border-radius: 10px;
     background: var(--brand-700);
-    color: #ffffff;
+    color: #fff;
     font-size: 0.74rem;
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -314,8 +312,7 @@ body {
 .chat-messages {
     flex: 1;
     min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden auto;
     padding: 1rem 1rem 0.8rem;
     display: flex;
     flex-direction: column;
@@ -346,7 +343,7 @@ body {
     height: 30px;
     border-radius: 9px;
     background: var(--brand-700);
-    color: #ffffff;
+    color: #fff;
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.05em;
@@ -389,7 +386,7 @@ body {
 }
 
 .bot-bubble {
-    background: #ffffff;
+    background: #fff;
     color: #0f172a;
     border: 1px solid #e2e8f0;
     border-bottom-left-radius: 6px;
@@ -397,7 +394,7 @@ body {
 
 .user-bubble {
     background: var(--brand-700);
-    color: #ffffff;
+    color: #fff;
     border-bottom-right-radius: 6px;
 }
 
@@ -414,7 +411,7 @@ body {
 }
 
 .typing-bubble {
-    background: #ffffff;
+    background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     border-bottom-left-radius: 6px;
@@ -436,14 +433,21 @@ body {
 .typing-dot:nth-child(3) { animation-delay: 0.32s; }
 
 @keyframes typing-pulse {
-    0%, 100% { transform: translateY(0); opacity: 0.45; }
-    50% { transform: translateY(-3px); opacity: 1; }
+0%, 100% {
+    transform: translateY(0);
+    opacity: 0.45;
+}
+
+50% {
+    transform: translateY(-3px);
+    opacity: 1;
+}
 }
 
 .quick-replies {
     padding: 0.56rem 0.9rem;
     border-top: 1px solid var(--chat-border);
-    background: #ffffff;
+    background: #fff;
     display: flex;
     flex-wrap: wrap;
     gap: 0.44rem;
@@ -455,7 +459,7 @@ body {
     padding: 0 0.74rem;
     border-radius: 999px;
     border: 1px solid #d1d5db;
-    background: #ffffff;
+    background: #fff;
     color: #0f172a;
     font-size: 0.79rem;
     font-weight: 600;
@@ -472,7 +476,7 @@ body {
 .input-area {
     padding: 0.74rem 0.9rem 0.88rem;
     border-top: 1px solid var(--chat-border);
-    background: #ffffff;
+    background: #fff;
     flex-shrink: 0;
 }
 
@@ -481,7 +485,7 @@ body {
     min-height: 44px;
     border: 1px solid #d1d5db;
     border-radius: 12px;
-    background: #ffffff;
+    background: #fff;
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -490,7 +494,7 @@ body {
 
 .input-wrap:focus-within {
     border-color: #86efac;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 0 3px rgb(16, 185, 129, 0.15);
 }
 
 .input-wrap input {
@@ -513,7 +517,7 @@ body {
     border: 0;
     border-radius: 10px;
     background: var(--brand-700);
-    color: #ffffff;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;

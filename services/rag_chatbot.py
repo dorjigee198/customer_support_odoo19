@@ -316,11 +316,11 @@ class ChatBotBackend:
                 try:
                     return json.loads(raw[start:end])
                 except Exception:
-                    pass
+                    _logger.warning("LLM response fallback JSON fragment parse failed; returning raw reply.")
             return {"intent": "general", "reply": raw.strip()}
 
     def _hash(self, text):
-        return hashlib.md5(text.encode()).hexdigest()
+        return hashlib.md5(text.encode(), usedforsecurity=False).hexdigest()
 
     def _cache_and_return(self, user_id, cache_key, intent, reply):
         if user_id not in self._query_cache:
@@ -340,7 +340,7 @@ class GeneralChatBackend:
         normalized = user_message.strip().lower()
 
         # 1. Cache check
-        cache_key = hashlib.md5(normalized.encode()).hexdigest()
+        cache_key = hashlib.md5(normalized.encode(), usedforsecurity=False).hexdigest()
         if user_id in self._query_cache and cache_key in self._query_cache[user_id]:
             _logger.info(f"Dragon Chat cache hit for user {user_id}")
             return self._query_cache[user_id][cache_key]
@@ -471,7 +471,7 @@ class GeneralChatBackend:
                 try:
                     return json.loads(raw[start:end])
                 except Exception:
-                    pass
+                    _logger.warning("LLM response fallback JSON fragment parse failed; returning raw reply.")
             return {"intent": "general", "reply": raw.strip()}
 
     def _cache_and_return(self, user_id, cache_key, intent, reply):

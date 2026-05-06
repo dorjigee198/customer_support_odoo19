@@ -48,9 +48,23 @@ class EmailService:
 
     @staticmethod
     def _send(subject, body_html, email_to, force_send=False):
-        """Email sending disabled — SMTP is not configured on this server."""
-        _logger.info("Email suppressed (SMTP disabled) for %s: %s", email_to, subject)
-        return True
+        """Queue an email in Odoo and optionally trigger immediate send."""
+        try:
+            mail_vals = {
+                "subject": subject,
+                "body_html": body_html,
+                "email_to": email_to,
+                "email_from": EmailService._get_default_email_from(),
+                "auto_delete": False,
+            }
+            mail = request.env["mail.mail"].sudo().create(mail_vals)
+            if force_send:
+                mail.send()
+            _logger.info("Email queued for %s: %s", email_to, subject)
+            return True
+        except Exception:
+            _logger.exception("Email send failed for %s: %s", email_to, subject)
+            return False
 
     # ── Public send methods ───────────────────────────────────────────────────
 

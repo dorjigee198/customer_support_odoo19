@@ -13,21 +13,34 @@
                 <link rel="stylesheet" href="/customer_support/static/src/css/ticket_board.css?v=4" />
             </t>
 
-            <!-- Inject board data as JS variables -->
-            <script type="text/javascript"> window.BOARD_DATA = { ticketId: <t t-esc="ticket.id" />,
+            <!-- Inject board data as escaped data attributes, then hydrate via JSON.parse -->
+            <div id="boardDataPayload" class="d-none"
+                t-att-data-project-members-json="project_members_json"
+                t-att-data-board-columns-json="board_columns_json"
+                t-att-data-customer-conversation-json="customer_conversation_json"
+                t-att-data-board-bg-json="board_bg_json"></div>
+            <script type="text/javascript">
+                const _boardPayload = document.getElementById('boardDataPayload');
+                const _safeParse = (value, fallback) => {
+                    try {
+                        return JSON.parse(value);
+                    } catch (e) {
+                        return fallback;
+                    }
+                };
+                window.BOARD_DATA = { ticketId: <t t-esc="ticket.id" />,
                 projectId: <t t-if="ticket.project_id">
                     <t t-esc="ticket.project_id.id" />
                 </t><t
                     t-if="not ticket.project_id">null</t>, csrfToken: "<t
-                    t-esc="request.csrf_token()" />", projectMembers: <t
-                    t-out="project_members_json" />, currentUserId: <t t-if="user">
+                    t-esc="request.csrf_token()" />", projectMembers: _safeParse(_boardPayload ? _boardPayload.dataset.projectMembersJson : null, []), currentUserId: <t t-if="user">
                     <t t-esc="user.id" />
                 </t><t t-if="not user">null</t>,
                 publicBoard: <t t-if="public_board">true</t><t t-if="not public_board">false</t>,
                 boardToken: <t t-if="public_board">"<t t-esc="board_token"/>"</t><t t-if="not public_board">null</t>,
-                boardColumns: <t t-out="board_columns_json" />,
-                customerConversation: <t t-out="customer_conversation_json" />,
-                boardBg: <t t-out="board_bg_json" /> }; </script>
+                boardColumns: _safeParse(_boardPayload ? _boardPayload.dataset.boardColumnsJson : null, []),
+                customerConversation: _safeParse(_boardPayload ? _boardPayload.dataset.customerConversationJson : null, []),
+                boardBg: _safeParse(_boardPayload ? _boardPayload.dataset.boardBgJson : null, '') }; </script>
 
             <div id="wrap" class="tb-wrap">
 

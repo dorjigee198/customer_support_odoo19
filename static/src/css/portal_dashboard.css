@@ -8,14 +8,14 @@
 :root {
     --cs-bg-soft: #f0fdf4;
     --cs-surface: #f8fafc;
-    --cs-surface-strong: #ffffff;
+    --cs-surface-strong: #fff;
     --cs-primary: #065f46;
     --cs-primary-strong: #022c22;
     --cs-accent: #059669;
     --cs-text: #1e293b;
     --cs-muted: #64748b;
-    --cs-border: rgba(5,150,105,0.12);
-    --cs-shadow: 0 4px 16px rgba(5,150,105,0.08);
+    --cs-border: rgb(5,150,105,0.12);
+    --cs-shadow: 0 4px 16px rgb(5,150,105,0.08);
 }
 
 *,
@@ -30,7 +30,7 @@
 .dashboard-wrapper {
     min-height: 100vh;
     background: #f8fafc;
-    font-family: 'Manrope', 'Segoe UI', sans-serif;
+    font-family: Manrope, 'Segoe UI', sans-serif;
     margin: 0;
     padding: 0;
     color: var(--cs-text);
@@ -44,8 +44,8 @@
         linear-gradient(130deg, #022c22 0%, #064e3b 46%, #065f46 100%);
     color: white;
     padding: 0.75rem 2rem;
-    box-shadow: 0 8px 24px rgba(7, 24, 40, 0.26);
-    border-bottom: 1px solid rgba(110,231,183, 0.22);
+    box-shadow: 0 8px 24px rgb(7, 24, 40, 0.26);
+    border-bottom: 1px solid rgb(110,231,183, 0.22);
 }
 
 .header-content {
@@ -63,7 +63,7 @@
 }
 
 .nav-link {
-    color: rgba(242, 248, 255, 0.85);
+    color: rgb(242, 248, 255, 0.85);
     text-decoration: none;
     font-size: 0.95rem;
     font-weight: 500;
@@ -106,7 +106,7 @@
 }
 
 .btn-new-ticket {
-    background: #ffffff;
+    background: #fff;
     color: #065f46;
     padding: 0.5rem 1.5rem;
     border-radius: 25px;
@@ -117,14 +117,14 @@
     gap: 0.5rem;
     transition: all 0.2s ease;
     border: none;
-    box-shadow: 0 4px 12px rgba(5,150,105,0.2);
+    box-shadow: 0 4px 12px rgb(5,150,105,0.2);
     font-size: 0.9rem;
 }
 
 .btn-new-ticket:hover {
     background: #f0fdf4;
     color: #047857;
-    box-shadow: 0 6px 16px rgba(5,150,105,0.25);
+    box-shadow: 0 6px 16px rgb(5,150,105,0.25);
 }
 
 .user-profile {
@@ -137,9 +137,9 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgb(255, 255, 255, 0.3);
     object-fit: cover;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgb(255, 255, 255, 0.1);
 }
 
 .user-name {
@@ -149,7 +149,7 @@
 }
 
 .user-profile i {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgb(255, 255, 255, 0.9);
     transition: color 0.2s ease;
 }
 
@@ -176,7 +176,7 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgb(0, 0, 0, 0.08);
 }
 
 .alert-success {
@@ -233,11 +233,11 @@
 .dashboard-card {
     flex: 2 1 0;
     min-width: 0;
-    background: rgba(255, 255, 255, 0.78);
+    background: rgb(255, 255, 255, 0.78);
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: var(--cs-shadow);
-    border: 1px solid rgba(110,231,183, 0.28);
+    border: 1px solid rgb(110,231,183, 0.28);
     backdrop-filter: blur(8px);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -245,11 +245,11 @@
 .performance-card {
     flex: 1 1 0;
     min-width: 0;
-    background: rgba(255, 255, 255, 0.78);
+    background: rgb(255, 255, 255, 0.78);
     border-radius: 12px;
     padding: 1.5rem;
     box-shadow: var(--cs-shadow);
-    border: 1px solid rgba(110,231,183, 0.28);
+    border: 1px solid rgb(110,231,183, 0.28);
     backdrop-filter: blur(8px);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -257,7 +257,7 @@
 .dashboard-card:hover,
 .performance-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 50px rgba(5,150,105, 0.15) !important;
+    box-shadow: 0 15px 50px rgb(5,150,105, 0.15) !important;
 }
 
 /* ============================================
@@ -266,7 +266,7 @@
 .card-header {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(5,150,105, 0.1);
+    border-bottom: 1px solid rgb(5,150,105, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -319,7 +319,7 @@
     border-radius: 20px;
     font-weight: 600;
     font-size: 0.85rem;
-    box-shadow: 0 2px 4px rgba(5,150,105, 0.2);
+    box-shadow: 0 2px 4px rgb(5,150,105, 0.2);
 }
 
 /* ============================================
@@ -338,22 +338,22 @@
 }
 
 .stat-box {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgb(255, 255, 255, 0.95);
     border-radius: 8px;
     padding: 1.25rem;
-    border: 1px solid rgba(5,150,105, 0.14);
+    border: 1px solid rgb(5,150,105, 0.14);
     transition: all 0.3s ease;
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    box-shadow: 0 2px 5px rgba(5,150,105, 0.06);
+    box-shadow: 0 2px 5px rgb(5,150,105, 0.06);
     min-width: 0;
 }
 
 .stat-box:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(5,150,105, 0.12);
-    border-color: rgba(5,150,105, 0.25);
+    box-shadow: 0 6px 15px rgb(5,150,105, 0.12);
+    border-color: rgb(5,150,105, 0.25);
 }
 
 .stat-icon {
@@ -366,14 +366,15 @@
     justify-content: center;
     font-size: 1.25rem;
     color: var(--cs-primary);
+
     .dashboard-wrapper .dropdown-menu {
-        border: 1px solid rgba(5,150,105, 0.14);
-        box-shadow: 0 14px 32px rgba(5,150,105, 0.2);
+        border: 1px solid rgb(5,150,105, 0.14);
+        box-shadow: 0 14px 32px rgb(5,150,105, 0.2);
         border-radius: 12px;
     }
 
     .dashboard-wrapper .dropdown-item:hover {
-        background: linear-gradient(90deg, rgba(5,150,105, 0.08) 0%, rgba(5,150,105, 0.12) 100%);
+        background: linear-gradient(90deg, rgb(5,150,105, 0.08) 0%, rgb(5,150,105, 0.12) 100%);
         color: var(--cs-primary);
     }
 
@@ -381,9 +382,9 @@
     .reporting-section .report-chart-card,
     .reporting-section .report-kpi,
     .action-card {
-        border: 1px solid rgba(5,150,105, 0.14) !important;
+        border: 1px solid rgb(5,150,105, 0.14) !important;
         box-shadow: var(--cs-shadow) !important;
-        background: rgba(255, 255, 255, 0.9) !important;
+        background: rgb(255, 255, 255, 0.9) !important;
         backdrop-filter: blur(8px);
     }
 
@@ -408,19 +409,20 @@
     .day-btn.active,
     .print-btn {
         background: linear-gradient(140deg, #047857 0%, #059669 100%) !important;
-        color: #ffffff !important;
+        color: #fff !important;
         border-color: #047857 !important;
     }
 
     .notif-dropdown {
-        border: 1px solid rgba(5,150,105, 0.14) !important;
-        box-shadow: 0 16px 36px rgba(5,150,105, 0.2) !important;
+        border: 1px solid rgb(5,150,105, 0.14) !important;
+        box-shadow: 0 16px 36px rgb(5,150,105, 0.2) !important;
         border-radius: 14px !important;
     }
 
     .notif-header {
-        background: linear-gradient(90deg, rgba(5,150,105, 0.11) 0%, rgba(5,150,105, 0.13) 100%) !important;
+        background: linear-gradient(90deg, rgb(5,150,105, 0.11) 0%, rgb(5,150,105, 0.13) 100%) !important;
     }
+
     flex-shrink: 0;
 }
 
@@ -468,19 +470,19 @@
     background: white;
     border-radius: 8px;
     padding: 1.25rem;
-    border: 1px solid rgba(5,150,105, 0.12);
+    border: 1px solid rgb(5,150,105, 0.12);
     transition: all 0.3s ease;
     display: flex;
     align-items: flex-start;
     gap: 1rem;
-    box-shadow: 0 2px 5px rgba(5,150,105, 0.06);
+    box-shadow: 0 2px 5px rgb(5,150,105, 0.06);
     min-width: 0;
 }
 
 .performance-stat:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(5,150,105, 0.12);
-    border-color: rgba(5,150,105, 0.25);
+    box-shadow: 0 6px 15px rgb(5,150,105, 0.12);
+    border-color: rgb(5,150,105, 0.25);
 }
 
 .performance-icon {
@@ -528,7 +530,7 @@
 .performance-progress {
     margin-top: 1.5rem;
     padding-top: 1.5rem;
-    border-top: 1px solid rgba(5,150,105, 0.1);
+    border-top: 1px solid rgb(5,150,105, 0.1);
 }
 
 .progress-label {
@@ -545,7 +547,7 @@
     border-radius: 5px;
     background: #d1fae5;
     overflow: hidden;
-    box-shadow: inset 0 1px 2px rgba(5,150,105, 0.1);
+    box-shadow: inset 0 1px 2px rgb(5,150,105, 0.1);
 }
 
 .progress-bar {
@@ -553,7 +555,7 @@
     border-radius: 5px;
     transition: width 0.6s ease;
     background: linear-gradient(90deg, #065f46 0%, #059669 100%);
-    box-shadow: 0 1px 3px rgba(5,150,105, 0.2);
+    box-shadow: 0 1px 3px rgb(5,150,105, 0.2);
 }
 
 .progress-bar.bg-success {
@@ -583,20 +585,20 @@
     background: white;
     border-radius: 8px;
     padding: 1.25rem;
-    border: 1px solid rgba(5,150,105, 0.1);
+    border: 1px solid rgb(5,150,105, 0.1);
     text-decoration: none;
     color: inherit;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 1rem;
-    box-shadow: 0 2px 5px rgba(5,150,105, 0.05);
+    box-shadow: 0 2px 5px rgb(5,150,105, 0.05);
     min-width: 0;
 }
 
 .action-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(5,150,105, 0.15);
+    box-shadow: 0 6px 15px rgb(5,150,105, 0.15);
     border-color: #065f46;
     background: #f8fafc;
 }
@@ -612,7 +614,7 @@
     font-size: 1.25rem;
     color: white;
     flex-shrink: 0;
-    box-shadow: 0 2px 5px rgba(5,150,105, 0.2);
+    box-shadow: 0 2px 5px rgb(5,150,105, 0.2);
 }
 
 .action-content h4 {
@@ -679,7 +681,7 @@
     cursor: pointer;
     padding: 6px 8px;
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgb(255, 255, 255, 0.75);
     font-size: 1.15rem;
     transition: all 0.2s;
     position: relative;
@@ -688,7 +690,7 @@
 }
 
 .notif-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgb(255, 255, 255, 0.08);
     color: #fff;
 }
 
@@ -720,10 +722,10 @@
     top: calc(100% + 12px);
     right: 0;
     width: 360px;
-    background: #ffffff;
-    border: 1px solid rgba(5,150,105, 0.15);
+    background: #fff;
+    border: 1px solid rgb(5,150,105, 0.15);
     border-radius: 16px;
-    box-shadow: 0 12px 40px rgba(5,150,105, 0.18);
+    box-shadow: 0 12px 40px rgb(5,150,105, 0.18);
     z-index: 300;
     overflow: hidden;
     opacity: 0;
@@ -741,7 +743,7 @@
 /* FIX: header was invisible on dark bg — now light #f0fdf4 strip */
 .notif-header {
     padding: 0.9rem 1.25rem;
-    border-bottom: 1px solid rgba(5,150,105, 0.1);
+    border-bottom: 1px solid rgb(5,150,105, 0.1);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -790,7 +792,7 @@
 }
 
 .notif-list::-webkit-scrollbar-thumb {
-    background: rgba(5,150,105, 0.12);
+    background: rgb(5,150,105, 0.12);
     border-radius: 4px;
 }
 
@@ -799,7 +801,7 @@
     align-items: flex-start;
     gap: 0.85rem;
     padding: 0.9rem 1.25rem;
-    border-bottom: 1px solid rgba(5,150,105, 0.07);
+    border-bottom: 1px solid rgb(5,150,105, 0.07);
     cursor: pointer;
     transition: background 0.15s;
     text-decoration: none;
@@ -826,17 +828,17 @@
 }
 
 .notif-icon-wrap.status {
-    background: rgba(2, 132, 199, 0.12);
+    background: rgb(2, 132, 199, 0.12);
     color: #059669;
 }
 
 .notif-icon-wrap.assigned {
-    background: rgba(16, 185, 129, 0.12);
+    background: rgb(16, 185, 129, 0.12);
     color: #059669;
 }
 
 .notif-icon-wrap.breach {
-    background: rgba(220, 38, 38, 0.1);
+    background: rgb(220, 38, 38, 0.1);
     color: #dc2626;
 }
 
@@ -898,7 +900,7 @@
 
 .notif-footer {
     padding: 0.75rem 1.25rem;
-    border-top: 1px solid rgba(5,150,105, 0.08);
+    border-top: 1px solid rgb(5,150,105, 0.08);
     text-align: center;
     background: #f0fdf4;
 }
@@ -932,7 +934,7 @@
 }
 
 .kanban-board::-webkit-scrollbar-thumb {
-    background: rgba(5,150,105, 0.15);
+    background: rgb(5,150,105, 0.15);
     border-radius: 4px;
 }
 
@@ -1023,13 +1025,13 @@
     padding: 0.9rem;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    box-shadow: 0 1px 4px rgba(5,150,105, 0.06);
+    box-shadow: 0 1px 4px rgb(5,150,105, 0.06);
 }
 
 .kanban-card:hover {
     border-color: #059669;
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(5,150,105, 0.12);
+    box-shadow: 0 8px 24px rgb(5,150,105, 0.12);
 }
 
 .kanban-card-id {
@@ -1110,7 +1112,7 @@
 .view-toggle-btn {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.75);
+    color: rgb(255, 255, 255, 0.75);
     font-size: 1.2rem;
     cursor: pointer;
     padding: 6px 8px;
@@ -1119,12 +1121,12 @@
 }
 
 .view-toggle-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgb(255, 255, 255, 0.08);
     color: #fff;
 }
 
 .view-toggle-btn.active {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgb(255, 255, 255, 0.15);
     color: #fff;
 }
 
@@ -1141,9 +1143,9 @@
 }
 
 .view-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.7);
+    background: rgb(255, 255, 255, 0.1);
+    border: 1px solid rgb(255, 255, 255, 0.15);
+    color: rgb(255, 255, 255, 0.7);
     padding: 6px 12px;
     border-radius: 8px;
     cursor: pointer;
@@ -1152,9 +1154,9 @@
 
 .view-btn.active,
 .view-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgb(255, 255, 255, 0.2);
     color: #fff;
-    border-color: rgba(255, 255, 255, 0.4);
+    border-color: rgb(255, 255, 255, 0.4);
 }
 
 /* ============================================
@@ -1206,7 +1208,7 @@
 
 .day-btn {
     background: white;
-    border: 1px solid rgba(5,150,105, 0.2);
+    border: 1px solid rgb(5,150,105, 0.2);
     color: #475569;
     padding: 6px 14px;
     border-radius: 8px;
@@ -1219,14 +1221,14 @@
 .day-btn:hover {
     background: #d1fae5;
     color: #065f46;
-    border-color: rgba(5,150,105, 0.35);
+    border-color: rgb(5,150,105, 0.35);
 }
 
 .day-btn.active {
     background: #065f46;
     color: white;
     border-color: #065f46;
-    box-shadow: 0 2px 6px rgba(5,150,105, 0.25);
+    box-shadow: 0 2px 6px rgb(5,150,105, 0.25);
 }
 
 /* Print button */
@@ -1264,18 +1266,18 @@
 
 .report-kpi {
     background: white;
-    border: 1px solid rgba(5,150,105, 0.12);
+    border: 1px solid rgb(5,150,105, 0.12);
     border-radius: 12px;
     padding: 1.25rem 1.5rem;
     text-align: center;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(5,150,105, 0.07);
+    box-shadow: 0 2px 8px rgb(5,150,105, 0.07);
 }
 
 .report-kpi:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(5,150,105, 0.12);
-    border-color: rgba(5,150,105, 0.25);
+    box-shadow: 0 8px 20px rgb(5,150,105, 0.12);
+    border-color: rgb(5,150,105, 0.25);
 }
 
 .report-kpi-value {
@@ -1333,16 +1335,16 @@
 
 .report-chart-card {
     background: white;
-    border: 1px solid rgba(5,150,105, 0.12);
+    border: 1px solid rgb(5,150,105, 0.12);
     border-radius: 16px;
     padding: 1.25rem 1.5rem;
-    box-shadow: 0 2px 8px rgba(5,150,105, 0.07);
+    box-shadow: 0 2px 8px rgb(5,150,105, 0.07);
     transition: all 0.2s ease;
 }
 
 .report-chart-card:hover {
-    box-shadow: 0 8px 20px rgba(5,150,105, 0.1);
-    border-color: rgba(5,150,105, 0.2);
+    box-shadow: 0 8px 20px rgb(5,150,105, 0.1);
+    border-color: rgb(5,150,105, 0.2);
 }
 
 /* FIX: was muted #c8cfe0 — now strong #065f46 matching card-title everywhere */
@@ -1355,7 +1357,7 @@
     align-items: center;
     gap: 0.5rem;
     padding-bottom: 0.75rem;
-    border-bottom: 1px solid rgba(5,150,105, 0.08);
+    border-bottom: 1px solid rgb(5,150,105, 0.08);
 }
 
 .report-chart-title i {
@@ -1386,7 +1388,7 @@
 .spinner {
     width: 22px;
     height: 22px;
-    border: 3px solid rgba(5,150,105, 0.12);
+    border: 3px solid rgb(5,150,105, 0.12);
     border-top-color: #065f46;
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
@@ -1402,7 +1404,7 @@
 .print-header {
     display: none;
     padding: 1rem 0 1.5rem;
-    border-bottom: 2px solid rgba(5,150,105, 0.15);
+    border-bottom: 2px solid rgb(5,150,105, 0.15);
     margin-bottom: 1.5rem;
 }
 
@@ -1427,7 +1429,7 @@
     border: 1px solid #d1fae5 !important;
     border-radius: 8px !important;
     min-width: 220px;
-    box-shadow: 0 10px 25px rgba(5,150,105, 0.1) !important;
+    box-shadow: 0 10px 25px rgb(5,150,105, 0.1) !important;
     padding: 0.5rem 0 !important;
 }
 
@@ -1463,7 +1465,7 @@
 }
 
 .dropdown-item.text-danger:hover {
-    background-color: rgba(5,150,105, 0.1) !important;
+    background-color: rgb(5,150,105, 0.1) !important;
     color: #065f46 !important;
 }
 
@@ -1471,7 +1473,7 @@
     background-color: #d1fae5 !important;
     color: #065f46 !important;
     outline: none !important;
-    box-shadow: 0 0 0 2px rgba(5,150,105, 0.1) !important;
+    box-shadow: 0 0 0 2px rgb(5,150,105, 0.1) !important;
 }
 
 /* ============================================
@@ -1519,8 +1521,7 @@
 /* ============================================
    RESPONSIVE
    ============================================ */
-@media (max-width: 1200px) {
-
+@media (width <= 1200px) {
     .dashboard-content,
     .header-content,
     .container-fluid.mt-3.px-4 {
@@ -1537,7 +1538,7 @@
     }
 }
 
-@media (max-width: 992px) {
+@media (width <= 992px) {
     .dashboard-grid {
         flex-direction: column;
     }
@@ -1573,8 +1574,7 @@
     }
 }
 
-@media (max-width: 768px) {
-
+@media (width <= 768px) {
     .dashboard-header {
         padding: 0 1rem !important;
         height: 60px !important;
@@ -1584,12 +1584,11 @@
 
     .header-content {
         display: flex !important;
-        flex-direction: row !important;
+        flex-flow: row nowrap !important;
         align-items: center !important;
         width: 100% !important;
         gap: 0.75rem !important;
         padding: 0 !important;
-        flex-wrap: nowrap !important;
         max-width: 100% !important;
         margin: 0 !important;
     }
@@ -1670,8 +1669,7 @@
     .user-profile { gap: 0.25rem !important; }
 }
 
-@media (max-width: 576px) {
-
+@media (width <= 576px) {
     .stat-value,
     .performance-value {
         font-size: 1.5rem;
@@ -1726,7 +1724,6 @@
    PRINT
    ============================================ */
 @media print {
-
     .dashboard-header,
     .header-nav,
     .header-right,
@@ -1807,7 +1804,6 @@
    ACCESSIBILITY
    ============================================ */
 @media (prefers-reduced-motion: reduce) {
-
     *,
     *::before,
     *::after {
@@ -1822,7 +1818,7 @@
     }
 }
 
-@media (prefers-contrast: high) {
+@media (prefers-contrast: more) {
     .dashboard-header {
         background: #065f46;
         border-bottom: 2px solid white;

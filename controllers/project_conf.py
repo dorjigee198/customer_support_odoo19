@@ -661,7 +661,13 @@ class CustomerSupportProjectController(http.Controller):
                             import secrets
                             ticket.sudo().write({"board_token": secrets.token_urlsafe(32)})
                         board_url = f"{base_url}/board/{ticket.board_token}"
-                        EmailService.send_board_invite(name, email, ticket, board_url)
+                        sent = EmailService.send_board_invite(name, email, ticket, board_url)
+                        if not sent:
+                            _logger.warning(
+                                "Board invite email was not sent for ticket %s to %s",
+                                ticket.id,
+                                email,
+                            )
                 except Exception as mail_err:
                     _logger.warning(f"Board invite email failed: {mail_err}")
 
